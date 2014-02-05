@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace AspectInjector.Test.Aspects
 {
-    [InjectInterfaceProxy(Interface = typeof(INotifyPropertyChanged))]
+    [InterfaceProxyInjection(typeof(INotifyPropertyChanged))]
     public class NotifyPropertyChangedAspect : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
 
-        [PropertyInjection(Method = PropertyMethod.Set, Point = MethodPoint.Ending)]
+        [PropertyInjection(PropertyMethod.Set, MethodPoint.Ending)]
         public void RaisePropertyChanged(
-            [InjectArgument(Argument = InjectArgument.Instance)] object target,
-            [InjectArgument(Argument = InjectArgument.MemberName)]string propertyName)
+            [ArgumentInjection(ArgumentValue.Instance)] object target,
+            [ArgumentInjection(ArgumentValue.MemberName)] string propertyName)
         {
             PropertyChanged(target, new PropertyChangedEventArgs(propertyName));
         }

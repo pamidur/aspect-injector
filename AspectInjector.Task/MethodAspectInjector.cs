@@ -3,27 +3,12 @@ using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.BuildTask
 {
     public class MethodAspectInjector : InjectorBase, IAspectInjector
     {
-        protected virtual MethodDefinition GetInjectionTarget(MethodDefinition methodToInject, IMemberDefinition member)
-        {
-            return (MethodDefinition)member;
-        }
-
-        protected virtual IEnumerable<Instruction> GetInjectionPoints(MethodDefinition methodToInject, MethodDefinition injectionTarget)
-        {
-            var propertyInjectorAttribute = methodToInject.CustomAttributes.First(ca => ca.IsAttributeOfType(typeof(MethodInjectionAttribute)));
-            var point = (MethodPoint)propertyInjectorAttribute.Properties.First(p => p.Name == "Point").Argument.Value;
-
-            return point == MethodPoint.Beginning ? new[] { injectionTarget.Body.Instructions.First() } : injectionTarget.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret);
-        }
-
-        public void ProcessModule(Mono.Cecil.ModuleDefinition module)
+        public virtual void ProcessModule(Mono.Cecil.ModuleDefinition module)
         {
             //todo:: make it possible to get all properties of marked class
 
@@ -40,6 +25,21 @@ namespace AspectInjector.BuildTask
             return aspectType.Methods.Where(m => m.CustomAttributes.Any(ca => ca.IsAttributeOfType(typeof(MethodInjectionAttribute))));
         }
 
+        protected virtual IEnumerable<Instruction> GetInjectionPoints(MethodDefinition methodToInject, MethodDefinition injectionTarget)
+        {
+            var propertyInjectorAttribute = methodToInject.CustomAttributes.First(ca => ca.IsAttributeOfType(typeof(MethodInjectionAttribute)));
+            var point = (MethodPoint)propertyInjectorAttribute.ConstructorArguments[0].Value;
+
+            return point == MethodPoint.Beginning ?
+                new[] { injectionTarget.Body.Instructions.First() } :
+                injectionTarget.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret);
+        }
+
+        protected virtual MethodDefinition GetInjectionTarget(MethodDefinition methodToInject, IMemberDefinition member)
+        {
+            return (MethodDefinition)member;
+        }
+
         protected void ProcessDefinitions<T>(IEnumerable<T> allDefinitions)
             where T : IMemberDefinition
         {
@@ -51,12 +51,12 @@ namespace AspectInjector.BuildTask
                 foreach (var aspectAttribute in aspectAttributes)
                 {
                     //get the actual aspect
-                    var aspectType = (TypeDefinition)aspectAttribute.Properties.First(p => p.Name == "Type").Argument.Value;
+                    var aspectType = (TypeDefinition)aspectAttribute.ConstructorArguments[0].Value;
 
                     //create a reference to aspect as private field
                     var aspectInstanceReference = GetOrCreateAspectReference(member.DeclaringType, aspectType);
 
-                    //System.Diagnostics.Debugger.Launch();
+                    System.Diagnostics.Debugger.Launch();
 
                     //looking for methods in aspect which should be injected
                     var methodsToInject = GetInjectableAspectMethods(aspectType);
@@ -77,20 +77,21 @@ namespace AspectInjector.BuildTask
 
                             foreach (var argument in methodToInject.Parameters)
                             {
-                                var injectArgumetAttribute = argument.CustomAttributes.FirstOrDefault(ca => ca.IsAttributeOfType(typeof(InjectArgumentAttribute)));
+                                var injectArgumetAttribute = argument.CustomAttributes
+                                    .FirstOrDefault(ca => ca.IsAttributeOfType(typeof(ArgumentInjectionAttribute)));
 
                                 if (injectArgumetAttribute == null)
                                     throw new NotSupportedException("Cannot inject unknown argument");
 
-                                var injectionArgument = (InjectArgument)injectArgumetAttribute.Properties.First(p => p.Name == "Argument").Argument.Value;
+                                var injectionArgument = (ArgumentValue)injectArgumetAttribute.ConstructorArguments[0].Value;
 
-                                if (injectionArgument == InjectArgument.Instance && argument.ParameterType.IsType(typeof(object)))
+                                if (injectionArgument == ArgumentValue.Instance && argument.ParameterType.IsType(typeof(object)))
                                 {
                                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldarg_0));
                                     continue;
                                 }
 
-                                if (injectionArgument == InjectArgument.MemberName && argument.ParameterType.IsType(typeof(string)))
+                                if (injectionArgument == ArgumentValue.MemberName && argument.ParameterType.IsType(typeof(string)))
                                 {
                                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldstr, member.Name));
                                     continue;

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System.Linq;
 
 namespace AspectInjector.BuildTask
 {
@@ -28,7 +24,7 @@ namespace AspectInjector.BuildTask
         {
             if (attribute != null)
             {
-                var aspectType = (TypeDefinition)attribute.Properties.First(p => p.Name == "Type").Argument.Value;
+                var aspectType = (TypeDefinition)attribute.ConstructorArguments[0].Value;
 
                 if (aspectType.Interfaces.HasType(typeof(ICustomAspect)))
                 {

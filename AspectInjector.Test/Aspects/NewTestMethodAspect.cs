@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.Test
 {
@@ -13,16 +9,16 @@ namespace AspectInjector.Test
             Console.WriteLine("Constructor");
         }
 
-        [MethodInjection(Point = MethodPoint.Beginning)]
-        public void ICallItBefore([InjectArgument(Argument = InjectArgument.MemberName)] string propertyName)
-        {
-            Console.WriteLine("We are gonna call " + propertyName);
-        }
-
-        [MethodInjection(Point = MethodPoint.Ending)]
-        public void After([InjectArgument(Argument = InjectArgument.Instance)] object target)
+        [MethodInjection(MethodPoint.Ending)]
+        public void After([ArgumentInjection(ArgumentValue.Instance)] object target)
         {
             Console.WriteLine("We've just called " + target.ToString());
+        }
+
+        [MethodInjection(MethodPoint.Beginning)]
+        public void ICallItBefore([ArgumentInjection(ArgumentValue.MemberName)] string propertyName)
+        {
+            Console.WriteLine("We are gonna call " + propertyName);
         }
     }
 }

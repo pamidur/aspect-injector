@@ -41,11 +41,14 @@
   <ItemGroup>
     <Compile Include="AspectAttribute.cs" />
     <Compile Include="ICustomAspect.cs" />
-    <Compile Include="InjectInterfaceProxy.cs" />
+    <Compile Include="ArgumentValue.cs" />
+    <Compile Include="InterfaceProxyInjectionAttribute.cs" />
     <Compile Include="MethodInjectionAttribute.cs" />
+    <Compile Include="MethodPoint.cs" />
     <Compile Include="PropertyInjectionAttribute.cs" />
-    <Compile Include="InjectArgumentAttribute.cs" />
+    <Compile Include="ArgumentInjectionAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyMethod.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
