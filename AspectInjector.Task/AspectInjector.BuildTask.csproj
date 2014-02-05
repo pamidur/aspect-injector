@@ -59,7 +59,6 @@
   <ItemGroup>
     <Compile Include="AspectInjector.cs" />
     <Compile Include="AspectInjectorBuildTask.cs" />
-    <Compile Include="CustomAspectInjector.cs" />
     <Compile Include="IAspectInjector.cs" />
     <Compile Include="InjectorBase.cs" />
     <Compile Include="MethodAspectInjector.cs" />

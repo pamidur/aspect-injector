@@ -28,6 +28,7 @@ namespace AspectInjector.BuildTask
         protected virtual IEnumerable<Instruction> GetInjectionPoints(MethodDefinition methodToInject, MethodDefinition injectionTarget)
         {
             var propertyInjectorAttribute = methodToInject.CustomAttributes.First(ca => ca.IsAttributeOfType(typeof(MethodInjectionAttribute)));
+            methodToInject.CustomAttributes.Remove(propertyInjectorAttribute);
             var point = (MethodPoint)propertyInjectorAttribute.ConstructorArguments[0].Value;
 
             return point == MethodPoint.Beginning ?
@@ -46,7 +47,7 @@ namespace AspectInjector.BuildTask
             foreach (var member in allDefinitions)
             {
                 //there could be several aspects per one member
-                var aspectAttributes = member.CustomAttributes.Where(a => a.IsAttributeOfType(typeof(AspectAttribute)));
+                var aspectAttributes = member.CustomAttributes.Where(a => a.IsAttributeOfType(typeof(AspectAttribute))).ToList();
 
                 foreach (var aspectAttribute in aspectAttributes)
                 {
@@ -55,8 +56,6 @@ namespace AspectInjector.BuildTask
 
                     //create a reference to aspect as private field
                     var aspectInstanceReference = GetOrCreateAspectReference(member.DeclaringType, aspectType);
-
-                    System.Diagnostics.Debugger.Launch();
 
                     //looking for methods in aspect which should be injected
                     var methodsToInject = GetInjectableAspectMethods(aspectType);
@@ -83,6 +82,8 @@ namespace AspectInjector.BuildTask
                                 if (injectArgumetAttribute == null)
                                     throw new NotSupportedException("Cannot inject unknown argument");
 
+                                argument.CustomAttributes.Remove(injectArgumetAttribute);
+
                                 var injectionArgument = (ArgumentValue)injectArgumetAttribute.ConstructorArguments[0].Value;
 
                                 if (injectionArgument == ArgumentValue.Instance && argument.ParameterType.IsType(typeof(object)))
@@ -103,6 +104,8 @@ namespace AspectInjector.BuildTask
                             processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Callvirt, methodToInject));
                         }
                     }
+
+                    member.CustomAttributes.Remove(aspectAttribute);
                 }
             }
         }

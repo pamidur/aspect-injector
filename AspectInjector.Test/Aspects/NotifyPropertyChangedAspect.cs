@@ -2,7 +2,7 @@
 
 namespace AspectInjector.Test.Aspects
 {
-    [InterfaceProxyInjection(typeof(INotifyPropertyChanged))]
+    //[InterfaceProxyInjection(typeof(INotifyPropertyChanged))]
     public class NotifyPropertyChangedAspect : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };

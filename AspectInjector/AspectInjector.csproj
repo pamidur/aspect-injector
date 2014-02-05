@@ -40,7 +40,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AspectAttribute.cs" />
-    <Compile Include="ICustomAspect.cs" />
     <Compile Include="ArgumentValue.cs" />
     <Compile Include="InterfaceProxyInjectionAttribute.cs" />
     <Compile Include="MethodInjectionAttribute.cs" />

@@ -45,10 +45,9 @@
     <Compile Include="Aspects\NotifyPropertyChangedAspect.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Aspects\NewTestMethodAspect.cs" />
+    <Compile Include="Aspects\TestMethodAspect.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Aspects\TestAspect.cs" />
     <Compile Include="TestClass.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace AspectInjector.Test
+namespace AspectInjector.Test.Aspects
 {
-    internal class NewTestMethodAspect
+    internal class TestMethodAspect
     {
-        public NewTestMethodAspect()
+        public TestMethodAspect()
         {
             Console.WriteLine("Constructor");
         }
