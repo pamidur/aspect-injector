@@ -16,7 +16,7 @@ namespace AspectInjector.Test.Aspects
 
         [PropertyInjection(Method = PropertyMethod.Set, Point = MethodPoint.Ending)]
         public void RaisePropertyChanged(
-            [InjectArgument(Argument = InjectArgument.Instanse)] object target,
+            [InjectArgument(Argument = InjectArgument.Instance)] object target,
             [InjectArgument(Argument = InjectArgument.MemberName)]string propertyName)
         {
             PropertyChanged(target, new PropertyChangedEventArgs(propertyName));

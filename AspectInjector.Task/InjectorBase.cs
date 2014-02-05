@@ -17,7 +17,7 @@ namespace AspectInjector.BuildTask
 
             var aspectPropertyName = "__a_" + aspectType.Name;
 
-            var existingField = targetType.Fields.FirstOrDefault(f=>f.Name == aspectPropertyName && f.FieldType == aspectType);
+            var existingField = targetType.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType == aspectType);
 
             if (existingField != null)
                 return existingField;
@@ -39,7 +39,6 @@ namespace AspectInjector.BuildTask
             return fd;
         }
 
-
         protected MethodReference GetOrCreateMethodProxy(TypeDefinition targetType, MethodReference originalMethod)
         {
             throw new NotImplementedException();
@@ -59,6 +58,5 @@ namespace AspectInjector.BuildTask
         {
             throw new NotImplementedException();
         }
-
     }
 }

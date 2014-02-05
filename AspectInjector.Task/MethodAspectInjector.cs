@@ -20,12 +20,12 @@ namespace AspectInjector.BuildTask
             var propertyInjectorAttribute = methodToInject.CustomAttributes.First(ca => ca.IsAttributeOfType(typeof(MethodInjectionAttribute)));
             var point = (MethodPoint)propertyInjectorAttribute.Properties.First(p => p.Name == "Point").Argument.Value;
 
-            return point == MethodPoint.Begining ? new[] { injectionTarget.Body.Instructions.First() } : injectionTarget.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret);
+            return point == MethodPoint.Beginning ? new[] { injectionTarget.Body.Instructions.First() } : injectionTarget.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret);
         }
 
         public void ProcessModule(Mono.Cecil.ModuleDefinition module)
         {
-            //todo:: make it be able to get all properties of marked class
+            //todo:: make it possible to get all properties of marked class
 
             //Get properties marked for aspect
             var allMethods = module.Types
@@ -54,7 +54,7 @@ namespace AspectInjector.BuildTask
                     var aspectType = (TypeDefinition)aspectAttribute.Properties.First(p => p.Name == "Type").Argument.Value;
 
                     //create a reference to aspect as private field
-                    var aspectInstanseReference = GetOrCreateAspectReference(member.DeclaringType, aspectType);
+                    var aspectInstanceReference = GetOrCreateAspectReference(member.DeclaringType, aspectType);
 
                     //System.Diagnostics.Debugger.Launch();
 
@@ -63,17 +63,17 @@ namespace AspectInjector.BuildTask
                     foreach (var methodToInject in methodsToInject)
                     {
                         //figuring out get or set method
-                        var injectionTaregt = GetInjectionTarget(methodToInject, member);
+                        var injectionTarget = GetInjectionTarget(methodToInject, member);
 
                         //there could be several return statemets
-                        var injectionPoints = GetInjectionPoints(methodToInject, injectionTaregt).ToList();
+                        var injectionPoints = GetInjectionPoints(methodToInject, injectionTarget).ToList();
 
                         foreach (var injectionPoint in injectionPoints)
                         {
-                            ILProcessor processor = injectionTaregt.Body.GetILProcessor();
+                            ILProcessor processor = injectionTarget.Body.GetILProcessor();
                             processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Nop));
                             processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldarg_0));
-                            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldfld, aspectInstanseReference));
+                            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldfld, aspectInstanceReference));
 
                             foreach (var argument in methodToInject.Parameters)
                             {
@@ -84,7 +84,7 @@ namespace AspectInjector.BuildTask
 
                                 var injectionArgument = (InjectArgument)injectArgumetAttribute.Properties.First(p => p.Name == "Argument").Argument.Value;
 
-                                if (injectionArgument == InjectArgument.Instanse && argument.ParameterType.IsType(typeof(object)))
+                                if (injectionArgument == InjectArgument.Instance && argument.ParameterType.IsType(typeof(object)))
                                 {
                                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldarg_0));
                                     continue;

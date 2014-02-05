@@ -8,7 +8,7 @@ namespace AspectInjector
 {
     public enum InjectArgument
     {
-        Instanse,
+        Instance,
         MemberName,
         MemberArguments
     }

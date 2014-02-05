@@ -25,7 +25,7 @@ namespace AspectInjector.BuildTask
             var propertyInjectorAttribute = methodToInject.CustomAttributes.First(ca => ca.IsAttributeOfType(typeof(PropertyInjectionAttribute)));
             var point = (MethodPoint)propertyInjectorAttribute.Properties.First(p => p.Name == "Point").Argument.Value;
 
-            return point == MethodPoint.Begining ? new[] { injectionTarget.Body.Instructions.First() } : injectionTarget.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret);
+            return point == MethodPoint.Beginning ? new[] { injectionTarget.Body.Instructions.First() } : injectionTarget.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret);
         }
 
         protected override IEnumerable<MethodDefinition> GetInjectableAspectMethods(TypeDefinition aspectType)

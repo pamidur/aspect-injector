@@ -8,12 +8,14 @@ namespace AspectInjector
 {
     public enum PropertyMethod
     {
-        Get, Set
+        Get, 
+        Set
     }
 
     public enum MethodPoint
     {
-        Begining, Ending
+        Beginning, 
+        Ending
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]

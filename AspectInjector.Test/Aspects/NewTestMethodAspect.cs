@@ -13,14 +13,14 @@ namespace AspectInjector.Test
             Console.WriteLine("Constructor");
         }
 
-        [MethodInjection(Point = MethodPoint.Begining)]
+        [MethodInjection(Point = MethodPoint.Beginning)]
         public void ICallItBefore([InjectArgument(Argument = InjectArgument.MemberName)] string propertyName)
         {
             Console.WriteLine("We are gonna call " + propertyName);
         }
 
         [MethodInjection(Point = MethodPoint.Ending)]
-        public void After([InjectArgument(Argument = InjectArgument.Instanse)] object target)
+        public void After([InjectArgument(Argument = InjectArgument.Instance)] object target)
         {
             Console.WriteLine("We've just called " + target.ToString());
         }
