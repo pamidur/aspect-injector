@@ -6,12 +6,17 @@ using System.Threading.Tasks;
 
 namespace AspectInjector.Test
 {
+    [CustomAspect(Type = typeof(TestAspect))]
     class TestClass
     {
-        [CustomAspect(Type = typeof(TestAspect))]
         public void Print()
         {
             Console.WriteLine("Original text");
+        }
+
+        public void Warning()
+        {
+            Console.WriteLine("Original warning");
         }
     }
 }

@@ -12,6 +12,7 @@ namespace AspectInjector.Test
         {
             var test = new TestClass();
             test.Print();
+            test.Warning();
         }
     }
 }
