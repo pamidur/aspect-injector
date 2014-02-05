@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Mono.Cecil;
+﻿using Mono.Cecil;
+using System.Collections.Generic;
 
 namespace AspectInjector.BuildTask
 {
@@ -10,7 +10,8 @@ namespace AspectInjector.BuildTask
         public AspectInjector()
         {
             injectors.Add(new CustomAspectInjector());
-            injectors.Add(new PropertyChangedAspectInjector());
+            injectors.Add(new PropertyAspectInjector());
+            injectors.Add(new MethodAspectInjector());
         }
 
         public void Process(AssemblyDefinition assembly)

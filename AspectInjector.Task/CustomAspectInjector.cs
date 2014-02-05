@@ -8,17 +8,17 @@ using Mono.Cecil.Cil;
 
 namespace AspectInjector.BuildTask
 {
-    internal class CustomAspectInjector : IAspectInjector
+    internal class CustomAspectInjector : InjectorBase, IAspectInjector
     {
         public void ProcessModule(ModuleDefinition module)
         {
             foreach (var @class in module.Types.Where(t => t.IsClass))
             {
-                var classAttribute = @class.CustomAttributes.SingleOrDefault(a => a.IsAttributeOfType(typeof(CustomAspectAttribute)));
-                //TODO: Think about configurable filtering of method types
+                var classAttribute = @class.CustomAttributes.SingleOrDefault(a => a.IsAttributeOfType(typeof(AspectAttribute)));
+                //todo::  think about configurable filtering of method types
                 foreach (var method in @class.Methods.Where(m => !m.IsGetter && !m.IsSetter && !m.IsConstructor && !m.IsAbstract))
                 {
-                    var methodAttribute = method.CustomAttributes.SingleOrDefault(a => a.IsAttributeOfType(typeof(CustomAspectAttribute)));
+                    var methodAttribute = method.CustomAttributes.SingleOrDefault(a => a.IsAttributeOfType(typeof(AspectAttribute)));
                     ProcessMethod(module, method, methodAttribute ?? classAttribute);
                 }
             }
@@ -28,23 +28,26 @@ namespace AspectInjector.BuildTask
         {
             if (attribute != null)
             {
-                //TODO: Get property by name
-                var aspectType = (TypeDefinition)attribute.Properties.First().Argument.Value;
+                var aspectType = (TypeDefinition)attribute.Properties.First(p => p.Name == "Type").Argument.Value;
+
                 if (aspectType.Interfaces.HasType(typeof(ICustomAspect)))
                 {
-                    MethodReference constructor = module.ImportConstructor(aspectType);
+                    var aspectInstanseReference = GetOrCreateAspectReference(method.DeclaringType, aspectType);
+
                     MethodReference beforeMethod = module.ImportMethod<ICustomAspect>(aspectType, a => a.Before());
                     MethodReference afterMethod = module.ImportMethod<ICustomAspect>(aspectType, a => a.After());
 
                     ILProcessor processor = method.Body.GetILProcessor();
                     Instruction firstInstruction = method.Body.Instructions.First();
                     processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Nop));
-                    processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Newobj, constructor));
+                    processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldarg_0));
+                    processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldfld, aspectInstanseReference));
                     processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Callvirt, beforeMethod));
 
-                    //TODO: Optimize injecting by creating aspect instance only once
+                    //todo:: process all return statements (all code execution pathes)
                     Instruction lastInstruction = method.Body.Instructions.Last();
-                    processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Newobj, constructor));
+                    processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Ldarg_0));
+                    processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Ldfld, aspectInstanseReference));
                     processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Callvirt, afterMethod));
                     processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Nop));
                 }
