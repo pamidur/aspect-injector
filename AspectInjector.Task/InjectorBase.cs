@@ -22,7 +22,7 @@ namespace AspectInjector.BuildTask
             if (existingField != null)
                 return existingField;
 
-            var fd = new FieldDefinition(aspectPropertyName, FieldAttributes.Private, aspectType);
+            var fd = new FieldDefinition(aspectPropertyName, FieldAttributes.Private | FieldAttributes.InitOnly, aspectType);
 
             var constructor = targetType.Methods.First(m => m.IsConstructor && !m.Parameters.Any());
             var aspectConstructor = targetType.Module.ImportConstructor(aspectType);
@@ -38,5 +38,27 @@ namespace AspectInjector.BuildTask
 
             return fd;
         }
+
+
+        protected MethodReference GetOrCreateMethodProxy(TypeDefinition targetType, MethodReference originalMethod)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected EventReference GetOrCreateMethodEvent(TypeDefinition targetType, EventReference originalMethod)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected PropertyReference GetOrCreateMethodProperty(TypeDefinition targetType, PropertyReference originalMethod)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected PropertyReference GetOrCreateMethodIndexer(TypeDefinition targetType, PropertyReference originalMethod)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

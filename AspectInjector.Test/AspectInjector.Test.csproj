@@ -42,9 +42,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aspects\NotifyPropertyChangedAspect.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\NewTestMethodAspect.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestAspect.cs" />
+    <Compile Include="Aspects\TestAspect.cs" />
     <Compile Include="TestClass.cs" />
   </ItemGroup>
   <ItemGroup>

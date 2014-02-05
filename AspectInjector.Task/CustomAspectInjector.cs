@@ -18,7 +18,7 @@ namespace AspectInjector.BuildTask
 
             foreach (var method in allMethods)
             {
-                var attribute = method.CustomAttributes.SingleOrDefault(a => a.IsAttributeOfType(typeof(CustomAspectAttribute)));
+                var attribute = method.CustomAttributes.SingleOrDefault(a => a.IsAttributeOfType(typeof(AspectAttribute)));
                 if (attribute != null)
                 {
                     var aspectType = (TypeDefinition)attribute.Properties.First(p => p.Name == "Type").Argument.Value;
@@ -37,6 +37,8 @@ namespace AspectInjector.BuildTask
                         processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldfld, aspectInstanseReference));
                         processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Callvirt, beforeMethod));
 
+
+                        //todo:: process all return statements (all code execution pathes)
                         Instruction lastInstruction = method.Body.Instructions.Last();
                         processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Ldarg_0));
                         processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Ldfld, aspectInstanseReference));

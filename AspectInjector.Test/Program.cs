@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace AspectInjector.Test
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var test = new TestClass();
             test.Print();
+            test.Print2();
         }
     }
 }

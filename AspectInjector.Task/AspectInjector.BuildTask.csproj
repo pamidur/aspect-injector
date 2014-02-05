@@ -62,8 +62,9 @@
     <Compile Include="CustomAspectInjector.cs" />
     <Compile Include="IAspectInjector.cs" />
     <Compile Include="InjectorBase.cs" />
+    <Compile Include="MethodAspectInjector.cs" />
+    <Compile Include="PropertyAspectInjector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyChangedAspectInjector.cs" />
     <Compile Include="ReflectionUtils.cs" />
   </ItemGroup>
   <ItemGroup>
