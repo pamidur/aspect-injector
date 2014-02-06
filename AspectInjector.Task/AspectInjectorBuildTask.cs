@@ -1,8 +1,8 @@
-﻿using System;
-using System.IO;
-using Microsoft.Build.Framework;
+﻿using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Mono.Cecil;
+using System;
+using System.IO;
 
 namespace AspectInjector.BuildTask
 {
@@ -26,10 +26,10 @@ namespace AspectInjector.BuildTask
                 string assemblyFile = Path.Combine(OutputPath, Assembly + ".exe");
 
                 var assembly = AssemblyDefinition.ReadAssembly(assemblyFile,
-                    new ReaderParameters 
-                    { 
-                        ReadingMode = Mono.Cecil.ReadingMode.Deferred, 
-                        AssemblyResolver = assemblyResolver 
+                    new ReaderParameters
+                    {
+                        ReadingMode = Mono.Cecil.ReadingMode.Deferred,
+                        AssemblyResolver = assemblyResolver
                     });
 
                 Console.WriteLine("Assembly has been loaded");
@@ -45,6 +45,7 @@ namespace AspectInjector.BuildTask
             }
             catch (Exception e)
             {
+                this.Log.LogErrorFromException(e, false, true, null);
                 Console.Error.WriteLine(e.Message);
                 return false;
             }
