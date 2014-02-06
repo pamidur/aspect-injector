@@ -57,8 +57,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AspectBodyInterfaceProxyInjector.cs" />
     <Compile Include="AspectInjector.cs" />
     <Compile Include="AspectInjectorBuildTask.cs" />
+    <Compile Include="Extensions\MemberExtensions.cs" />
     <Compile Include="IAspectInjector.cs" />
     <Compile Include="InjectorBase.cs" />
     <Compile Include="MethodAspectInjector.cs" />

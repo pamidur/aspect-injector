@@ -3,6 +3,7 @@ using System;
 
 namespace AspectInjector.Test
 {
+    [Aspect(typeof(TestInjectInterfaceAspect))]
     internal class TestClass
     {
         [Aspect(typeof(NotifyPropertyChangedAspect))]

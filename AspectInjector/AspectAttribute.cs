@@ -2,7 +2,7 @@
 
 namespace AspectInjector
 {
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
     public class AspectAttribute : Attribute
     {
         public AspectAttribute(Type aspectType)

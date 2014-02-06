@@ -1,6 +1,5 @@
 ﻿using Mono.Cecil;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AspectInjector.BuildTask
 {
@@ -10,6 +9,7 @@ namespace AspectInjector.BuildTask
 
         public AspectInjector()
         {
+            //injectors.Add(new AspectBodyInterfaceProxyInjector());
             injectors.Add(new PropertyAspectInjector());
             injectors.Add(new MethodAspectInjector());
         }
@@ -23,13 +23,9 @@ namespace AspectInjector.BuildTask
                 injector.ProcessModule(assembly.MainModule);
             }
 
-            var moduleReference = assembly.MainModule.ModuleReferences.FirstOrDefault(ar => ar.Name == "AspectInjector");
-            if (moduleReference != null)
-                assembly.MainModule.ModuleReferences.Remove(moduleReference);
-
-            var reference = assembly.MainModule.AssemblyReferences.FirstOrDefault(ar => ar.Name == "AspectInjector");
-            if (reference != null)
-                assembly.MainModule.AssemblyReferences.Remove(reference);
+            //var reference = assembly.MainModule.AssemblyReferences.FirstOrDefault(ar => ar.Name == "AspectInjector");
+            //if (reference != null)
+            //    assembly.MainModule.AssemblyReferences.Remove(reference);
         }
     }
 }

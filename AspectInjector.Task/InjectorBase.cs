@@ -1,10 +1,7 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.BuildTask
 {
@@ -39,9 +36,19 @@ namespace AspectInjector.BuildTask
             return fd;
         }
 
-        protected MethodReference GetOrCreateMethodProxy(TypeDefinition targetType, MethodReference originalMethod)
+        protected MethodReference GetOrCreateMethodProxy(TypeDefinition targetType, TypeDefinition sourceType, MethodDefinition interfaceMethodDefinition)
         {
-            throw new NotImplementedException();
+            var implementation = sourceType.GetInterfaceImplementation(interfaceMethodDefinition);
+
+            var md = new MethodDefinition(interfaceMethodDefinition.DeclaringType.FullName + "." + interfaceMethodDefinition.Name
+                , MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
+                , implementation.ReturnType);
+
+            targetType.Methods.Add(md);
+
+            md.Overrides.Add(interfaceMethodDefinition);
+
+            return md;
         }
 
         protected EventReference GetOrCreateMethodEvent(TypeDefinition targetType, EventReference originalMethod)
