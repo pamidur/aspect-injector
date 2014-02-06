@@ -1,11 +1,7 @@
 ﻿namespace AspectInjector.Test
 {
-    internal interface ITestInterface : ITestInterface2
+    internal interface ITestInterface
     {
-    }
-
-    internal interface ITestInterface2
-    {
-        object TestMethod();
+        string TestMethod(string data);
     }
 }

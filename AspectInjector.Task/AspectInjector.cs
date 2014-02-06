@@ -9,7 +9,7 @@ namespace AspectInjector.BuildTask
 
         public AspectInjector()
         {
-            //injectors.Add(new AspectBodyInterfaceProxyInjector());
+            injectors.Add(new AspectBodyInterfaceProxyInjector());
             injectors.Add(new PropertyAspectInjector());
             injectors.Add(new MethodAspectInjector());
         }

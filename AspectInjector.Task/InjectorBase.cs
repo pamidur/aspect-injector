@@ -36,22 +36,12 @@ namespace AspectInjector.BuildTask
             return fd;
         }
 
-        protected MethodReference GetOrCreateMethodProxy(TypeDefinition targetType, TypeDefinition sourceType, MethodDefinition interfaceMethodDefinition)
+        protected EventReference GetOrCreateMethodEvent(TypeDefinition targetType, EventReference originalMethod)
         {
-            var implementation = sourceType.GetInterfaceImplementation(interfaceMethodDefinition);
-
-            var md = new MethodDefinition(interfaceMethodDefinition.DeclaringType.FullName + "." + interfaceMethodDefinition.Name
-                , MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
-                , implementation.ReturnType);
-
-            targetType.Methods.Add(md);
-
-            md.Overrides.Add(interfaceMethodDefinition);
-
-            return md;
+            throw new NotImplementedException();
         }
 
-        protected EventReference GetOrCreateMethodEvent(TypeDefinition targetType, EventReference originalMethod)
+        protected PropertyReference GetOrCreateMethodIndexer(TypeDefinition targetType, PropertyReference originalMethod)
         {
             throw new NotImplementedException();
         }
@@ -61,9 +51,58 @@ namespace AspectInjector.BuildTask
             throw new NotImplementedException();
         }
 
-        protected PropertyReference GetOrCreateMethodIndexer(TypeDefinition targetType, PropertyReference originalMethod)
+        protected MethodReference GetOrCreateMethodProxy(TypeDefinition targetType, TypeDefinition sourceType, MethodDefinition interfaceMethodDefinition)
         {
-            throw new NotImplementedException();
+            var md = new MethodDefinition(interfaceMethodDefinition.DeclaringType.FullName + "." + interfaceMethodDefinition.Name
+                , MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
+                , interfaceMethodDefinition.ReturnType);
+
+            foreach (var parameter in interfaceMethodDefinition.Parameters)
+                md.Parameters.Add(parameter);
+
+            foreach (var genericParameter in interfaceMethodDefinition.GenericParameters)
+                md.GenericParameters.Add(genericParameter);
+
+            var aspectField = GetOrCreateAspectReference(targetType, sourceType);
+
+            var processor = md.Body.GetILProcessor();
+            processor.Append(processor.Create(OpCodes.Nop));
+            processor.Append(processor.Create(OpCodes.Ldarg_0));
+            processor.Append(processor.Create(OpCodes.Ldfld, aspectField));
+
+            if (interfaceMethodDefinition.Parameters.Count > 0)
+                processor.Append(processor.Create(OpCodes.Ldarg_1));
+
+            if (interfaceMethodDefinition.Parameters.Count > 1)
+                processor.Append(processor.Create(OpCodes.Ldarg_2));
+
+            if (interfaceMethodDefinition.Parameters.Count > 2)
+                processor.Append(processor.Create(OpCodes.Ldarg_3));
+
+            if (interfaceMethodDefinition.Parameters.Count > 3)
+            {
+                for (int i = 4; i < interfaceMethodDefinition.Parameters.Count + 1; i++)
+                {
+                    processor.Append(processor.Create(OpCodes.Ldarg_S, (byte)i));
+                }
+            }
+
+            processor.Append(processor.Create(OpCodes.Callvirt, interfaceMethodDefinition));
+
+            if (!interfaceMethodDefinition.ReturnType.IsType(typeof(void)))
+            {
+                md.Body.Variables.Add(new VariableDefinition(targetType.Module.Import(typeof(object))));
+                processor.Append(processor.Create(OpCodes.Stloc_0));
+                processor.Append(processor.Create(OpCodes.Ldloc_0));
+            }
+
+            processor.Append(processor.Create(OpCodes.Ret));
+
+            md.Overrides.Add(interfaceMethodDefinition);
+
+            targetType.Methods.Add(md);
+
+            return md;
         }
     }
 }
