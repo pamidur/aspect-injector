@@ -24,12 +24,14 @@ namespace AspectInjector.BuildTask
                 assemblyResolver.AddSearchDirectory(OutputPath);
 
                 string assemblyFile = Path.Combine(OutputPath, Assembly + ".exe");
+                string pdbFile = Path.Combine(OutputPath, Assembly + ".pdb");
 
                 var assembly = AssemblyDefinition.ReadAssembly(assemblyFile,
                     new ReaderParameters
                     {
                         ReadingMode = Mono.Cecil.ReadingMode.Deferred,
-                        AssemblyResolver = assemblyResolver
+                        AssemblyResolver = assemblyResolver,
+                        ReadSymbols = true
                     });
 
                 Console.WriteLine("Assembly has been loaded");
@@ -39,7 +41,10 @@ namespace AspectInjector.BuildTask
 
                 Console.WriteLine("Assembly has been patched");
 
-                assembly.Write(assemblyFile);
+                assembly.Write(assemblyFile, new WriterParameters()
+                {
+                    WriteSymbols = true
+                });
 
                 Console.WriteLine("Assembly has been written");
             }
