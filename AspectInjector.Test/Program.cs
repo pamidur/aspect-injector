@@ -9,7 +9,7 @@ namespace AspectInjector.Test
             var test = new TestClass();
             test.Print();
 
-            Console.WriteLine(((ITestInterface)test).TestMethod("test"));
+            test.Value = "New property value";
         }
     }
 }

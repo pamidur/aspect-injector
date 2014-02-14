@@ -45,7 +45,7 @@
     <Compile Include="Aspects\NotifyPropertyChangedAspect.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Aspects\TestInjectInterfaceAspect.cs" />
+    <Compile Include="Aspects\TestInterfaceAspect.cs" />
     <Compile Include="Aspects\TestMethodAspect.cs" />
     <Compile Include="ITestInterface.cs" />
     <Compile Include="Program.cs" />

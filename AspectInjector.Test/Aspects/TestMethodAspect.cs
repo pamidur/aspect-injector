@@ -6,19 +6,21 @@ namespace AspectInjector.Test.Aspects
     {
         public TestMethodAspect()
         {
-            Console.WriteLine("Constructor");
+            Console.WriteLine("SampleMethodAspect constructor");
         }
 
-        [MethodInjection(MethodPoint.Ending)]
-        public void After([ArgumentInjection(ArgumentValue.Instance)] object target)
+        [Advice(Points = InjectionPoint.After)]
+        public void After([AdviceArgument(Source = AdviceArgumentSource.Instance)] object targetInstance,
+            [AdviceArgument(Source = AdviceArgumentSource.TargetName)] object targetName)
         {
-            Console.WriteLine("We've just called " + target.ToString());
+            Console.WriteLine("SampleMethodAspect.After() called on {0}.{1}", targetInstance, targetName);
         }
 
-        [MethodInjection(MethodPoint.Beginning)]
-        public void ICallItBefore([ArgumentInjection(ArgumentValue.MemberName)] string propertyName)
+        [Advice(Points = InjectionPoint.Before)]
+        public void Before([AdviceArgument(Source = AdviceArgumentSource.Instance)] object targetInstance,
+            [AdviceArgument(Source = AdviceArgumentSource.TargetName)] object targetName)
         {
-            Console.WriteLine("We are gonna call " + propertyName);
+            Console.WriteLine("SampleMethodAspect.Before() called on {0}.{1}", targetInstance, targetName);
         }
     }
 }

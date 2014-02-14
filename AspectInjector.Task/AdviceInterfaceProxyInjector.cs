@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AspectInjector.BuildTask
 {
-    internal class AspectBodyInterfaceProxyInjector : InjectorBase, IAspectInjector
+    internal class AdviceInterfaceProxyInjector : InjectorBase, IAspectInjector
     {
         public void ProcessModule(ModuleDefinition module)
         {
@@ -16,7 +16,7 @@ namespace AspectInjector.BuildTask
                 var aspects = from ca in @class.CustomAttributes
                               where ca.IsAttributeOfType(typeof(AspectAttribute))
                               let type = ((TypeReference)ca.ConstructorArguments[0].Value).Resolve()
-                              where type.CustomAttributes.Any(tca => tca.IsAttributeOfType(typeof(InterfaceProxyInjectionAttribute)))
+                              where type.CustomAttributes.Any(tca => tca.IsAttributeOfType(typeof(AdviceInterfaceProxyAttribute)))
                               select new { aspect = ca, type };
 
                 if (!aspects.Any())
@@ -38,7 +38,7 @@ namespace AspectInjector.BuildTask
         protected virtual void InjectAspectIntoClass(TypeDefinition classDefinition, TypeDefinition aspectDefinition)
         {
             var interfaceInjectionDefinitions = from ca in aspectDefinition.CustomAttributes
-                                                where ca.IsAttributeOfType(typeof(InterfaceProxyInjectionAttribute))
+                                                where ca.IsAttributeOfType(typeof(AdviceInterfaceProxyAttribute))
                                                 select new { @interface = (TypeReference)ca.ConstructorArguments[0].Value };
 
             foreach (var interfaceInjectionDefinition in interfaceInjectionDefinitions)

@@ -1,7 +1,7 @@
 ﻿namespace AspectInjector.Test.Aspects
 {
-    [InterfaceProxyInjection(typeof(ITestInterface))]
-    internal class TestInjectInterfaceAspect : ITestInterface
+    [AdviceInterfaceProxy(typeof(ITestInterface))]
+    internal class TestInterfaceAspect : ITestInterface
     {
         string ITestInterface.TestMethod(string data)
         {

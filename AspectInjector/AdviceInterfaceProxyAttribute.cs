@@ -3,9 +3,9 @@
 namespace AspectInjector
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class InterfaceProxyInjectionAttribute : Attribute
+    public class AdviceInterfaceProxyAttribute : Attribute
     {
-        public InterfaceProxyInjectionAttribute(Type @interface)
+        public AdviceInterfaceProxyAttribute(Type @interface)
         {
             Interface = @interface;
         }

@@ -1,18 +1,20 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace AspectInjector.Test.Aspects
 {
-    [InterfaceProxyInjection(typeof(INotifyPropertyChanged))]
+    [AdviceInterfaceProxy(typeof(INotifyPropertyChanged))]
     public class NotifyPropertyChangedAspect : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
 
-        [PropertyInjection(PropertyMethod.Set, MethodPoint.Ending)]
+        [Advice(Targets = InjectionTarget.Setter, Points = InjectionPoint.After)]
         public void RaisePropertyChanged(
-            [ArgumentInjection(ArgumentValue.Instance)] object target,
-            [ArgumentInjection(ArgumentValue.MemberName)] string propertyName)
+            [AdviceArgument(Source = AdviceArgumentSource.Instance)] object targetInstance,
+            [AdviceArgument(Source = AdviceArgumentSource.TargetName)] string propertyName)
         {
-            PropertyChanged(target, new PropertyChangedEventArgs(propertyName));
+            Console.WriteLine("Raising PropertyChange event on {0} for property {1}", targetInstance, propertyName);
+            PropertyChanged(targetInstance, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

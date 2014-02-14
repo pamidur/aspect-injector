@@ -9,9 +9,8 @@ namespace AspectInjector.BuildTask
 
         public AspectInjector()
         {
-            injectors.Add(new AspectBodyInterfaceProxyInjector());
-            injectors.Add(new PropertyAspectInjector());
-            injectors.Add(new MethodAspectInjector());
+            injectors.Add(new AdviceInterfaceProxyInjector());
+            injectors.Add(new AdviceInjector());
         }
 
         public void Process(AssemblyDefinition assembly)
