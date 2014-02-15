@@ -106,13 +106,11 @@ namespace AspectInjector.BuildTask
 
             foreach(var argument in adviceMethod.Parameters)
             {
-                var argumentAttribute = argument.CustomAttributes.First(a => a.IsAttributeOfType(typeof(AdviceArgumentAttribute)));
+                var argumentAttribute = argument.CustomAttributes.FirstOrDefault(a => a.IsAttributeOfType(typeof(AdviceArgumentAttribute)));
                 if (argumentAttribute == null)
                 {
                     throw new NotSupportedException("Unbound advice arguments are not supported");
                 }
-
-                argument.CustomAttributes.Remove(argumentAttribute);
 
                 var source = (AdviceArgumentSource)argumentAttribute.Properties.Where(p => p.Name == "Source").Select(p => p.Argument.Value).First();
                 switch (source)
@@ -148,11 +146,27 @@ namespace AspectInjector.BuildTask
 
         private bool CheckTargetMethod(MethodDefinition targetMethod, InjectionTarget targets)
         {
-            return !targetMethod.IsAbstract &&
-                !targetMethod.IsStatic &&
-                (!targetMethod.IsConstructor || ((targets & InjectionTarget.Constructor) != 0)) &&
-                (!targetMethod.IsGetter || ((targets & InjectionTarget.Getter) != 0)) && 
-                (!targetMethod.IsSetter || ((targets & InjectionTarget.Setter) != 0));
+            if (targetMethod.IsAbstract || targetMethod.IsStatic)
+            {
+                return false;
+            }
+
+            if (targetMethod.IsConstructor)
+            {
+                return (targets & InjectionTarget.Constructor) != 0;
+            }
+
+            if (targetMethod.IsGetter)
+            {
+                return (targets & InjectionTarget.Getter) != 0;
+            }
+
+            if (targetMethod.IsSetter)
+            {
+                return (targets & InjectionTarget.Setter) != 0;
+            }
+
+            return (targets & InjectionTarget.Method) != 0;
         }
     }
 }

@@ -4,10 +4,12 @@ using System;
 namespace AspectInjector.Test
 {
     [Aspect(typeof(TestInterfaceAspect))]
+    [Aspect(typeof(NotifyPropertyChangedAspect))]
     internal class TestClass
     {
-        [Aspect(typeof(NotifyPropertyChangedAspect))]
         public string Value { get; set; }
+        public int Count { get; set; }
+        public DateTime Date { get; set; }
 
         [Aspect(typeof(TestMethodAspect))]
         public void Print()

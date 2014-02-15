@@ -10,6 +10,8 @@ namespace AspectInjector.Test
             test.Print();
 
             test.Value = "New property value";
+            test.Count = 10;
+            test.Date = DateTime.Now;
         }
     }
 }

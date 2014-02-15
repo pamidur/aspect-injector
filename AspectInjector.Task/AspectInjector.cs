@@ -9,7 +9,7 @@ namespace AspectInjector.BuildTask
 
         public AspectInjector()
         {
-            injectors.Add(new AdviceInterfaceProxyInjector());
+            //injectors.Add(new AdviceInterfaceProxyInjector());
             injectors.Add(new AdviceInjector());
         }
 
