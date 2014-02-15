@@ -12,18 +12,18 @@ namespace AspectInjector.BuildTask
         {
             foreach(var @class in module.Types.Where(t => t.IsClass))
             {
-                var classAspectAttributes = @class.CustomAttributes.Where(a => a.IsAttributeOfType(typeof(AspectAttribute))).ToList();
+                var classAspectAttributes = @class.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
 
                 foreach(var method in @class.Methods.Where(m => !m.IsSetter && !m.IsGetter))
                 {
-                    var methodAspectAttributes = method.CustomAttributes.Where(a => a.IsAttributeOfType(typeof(AspectAttribute))).ToList();
+                    var methodAspectAttributes = method.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
                     ProcessMethod(method, method.Name, classAspectAttributes.Union(methodAspectAttributes));
                     methodAspectAttributes.ForEach(a => method.CustomAttributes.Remove(a));
                 }
 
                 foreach (var property in @class.Properties)
                 {
-                    var propertyAspectAttributes = property.CustomAttributes.Where(a => a.IsAttributeOfType(typeof(AspectAttribute))).ToList();
+                    var propertyAspectAttributes = property.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
                     var allAspectAttributes = propertyAspectAttributes.Union(classAspectAttributes).ToList();
 
                     if (property.GetMethod != null)
@@ -63,7 +63,7 @@ namespace AspectInjector.BuildTask
             MethodDefinition targetMethod,
             string targetName)
         {
-            var adviceAttribute = adviceMethod.CustomAttributes.First(ca => ca.IsAttributeOfType(typeof(AdviceAttribute)));
+            var adviceAttribute = adviceMethod.CustomAttributes.GetAttributeOfType<AdviceAttribute>();
 
             //todo:: rethink getting attribute parameters
             var targetsObject = adviceAttribute.Properties.Where(p => p.Name == "Targets").Select(p => p.Argument.Value).FirstOrDefault();
@@ -106,7 +106,7 @@ namespace AspectInjector.BuildTask
 
             foreach(var argument in adviceMethod.Parameters)
             {
-                var argumentAttribute = argument.CustomAttributes.FirstOrDefault(a => a.IsAttributeOfType(typeof(AdviceArgumentAttribute)));
+                var argumentAttribute = argument.CustomAttributes.GetAttributeOfType<AdviceArgumentAttribute>();
                 if (argumentAttribute == null)
                 {
                     throw new NotSupportedException("Unbound advice arguments are not supported");
@@ -141,7 +141,7 @@ namespace AspectInjector.BuildTask
 
         private IEnumerable<MethodDefinition> GetAdviceMethods(TypeDefinition aspectType)
         {
-            return aspectType.Methods.Where(m => m.CustomAttributes.Any(ca => ca.IsAttributeOfType(typeof(AdviceAttribute))));
+            return aspectType.Methods.Where(m => m.CustomAttributes.HasAttributeOfType<AdviceAttribute>());
         }
 
         private bool CheckTargetMethod(MethodDefinition targetMethod, InjectionTarget targets)

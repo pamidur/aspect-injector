@@ -51,14 +51,34 @@ namespace AspectInjector.BuildTask
             return methodExpression != null ? methodExpression.Method.Name : null;
         }
 
-        public static bool HasAttributeOfType(this IEnumerable<CustomAttribute> attributes, Type attributeType)
+        public static bool IsAttributeOfType<T>(this CustomAttribute attribute)
         {
-            return attributes.Any(a => a.IsAttributeOfType(attributeType));
+            return attribute.AttributeType.Resolve().FullName == typeof(T).FullName;
+        }
+
+        public static bool HasAttributeOfType<T>(this IEnumerable<CustomAttribute> attributes)
+        {
+            return attributes.Any(a => a.IsAttributeOfType<T>());
+        }
+
+        public static IEnumerable<CustomAttribute> GetAttributesOfType<T>(this IEnumerable<CustomAttribute> attributes)
+        {
+            return attributes.Where(a => a.IsAttributeOfType<T>());
+        }
+
+        public static CustomAttribute GetAttributeOfType<T>(this IEnumerable<CustomAttribute> attributes)
+        {
+            return attributes.GetAttributesOfType<T>().FirstOrDefault();
+        }
+
+        public static bool IsType(this TypeReference typeReference, Type type)
+        {
+            return typeReference.Resolve().FullName == type.FullName;
         }
 
         public static bool HasType(this IEnumerable<TypeReference> typeReferences, Type type)
         {
-            return typeReferences.Any(td => td.IsType(type));
+            return typeReferences.Any(tr => tr.IsType(type));
         }
 
         public static bool ImplementsInterface(this TypeReference typeReference, TypeReference @interface)
@@ -76,16 +96,6 @@ namespace AspectInjector.BuildTask
         {
             var methodName = GetMethodName<T>(methodExpression);
             return !string.IsNullOrEmpty(methodName) ? module.Import(type.Methods.First(c => c.Name == methodName)) : null;
-        }
-
-        public static bool IsAttributeOfType(this CustomAttribute attribute, Type attributeType)
-        {
-            return attribute.AttributeType.Resolve().FullName == attributeType.FullName;
-        }
-
-        public static bool IsType(this TypeReference typeReference, Type type)
-        {
-            return typeReference.Resolve().FullName == type.FullName;
         }
 
         public static bool IsTypeReferenceOf(this TypeReference typeReference1, TypeReference typeReference2)

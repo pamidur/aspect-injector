@@ -9,14 +9,14 @@ namespace AspectInjector.BuildTask
         public void ProcessModule(ModuleDefinition module)
         {
             var allClasses = module.Types
-                .Where(t => t.IsClass && t.CustomAttributes.Any(ca => ca.IsAttributeOfType(typeof(AspectAttribute))));
+                .Where(t => t.IsClass && t.CustomAttributes.HasAttributeOfType<AspectAttribute>());
 
             foreach (var @class in allClasses)
             {
                 var aspects = from ca in @class.CustomAttributes
-                              where ca.IsAttributeOfType(typeof(AspectAttribute))
+                              where ca.IsAttributeOfType<AspectAttribute>()
                               let type = ((TypeReference)ca.ConstructorArguments[0].Value).Resolve()
-                              where type.CustomAttributes.Any(tca => tca.IsAttributeOfType(typeof(AdviceInterfaceProxyAttribute)))
+                              where type.CustomAttributes.Any(tca => tca.IsAttributeOfType<AdviceInterfaceProxyAttribute>())
                               select new { aspect = ca, type };
 
                 if (!aspects.Any())
@@ -38,7 +38,7 @@ namespace AspectInjector.BuildTask
         protected virtual void InjectAspectIntoClass(TypeDefinition classDefinition, TypeDefinition aspectDefinition)
         {
             var interfaceInjectionDefinitions = from ca in aspectDefinition.CustomAttributes
-                                                where ca.IsAttributeOfType(typeof(AdviceInterfaceProxyAttribute))
+                                                where ca.IsAttributeOfType<AdviceInterfaceProxyAttribute>()
                                                 select new { @interface = (TypeReference)ca.ConstructorArguments[0].Value };
 
             foreach (var interfaceInjectionDefinition in interfaceInjectionDefinitions)
