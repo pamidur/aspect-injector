@@ -133,7 +133,7 @@
         <TryCatch.Finally>
           <Sequence sap2010:WorkflowViewState.IdRef="Sequence_1">
             <mtbac:DropBinaries DestinationPath="{x:Null}" DisplayName="Copy binaries to drop" Enabled="True" sap2010:WorkflowViewState.IdRef="DropBinaries_1" />
-            <mtbwa:InvokeProcess Arguments="[&quot;-File &quot; + PrePackageScriptPath + &quot; &quot; + PrePackageScriptArgs]" DisplayName="ExecutePrePackageScript" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_1" WorkingDirectory="C:\a\src">
+            <mtbwa:InvokeProcess Arguments="[&quot;-File &quot; + PrePackageScriptPath + &quot; &quot; + PrePackageScriptArgs]" DisplayName="ExecutePrePackageScript" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_1" WorkingDirectory="[Workspace.Folders()(0).DisplayServerItem]">
               <mtbwa:InvokeProcess.ErrorDataReceived>
                 <ActivityAction x:TypeArguments="x:String">
                   <ActivityAction.Argument>
@@ -164,7 +164,7 @@
         </TryCatch.Try>
       </TryCatch>
     </mtbwa:AgentScope>
-    <sads:DebugSymbol.Symbol>d1hjOlx1c2Vyc1xhbGV4YW5kZXIubWFzaHVuaWEtYm9va1xTb3VyY2VcUmVwb3NcQXNwZWN0SW5qZWN0b3JcYnVpbGRcR2l0TnVnZXRUZW1wbGF0ZS54YW1sOQH+BQGFBgEIAZ4GAd4GAQcBxQIBzAIBBgHpAgH4BAEFAZcFAd4FAQQBXAHGAQEDAecBAaYCAQJ6A6gBDgIBAYABBYABsgECAUOBAQWmARgCAQKAAUWAAVoCAUSBAbEBgQHOAQIBBoEBggGBAaQBAgEFgQHfAYEBigICAQOCAQeCAcUBAgE/gwEHgwGgAQIBO4QBB6UBEgIBB4IBpQGCAaoBAgFCggEzggE4AgFBggG9AYIBwgECAUCDASaDATkCAT2DAWuDAXECATydAQujARYCARmGAQuaARYCAQieAQ2eAYkCAgE3nwENnwHHAQIBMqABDaAB5AMCASShAQ2hAd0BAgEgogENogHWAQIBGocBDYcBogECAReIAQ2ZASMCAQmeAbMBngGGAgIBOp4BkwGeAawBAgE4nwGtAZ8BxAECATWfAZMBnwGmAQIBM6AB8wKgAYYDAgEwoAGwAqABxAICAS6gAdkDoAHhAwIBLaABsAOgAc4DAgEsoAEzoAGJAQIBKqABoAGgAbkBAgEooAHUAqAB4gICASegAekBoAHvAQIBJqABnAOgAaIDAgEloQGzAaEB2gECASOhAZ8BoQGsAQIBIaIBxgGiAdMBAgEeogF+ogGEAQIBHaIBO6IBVAIBG4cBaIcBbgIBGIgBLIgBgAECAROIAbABiAHKAQIBEogBjgKIAZgCAgERlgETlgHeAQIBDY4BE44BdgIBCpYBapYBdwIBD44BZo4BcwIBCw==</sads:DebugSymbol.Symbol>
+    <sads:DebugSymbol.Symbol>d1hjOlx1c2Vyc1xhbGV4YW5kZXIubWFzaHVuaWEtYm9va1xTb3VyY2VcUmVwb3NcQXNwZWN0SW5qZWN0b3JcYnVpbGRcR2l0TnVnZXRUZW1wbGF0ZS54YW1sOQH+BQGFBgEIAZ4GAd4GAQcBxQIBzAIBBgHpAgH4BAEFAZcFAd4FAQQBXAHGAQEDAecBAaYCAQJ6A6gBDgIBAYABBYABsgECAUOBAQWmARgCAQKAAUWAAVoCAUSBAbEBgQHOAQIBBoEBggGBAaQBAgEFgQHfAYEBigICAQOCAQeCAcUBAgE/gwEHgwGgAQIBO4QBB6UBEgIBB4IBpQGCAaoBAgFCggEzggE4AgFBggG9AYIBwgECAUCDASaDATkCAT2DAWuDAXECATydAQujARYCARmGAQuaARYCAQieAQ2eAYkCAgE3nwENnwHHAQIBMqABDaAB5AMCASShAQ2hAd0BAgEgogENogHWAQIBGocBDYcBogECAReIAQ2ZASMCAQmeAbMBngGGAgIBOp4BkwGeAawBAgE4nwGtAZ8BxAECATWfAZMBnwGmAQIBM6AB8wKgAYYDAgEwoAGwAqABxAICAS6gAdkDoAHhAwIBLaABsAOgAc4DAgEsoAEzoAGJAQIBKqABoAGgAbkBAgEooAHUAqAB4gICASegAekBoAHvAQIBJqABnAOgAaIDAgEloQGzAaEB2gECASOhAZ8BoQGsAQIBIaIBxgGiAdMBAgEeogF+ogGEAQIBHaIBO6IBVAIBG4cBaIcBbgIBGIgBLIgBgAECAROIAbABiAHKAQIBEogBjgKIAboCAgERlgETlgHeAQIBDY4BE44BdgIBCpYBapYBdwIBD44BZo4BcwIBCw==</sads:DebugSymbol.Symbol>
   </Sequence>
   <sap2010:WorkflowViewState.ViewStateManager>
     <sap2010:ViewStateManager>
