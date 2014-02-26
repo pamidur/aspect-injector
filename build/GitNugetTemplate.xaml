@@ -132,7 +132,7 @@
         <TryCatch.Finally>
           <Sequence sap2010:WorkflowViewState.IdRef="Sequence_1">
             <mtbac:DropBinaries DestinationPath="{x:Null}" DisplayName="Copy binaries to drop" Enabled="True" sap2010:WorkflowViewState.IdRef="DropBinaries_1" />
-            <mtbwa:InvokeProcess Arguments="[PrePackageScriptArgs]" DisplayName="ExecutePrePackageScript" FileName="[&quot;powershell -File &quot; + PrePackageScriptArgs]" sap2010:WorkflowViewState.IdRef="InvokeProcess_1">
+            <mtbwa:InvokeProcess Arguments="[&quot;-File &quot; + PrePackageScriptPath + &quot; &quot; + PrePackageScriptArgs]" DisplayName="ExecutePrePackageScript" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_1">
               <mtbwa:InvokeProcess.ErrorDataReceived>
                 <ActivityAction x:TypeArguments="x:String">
                   <ActivityAction.Argument>
