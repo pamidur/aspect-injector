@@ -1,4 +1,4 @@
-﻿<Activity mc:Ignorable="sap sap2010 sads" x:Class="TfsBuild.Process" this:Process.TestSpec="[New Microsoft.TeamFoundation.Build.Workflow.Activities.AgileTestPlatformSpec(&quot;**\*test*.dll&quot;)]" this:Process.BuildNumberFormat="[&quot;$(BuildDefinitionName)_$(Date:yyyyMMdd)$(Rev:.r)&quot;]" this:Process.CleanRepository="[True]" this:Process.AgentSettings="[New Microsoft.TeamFoundation.Build.Workflow.Activities.AgentSettings() With {.MaxWaitTime = New System.TimeSpan(4, 0, 0), .MaxExecutionTime = New System.TimeSpan(0, 0, 0), .TagComparison = Microsoft.TeamFoundation.Build.Workflow.Activities.TagComparison.MatchExactly }]" this:Process.MSBuildPlatform="[Microsoft.TeamFoundation.Build.Workflow.Activities.ToolPlatform.Auto]" this:Process.MSBuildMultiProc="[True]" this:Process.Verbosity="[Microsoft.TeamFoundation.Build.Workflow.BuildVerbosity.Normal]" this:Process.SupportedReasons="Manual, IndividualCI, BatchedCI, Schedule, ScheduleForced, UserCreated" this:Process.BuildProcessVersion="11.0"
+﻿<Activity mc:Ignorable="sads sap sap2010" x:Class="TfsBuild.Process" this:Process.TestSpec="[New Microsoft.TeamFoundation.Build.Workflow.Activities.AgileTestPlatformSpec(&quot;**\*test*.dll&quot;)]" this:Process.BuildNumberFormat="[&quot;$(BuildDefinitionName)_$(Date:yyyyMMdd)$(Rev:.r)&quot;]" this:Process.CleanRepository="[True]" this:Process.AgentSettings="[New Microsoft.TeamFoundation.Build.Workflow.Activities.AgentSettings() With {.MaxWaitTime = New System.TimeSpan(4, 0, 0), .MaxExecutionTime = New System.TimeSpan(0, 0, 0), .TagComparison = Microsoft.TeamFoundation.Build.Workflow.Activities.TagComparison.MatchExactly }]" this:Process.MSBuildPlatform="[Microsoft.TeamFoundation.Build.Workflow.Activities.ToolPlatform.Auto]" this:Process.MSBuildMultiProc="[True]" this:Process.Verbosity="[Microsoft.TeamFoundation.Build.Workflow.BuildVerbosity.Normal]" this:Process.SupportedReasons="Manual, IndividualCI, BatchedCI, Schedule, ScheduleForced, UserCreated" this:Process.BuildProcessVersion="11.0"
  xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities"
  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
  xmlns:mtba="clr-namespace:Microsoft.TeamFoundation.Build.Activities;assembly=Microsoft.TeamFoundation.Build.Activities"
@@ -60,8 +60,8 @@
       <mtbw:ProcessParameterMetadata Category="#300 Advanced" Description="Specify additional MSBuild arguments." DisplayName="MSBuild arguments" ParameterName="MSBuildArguments" />
       <mtbw:ProcessParameterMetadata Category="#300 Advanced" Description="Use more than one processor per build." DisplayName="MSBuild multi-proc" ParameterName="MSBuildMultiProc" />
       <mtbw:ProcessParameterMetadata Category="#300 Advanced" Description="Specify the MSBuild platform to use. Defaults to the OS." DisplayName="MSBuild Platform" ParameterName="MSBuildPlatform" />
-	  <mtbw:ProcessParameterMetadata Category="#400 Nuget" Description="Specify the pre-package script path." DisplayName="Pre-package script path" ParameterName="PrePackageScriptPath" />
-	  <mtbw:ProcessParameterMetadata Category="#400 Nuget" Description="Specify the pre-package script arguments." DisplayName="Pre-package script arguments" ParameterName="PrePackageScriptArgs" />
+      <mtbw:ProcessParameterMetadata Category="#400 Nuget" Description="Specify the pre-package script path." DisplayName="Pre-package script path" ParameterName="PrePackageScriptPath" />
+      <mtbw:ProcessParameterMetadata Category="#400 Nuget" Description="Specify the pre-package script arguments." DisplayName="Pre-package script arguments" ParameterName="PrePackageScriptArgs" />
     </mtbw:ProcessParameterMetadataCollection>
   </this:Process.Metadata>
   <mva:VisualBasic.Settings>
@@ -94,6 +94,7 @@
       <x:String>System.Linq</x:String>
       <x:String>System.Windows.Markup</x:String>
       <x:String>TfsBuild</x:String>
+      <x:String>Microsoft.TeamFoundation.Build.Activities.Extensions</x:String>
     </sco:Collection>
   </TextExpression.NamespacesForImplementation>
   <TextExpression.ReferencesForImplementation>
@@ -132,7 +133,7 @@
         <TryCatch.Finally>
           <Sequence sap2010:WorkflowViewState.IdRef="Sequence_1">
             <mtbac:DropBinaries DestinationPath="{x:Null}" DisplayName="Copy binaries to drop" Enabled="True" sap2010:WorkflowViewState.IdRef="DropBinaries_1" />
-            <mtbwa:InvokeProcess Arguments="[&quot;-File &quot; + PrePackageScriptPath + &quot; &quot; + PrePackageScriptArgs]" DisplayName="ExecutePrePackageScript" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_1">
+            <mtbwa:InvokeProcess Arguments="[&quot;-File &quot; + PrePackageScriptPath + &quot; &quot; + PrePackageScriptArgs]" DisplayName="ExecutePrePackageScript" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_1" WorkingDirectory="[Microsoft.TeamFoundation.Build.Activities.Extensions.WellKnownEnvironmentVariables.SourcesDirectory]">
               <mtbwa:InvokeProcess.ErrorDataReceived>
                 <ActivityAction x:TypeArguments="x:String">
                   <ActivityAction.Argument>
@@ -163,46 +164,46 @@
         </TryCatch.Try>
       </TryCatch>
     </mtbwa:AgentScope>
-    <sads:DebugSymbol.Symbol>d19DOlxVc2Vyc1xhZ3VcRG9jdW1lbnRzXFZpc3VhbCBTdHVkaW8gMjAxM1xQcm9qZWN0c1xHaXROdWdldFRlbXBsYXRlXEdpdE51Z2V0VGVtcGxhdGVTaW1wbGUueGFtbDgB/gUBhQYBCAGeBgHeBgEHAcUCAcwCAQYB6QIB+AQBBQGXBQHeBQEEAVwBxgEBAwHnAQGmAgECdwOlAQ4CAQF9BX2yAQIBQn4FowEYAgECfUV9WgIBQ36xAX7OAQIBBn6CAX6kAQIBBX7fAX6KAgIBA38Hf8UBAgE+gAEHgAGgAQIBOoEBB6IBEgIBB3+lAX+qAQIBQX8zfzgCAUB/vQF/wgECAT+AASaAATkCATyAAWuAAXECATuaAQugARYCARiDAQuXARYCAQibAQ2bAYkCAgE2nAENnAHHAQIBMZ0BDZ0B5AMCASOeAQ2eAd0BAgEfnwENnwHWAQIBGYQBDYQBogECARaFAQ2WASMCAQmbAbMBmwGGAgIBOZsBkwGbAawBAgE3nAGtAZwBxAECATScAZMBnAGmAQIBMp0B8wKdAYYDAgEvnQGwAp0BxAICAS2dAdkDnQHhAwIBLJ0BsAOdAc4DAgErnQEznQGJAQIBKZ0BoAGdAbkBAgEnnQHUAp0B4gICASadAekBnQHvAQIBJZ0BnAOdAaIDAgEkngGzAZ4B2gECASKeAZ8BngGsAQIBIJ8BxgGfAdMBAgEdnwF+nwGEAQIBHJ8BO58BVAIBGoQBaIQBbgIBF4UBLIUBRAIBE4UBdIUBrAECARGTAROTAd4BAgENiwETiwF2AgEKkwFqkwF3AgEPiwFmiwFzAgEL</sads:DebugSymbol.Symbol>
+    <sads:DebugSymbol.Symbol>d1hjOlx1c2Vyc1xhbGV4YW5kZXIubWFzaHVuaWEtYm9va1xTb3VyY2VcUmVwb3NcQXNwZWN0SW5qZWN0b3JcYnVpbGRcR2l0TnVnZXRUZW1wbGF0ZS54YW1sOQH+BQGFBgEIAZ4GAd4GAQcBxQIBzAIBBgHpAgH4BAEFAZcFAd4FAQQBXAHGAQEDAecBAaYCAQJ6A6gBDgIBAYABBYABsgECAUOBAQWmARgCAQKAAUWAAVoCAUSBAbEBgQHOAQIBBoEBggGBAaQBAgEFgQHfAYEBigICAQOCAQeCAcUBAgE/gwEHgwGgAQIBO4QBB6UBEgIBB4IBpQGCAaoBAgFCggEzggE4AgFBggG9AYIBwgECAUCDASaDATkCAT2DAWuDAXECATydAQujARYCARmGAQuaARYCAQieAQ2eAYkCAgE3nwENnwHHAQIBMqABDaAB5AMCASShAQ2hAd0BAgEgogENogHWAQIBGocBDYcBogECAReIAQ2ZASMCAQmeAbMBngGGAgIBOp4BkwGeAawBAgE4nwGtAZ8BxAECATWfAZMBnwGmAQIBM6AB8wKgAYYDAgEwoAGwAqABxAICAS6gAdkDoAHhAwIBLaABsAOgAc4DAgEsoAEzoAGJAQIBKqABoAGgAbkBAgEooAHUAqAB4gICASegAekBoAHvAQIBJqABnAOgAaIDAgEloQGzAaEB2gECASOhAZ8BoQGsAQIBIaIBxgGiAdMBAgEeogF+ogGEAQIBHaIBO6IBVAIBG4cBaIcBbgIBGIgBLIgBgAECAROIAbABiAHKAQIBEogBjgKIAfUCAgERlgETlgHeAQIBDY4BE44BdgIBCpYBapYBdwIBD44BZo4BcwIBCw==</sads:DebugSymbol.Symbol>
   </Sequence>
   <sap2010:WorkflowViewState.ViewStateManager>
     <sap2010:ViewStateManager>
-      <sap2010:ViewStateData Id="SetBuildNumber_1" sap:VirtualizedContainerService.HintSize="440,22" />
-      <sap2010:ViewStateData Id="InitializeEnvironment_1" sap:VirtualizedContainerService.HintSize="418,22" />
-      <sap2010:ViewStateData Id="GitPull_1" sap:VirtualizedContainerService.HintSize="418,22" />
-      <sap2010:ViewStateData Id="DropBinaries_1" sap:VirtualizedContainerService.HintSize="234,22" />
-      <sap2010:ViewStateData Id="WriteBuildError_1" sap:VirtualizedContainerService.HintSize="200,22" />
-      <sap2010:ViewStateData Id="WriteBuildMessage_1" sap:VirtualizedContainerService.HintSize="200,22" />
-      <sap2010:ViewStateData Id="InvokeProcess_1" sap:VirtualizedContainerService.HintSize="234,278" />
-      <sap2010:ViewStateData Id="Sequence_1" sap:VirtualizedContainerService.HintSize="256,464">
+      <sap2010:ViewStateData Id="SetBuildNumber_1" sap:VirtualizedContainerService.HintSize="440,22.4" />
+      <sap2010:ViewStateData Id="InitializeEnvironment_1" sap:VirtualizedContainerService.HintSize="417.6,22.4" />
+      <sap2010:ViewStateData Id="GitPull_1" sap:VirtualizedContainerService.HintSize="417.6,22.4" />
+      <sap2010:ViewStateData Id="DropBinaries_1" sap:VirtualizedContainerService.HintSize="233.6,22.4" />
+      <sap2010:ViewStateData Id="WriteBuildError_1" sap:VirtualizedContainerService.HintSize="200,22.4" />
+      <sap2010:ViewStateData Id="WriteBuildMessage_1" sap:VirtualizedContainerService.HintSize="200,22.4" />
+      <sap2010:ViewStateData Id="InvokeProcess_1" sap:VirtualizedContainerService.HintSize="233.6,273.6" />
+      <sap2010:ViewStateData Id="Sequence_1" sap:VirtualizedContainerService.HintSize="256,460.8">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">True</x:Boolean>
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="Assign`1_1" sap:VirtualizedContainerService.HintSize="200,22" />
-      <sap2010:ViewStateData Id="Assign`1_2" sap:VirtualizedContainerService.HintSize="200,22" />
-      <sap2010:ViewStateData Id="RunMSBuild_1" sap:VirtualizedContainerService.HintSize="200,22" />
-      <sap2010:ViewStateData Id="Assign`1_3" sap:VirtualizedContainerService.HintSize="200,22" />
-      <sap2010:ViewStateData Id="RunAgileTestRunner_1" sap:VirtualizedContainerService.HintSize="200,22" />
-      <sap2010:ViewStateData Id="Sequence_2" sap:VirtualizedContainerService.HintSize="222,394">
+      <sap2010:ViewStateData Id="Assign`1_1" sap:VirtualizedContainerService.HintSize="200,22.4" />
+      <sap2010:ViewStateData Id="Assign`1_2" sap:VirtualizedContainerService.HintSize="200,22.4" />
+      <sap2010:ViewStateData Id="RunMSBuild_1" sap:VirtualizedContainerService.HintSize="200,22.4" />
+      <sap2010:ViewStateData Id="Assign`1_3" sap:VirtualizedContainerService.HintSize="200,22.4" />
+      <sap2010:ViewStateData Id="RunAgileTestRunner_1" sap:VirtualizedContainerService.HintSize="200,22.4" />
+      <sap2010:ViewStateData Id="Sequence_2" sap:VirtualizedContainerService.HintSize="222.4,396.8">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">True</x:Boolean>
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="TryCatch_1" sap:VirtualizedContainerService.HintSize="418,1107" />
-      <sap2010:ViewStateData Id="AgentScope_1" sap:VirtualizedContainerService.HintSize="440,1355" />
-      <sap2010:ViewStateData Id="Sequence_3" sap:VirtualizedContainerService.HintSize="462,1541">
+      <sap2010:ViewStateData Id="TryCatch_1" sap:VirtualizedContainerService.HintSize="417.6,1110.4" />
+      <sap2010:ViewStateData Id="AgentScope_1" sap:VirtualizedContainerService.HintSize="440,1360" />
+      <sap2010:ViewStateData Id="Sequence_3" sap:VirtualizedContainerService.HintSize="462.4,1547.2">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">True</x:Boolean>
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="TfsBuild.Process_1" sap:VirtualizedContainerService.HintSize="502,1621">
+      <sap2010:ViewStateData Id="TfsBuild.Process_1" sap:VirtualizedContainerService.HintSize="502.4,1627.2">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="ShouldExpandAll">True</x:Boolean>

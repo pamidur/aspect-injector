@@ -11,6 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Test", "Aspe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B1F4DD41-A903-4153-8F57-AB7EC799FDB7}"
 	ProjectSection(SolutionItems) = preProject
+		build\GitNugetTemplate.xaml = build\GitNugetTemplate.xaml
 		test.ps1 = test.ps1
 	EndProjectSection
 EndProject
