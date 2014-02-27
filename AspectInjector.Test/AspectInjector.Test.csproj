@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="AspectInjector.BuildTask.AspectInjectorBuildTask" AssemblyFile="$(SolutionDir)/AspectInjector.Task/bin/Debug/AspectInjector.BuildTask.dll" />
+  <UsingTask Condition="Exists('$(SolutionDir)/AspectInjector.Task/bin/Debug/AspectInjector.BuildTask.dll')" TaskName="AspectInjector.BuildTask.AspectInjectorBuildTask" AssemblyFile="$(SolutionDir)/AspectInjector.Task/bin/Debug/AspectInjector.BuildTask.dll" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -32,6 +32,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>ololo.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -54,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="ololo.snk" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AspectInjector\AspectInjector.csproj">
@@ -65,8 +72,10 @@
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
-  </Target>-->
-  <Target Name="AfterBuild">
-    <AspectInjectorBuildTask Assembly="$(AssemblyName)" OutputPath="$(OutputPath)" />
+  </Target>-->    
+  
+  <Target Name="AfterCompile" > 
+    <AspectInjectorBuildTask Condition="Exists('$(SolutionDir)/AspectInjector.Task/bin/Debug/AspectInjector.BuildTask.dll')" Assembly="$(AssemblyName)" References="@(ReferencePath)" OutputPath="obj\Debug\" />
+	<Exec Condition="Exists('$(AssemblyOriginatorKeyFile)')" Command="&quot;$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.0A\WinSDK-NetFx40Tools-x86@InstallationFolder)sn.exe&quot; -R obj\Debug\$(AssemblyName).exe $(AssemblyOriginatorKeyFile)"/>
   </Target>
 </Project>
