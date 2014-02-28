@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask Condition="Exists('$(SolutionDir)/AspectInjector.Task/bin/Debug/AspectInjector.BuildTask.dll')" TaskName="AspectInjector.BuildTask.AspectInjectorBuildTask" AssemblyFile="$(SolutionDir)/AspectInjector.Task/bin/Debug/AspectInjector.BuildTask.dll" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -56,17 +55,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AspectInjector\AspectInjector.csproj">
-      <Project>{2e1550ed-607f-4b13-9254-f2b9e756bcf9}</Project>
-      <Name>AspectInjector</Name>
+    <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj">
+      <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
+      <Name>AspectInjector.Broker</Name>
     </ProjectReference>
   </ItemGroup>
+  
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>-->
-  <Target Name="AfterBuild">
-    <AspectInjectorBuildTask Condition="Exists('$(SolutionDir)/AspectInjector.Task/bin/Debug/AspectInjector.BuildTask.dll')" Assembly="$(AssemblyName)" OutputPath="$(OutputPath)" />
-  </Target>
+  
+  <UsingTask TaskName="AspectInjector.BuildTask.AspectInjectorBuildTask" AssemblyFile="..\AspectInjector.BuildTask\bin\Debug\AspectInjector.BuildTask.dll" />
+  <Import Project="..\build\AspectInjector.targets" /> 
 </Project>

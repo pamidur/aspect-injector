@@ -1,4 +1,5 @@
-﻿namespace AspectInjector.Test.Aspects
+﻿using AspectInjector.Broker;
+namespace AspectInjector.Test.Aspects
 {
     [AdviceInterfaceProxy(typeof(ITestInterface))]
     internal class TestInterfaceAspect : ITestInterface
