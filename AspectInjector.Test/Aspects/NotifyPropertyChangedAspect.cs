@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AspectInjector.Broker;
+using System;
 using System.ComponentModel;
 
 namespace AspectInjector.Test.Aspects
