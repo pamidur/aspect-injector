@@ -130,11 +130,10 @@
     <mtbwa:AgentScope DataToIgnore="" DisplayName="Run on agent" sap2010:WorkflowViewState.IdRef="AgentScope_1" MaxExecutionTime="[AgentSettings.MaxExecutionTime]" MaxWaitTime="[AgentSettings.MaxWaitTime]" ReservationSpec="[AgentSettings.GetAgentReservationSpec()]" mva:VisualBasic.Settings="Assembly references and imported namespaces serialized as XML namespaces">
       <mtbwa:AgentScope.Variables>
         <Variable x:TypeArguments="x:String" Name="sourcesDir" />
-        <Variable x:TypeArguments="x:String" Name="buildNumber" />
+        <Variable x:TypeArguments="mtbc:IBuildDetail" Name="BuildDetail" />
       </mtbwa:AgentScope.Variables>
       <mtbac:InitializeEnvironment BinariesFolder="bin" DisplayName="Initialize environment" sap2010:WorkflowViewState.IdRef="InitializeEnvironment_1" SourceFolder="src" TestResultsFolder="tst" />
       <mtbac:GetEnvironmentVariable x:TypeArguments="x:String" DisplayName="GetSourcesDir" sap2010:WorkflowViewState.IdRef="GetEnvironmentVariable`1_1" Name="[Microsoft.TeamFoundation.Build.Activities.Extensions.WellKnownEnvironmentVariables.SourcesDirectory]" Result="[sourcesDir]" />
-      <mtbac:GetEnvironmentVariable x:TypeArguments="x:String" DisplayName="GetBuildNumber" Name="[Microsoft.TeamFoundation.Build.Activities.Extensions.WellKnownEnvironmentVariables.BuildNumber]" Result="[buildNumber]" />
       <mtbag:GitPull CleanRepository="[CleanRepository]" DisplayName="Pull sources from Git repo" Enabled="True" sap2010:WorkflowViewState.IdRef="GitPull_1" />
       <TryCatch DisplayName="Try" sap2010:WorkflowViewState.IdRef="TryCatch_1" mtbwt:BuildTrackingParticipant.Importance="Low">
         <TryCatch.Finally>
@@ -162,7 +161,7 @@
         </TryCatch.Finally>
         <TryCatch.Try>
           <Sequence DisplayName="Compile and Test" sap2010:WorkflowViewState.IdRef="Sequence_2">
-            <mtbwa:InvokeProcess Arguments="[&quot;-File build\modify-versions.ps1 &quot; + buildNumber]" DisplayName="Modify Versions" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_2" WorkingDirectory="[sourcesDir]">
+            <mtbwa:InvokeProcess Arguments="[&quot;-File build\modify-versions.ps1 &quot; + BuildDetail.BuildNumber]" DisplayName="Modify Versions" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_2" WorkingDirectory="[sourcesDir]">
               <mtbwa:InvokeProcess.ErrorDataReceived>
                 <ActivityAction x:TypeArguments="x:String">
                   <ActivityAction.Argument>
@@ -189,7 +188,7 @@
         </TryCatch.Try>
       </TryCatch>
     </mtbwa:AgentScope>
-    <sads:DebugSymbol.Symbol>dzZFOlxSZXBvc1ZTT1xBc3BlY3RJbmplY3RvclxidWlsZFxHaXROdWdldFRlbXBsYXRlLnhhbWxFAf4FAYUGAQkBngYB3gYBCAHFAgHMAgEHAekCAfgEAQYBlwUB3gUBBQGECAGPCAEEAVwBxgEBAwHnAQGmAgECfAPAAQ4CAQGCAQWCAbIBAgFWgwEFvgEYAgECggFFggFaAgFXgwGxAYMBzgECAQaDAYIBgwGkAQIBBYMB3wGDAYoCAgEDhwEHhwHFAQIBUogBB4gBngICAU6JAQeJAaABAgFKigEHvQESAgEHhwGlAYcBqgECAVWHATOHATgCAVSHAb0BhwHCAQIBU4gBjQKIAZsCAgFQiAGeAYgBhQICAU+JASaJATkCAUyJAWuJAXECAUujAQu7ARYCARqMAQugARYCAQikAQ21ASMCATy2AQ22AYkCAgE4twENtwHHAQIBM7gBDbgB5AMCASW5AQ25Ad0BAgEhugENugHWAQIBG40BDY0BogECARiOAQ2fASMCAQmkASykAWYCAUekAY4BpAGoAQIBRqQB7AGkAfoBAgFEsgETsgHeAQIBQKoBE6oBdgIBPbYBswG2AYYCAgE7tgGTAbYBrAECATm3Aa0BtwHEAQIBNrcBkwG3AaYBAgE0uAHzArgBhgMCATG4AbACuAHEAgIBL7gB2QO4AeEDAgEuuAGwA7gBzgMCAS24ATO4AYkBAgEruAGgAbgBuQECASm4AdQCuAHiAgIBKLgB6QG4Ae8BAgEnuAGcA7gBogMCASa5AbMBuQHaAQIBJLkBnwG5AawBAgEiugHGAboB0wECAR+6AX66AYQBAgEeugE7ugFUAgEcjQFojQFuAgEZjgEsjgGAAQIBFI4BsAGOAcoBAgETjgGOAo4BnAICARGcAROcAd4BAgENlAETlAF2AgEKsgFqsgF3AgFCqgFmqgFzAgE+nAFqnAF3AgEPlAFmlAFzAgEL</sads:DebugSymbol.Symbol>
+    <sads:DebugSymbol.Symbol>dzZFOlxSZXBvc1ZTT1xBc3BlY3RJbmplY3RvclxidWlsZFxHaXROdWdldFRlbXBsYXRlLnhhbWxEAf4FAYUGAQgBngYB3gYBBwHFAgHMAgEGAekCAfgEAQUBlwUB3gUBBAFcAcYBAQMB5wEBpgIBAnsDwAEOAgEBgQEFgQGyAQIBVYIBBb4BGAIBAoEBRYEBWgIBVoIBsQGCAc4BAgEGggGCAYIBpAECAQWCAd8BggGKAgIBA4cBB4cBxQECAVGIAQeIAZ4CAgFNiQEHiQGgAQIBSYoBB70BEgIBB4cBpQGHAaoBAgFUhwEzhwE4AgFThwG9AYcBwgECAVKIAY0CiAGbAgIBT4gBngGIAYUCAgFOiQEmiQE5AgFLiQFriQFxAgFKowELuwEWAgEajAELoAEWAgEIpAENtQEjAgE8tgENtgGJAgIBOLcBDbcBxwECATO4AQ24AeQDAgEluQENuQHdAQIBIboBDboB1gECARuNAQ2NAaIBAgEYjgENnwEjAgEJpAEspAF2AgFHpAGeAaQBuAECAUakAfwBpAGKAgIBRLIBE7IB3gECAUCqAROqAXYCAT22AbMBtgGGAgIBO7YBkwG2AawBAgE5twGtAbcBxAECATa3AZMBtwGmAQIBNLgB8wK4AYYDAgExuAGwArgBxAICAS+4AdkDuAHhAwIBLrgBsAO4Ac4DAgEtuAEzuAGJAQIBK7gBoAG4AbkBAgEpuAHUArgB4gICASi4AekBuAHvAQIBJ7gBnAO4AaIDAgEmuQGzAbkB2gECASS5AZ8BuQGsAQIBIroBxgG6AdMBAgEfugF+ugGEAQIBHroBO7oBVAIBHI0BaI0BbgIBGY4BLI4BgAECARSOAbABjgHKAQIBE44BjgKOAZwCAgERnAETnAHeAQIBDZQBE5QBdgIBCrIBarIBdwIBQqoBZqoBcwIBPpwBapwBdwIBD5QBZpQBcwIBCw==</sads:DebugSymbol.Symbol>
   </Sequence>
   <sap2010:WorkflowViewState.ViewStateManager>
     <sap2010:ViewStateManager>
@@ -213,8 +212,8 @@
       <sap2010:ViewStateData Id="InvokeProcess_2" sap:VirtualizedContainerService.HintSize="234,278" />
       <sap2010:ViewStateData Id="Assign`1_1" sap:VirtualizedContainerService.HintSize="234,22" />
       <sap2010:ViewStateData Id="Assign`1_2" sap:VirtualizedContainerService.HintSize="234,22" />
-      <sap2010:ViewStateData Id="RunMSBuild_1" sap:VirtualizedContainerService.HintSize="200,22" />
-      <sap2010:ViewStateData Id="Assign`1_3" sap:VirtualizedContainerService.HintSize="200,22" />
+      <sap2010:ViewStateData Id="RunMSBuild_1" sap:VirtualizedContainerService.HintSize="234,22" />
+      <sap2010:ViewStateData Id="Assign`1_3" sap:VirtualizedContainerService.HintSize="234,22" />
       <sap2010:ViewStateData Id="RunAgileTestRunner_1" sap:VirtualizedContainerService.HintSize="200,22" />
       <sap2010:ViewStateData Id="Sequence_2" sap:VirtualizedContainerService.HintSize="256,712">
         <sap:WorkflowViewStateService.ViewState>
@@ -232,7 +231,7 @@
           </scg:Dictionary>
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
-      <sap2010:ViewStateData Id="TfsBuild.Process_1" sap:VirtualizedContainerService.HintSize="502,2001">
+      <sap2010:ViewStateData Id="TfsBuild.Process_1" sap:VirtualizedContainerService.HintSize="502,2063">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="ShouldExpandAll">True</x:Boolean>
