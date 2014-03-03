@@ -19,17 +19,19 @@ namespace AspectInjector.BuildTask
 
         public override bool Execute()
         {
+            System.Diagnostics.Debugger.Launch();
+
             try
             {
                 Console.WriteLine("Aspect Injector has started for {0}", Assembly);
 
-                var assemblyResolver = new DefaultAssemblyResolver();
+                var assemblyResolver = new StrictAssemblyResolver();
 
                 foreach (var r in References)
-                    assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(r));
+                    assemblyResolver.RegisterAssembly(r);
 
-                string assemblyFile = Path.Combine(OutputPath, Assembly + ".exe");
-                string pdbFile = Path.Combine(OutputPath, Assembly + ".pdb");
+                string assemblyFile = Path.Combine(OutputPath, Assembly);
+                string pdbFile = Path.Combine(OutputPath, Path.GetFileNameWithoutExtension(Assembly) + ".pdb");
 
                 var assembly = AssemblyDefinition.ReadAssembly(assemblyFile,
                     new ReaderParameters

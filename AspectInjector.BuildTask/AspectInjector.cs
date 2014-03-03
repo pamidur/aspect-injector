@@ -15,8 +15,6 @@ namespace AspectInjector.BuildTask
 
         public void Process(AssemblyDefinition assembly)
         {
-            //System.Diagnostics.Debugger.Launch();
-
             foreach (var injector in injectors)
             {
                 injector.ProcessModule(assembly.MainModule);
