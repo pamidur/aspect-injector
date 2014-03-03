@@ -3,6 +3,8 @@ Param (
   [String]$binDir = "AspectInjector.BuildTask\bin\Release"
 )
 
+$binDir
+
 
 if(Test-Path $packageBuildPlace ){
 	"Cleaning up package-build-place."
