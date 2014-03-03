@@ -161,7 +161,7 @@
         </TryCatch.Finally>
         <TryCatch.Try>
           <Sequence DisplayName="Compile and Test" sap2010:WorkflowViewState.IdRef="Sequence_2">
-            <mtbwa:InvokeProcess Arguments="[&quot;-File build\modify-versions.ps1 &quot; + BuildDetail.BuildNumber]" DisplayName="Modify Versions" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_2" WorkingDirectory="[sourcesDir]">
+            <mtbwa:InvokeProcess Arguments="-File build\modify-versions.ps1 10" DisplayName="Modify Versions" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_2" WorkingDirectory="[sourcesDir]">
               <mtbwa:InvokeProcess.ErrorDataReceived>
                 <ActivityAction x:TypeArguments="x:String">
                   <ActivityAction.Argument>
@@ -188,7 +188,7 @@
         </TryCatch.Try>
       </TryCatch>
     </mtbwa:AgentScope>
-    <sads:DebugSymbol.Symbol>dzZFOlxSZXBvc1ZTT1xBc3BlY3RJbmplY3RvclxidWlsZFxHaXROdWdldFRlbXBsYXRlLnhhbWxEAf4FAYUGAQgBngYB3gYBBwHFAgHMAgEGAekCAfgEAQUBlwUB3gUBBAFcAcYBAQMB5wEBpgIBAnsDwAEOAgEBgQEFgQGyAQIBVYIBBb4BGAIBAoEBRYEBWgIBVoIBsQGCAc4BAgEGggGCAYIBpAECAQWCAd8BggGKAgIBA4cBB4cBxQECAVGIAQeIAZ4CAgFNiQEHiQGgAQIBSYoBB70BEgIBB4cBpQGHAaoBAgFUhwEzhwE4AgFThwG9AYcBwgECAVKIAY0CiAGbAgIBT4gBngGIAYUCAgFOiQEmiQE5AgFLiQFriQFxAgFKowELuwEWAgEajAELoAEWAgEIpAENtQEjAgE8tgENtgGJAgIBOLcBDbcBxwECATO4AQ24AeQDAgEluQENuQHdAQIBIboBDboB1gECARuNAQ2NAaIBAgEYjgENnwEjAgEJpAEspAF2AgFHpAGeAaQBuAECAUakAfwBpAGKAgIBRLIBE7IB3gECAUCqAROqAXYCAT22AbMBtgGGAgIBO7YBkwG2AawBAgE5twGtAbcBxAECATa3AZMBtwGmAQIBNLgB8wK4AYYDAgExuAGwArgBxAICAS+4AdkDuAHhAwIBLrgBsAO4Ac4DAgEtuAEzuAGJAQIBK7gBoAG4AbkBAgEpuAHUArgB4gICASi4AekBuAHvAQIBJ7gBnAO4AaIDAgEmuQGzAbkB2gECASS5AZ8BuQGsAQIBIroBxgG6AdMBAgEfugF+ugGEAQIBHroBO7oBVAIBHI0BaI0BbgIBGY4BLI4BgAECARSOAbABjgHKAQIBE44BjgKOAZwCAgERnAETnAHeAQIBDZQBE5QBdgIBCrIBarIBdwIBQqoBZqoBcwIBPpwBapwBdwIBD5QBZpQBcwIBCw==</sads:DebugSymbol.Symbol>
+    <sads:DebugSymbol.Symbol>dzZFOlxSZXBvc1ZTT1xBc3BlY3RJbmplY3RvclxidWlsZFxHaXROdWdldFRlbXBsYXRlLnhhbWxEAf4FAYUGAQgBngYB3gYBBwHFAgHMAgEGAekCAfgEAQUBlwUB3gUBBAFcAcYBAQMB5wEBpgIBAnsDwAEOAgEBgQEFgQGyAQIBVYIBBb4BGAIBAoEBRYEBWgIBVoIBsQGCAc4BAgEGggGCAYIBpAECAQWCAd8BggGKAgIBA4cBB4cBxQECAVGIAQeIAZ4CAgFNiQEHiQGgAQIBSYoBB70BEgIBB4cBpQGHAaoBAgFUhwEzhwE4AgFThwG9AYcBwgECAVKIAY0CiAGbAgIBT4gBngGIAYUCAgFOiQEmiQE5AgFLiQFriQFxAgFKowELuwEWAgEajAELoAEWAgEIpAENtQEjAgE8tgENtgGJAgIBOLcBDbcBxwECATO4AQ24AeQDAgEluQENuQHdAQIBIboBDboB1gECARuNAQ2NAaIBAgEYjgENnwEjAgEJpAEspAFQAgFHpAF4pAGSAQIBRqQB1gGkAeQBAgFEsgETsgHeAQIBQKoBE6oBdgIBPbYBswG2AYYCAgE7tgGTAbYBrAECATm3Aa0BtwHEAQIBNrcBkwG3AaYBAgE0uAHzArgBhgMCATG4AbACuAHEAgIBL7gB2QO4AeEDAgEuuAGwA7gBzgMCAS24ATO4AYkBAgEruAGgAbgBuQECASm4AdQCuAHiAgIBKLgB6QG4Ae8BAgEnuAGcA7gBogMCASa5AbMBuQHaAQIBJLkBnwG5AawBAgEiugHGAboB0wECAR+6AX66AYQBAgEeugE7ugFUAgEcjQFojQFuAgEZjgEsjgGAAQIBFI4BsAGOAcoBAgETjgGOAo4BnAICARGcAROcAd4BAgENlAETlAF2AgEKsgFqsgF3AgFCqgFmqgFzAgE+nAFqnAF3AgEPlAFmlAFzAgEL</sads:DebugSymbol.Symbol>
   </Sequence>
   <sap2010:WorkflowViewState.ViewStateManager>
     <sap2010:ViewStateManager>
