@@ -1,4 +1,4 @@
-﻿<Activity mc:Ignorable="sads sap sap2010" x:Class="TfsBuild.Process" this:Process.TestSpec="[New Microsoft.TeamFoundation.Build.Workflow.Activities.AgileTestPlatformSpec(&quot;**\*test*.dll&quot;)]" this:Process.BuildNumberFormat="[&quot;$(BuildDefinitionName)_$(Date:yyyyMMdd)$(Rev:.r)&quot;]" this:Process.CleanRepository="[True]" this:Process.AgentSettings="[New Microsoft.TeamFoundation.Build.Workflow.Activities.AgentSettings() With {.MaxWaitTime = New System.TimeSpan(4, 0, 0), .MaxExecutionTime = New System.TimeSpan(0, 0, 0), .TagComparison = Microsoft.TeamFoundation.Build.Workflow.Activities.TagComparison.MatchExactly }]" this:Process.MSBuildPlatform="[Microsoft.TeamFoundation.Build.Workflow.Activities.ToolPlatform.Auto]" this:Process.MSBuildMultiProc="[True]" this:Process.Verbosity="[Microsoft.TeamFoundation.Build.Workflow.BuildVerbosity.Normal]" this:Process.SupportedReasons="Manual, IndividualCI, BatchedCI, Schedule, ScheduleForced, UserCreated" this:Process.BuildProcessVersion="11.0" this:Process.BuildId="$(BuildID)"
+﻿<Activity mc:Ignorable="sads sap sap2010" x:Class="TfsBuild.Process" this:Process.TestSpec="[New Microsoft.TeamFoundation.Build.Workflow.Activities.AgileTestPlatformSpec(&quot;**\*test*.dll&quot;)]" this:Process.BuildNumberFormat="[&quot;$(BuildDefinitionName)_$(Date:yyyyMMdd)$(Rev:.r)&quot;]" this:Process.CleanRepository="[True]" this:Process.AgentSettings="[New Microsoft.TeamFoundation.Build.Workflow.Activities.AgentSettings() With {.MaxWaitTime = New System.TimeSpan(4, 0, 0), .MaxExecutionTime = New System.TimeSpan(0, 0, 0), .TagComparison = Microsoft.TeamFoundation.Build.Workflow.Activities.TagComparison.MatchExactly }]" this:Process.MSBuildPlatform="[Microsoft.TeamFoundation.Build.Workflow.Activities.ToolPlatform.Auto]" this:Process.MSBuildMultiProc="[True]" this:Process.Verbosity="[Microsoft.TeamFoundation.Build.Workflow.BuildVerbosity.Normal]" this:Process.SupportedReasons="Manual, IndividualCI, BatchedCI, Schedule, ScheduleForced, UserCreated" this:Process.BuildProcessVersion="11.0"
  xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities"
  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
  xmlns:mtba="clr-namespace:Microsoft.TeamFoundation.Build.Activities;assembly=Microsoft.TeamFoundation.Build.Activities"
@@ -35,7 +35,6 @@
     <x:Property Name="BuildProcessVersion" Type="x:String" />
     <x:Property Name="PrePackageScriptPath" Type="InArgument(x:String)" />
     <x:Property Name="PrePackageScriptArgs" Type="InArgument(x:String)" />
-    <x:Property Name="BuildId" Type="InArgument(x:String)" />
   </x:Members>
   <this:Process.SolutionToBuild>
     <InArgument x:TypeArguments="x:String" />
@@ -131,9 +130,11 @@
     <mtbwa:AgentScope DataToIgnore="" DisplayName="Run on agent" sap2010:WorkflowViewState.IdRef="AgentScope_1" MaxExecutionTime="[AgentSettings.MaxExecutionTime]" MaxWaitTime="[AgentSettings.MaxWaitTime]" ReservationSpec="[AgentSettings.GetAgentReservationSpec()]" mva:VisualBasic.Settings="Assembly references and imported namespaces serialized as XML namespaces">
       <mtbwa:AgentScope.Variables>
         <Variable x:TypeArguments="x:String" Name="sourcesDir" />
+        <Variable x:TypeArguments="x:String" Name="buildNumber" />
       </mtbwa:AgentScope.Variables>
       <mtbac:InitializeEnvironment BinariesFolder="bin" DisplayName="Initialize environment" sap2010:WorkflowViewState.IdRef="InitializeEnvironment_1" SourceFolder="src" TestResultsFolder="tst" />
       <mtbac:GetEnvironmentVariable x:TypeArguments="x:String" DisplayName="GetSourcesDir" sap2010:WorkflowViewState.IdRef="GetEnvironmentVariable`1_1" Name="[Microsoft.TeamFoundation.Build.Activities.Extensions.WellKnownEnvironmentVariables.SourcesDirectory]" Result="[sourcesDir]" />
+      <mtbac:GetEnvironmentVariable x:TypeArguments="x:String" DisplayName="GetBuildNumber" Name="[Microsoft.TeamFoundation.Build.Activities.Extensions.WellKnownEnvironmentVariables.BuildNumber]" Result="[buildNumber]" />
       <mtbag:GitPull CleanRepository="[CleanRepository]" DisplayName="Pull sources from Git repo" Enabled="True" sap2010:WorkflowViewState.IdRef="GitPull_1" />
       <TryCatch DisplayName="Try" sap2010:WorkflowViewState.IdRef="TryCatch_1" mtbwt:BuildTrackingParticipant.Importance="Low">
         <TryCatch.Finally>
@@ -161,7 +162,7 @@
         </TryCatch.Finally>
         <TryCatch.Try>
           <Sequence DisplayName="Compile and Test" sap2010:WorkflowViewState.IdRef="Sequence_2">
-            <mtbwa:InvokeProcess Arguments="[&quot;-File build\modify-versions.ps1 &quot; + BuildId]" DisplayName="Modify Versions" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_2" WorkingDirectory="[sourcesDir]">
+            <mtbwa:InvokeProcess Arguments="[&quot;-File build\modify-versions.ps1 &quot; + buildNumber]" DisplayName="Modify Versions" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_2" WorkingDirectory="[sourcesDir]">
               <mtbwa:InvokeProcess.ErrorDataReceived>
                 <ActivityAction x:TypeArguments="x:String">
                   <ActivityAction.Argument>
