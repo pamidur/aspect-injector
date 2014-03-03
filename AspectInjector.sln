@@ -11,7 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B1F4DD41
 		build\AspectInjector.props = build\AspectInjector.props
 		build\AspectInjector.targets = build\AspectInjector.targets
 		build\GitNugetTemplate.xaml = build\GitNugetTemplate.xaml
+		build\modify-versions.ps1 = build\modify-versions.ps1
 		build\prepare-package.ps1 = build\prepare-package.ps1
+		build\Version.txt = build\Version.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Broker", "AspectInjector.Broker\AspectInjector.Broker.csproj", "{0926FE28-73BA-4F73-9188-B196FBBC9410}"
