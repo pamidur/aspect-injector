@@ -3,9 +3,6 @@ Param (
   [String]$binDir = "AspectInjector.BuildTask\bin\Release"
 )
 
-ls $binDir
-
-
 if(Test-Path $packageBuildPlace ){
 	"Cleaning up package-build-place."
 	Remove-Item $packageBuildPlace -Recurse -Force | Out-Null 

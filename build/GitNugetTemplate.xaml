@@ -130,10 +130,11 @@
     <mtbwa:AgentScope DataToIgnore="" DisplayName="Run on agent" sap2010:WorkflowViewState.IdRef="AgentScope_1" MaxExecutionTime="[AgentSettings.MaxExecutionTime]" MaxWaitTime="[AgentSettings.MaxWaitTime]" ReservationSpec="[AgentSettings.GetAgentReservationSpec()]" mva:VisualBasic.Settings="Assembly references and imported namespaces serialized as XML namespaces">
       <mtbwa:AgentScope.Variables>
         <Variable x:TypeArguments="x:String" Name="sourcesDir" />
-        <Variable x:TypeArguments="mtbc:IBuildDetail" Name="BuildDetail" />
+        <Variable x:TypeArguments="mtbc:IBuildDetail" Name="buildDetail" />
         <Variable x:TypeArguments="x:String" Name="buildDir" />
       </mtbwa:AgentScope.Variables>
       <mtbac:InitializeEnvironment BinariesFolder="bin" DisplayName="Initialize environment" sap2010:WorkflowViewState.IdRef="InitializeEnvironment_1" SourceFolder="src" TestResultsFolder="tst" />
+      <mtbac:GetEnvironmentVariable x:TypeArguments="mtbc:IBuildDetail" DisplayName="GetBuildDetail" sap2010:WorkflowViewState.IdRef="GetEnvironmentVariable`1_3" Name="[WellKnownEnvironmentVariables.BuildDetail]" Result="[buildDetail]" />
       <mtbac:GetEnvironmentVariable x:TypeArguments="x:String" DisplayName="GetSourcesDir" sap2010:WorkflowViewState.IdRef="GetEnvironmentVariable`1_1" Name="[Microsoft.TeamFoundation.Build.Activities.Extensions.WellKnownEnvironmentVariables.SourcesDirectory]" Result="[sourcesDir]" />
       <mtbac:GetEnvironmentVariable x:TypeArguments="x:String" DisplayName="GetBuildDir" sap2010:WorkflowViewState.IdRef="GetEnvironmentVariable`1_2" Name="[Microsoft.TeamFoundation.Build.Activities.Extensions.WellKnownEnvironmentVariables.BinariesDirectory]" Result="[buildDir]" />
       <mtbag:GitPull CleanRepository="[CleanRepository]" DisplayName="Pull sources from Git repo" Enabled="True" sap2010:WorkflowViewState.IdRef="GitPull_1" />
@@ -163,7 +164,7 @@
         </TryCatch.Finally>
         <TryCatch.Try>
           <Sequence DisplayName="Compile and Test" sap2010:WorkflowViewState.IdRef="Sequence_2">
-            <mtbwa:InvokeProcess Arguments="-File build\modify-versions.ps1 10" DisplayName="Modify Versions" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_2" WorkingDirectory="[sourcesDir]">
+            <mtbwa:InvokeProcess Arguments="[&quot;-File build\modify-versions.ps1 &quot; + buildDetail.BuildNumber]" DisplayName="Modify Versions" FileName="[&quot;powershell&quot;]" sap2010:WorkflowViewState.IdRef="InvokeProcess_2" WorkingDirectory="[sourcesDir]">
               <mtbwa:InvokeProcess.ErrorDataReceived>
                 <ActivityAction x:TypeArguments="x:String">
                   <ActivityAction.Argument>
@@ -190,12 +191,13 @@
         </TryCatch.Try>
       </TryCatch>
     </mtbwa:AgentScope>
-    <sads:DebugSymbol.Symbol>dzZFOlxSZXBvc1ZTT1xBc3BlY3RJbmplY3RvclxidWlsZFxHaXROdWdldFRlbXBsYXRlLnhhbWxHAf0FAYQGAQgBnQYB3QYBBwHFAgHMAgEGAekCAfcEAQUBlgUB3QUBBAFcAcYBAQMB5wEBpgIBAnsDwgEOAgEBgQEFgQGyAQIBWoIBBcABGAIBAoEBRYEBWgIBW4IBsQGCAc4BAgEGggGCAYIBpAECAQWCAd8BggGKAgIBA4gBB4gBxQECAVaJAQeJAZ4CAgFSigEHigGbAgIBTosBB4sBoAECAUqMAQe/ARICAQeIAaUBiAGqAQIBWYgBM4gBOAIBWIgBvQGIAcIBAgFXiQGNAokBmwICAVSJAZ4BiQGFAgIBU4oBjAKKAZgCAgFQigGcAYoBhAICAU+LASaLATkCAUyLAWuLAXECAUulAQu9ARYCARuOAQuiARYCAQimAQ23ASMCAT24AQ24AYkCAgE5uQENuQHHAQIBNLoBDboB5AMCASa7AQ27Ad0BAgEivAENvAHWAQIBHI8BDY8BogECARmQAQ2hASMCAQmmASymAVACAUimAXimAZIBAgFHpgHWAaYB5AECAUW0ARO0Ad4BAgFBrAETrAF2AgE+uAGzAbgBhgICATy4AZMBuAGsAQIBOrkBrQG5AcQBAgE3uQGTAbkBpgECATW6AfMCugGGAwIBMroBsAK6AcQCAgEwugHZA7oB4QMCAS+6AbADugHOAwIBLroBM7oBiQECASy6AaABugG5AQIBKroB1AK6AeICAgEpugHpAboB7wECASi6AZwDugGiAwIBJ7sBswG7AdoBAgEluwGfAbsBrAECASO8AcYBvAHTAQIBILwBfrwBhAECAR+8ATu8AVQCAR2PAWiPAW4CARqQASyQAZsBAgEUkAHLAZAB5QECAROQAakCkAG3AgIBEZ4BE54B3gECAQ2WAROWAXYCAQq0AWq0AXcCAUOsAWasAXMCAT+eAWqeAXcCAQ+WAWaWAXMCAQs=</sads:DebugSymbol.Symbol>
+    <sads:DebugSymbol.Symbol>dzZFOlxSZXBvc1ZTT1xBc3BlY3RJbmplY3RvclxidWlsZFxHaXROdWdldFRlbXBsYXRlLnhhbWxKAf0FAYQGAQgBnQYB3QYBBwHFAgHMAgEGAekCAfcEAQUBlgUB3QUBBAFcAcYBAQMB5wEBpgIBAnsDwwEOAgEBgQEFgQGyAQIBXoIBBcEBGAIBAoEBRYEBWgIBX4IBsQGCAc4BAgEGggGCAYIBpAECAQWCAd8BggGKAgIBA4gBB4gBxQECAVqJAQeJAe8BAgFWigEHigGeAgIBUosBB4sBmwICAU6MAQeMAaABAgFKjQEHwAESAgEHiAGlAYgBqgECAV2IATOIATgCAVyIAb0BiAHCAQIBW4kB3QGJAewBAgFYiQGoAYkB1QECAVeKAY0CigGbAgIBVIoBngGKAYUCAgFTiwGMAosBmAICAVCLAZwBiwGEAgIBT4wBJowBOQIBTIwBa4wBcQIBS6YBC74BFgIBG48BC6MBFgIBCKcBDbgBIwIBPbkBDbkBiQICATm6AQ26AccBAgE0uwENuwHkAwIBJrwBDbwB3QECASK9AQ29AdYBAgEckAENkAGiAQIBGZEBDaIBIwIBCacBLKcBdgIBSKcBngGnAbgBAgFHpwH8AacBigICAUW1ARO1Ad4BAgFBrQETrQF2AgE+uQGzAbkBhgICATy5AZMBuQGsAQIBOroBrQG6AcQBAgE3ugGTAboBpgECATW7AfMCuwGGAwIBMrsBsAK7AcQCAgEwuwHZA7sB4QMCAS+7AbADuwHOAwIBLrsBM7sBiQECASy7AaABuwG5AQIBKrsB1AK7AeICAgEpuwHpAbsB7wECASi7AZwDuwGiAwIBJ7wBswG8AdoBAgElvAGfAbwBrAECASO9AcYBvQHTAQIBIL0Bfr0BhAECAR+9ATu9AVQCAR2QAWiQAW4CARqRASyRAZsBAgEUkQHLAZEB5QECARORAakCkQG3AgIBEZ8BE58B3gECAQ2XAROXAXYCAQq1AWq1AXcCAUOtAWatAXMCAT+fAWqfAXcCAQ+XAWaXAXMCAQs=</sads:DebugSymbol.Symbol>
   </Sequence>
   <sap2010:WorkflowViewState.ViewStateManager>
     <sap2010:ViewStateManager>
       <sap2010:ViewStateData Id="SetBuildNumber_1" sap:VirtualizedContainerService.HintSize="440,22" />
       <sap2010:ViewStateData Id="InitializeEnvironment_1" sap:VirtualizedContainerService.HintSize="418,22" />
+      <sap2010:ViewStateData Id="GetEnvironmentVariable`1_3" sap:VirtualizedContainerService.HintSize="418,22" />
       <sap2010:ViewStateData Id="GetEnvironmentVariable`1_1" sap:VirtualizedContainerService.HintSize="418,22" />
       <sap2010:ViewStateData Id="GetEnvironmentVariable`1_2" sap:VirtualizedContainerService.HintSize="418,22" />
       <sap2010:ViewStateData Id="GitPull_1" sap:VirtualizedContainerService.HintSize="418,22" />
@@ -226,8 +228,8 @@
         </sap:WorkflowViewStateService.ViewState>
       </sap2010:ViewStateData>
       <sap2010:ViewStateData Id="TryCatch_1" sap:VirtualizedContainerService.HintSize="418,1425" />
-      <sap2010:ViewStateData Id="AgentScope_1" sap:VirtualizedContainerService.HintSize="440,1797" />
-      <sap2010:ViewStateData Id="Sequence_3" sap:VirtualizedContainerService.HintSize="462,1983">
+      <sap2010:ViewStateData Id="AgentScope_1" sap:VirtualizedContainerService.HintSize="440,1859" />
+      <sap2010:ViewStateData Id="Sequence_3" sap:VirtualizedContainerService.HintSize="462,2045">
         <sap:WorkflowViewStateService.ViewState>
           <scg:Dictionary x:TypeArguments="x:String, x:Object">
             <x:Boolean x:Key="IsExpanded">True</x:Boolean>
