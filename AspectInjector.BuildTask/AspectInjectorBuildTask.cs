@@ -12,15 +12,12 @@ namespace AspectInjector.BuildTask
         public string Assembly { get; set; }
 
         [Required]
-        public string[] References { get; set; }
-
-        [Required]
         public string OutputPath { get; set; }
+        [Required]
+        public string[] References { get; set; }
 
         public override bool Execute()
         {
-            System.Diagnostics.Debugger.Launch();
-
             try
             {
                 Console.WriteLine("Aspect Injector has started for {0}", Assembly);
