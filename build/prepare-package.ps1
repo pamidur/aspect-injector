@@ -3,7 +3,7 @@ Param (
   [String]$binDir = "AspectInjector.BuildTask\bin\Release"
 )
 
-$binDir
+ls $binDir
 
 
 if(Test-Path $packageBuildPlace ){
