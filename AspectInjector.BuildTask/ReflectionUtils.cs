@@ -89,7 +89,7 @@ namespace AspectInjector.BuildTask
 
         public static MethodReference ImportConstructor(this ModuleDefinition module, TypeDefinition type)
         {
-            return module.Import(type.Methods.First(c => c.Name == ".ctor"));
+            return module.Import(type.Methods.First(c => c.IsConstructor));
         }
 
         public static MethodReference ImportMethod<T>(this ModuleDefinition module, TypeDefinition type, Expression<Action<T>> methodExpression)

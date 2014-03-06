@@ -13,6 +13,7 @@ namespace AspectInjector.BuildTask
 
         [Required]
         public string OutputPath { get; set; }
+
         [Required]
         public string[] References { get; set; }
 
@@ -20,6 +21,10 @@ namespace AspectInjector.BuildTask
         {
             try
             {
+#if DEBUG
+                System.Diagnostics.Debugger.Launch();
+#endif
+
                 Console.WriteLine("Aspect Injector has started for {0}", Assembly);
 
                 var assemblyResolver = new StrictAssemblyResolver();
