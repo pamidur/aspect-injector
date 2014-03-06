@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-
-namespace AspectInjector.Test
+﻿namespace AspectInjector.Test
 {
     internal class Program
     {

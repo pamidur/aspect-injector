@@ -51,7 +51,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Aspects\TestMethodAspect.cs" />
-    <Compile Include="ITestInterface.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestInterfaceProxy.cs" />
