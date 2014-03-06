@@ -65,14 +65,20 @@ namespace AspectInjector.BuildTask
             var ifaces = interfaceDefinition.GetInterfacesTree();
 
             foreach (var iface in ifaces)
-                classDefinition.Interfaces.Add(iface);
+                classDefinition.Interfaces.Add(classDefinition.Module.Import(iface));
 
-            var methods = interfaceDefinition.GetInterfaceTreeMemebers(td => td.Methods);
+            var methods = interfaceDefinition.GetInterfaceTreeMemebers(td => td.Methods).Where(m => !m.IsAddOn && !m.IsRemoveOn && !m.IsSetter && !m.IsGetter);
             var properties = interfaceDefinition.GetInterfaceTreeMemebers(td => td.Properties);
             var events = interfaceDefinition.GetInterfaceTreeMemebers(td => td.Events);
 
             foreach (var method in methods)
                 GetOrCreateMethodProxy(classDefinition, aspectDefinition, method);
+
+            foreach (var @event in events)
+                GetOrCreateEventProxy(classDefinition, aspectDefinition, @event);
+
+            foreach (var property in properties)
+                GetOrCreatePropertyProxy(classDefinition, aspectDefinition, property);
         }
     }
 }

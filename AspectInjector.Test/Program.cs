@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace AspectInjector.Test
 {
@@ -6,12 +7,20 @@ namespace AspectInjector.Test
     {
         private static void Main(string[] args)
         {
-            var test = new TestClass();
-            test.Print();
+            TestInterfaceInjection();
+        }
 
-            test.Value = "New property value";
-            test.Count = 10;
-            test.Date = DateTime.Now;
+        private static void TestInterfaceInjection()
+        {
+            var testInterface = (ITestInterface)new TestInterfaceProxyClass();
+
+            testInterface.TestEvent += (s, e) => { };
+            testInterface.TestEvent -= (s, e) => { };
+            testInterface.TestMethod("");
+            testInterface.TestProperty = 0;
+            var a = testInterface.TestProperty;
+            testInterface[0] = "";
+            var b = testInterface[0];
         }
     }
 }
