@@ -116,9 +116,13 @@ namespace AspectInjector.BuildTask
 
             if (!interfaceMethodRef.ReturnType.IsType(typeof(void)))
             {
-                md.Body.Variables.Add(new VariableDefinition(targetType.Module.Import(typeof(object))));
+                md.Body.InitLocals = true;
+                md.Body.Variables.Add(new VariableDefinition(targetType.Module.Import(interfaceMethodRef.ReturnType)));
+
                 processor.Append(processor.Create(OpCodes.Stloc_0));
-                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                var loadresultIstruction = processor.Create(OpCodes.Ldloc_0);
+                processor.Append(loadresultIstruction);
+                processor.InsertBefore(loadresultIstruction, processor.Create(OpCodes.Br_S, loadresultIstruction));
             }
 
             processor.Append(processor.Create(OpCodes.Ret));
