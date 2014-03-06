@@ -8,6 +8,8 @@ namespace AspectInjector.Broker
         Constructor = 1,
         Method = 2,
         Getter = 4,
-        Setter = 8
+        Setter = 8,
+        EventAdd = 16,
+        EventRemove = 32
     }
 }

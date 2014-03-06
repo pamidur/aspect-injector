@@ -11,11 +11,11 @@ namespace AspectInjector.BuildTask
     {
         public virtual void ProcessModule(ModuleDefinition module)
         {
-            foreach(var @class in module.Types.Where(t => t.IsClass))
+            foreach (var @class in module.Types.Where(t => t.IsClass))
             {
                 var classAspectAttributes = @class.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
 
-                foreach(var method in @class.Methods.Where(m => !m.IsSetter && !m.IsGetter))
+                foreach (var method in @class.Methods.Where(m => !m.IsSetter && !m.IsGetter))
                 {
                     var methodAspectAttributes = method.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
                     ProcessMethod(method, method.Name, classAspectAttributes.Union(methodAspectAttributes));
@@ -43,7 +43,7 @@ namespace AspectInjector.BuildTask
             }
         }
 
-        private void ProcessMethod(MethodDefinition targetMethod, 
+        private void ProcessMethod(MethodDefinition targetMethod,
             string targetName,
             IEnumerable<CustomAttribute> aspectAttributes)
         {
@@ -59,8 +59,8 @@ namespace AspectInjector.BuildTask
             }
         }
 
-        private void ProcessAdvice(MethodDefinition adviceMethod, 
-            FieldReference aspectInstanceField, 
+        private void ProcessAdvice(MethodDefinition adviceMethod,
+            FieldReference aspectInstanceField,
             MethodDefinition targetMethod,
             string targetName)
         {
@@ -73,11 +73,11 @@ namespace AspectInjector.BuildTask
             var pointsObject = adviceAttribute.Properties.Where(p => p.Name == "Points").Select(p => p.Argument.Value).FirstOrDefault();
             var points = (InjectionPoint)(pointsObject ?? InjectionPoint.After | InjectionPoint.Before);
 
-            if(CheckTargetMethod(targetMethod, targets))
+            if (CheckTargetMethod(targetMethod, targets))
             {
                 if ((points & InjectionPoint.Before) != 0)
                 {
-                    InjectAdvice(aspectInstanceField, 
+                    InjectAdvice(aspectInstanceField,
                         adviceMethod,
                         targetMethod,
                         targetName,
@@ -85,7 +85,7 @@ namespace AspectInjector.BuildTask
                 }
                 if ((points & InjectionPoint.After) != 0)
                 {
-                    InjectAdvice(aspectInstanceField, 
+                    InjectAdvice(aspectInstanceField,
                         adviceMethod,
                         targetMethod,
                         targetName,
@@ -94,8 +94,8 @@ namespace AspectInjector.BuildTask
             }
         }
 
-        private void InjectAdvice(FieldReference aspectInstanceField, 
-            MethodDefinition adviceMethod, 
+        private void InjectAdvice(FieldReference aspectInstanceField,
+            MethodDefinition adviceMethod,
             MethodDefinition targetMethod,
             string targetName,
             Instruction lastInstruction)
@@ -105,7 +105,7 @@ namespace AspectInjector.BuildTask
             processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Ldarg_0));
             processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Ldfld, aspectInstanceField));
 
-            foreach(var argument in adviceMethod.Parameters)
+            foreach (var argument in adviceMethod.Parameters)
             {
                 var argumentAttribute = argument.CustomAttributes.GetAttributeOfType<AdviceArgumentAttribute>();
                 if (argumentAttribute == null)
@@ -165,6 +165,16 @@ namespace AspectInjector.BuildTask
             if (targetMethod.IsSetter)
             {
                 return (targets & InjectionTarget.Setter) != 0;
+            }
+
+            if (targetMethod.IsAddOn)
+            {
+                return (targets & InjectionTarget.EventAdd) != 0;
+            }
+
+            if (targetMethod.IsRemoveOn)
+            {
+                return (targets & InjectionTarget.EventRemove) != 0;
             }
 
             return (targets & InjectionTarget.Method) != 0;

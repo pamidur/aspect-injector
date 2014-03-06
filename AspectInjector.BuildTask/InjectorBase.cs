@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.BuildTask.Extensions;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Linq;
@@ -66,7 +67,13 @@ namespace AspectInjector.BuildTask
 
         protected MethodDefinition GetOrCreateMethodProxy(TypeDefinition targetType, TypeDefinition sourceType, MethodDefinition interfaceMethodDefinition)
         {
-            var md = new MethodDefinition(interfaceMethodDefinition.DeclaringType.FullName + "." + interfaceMethodDefinition.Name
+            var methodName = interfaceMethodDefinition.DeclaringType.FullName + "." + interfaceMethodDefinition.Name;
+
+            var existedMethod = targetType.Methods.FirstOrDefault(m => m.Name == methodName && m.SignatureMatches(interfaceMethodDefinition));
+            if (existedMethod != null)
+                return existedMethod;
+
+            var md = new MethodDefinition(methodName
                 , MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
                 , targetType.Module.Import(interfaceMethodDefinition.ReturnType));
 

@@ -1,14 +1,22 @@
-﻿namespace AspectInjector.Test
+﻿using System;
+
+namespace AspectInjector.Test
 {
     internal class Program
     {
         private static void Main(string[] args)
         {
             TestInterfaceInjection();
+            TestMethodInjection();
         }
 
         private static void TestInterfaceInjection()
         {
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("TestInterfaceInjection");
+            Console.WriteLine();
+
             var testInterface = (ITestInterface)new TestInterfaceProxyClass();
 
             testInterface.TestEvent += (s, e) => { };
@@ -16,8 +24,22 @@
             testInterface.TestMethod("");
             testInterface.TestProperty = 0;
             var a = testInterface.TestProperty;
-            testInterface[0] = "";
-            var b = testInterface[0];
+        }
+
+        private static void TestMethodInjection()
+        {
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("TestMethodInjection");
+            Console.WriteLine();
+
+            var testMethod = new TestMethodClass();
+
+            testMethod.TestEvent += (s, e) => { };
+            testMethod.TestEvent -= (s, e) => { };
+            testMethod.TestMethod("");
+            testMethod.TestProperty = 0;
+            var a = testMethod.TestProperty;
         }
     }
 }
