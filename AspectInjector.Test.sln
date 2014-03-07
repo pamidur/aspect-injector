@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Test", "Aspe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Broker", "AspectInjector.Broker\AspectInjector.Broker.csproj", "{0926FE28-73BA-4F73-9188-B196FBBC9410}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Tests", "AspectInjector.Tests\AspectInjector.Tests.csproj", "{EE475524-F971-49F1-B794-6B37B770AA23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE475524-F971-49F1-B794-6B37B770AA23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE475524-F971-49F1-B794-6B37B770AA23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE475524-F971-49F1-B794-6B37B770AA23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE475524-F971-49F1-B794-6B37B770AA23}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
