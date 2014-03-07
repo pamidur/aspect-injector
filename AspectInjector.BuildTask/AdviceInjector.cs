@@ -19,7 +19,6 @@ namespace AspectInjector.BuildTask
                 {
                     var methodAspectAttributes = method.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
                     ProcessMethod(method, method.Name, classAspectAttributes.Union(methodAspectAttributes));
-                    methodAspectAttributes.ForEach(a => method.CustomAttributes.Remove(a));
                 }
 
                 foreach (var property in @class.Properties)
@@ -35,11 +34,7 @@ namespace AspectInjector.BuildTask
                     {
                         ProcessMethod(property.SetMethod, property.Name, allAspectAttributes);
                     }
-
-                    propertyAspectAttributes.ForEach(a => property.CustomAttributes.Remove(a));
                 }
-
-                classAspectAttributes.ForEach(a => @class.CustomAttributes.Remove(a));
             }
         }
 
