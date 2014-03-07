@@ -42,7 +42,7 @@ function Update-Nuspec ( $nuspec, $version )
 
 
 
-$version = Get-Content "build\Version.txt"
+$version = Get-Content "packagecontent\Version.txt"
 
 # replace shortcuts
 $version = $version -replace '{BuildNumber}', $buildNumber
@@ -50,6 +50,6 @@ $version = $version -replace '{BuildNumber}', $buildNumber
 "Setting version to $version"
 
 Update-AllAssemblyInfoFiles $version
-Update-Nuspec (get-item "build\AspectInjector.nuspec") $version
+Update-Nuspec (get-item "packagecontent\AspectInjector.nuspec") $version
 
 

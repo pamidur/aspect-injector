@@ -2,7 +2,7 @@
 
 namespace AspectInjector.BuildTask
 {
-    internal interface IAspectInjector
+    internal interface IModuleProcessor
     {
         void ProcessModule(ModuleDefinition module);
     }

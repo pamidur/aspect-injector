@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace AspectInjector.BuildTask
 {
-    internal class AdviceInterfaceProxyInjector : InjectorBase, IAspectInjector
+    internal class AdviceInterfaceProxyInjector : InjectorBase, IModuleProcessor
     {
         public void ProcessModule(ModuleDefinition module)
         {

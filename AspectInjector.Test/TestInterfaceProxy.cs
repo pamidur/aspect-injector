@@ -15,8 +15,6 @@ namespace AspectInjector.Test
         event EventHandler<EventArgs> TestEvent;
 
         int TestProperty { get; set; }
-
-        string this[int index] { get; set; }
     }
 
     [AdviceInterfaceProxy(typeof(ITestInterface))]
@@ -37,12 +35,6 @@ namespace AspectInjector.Test
         {
             get { Console.WriteLine("TestProperty_get"); return 0; }
             set { Console.WriteLine("TestProperty_set"); }
-        }
-
-        public string this[int index]
-        {
-            get { Console.WriteLine("Indexer_get"); return ""; }
-            set { Console.WriteLine("Indexer_set"); }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.BuildTask.Extensions;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Linq;
@@ -21,15 +22,19 @@ namespace AspectInjector.BuildTask
 
             var fd = new FieldDefinition(aspectPropertyName, FieldAttributes.Private | FieldAttributes.InitOnly, targetType.Module.Import(aspectType));
 
-            var constructor = targetType.Methods.First(m => m.IsConstructor && !m.Parameters.Any());
-            var aspectConstructor = targetType.Module.ImportConstructor(aspectType);
+            var constructors = targetType.Methods.Where(m => m.IsConstructor);
 
-            ILProcessor processor = constructor.Body.GetILProcessor();
-            Instruction firstInstruction = constructor.Body.Instructions.First();
+            foreach (var constructor in constructors)
+            {
+                var aspectConstructor = targetType.Module.ImportConstructor(aspectType);
 
-            processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldarg_0));
-            processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Newobj, aspectConstructor));
-            processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Stfld, fd));
+                ILProcessor processor = constructor.Body.GetILProcessor();
+                Instruction firstInstruction = constructor.Body.Instructions.First();
+
+                processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldarg_0));
+                processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Newobj, aspectConstructor));
+                processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Stfld, fd));
+            }
 
             targetType.Fields.Add(fd);
 
@@ -66,7 +71,13 @@ namespace AspectInjector.BuildTask
 
         protected MethodDefinition GetOrCreateMethodProxy(TypeDefinition targetType, TypeDefinition sourceType, MethodDefinition interfaceMethodDefinition)
         {
-            var md = new MethodDefinition(interfaceMethodDefinition.DeclaringType.FullName + "." + interfaceMethodDefinition.Name
+            var methodName = interfaceMethodDefinition.DeclaringType.FullName + "." + interfaceMethodDefinition.Name;
+
+            var existedMethod = targetType.Methods.FirstOrDefault(m => m.Name == methodName && m.SignatureMatches(interfaceMethodDefinition));
+            if (existedMethod != null)
+                return existedMethod;
+
+            var md = new MethodDefinition(methodName
                 , MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
                 , targetType.Module.Import(interfaceMethodDefinition.ReturnType));
 
@@ -109,9 +120,13 @@ namespace AspectInjector.BuildTask
 
             if (!interfaceMethodRef.ReturnType.IsType(typeof(void)))
             {
-                md.Body.Variables.Add(new VariableDefinition(targetType.Module.Import(typeof(object))));
+                md.Body.InitLocals = true;
+                md.Body.Variables.Add(new VariableDefinition(targetType.Module.Import(interfaceMethodRef.ReturnType)));
+
                 processor.Append(processor.Create(OpCodes.Stloc_0));
-                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                var loadresultIstruction = processor.Create(OpCodes.Ldloc_0);
+                processor.Append(loadresultIstruction);
+                processor.InsertBefore(loadresultIstruction, processor.Create(OpCodes.Br_S, loadresultIstruction));
             }
 
             processor.Append(processor.Create(OpCodes.Ret));
