@@ -14,6 +14,10 @@ namespace AspectInjector.BuildTask
         [Required]
         public string OutputPath { get; set; }
 
+        //public string StrongKeyPath { get; set; }
+        //public bool Sing { get; set; }
+        //public bool DelaySing { get; set; }
+
         [Required]
         public string[] References { get; set; }
 
@@ -52,7 +56,8 @@ namespace AspectInjector.BuildTask
 
                 assembly.Write(assemblyFile, new WriterParameters()
                 {
-                    WriteSymbols = true
+                    WriteSymbols = true,
+                    //StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
                 });
 
                 Console.WriteLine("Assembly has been written");

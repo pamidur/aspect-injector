@@ -33,7 +33,7 @@ namespace AspectInjector.Test
             Console.WriteLine("TestMethodInjection");
             Console.WriteLine();
 
-            var testMethod = new TestMethodClass();
+            var testMethod = new TestMethodClass("");
 
             testMethod.TestEvent += (s, e) => { };
             testMethod.TestEvent -= (s, e) => { };

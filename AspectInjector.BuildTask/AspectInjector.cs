@@ -5,24 +5,21 @@ namespace AspectInjector.BuildTask
 {
     internal class AspectInjector
     {
-        private List<IAspectInjector> injectors = new List<IAspectInjector>();
+        private List<IModuleProcessor> processors = new List<IModuleProcessor>();
 
         public AspectInjector()
         {
-            injectors.Add(new AdviceInterfaceProxyInjector());
-            injectors.Add(new AdviceInjector());
+            processors.Add(new AdviceInterfaceProxyInjector());
+            processors.Add(new AdviceInjector());
+            processors.Add(new Janitor());
         }
 
         public void Process(AssemblyDefinition assembly)
         {
-            foreach (var injector in injectors)
+            foreach (var processor in processors)
             {
-                injector.ProcessModule(assembly.MainModule);
+                processor.ProcessModule(assembly.MainModule);
             }
-
-            //var reference = assembly.MainModule.AssemblyReferences.FirstOrDefault(ar => ar.Name == "AspectInjector");
-            //if (reference != null)
-            //    assembly.MainModule.AssemblyReferences.Remove(reference);
         }
     }
 }

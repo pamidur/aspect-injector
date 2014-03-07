@@ -101,5 +101,10 @@ namespace AspectInjector.BuildTask.Extensions
                 self = @base;
             }
         }
+
+        public static bool BelongsToAssembly(this TypeReference tr, string publicKey)
+        {
+            return BitConverter.ToString(tr.Resolve().Module.Assembly.Name.PublicKeyToken).Replace("-", "").ToLowerInvariant() == publicKey.ToLowerInvariant();
+        }
     }
 }

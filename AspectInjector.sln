@@ -5,18 +5,24 @@ VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.BuildTask", "AspectInjector.BuildTask\AspectInjector.BuildTask.csproj", "{B711C00C-9E4D-4005-A82F-A78B1F444205}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B1F4DD41-A903-4153-8F57-AB7EC799FDB7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Broker", "AspectInjector.Broker\AspectInjector.Broker.csproj", "{0926FE28-73BA-4F73-9188-B196FBBC9410}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buildtools", "buildtools", "{C6F13967-CDA3-4CD0-BB8D-CE14DBBA0382}"
 	ProjectSection(SolutionItems) = preProject
-		build\AspectInjector.nuspec = build\AspectInjector.nuspec
-		build\AspectInjector.props = build\AspectInjector.props
-		build\AspectInjector.targets = build\AspectInjector.targets
 		build\GitNugetTemplate.xaml = build\GitNugetTemplate.xaml
 		build\modify-versions.ps1 = build\modify-versions.ps1
+		build\nuget.exe = build\nuget.exe
 		build\prepare-package.ps1 = build\prepare-package.ps1
-		build\Version.txt = build\Version.txt
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Broker", "AspectInjector.Broker\AspectInjector.Broker.csproj", "{0926FE28-73BA-4F73-9188-B196FBBC9410}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{90FC62D4-109D-4FDD-A119-1CAD4717AB7F}"
+	ProjectSection(SolutionItems) = preProject
+		packagecontent\AspectInjector.nuspec = packagecontent\AspectInjector.nuspec
+		packagecontent\AspectInjector.props = packagecontent\AspectInjector.props
+		packagecontent\AspectInjector.targets = packagecontent\AspectInjector.targets
+		packagecontent\install.ps1 = packagecontent\install.ps1
+		packagecontent\Version.txt = packagecontent\Version.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

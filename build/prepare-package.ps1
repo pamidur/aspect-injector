@@ -12,16 +12,19 @@ if(Test-Path $packageBuildPlace ){
 
 $targetsDir = Join-Path $packageBuildPlace "build"
 $libDir = Join-Path $packageBuildPlace "lib"
+$toolsDir = Join-Path $packageBuildPlace "tools"
 
 New-Item $packageBuildPlace -ItemType Directory | Out-Null 
 New-Item $targetsDir -ItemType Directory | Out-Null 
 New-Item $libDir -ItemType Directory | Out-Null 
+New-Item $toolsDir -ItemType Directory | Out-Null 
 
 "Copying items."
 
-Copy-Item "build\AspectInjector.nuspec" $packageBuildPlace
-Copy-Item "build\AspectInjector.targets" $targetsDir
-Copy-Item "build\AspectInjector.props" $targetsDir
+Copy-Item "packagecontent\AspectInjector.nuspec" $packageBuildPlace
+Copy-Item "packagecontent\AspectInjector.targets" $targetsDir
+Copy-Item "packagecontent\AspectInjector.props" $targetsDir
+Copy-Item "packagecontent\install.ps1" $toolsDir
 Get-ChildItem $binDir -Filter "*.dll" -Recurse | %{ Copy-Item $_.Fullname $targetsDir }
 Copy-Item (Join-Path $binDir "AspectInjector.Broker.dll") $libDir
 

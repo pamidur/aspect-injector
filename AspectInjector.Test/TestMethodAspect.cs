@@ -1,11 +1,22 @@
 ﻿using AspectInjector.Broker;
 using System;
+using System.Text;
 
 namespace AspectInjector.Test
 {
     [Aspect(typeof(TestMethodAspect))]
     internal class TestMethodClass
     {
+        private readonly StringBuilder b = new StringBuilder();
+
+        public TestMethodClass(string a)
+        {
+        }
+
+        public TestMethodClass(int b)
+        {
+        }
+
         public void TestMethod(string data)
         {
         }

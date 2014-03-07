@@ -37,6 +37,9 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>ololo.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -67,5 +70,5 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask TaskName="AspectInjector.BuildTask.AspectInjectorBuildTask" AssemblyFile="..\AspectInjector.BuildTask\bin\Debug\AspectInjector.BuildTask.dll" />
-  <Import Project="..\build\AspectInjector.targets" />
+  <Import Project="..\packagecontent\AspectInjector.targets" />
 </Project>

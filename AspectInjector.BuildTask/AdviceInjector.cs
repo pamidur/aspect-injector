@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace AspectInjector.BuildTask
 {
-    public class AdviceInjector : InjectorBase, IAspectInjector
+    public class AdviceInjector : InjectorBase, IModuleProcessor
     {
         public virtual void ProcessModule(ModuleDefinition module)
         {
