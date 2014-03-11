@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Broker;
+using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using System;
 using System.Linq;

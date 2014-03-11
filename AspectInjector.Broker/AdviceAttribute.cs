@@ -5,7 +5,7 @@ namespace AspectInjector.Broker
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
     public class AdviceAttribute : Attribute
     {
-        public InjectionTarget Targets { get; set; }
-        public InjectionPoint Points { get; set; }
+        public InjectionTargets Targets { get; set; }
+        public InjectionPoints Points { get; set; }
     }
 }

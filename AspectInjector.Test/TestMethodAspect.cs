@@ -5,6 +5,7 @@ using System.Text;
 namespace AspectInjector.Test
 {
     [Aspect(typeof(TestMethodAspect))]
+    [Aspect(typeof(TestMethodFilteredAspect), NameFilter = "Filtered", AccessModifierFilter = AccessModifiers.Public)]
     internal class TestMethodClass
     {
         private readonly StringBuilder b = new StringBuilder();
@@ -21,6 +22,15 @@ namespace AspectInjector.Test
         {
         }
 
+        private void TestMethodFiltered1()
+        {
+        }
+
+        public void TestMethodFiltered2()
+        {
+            TestMethodFiltered1();
+        }
+
         public event EventHandler<EventArgs> TestEvent = (s, e) => { };
 
         public int TestProperty { get; set; }
@@ -29,79 +39,88 @@ namespace AspectInjector.Test
     internal class TestMethodAspect
     {
         //Property
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.Setter)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Setter)]
         public void BeforeSetter()
         {
             Console.WriteLine("BeforeSetter");
         }
 
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.Setter)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Setter)]
         public void AfterSetter()
         {
             Console.WriteLine("AfterSetter");
         }
 
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.Getter)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Getter)]
         public void BeforeGetter()
         {
             Console.WriteLine("BeforeGetter");
         }
 
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.Getter)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Getter)]
         public void AfterGetter()
         {
             Console.WriteLine("AfterGetter");
         }
 
         //Event
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.EventAdd)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.EventAdd)]
         public void BeforeEventAdd()
         {
             Console.WriteLine("BeforeEventAdd");
         }
 
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.EventAdd)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.EventAdd)]
         public void AfterEventAdd()
         {
             Console.WriteLine("AfterEventAdd");
         }
 
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.EventRemove)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.EventRemove)]
         public void BeforeEventRemove()
         {
             Console.WriteLine("BeforeEventRemove");
         }
 
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.EventRemove)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.EventRemove)]
         public void AfterEventRemove()
         {
             Console.WriteLine("AfterEventRemove");
         }
 
         //Method
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.Method)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Method)]
         public void BeforeMethod()
         {
             Console.WriteLine("BeforeMethod");
         }
 
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.Method)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Method)]
         public void AfterMethod()
         {
             Console.WriteLine("AfterMethod");
         }
 
         //Constructor
-        //[Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.Constructor)]   <--there is a bug
+        //[Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Constructor)]   <--there is a bug
         public void BeforeConstructor()
         {
             Console.WriteLine("BeforeConstructor");
         }
 
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.Constructor)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Constructor)]
         public void AfterConstructor()
         {
             Console.WriteLine("AfterConstructor");
+        }
+    }
+
+    internal class TestMethodFilteredAspect
+    {
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Method)]
+        public void BeforeMethod([AdviceArgument(Source = AdviceArgumentSource.TargetName)] string methodName)
+        {
+            Console.WriteLine("BeforeMethod({0}) filtered", methodName);
         }
     }
 }

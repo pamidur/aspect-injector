@@ -145,54 +145,54 @@ namespace AspectInjector.Tests
     internal class TestAfterMethodAspect
     {
         //Property
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.Setter)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Setter)]
         public void AfterSetter() { Assert.IsTrue(true); }
 
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.Getter)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Getter)]
         public void AfterGetter() { Assert.IsTrue(true); }
 
         //Event
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.EventAdd)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.EventAdd)]
         public void AfterEventAdd() { Assert.IsTrue(true); }
 
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.EventRemove)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.EventRemove)]
         public void AfterEventRemove() { Assert.IsTrue(true); }
 
         //Method
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.Method)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Method)]
         public void AfterMethod() { Assert.IsTrue(true); }
     }
 
     internal class TestBeforeMethodAspect
     {
         //Property
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.Setter)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Setter)]
         public void BeforeSetter() { Assert.IsTrue(true); }
 
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.Getter)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Getter)]
         public void BeforeGetter() { Assert.IsTrue(true); }
 
         //Event
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.EventAdd)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.EventAdd)]
         public void BeforeEventAdd() { Assert.IsTrue(true); }
 
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.EventRemove)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.EventRemove)]
         public void BeforeEventRemove() { Assert.IsTrue(true); }
 
         //Method
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.Method)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Method)]
         public void BeforeMethod() { Assert.IsTrue(true); }
     }
 
     internal class TestBeforeConstructorAspect
     {
-        [Advice(Points = InjectionPoint.Before, Targets = InjectionTarget.Constructor)]
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Constructor)]
         public void BeforeConstructor() { Assert.IsTrue(true); }
     }
 
     internal class TestAfterConstructorAspect
     {
-        [Advice(Points = InjectionPoint.After, Targets = InjectionTarget.Constructor)]
+        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Constructor)]
         public void AfterConstructor() { Assert.IsTrue(true); }
     }
 }

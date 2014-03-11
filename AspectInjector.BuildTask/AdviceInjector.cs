@@ -1,9 +1,11 @@
 ﻿using AspectInjector.Broker;
+using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace AspectInjector.BuildTask
 {
@@ -42,7 +44,7 @@ namespace AspectInjector.BuildTask
             string targetName,
             IEnumerable<CustomAttribute> aspectAttributes)
         {
-            foreach (var aspectAttribute in aspectAttributes)
+            foreach (var aspectAttribute in aspectAttributes.Where(a => CheckFilter(targetMethod, targetName, a)))
             {
                 var aspectType = (TypeDefinition)aspectAttribute.ConstructorArguments.First().Value;
                 var aspectInstanceField = GetOrCreateAspectReference(targetMethod.DeclaringType, aspectType);
@@ -62,15 +64,15 @@ namespace AspectInjector.BuildTask
             var adviceAttribute = adviceMethod.CustomAttributes.GetAttributeOfType<AdviceAttribute>();
 
             //todo:: rethink getting attribute parameters
-            var targetsObject = adviceAttribute.Properties.Where(p => p.Name == "Targets").Select(p => p.Argument.Value).FirstOrDefault();
-            var targets = (InjectionTarget)(targetsObject ?? InjectionTarget.Constructor | InjectionTarget.Getter | InjectionTarget.Method | InjectionTarget.Setter);
+            var targetsObject = adviceAttribute.GetPropertyValue("Targets");
+            var targets = (InjectionTargets)(targetsObject ?? InjectionTargets.Constructor | InjectionTargets.Getter | InjectionTargets.Method | InjectionTargets.Setter);
 
-            var pointsObject = adviceAttribute.Properties.Where(p => p.Name == "Points").Select(p => p.Argument.Value).FirstOrDefault();
-            var points = (InjectionPoint)(pointsObject ?? InjectionPoint.After | InjectionPoint.Before);
+            var pointsObject = adviceAttribute.GetPropertyValue("Points");
+            var points = (InjectionPoints)(pointsObject ?? InjectionPoints.After | InjectionPoints.Before);
 
-            if (CheckTargetMethod(targetMethod, targets))
+            if (CheckTarget(targetMethod, targets))
             {
-                if ((points & InjectionPoint.Before) != 0)
+                if ((points & InjectionPoints.Before) != 0)
                 {
                     InjectAdvice(aspectInstanceField,
                         adviceMethod,
@@ -78,7 +80,7 @@ namespace AspectInjector.BuildTask
                         targetName,
                         targetMethod.Body.Instructions.First());
                 }
-                if ((points & InjectionPoint.After) != 0)
+                if ((points & InjectionPoints.After) != 0)
                 {
                     InjectAdvice(aspectInstanceField,
                         adviceMethod,
@@ -108,7 +110,7 @@ namespace AspectInjector.BuildTask
                     throw new NotSupportedException("Unbound advice arguments are not supported");
                 }
 
-                var source = (AdviceArgumentSource)argumentAttribute.Properties.Where(p => p.Name == "Source").Select(p => p.Argument.Value).First();
+                var source = (AdviceArgumentSource)argumentAttribute.GetPropertyValue("Source");
                 switch (source)
                 {
                     case AdviceArgumentSource.Instance:
@@ -140,7 +142,7 @@ namespace AspectInjector.BuildTask
             return aspectType.Methods.Where(m => m.CustomAttributes.HasAttributeOfType<AdviceAttribute>());
         }
 
-        private bool CheckTargetMethod(MethodDefinition targetMethod, InjectionTarget targets)
+        private bool CheckTarget(MethodDefinition targetMethod, InjectionTargets targets)
         {
             if (targetMethod.IsAbstract || targetMethod.IsStatic)
             {
@@ -149,30 +151,70 @@ namespace AspectInjector.BuildTask
 
             if (targetMethod.IsConstructor)
             {
-                return (targets & InjectionTarget.Constructor) != 0;
+                return (targets & InjectionTargets.Constructor) != 0;
             }
 
             if (targetMethod.IsGetter)
             {
-                return (targets & InjectionTarget.Getter) != 0;
+                return (targets & InjectionTargets.Getter) != 0;
             }
 
             if (targetMethod.IsSetter)
             {
-                return (targets & InjectionTarget.Setter) != 0;
+                return (targets & InjectionTargets.Setter) != 0;
             }
 
             if (targetMethod.IsAddOn)
             {
-                return (targets & InjectionTarget.EventAdd) != 0;
+                return (targets & InjectionTargets.EventAdd) != 0;
             }
 
             if (targetMethod.IsRemoveOn)
             {
-                return (targets & InjectionTarget.EventRemove) != 0;
+                return (targets & InjectionTargets.EventRemove) != 0;
             }
 
-            return (targets & InjectionTarget.Method) != 0;
+            return (targets & InjectionTargets.Method) != 0;
+        }
+
+        private bool CheckFilter(MethodDefinition targetMethod, string targetName, CustomAttribute aspectAttribute)
+        {
+            var result = true;
+
+            var nameFilter = (string)aspectAttribute.GetPropertyValue("NameFilter");
+            object accessModifierFilterObject = aspectAttribute.GetPropertyValue("AccessModifierFilter");
+            var accessModifierFilter = (AccessModifiers)(accessModifierFilterObject ?? 0);
+
+            if (!string.IsNullOrEmpty(nameFilter))
+            {
+                result = Regex.IsMatch(targetName, nameFilter);
+            }
+
+            if (result && accessModifierFilter != 0)
+            {
+                if (targetMethod.IsPrivate)
+                {
+                    result = (accessModifierFilter & AccessModifiers.Private) != 0;
+                }
+                else if (targetMethod.IsFamily)
+                {
+                    result = (accessModifierFilter & AccessModifiers.Protected) != 0;
+                }
+                else if (targetMethod.IsAssembly)
+                {
+                    result = (accessModifierFilter & AccessModifiers.Internal) != 0;
+                }
+                else if (targetMethod.IsFamilyOrAssembly)
+                {
+                    result = (accessModifierFilter & AccessModifiers.ProtectedInternal) != 0;
+                }
+                else if (targetMethod.IsPublic)
+                {
+                    result = (accessModifierFilter & AccessModifiers.Public) != 0;
+                }
+            }
+
+            return result;
         }
     }
 }

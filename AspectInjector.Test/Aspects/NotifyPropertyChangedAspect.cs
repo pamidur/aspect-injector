@@ -9,7 +9,7 @@ namespace AspectInjector.Test.Aspects
     {
         public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
 
-        [Advice(Targets = InjectionTarget.Setter, Points = InjectionPoint.After)]
+        [Advice(Targets = InjectionTargets.Setter, Points = InjectionPoints.After)]
         public void RaisePropertyChanged(
             [AdviceArgument(Source = AdviceArgumentSource.Instance)] object targetInstance,
             [AdviceArgument(Source = AdviceArgumentSource.TargetName)] string propertyName)

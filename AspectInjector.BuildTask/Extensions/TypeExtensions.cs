@@ -1,13 +1,11 @@
-﻿using AspectInjector.BuildTask.Extensions;
-using Mono.Cecil;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
+using Mono.Cecil;
 
-namespace AspectInjector.BuildTask
+namespace AspectInjector.BuildTask.Extensions
 {
-    internal static class ReflectionUtils
+    internal static class TypeExtensions
     {
         public static MethodDefinition GetInterfaceImplementation(this TypeReference typeReference, MethodDefinition interfaceMethodDefinition)
         {
@@ -45,32 +43,6 @@ namespace AspectInjector.BuildTask
             return members;
         }
 
-        public static string GetMethodName<T>(Expression<Action<T>> expression)
-        {
-            var methodExpression = expression.Body as MethodCallExpression;
-            return methodExpression != null ? methodExpression.Method.Name : null;
-        }
-
-        public static bool IsAttributeOfType<T>(this CustomAttribute attribute)
-        {
-            return attribute.AttributeType.Resolve().FullName == typeof(T).FullName;
-        }
-
-        public static bool HasAttributeOfType<T>(this IEnumerable<CustomAttribute> attributes)
-        {
-            return attributes.Any(a => a.IsAttributeOfType<T>());
-        }
-
-        public static IEnumerable<CustomAttribute> GetAttributesOfType<T>(this IEnumerable<CustomAttribute> attributes)
-        {
-            return attributes.Where(a => a.IsAttributeOfType<T>());
-        }
-
-        public static CustomAttribute GetAttributeOfType<T>(this IEnumerable<CustomAttribute> attributes)
-        {
-            return attributes.GetAttributesOfType<T>().FirstOrDefault();
-        }
-
         public static bool IsType(this TypeReference typeReference, Type type)
         {
             return typeReference.Resolve().FullName == type.FullName;
@@ -85,17 +57,6 @@ namespace AspectInjector.BuildTask
         {
             TypeDefinition typeDefinition = typeReference.Resolve();
             return typeDefinition.Interfaces.Any(i => i.IsTypeReferenceOf(@interface)) || (typeDefinition.BaseType != null && typeDefinition.BaseType.ImplementsInterface(@interface));
-        }
-
-        public static MethodReference ImportConstructor(this ModuleDefinition module, TypeDefinition type)
-        {
-            return module.Import(type.Methods.First(c => c.IsConstructor));
-        }
-
-        public static MethodReference ImportMethod<T>(this ModuleDefinition module, TypeDefinition type, Expression<Action<T>> methodExpression)
-        {
-            var methodName = GetMethodName<T>(methodExpression);
-            return !string.IsNullOrEmpty(methodName) ? module.Import(type.Methods.First(c => c.Name == methodName)) : null;
         }
 
         public static bool IsTypeReferenceOf(this TypeReference typeReference1, TypeReference typeReference2)
@@ -117,6 +78,11 @@ namespace AspectInjector.BuildTask
                 return null;
 
             return baseType.Resolve();
+        }
+
+        public static bool BelongsToAssembly(this TypeReference tr, string publicKey)
+        {
+            return BitConverter.ToString(tr.Resolve().Module.Assembly.Name.PublicKeyToken).Replace("-", "").ToLowerInvariant() == publicKey.ToLowerInvariant();
         }
     }
 }

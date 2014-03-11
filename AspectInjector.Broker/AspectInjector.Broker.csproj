@@ -42,13 +42,14 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccessModifiers.cs" />
     <Compile Include="AdviceArgumentAttribute.cs" />
     <Compile Include="AdviceArgumentSource.cs" />
     <Compile Include="AdviceAttribute.cs" />
     <Compile Include="AdviceInterfaceProxyAttribute.cs" />
     <Compile Include="AspectAttribute.cs" />
-    <Compile Include="InjectionPoint.cs" />
-    <Compile Include="InjectionTarget.cs" />
+    <Compile Include="InjectionPoints.cs" />
+    <Compile Include="InjectionTargets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

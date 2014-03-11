@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AspectInjector.BuildTask.Extensions
 {
-    public static class MemberExtensions
+    internal static class MemberExtensions
     {
         public static bool IsInterfaceImplementation(this MethodDefinition method, MethodReference overridden)
         {
@@ -100,11 +100,6 @@ namespace AspectInjector.BuildTask.Extensions
 
                 self = @base;
             }
-        }
-
-        public static bool BelongsToAssembly(this TypeReference tr, string publicKey)
-        {
-            return BitConverter.ToString(tr.Resolve().Module.Assembly.Name.PublicKeyToken).Replace("-", "").ToLowerInvariant() == publicKey.ToLowerInvariant();
         }
     }
 }
