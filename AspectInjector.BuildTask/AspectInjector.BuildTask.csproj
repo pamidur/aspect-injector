@@ -60,6 +60,7 @@
     <Compile Include="AdviceInterfaceProxyInjector.cs" />
     <Compile Include="AspectInjector.cs" />
     <Compile Include="AspectInjectorBuildTask.cs" />
+    <Compile Include="CompilationException.cs" />
     <Compile Include="Extensions\CustomAttributeExtensions.cs" />
     <Compile Include="Extensions\MemberExtensions.cs" />
     <Compile Include="Extensions\ModuleExtensions.cs" />

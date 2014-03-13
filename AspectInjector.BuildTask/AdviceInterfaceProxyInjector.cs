@@ -1,7 +1,6 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
-using System;
 using System.Linq;
 
 namespace AspectInjector.BuildTask
@@ -49,7 +48,7 @@ namespace AspectInjector.BuildTask
                 //todo:: process other InterfaceProxyInjectionAttribute parameters
 
                 if (classDefinition.ImplementsInterface(interfaceReference))
-                    throw new InvalidOperationException(classDefinition.Name + " already implements " + interfaceReference.Name);
+                    throw new CompilationException(classDefinition.Name + " already implements " + interfaceReference.Name, classDefinition);
 
                 InjectInterfaceProxyIntoClass(classDefinition, aspectDefinition, interfaceReference.Resolve());
             }
@@ -58,10 +57,10 @@ namespace AspectInjector.BuildTask
         protected virtual void InjectInterfaceProxyIntoClass(TypeDefinition classDefinition, TypeDefinition aspectDefinition, TypeDefinition interfaceDefinition)
         {
             if (!interfaceDefinition.IsInterface)
-                throw new NotSupportedException(interfaceDefinition.Name + " is not an interface on interface injection definition on acpect " + aspectDefinition.Name);
+                throw new CompilationException(interfaceDefinition.Name + " is not an interface on interface injection definition on acpect " + aspectDefinition.Name, aspectDefinition);
 
             if (!aspectDefinition.ImplementsInterface(interfaceDefinition))
-                throw new InvalidOperationException(aspectDefinition.Name + " should implement " + interfaceDefinition.Name);
+                throw new CompilationException(aspectDefinition.Name + " should implement " + interfaceDefinition.Name, aspectDefinition);
 
             var ifaces = interfaceDefinition.GetInterfacesTree();
 

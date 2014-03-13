@@ -63,6 +63,18 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
+        public void InjectAftercustomSetter()
+        {
+            _afterTestClass.TestCustomSetterProperty = 2;
+        }
+
+        [TestMethod]
+        public void InjectAftercustomSetter2()
+        {
+            _afterTestClass.TestCustomSetterProperty = 1;
+        }
+
+        [TestMethod]
         public void InjectAfterGetter()
         {
             var a = _afterTestClass.TestProperty;
@@ -140,6 +152,17 @@ namespace AspectInjector.Tests
         public event EventHandler<EventArgs> TestEvent = (s, e) => { };
 
         public int TestProperty { get; set; }
+
+        public int TestCustomSetterProperty
+        {
+            get { return 1; }
+            set
+            {
+                {
+                    if (value == 2) return;
+                }
+            }
+        }
     }
 
     internal class TestAfterMethodAspect
