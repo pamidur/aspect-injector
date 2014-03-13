@@ -49,7 +49,7 @@ namespace AspectInjector.BuildTask
 
                 Console.WriteLine("Assembly has been loaded");
 
-                var injector = new AspectInjector();
+                var injector = new AspectProcessor();
                 injector.Process(assembly);
 
                 Console.WriteLine("Assembly has been patched");
@@ -76,7 +76,7 @@ namespace AspectInjector.BuildTask
             }
             catch (Exception e)
             {
-                this.Log.LogErrorFromException(e, false, true, null);
+                this.Log.LogErrorFromException(e, true, true, null);
                 Console.Error.WriteLine(e.Message);
                 return false;
             }

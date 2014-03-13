@@ -9,13 +9,17 @@ namespace AspectInjector.Test
     internal class TestMethodClass
     {
         private readonly StringBuilder b = new StringBuilder();
+        private static readonly StringBuilder c = new StringBuilder();
 
         public TestMethodClass(string a)
         {
+            b.Append(1);
+            c.Append(1);
         }
 
         public TestMethodClass(int b)
         {
+
         }
 
         public void TestMethod(string data)
@@ -29,6 +33,10 @@ namespace AspectInjector.Test
         public void TestMethodFiltered2()
         {
             TestMethodFiltered1();
+        }
+
+        public void TestMethodFiltered3(string a, int b)
+        {
         }
 
         public event EventHandler<EventArgs> TestEvent = (s, e) => { };
@@ -118,9 +126,10 @@ namespace AspectInjector.Test
     internal class TestMethodFilteredAspect
     {
         [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Method)]
-        public void BeforeMethod([AdviceArgument(Source = AdviceArgumentSource.TargetName)] string methodName)
+        public string BeforeMethod([AdviceArgument(Source = AdviceArgumentSource.TargetName)] string methodName, [AdviceArgument(Source = AdviceArgumentSource.TargetArguments)] object[] args)
         {
             Console.WriteLine("BeforeMethod({0}) filtered", methodName);
+            return "";
         }
     }
 }

@@ -18,39 +18,51 @@ namespace AspectInjector.Tests
         [TestMethod]
         public void InjectProxySecondConstructor()
         {
+            Checker.Passed = false;
             var result = ((ITestInterface)new TestInterfaceProxyClass(1)).TestMethod("ok");
             Assert.AreEqual("ok", result);
+            Assert.IsTrue(Checker.Passed);
         }
 
         [TestMethod]
         public void InjectMethodProxy()
         {
+            Checker.Passed = false;
             var result = _testClass.TestMethod("ok");
             Assert.AreEqual("ok", result);
+            Assert.IsTrue(Checker.Passed);
         }
 
         [TestMethod]
         public void InjectSetterProxy()
         {
+            Checker.Passed = false;
             _testClass.TestProperty = 4;
+            Assert.IsTrue(Checker.Passed);
         }
 
         [TestMethod]
         public void InjectGetterProxy()
         {
+            Checker.Passed = false;
             var a = _testClass.TestProperty;
+            Assert.IsTrue(Checker.Passed);
         }
 
         [TestMethod]
         public void InjectEventAddProxy()
         {
+            Checker.Passed = false;
             _testClass.TestEvent += (s, e) => { };
+            Assert.IsTrue(Checker.Passed);
         }
 
         [TestMethod]
         public void InjectEventRemoveProxy()
         {
+            Checker.Passed = false;
             _testClass.TestEvent -= (s, e) => { };
+            Assert.IsTrue(Checker.Passed);
         }
     }
 
@@ -80,20 +92,20 @@ namespace AspectInjector.Tests
     {
         string ITestInterface.TestMethod(string data)
         {
-            Assert.IsTrue(true);
+            Checker.Passed = true;
             return data;
         }
 
         public event System.EventHandler<System.EventArgs> TestEvent
         {
-            add { Assert.IsTrue(true); }
-            remove { Assert.IsTrue(true); }
+            add { Checker.Passed = true; }
+            remove { Checker.Passed = true; }
         }
 
         public int TestProperty
         {
-            get { Assert.IsTrue(true); return 0; }
-            set { Assert.IsTrue(true); ; }
+            get { Checker.Passed = true; return 0; }
+            set { Checker.Passed = true; }
         }
     }
 }

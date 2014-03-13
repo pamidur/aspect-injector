@@ -31,8 +31,6 @@ namespace AspectInjector.BuildTask
 
                     InjectAspectIntoClass(@class, aspect.type);
                 }
-
-                //todo:: cleanup aspects
             }
         }
 
