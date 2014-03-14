@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Mono.Cecil;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mono.Cecil;
 
 namespace AspectInjector.BuildTask.Extensions
 {
@@ -43,23 +43,37 @@ namespace AspectInjector.BuildTask.Extensions
             return members;
         }
 
-        public static bool IsType(this TypeReference typeReference, Type type)
-        {
-            return typeReference.Resolve().FullName == type.FullName;
-        }
-
         public static bool HasType(this IEnumerable<TypeReference> typeReferences, Type type)
         {
-            return typeReferences.Any(tr => tr.IsType(type));
+            return typeReferences.Any(tr => tr.IsTypeOf(type));
         }
 
         public static bool ImplementsInterface(this TypeReference typeReference, TypeReference @interface)
         {
             TypeDefinition typeDefinition = typeReference.Resolve();
-            return typeDefinition.Interfaces.Any(i => i.IsTypeReferenceOf(@interface)) || (typeDefinition.BaseType != null && typeDefinition.BaseType.ImplementsInterface(@interface));
+            return typeDefinition.Interfaces.Any(i => i.IsTypeOf(@interface)) || (typeDefinition.BaseType != null && typeDefinition.BaseType.ImplementsInterface(@interface));
         }
 
-        public static bool IsTypeReferenceOf(this TypeReference typeReference1, TypeReference typeReference2)
+        public static bool IsTypeOf(this TypeReference typeReference, Type type)
+        {
+            var module = typeReference.Module;
+
+            if (type == typeof(bool))
+                return typeReference.IsTypeOf(module.TypeSystem.Boolean);
+
+            if (type == typeof(string))
+                return typeReference.IsTypeOf(module.TypeSystem.String);
+
+            if (type == typeof(int))
+                return typeReference.IsTypeOf(module.TypeSystem.Int32);
+
+            if (type == typeof(void))
+                return typeReference.IsTypeOf(module.TypeSystem.Void);
+
+            throw new NotSupportedException();
+        }
+
+        public static bool IsTypeOf(this TypeReference typeReference1, TypeReference typeReference2)
         {
             //see https://www.mail-archive.com/mono-cecil@googlegroups.com/msg01520.html for more info
 

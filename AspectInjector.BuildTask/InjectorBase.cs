@@ -41,83 +41,6 @@ namespace AspectInjector.BuildTask
             return fd;
         }
 
-        protected PropertyDefinition GetOrCreatePropertyProxy(TypeDefinition targetType, TypeDefinition sourceType, PropertyDefinition originalProperty)
-        {
-            var newGetMethod = GetOrCreateMethodProxy(targetType, sourceType, originalProperty.GetMethod);
-            var newSetMethod = GetOrCreateMethodProxy(targetType, sourceType, originalProperty.SetMethod);
-
-            var pd = new PropertyDefinition(originalProperty.Name, PropertyAttributes.None, targetType.Module.Import(originalProperty.PropertyType));
-            pd.GetMethod = newGetMethod;
-            pd.SetMethod = newSetMethod;
-
-            targetType.Properties.Add(pd);
-
-            return pd;
-        }
-
-        protected EventDefinition GetOrCreateEventProxy(TypeDefinition targetType, TypeDefinition sourceType, EventDefinition originalEvent)
-        {
-            var newAddMethod = GetOrCreateMethodProxy(targetType, sourceType, originalEvent.AddMethod);
-            var newRemoveMethod = GetOrCreateMethodProxy(targetType, sourceType, originalEvent.RemoveMethod);
-
-            var ed = new EventDefinition(originalEvent.Name, EventAttributes.None, targetType.Module.Import(originalEvent.EventType));
-            ed.AddMethod = newAddMethod;
-            ed.RemoveMethod = newRemoveMethod;
-
-            targetType.Events.Add(ed);
-
-            return ed;
-        }
-
-        protected MethodDefinition GetOrCreateMethodProxy(TypeDefinition targetType, TypeDefinition sourceType, MethodDefinition interfaceMethodDefinition)
-        {
-            var methodName = interfaceMethodDefinition.DeclaringType.FullName + "." + interfaceMethodDefinition.Name;
-
-            var existedMethod = targetType.Methods.FirstOrDefault(m => m.Name == methodName && m.SignatureMatches(interfaceMethodDefinition));
-            if (existedMethod != null)
-                return existedMethod;
-
-            var md = new MethodDefinition(methodName
-                , MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
-                , targetType.Module.Import(interfaceMethodDefinition.ReturnType));
-
-            if (interfaceMethodDefinition.IsSpecialName)
-                md.IsSpecialName = true;
-            
-            md.Overrides.Add(targetType.Module.Import(interfaceMethodDefinition));
-            targetType.Methods.Add(md);
-
-            foreach (var parameter in interfaceMethodDefinition.Parameters)
-                md.Parameters.Add(parameter);
-
-            foreach (var genericParameter in interfaceMethodDefinition.GenericParameters)
-                md.GenericParameters.Add(genericParameter);
-
-            var aspectField = GetOrCreateAspectReference(targetType, sourceType);
-
-            var processor = md.Body.GetILProcessor();
-            processor.Append(processor.Create(OpCodes.Nop));
-
-            var retCode = processor.Create(OpCodes.Ret);
-            processor.Append(retCode);
-
-            InjectMethodCall(processor, retCode, aspectField, interfaceMethodDefinition, md.Parameters.ToArray());
-
-            if (!interfaceMethodDefinition.ReturnType.IsType(typeof(void)))
-            {
-                md.Body.InitLocals = true;
-                md.Body.Variables.Add(new VariableDefinition(targetType.Module.Import(interfaceMethodDefinition.ReturnType)));
-
-                processor.InsertBefore(retCode, processor.Create(OpCodes.Stloc_0));
-                var loadresultIstruction = processor.Create(OpCodes.Ldloc_0);
-                processor.InsertBefore(retCode, loadresultIstruction);
-                processor.InsertBefore(loadresultIstruction, processor.Create(OpCodes.Br_S, loadresultIstruction));
-            }      
-
-            return md;
-        }
-
-
         protected void InjectMethodCall(ILProcessor processor, Instruction injectionPoint, MemberReference sourceMember, MethodDefinition method, object[] arguments)
         {
             if (method.Parameters.Count != arguments.Length)
@@ -138,15 +61,14 @@ namespace AspectInjector.BuildTask
                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldarg_0));
                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldfld, fr));
                 }
-
             }
             else
             {
                 throw new NotSupportedException("Only FieldRefences supported at the moment");
             }
 
-            for (int i = 0; i < method.Parameters.Count;i++ )            
-                LoadCallArgument(processor, injectionPoint, arguments[i],method.Parameters[i].ParameterType);  
+            for (int i = 0; i < method.Parameters.Count; i++)
+                LoadCallArgument(processor, injectionPoint, arguments[i], method.Parameters[i].ParameterType);
 
             processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Callvirt, method));
         }
@@ -161,13 +83,23 @@ namespace AspectInjector.BuildTask
 
                 processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldarg, parameter.Index + 1));
 
-                if (parameter.ParameterType.IsValueType && expectedType.IsTypeReferenceOf(module.TypeSystem.Object))
+                if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
+            }
+
+            if (arg is VariableDefinition)
+            {
+                var var = (VariableDefinition)arg;
+
+                if (!expectedType.Resolve().IsTypeOf(var.VariableType))
+                    throw new ArgumentException("Argument type mismatch");
+
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
             }
 
             if (arg is string)
             {
-                if (!expectedType.IsTypeReferenceOf(module.TypeSystem.String))
+                if (!expectedType.IsTypeOf(module.TypeSystem.String))
                     throw new ArgumentException("Argument type mismatch");
 
                 var str = (string)arg;
@@ -176,7 +108,7 @@ namespace AspectInjector.BuildTask
 
             if (arg == Markers.InstanceSelfMarker)
             {
-                if (!expectedType.IsTypeReferenceOf(module.TypeSystem.Object))
+                if (!expectedType.IsTypeOf(module.TypeSystem.Object))
                     throw new ArgumentException("Argument type mismatch");
 
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldarg_0));
@@ -184,7 +116,7 @@ namespace AspectInjector.BuildTask
 
             if (arg is Array)
             {
-                if (!expectedType.IsTypeReferenceOf(new ArrayType(module.TypeSystem.Object)))
+                if (!expectedType.IsTypeOf(new ArrayType(module.TypeSystem.Object)))
                     throw new ArgumentException("Argument type mismatch");
 
                 var parameters = (object[])arg;
@@ -203,7 +135,6 @@ namespace AspectInjector.BuildTask
 
                     processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, paramsArrayVar.Index));
 
-
                     for (var i = 0; i < parameters.Length; i++)
                     {
                         processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
@@ -216,8 +147,27 @@ namespace AspectInjector.BuildTask
 
                     processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
                 }
-
             }
+        }
+
+        protected void SetVar<T>(ILProcessor processor, Instruction injectionPoint, VariableDefinition v, T value)
+        {
+            var argType = typeof(T);
+            if (argType == typeof(bool))
+            {
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, v.Index));
+                return;
+            }
+
+            if (argType.IsClass && value == null)
+            {
+                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldnull));
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, v.Index));
+                return;
+            }
+
+            throw new NotSupportedException();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AspectInjector.Test
 {
-    [Aspect(typeof(TestMethodAspect))]
+    //[Aspect(typeof(TestMethodAspect))]
     [Aspect(typeof(TestMethodFilteredAspect), NameFilter = "Filtered", AccessModifierFilter = AccessModifiers.Public)]
     internal class TestMethodClass
     {
@@ -19,7 +19,6 @@ namespace AspectInjector.Test
 
         public TestMethodClass(int b)
         {
-
         }
 
         public void TestMethod(string data)
@@ -30,18 +29,35 @@ namespace AspectInjector.Test
         {
         }
 
-        public void TestMethodFiltered2()
+        public string TestMethodFiltered2()
         {
             TestMethodFiltered1();
+            return "aaa";
         }
 
-        public void TestMethodFiltered3(string a, int b)
+        public string TestMethodFiltered3(string a, int b)
         {
+            return "sdfsdfs";
         }
 
         public event EventHandler<EventArgs> TestEvent = (s, e) => { };
 
         public int TestProperty { get; set; }
+    }
+
+    internal class TestMethodFilteredAspect
+    {
+        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Method)]
+        public string BeforeMethod(
+            [AdviceArgument(Source = AdviceArgumentSource.TargetName)] string methodName,
+            [AdviceArgument(Source = AdviceArgumentSource.TargetArguments)] object[] args,
+            [AdviceArgument(Source = AdviceArgumentSource.AbortTarget)] ref bool abort
+
+            )
+        {
+            Console.WriteLine("BeforeMethod({0}) filtered", methodName);
+            return "";
+        }
     }
 
     internal class TestMethodAspect
@@ -120,16 +136,6 @@ namespace AspectInjector.Test
         public void AfterConstructor()
         {
             Console.WriteLine("AfterConstructor");
-        }
-    }
-
-    internal class TestMethodFilteredAspect
-    {
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Method)]
-        public string BeforeMethod([AdviceArgument(Source = AdviceArgumentSource.TargetName)] string methodName, [AdviceArgument(Source = AdviceArgumentSource.TargetArguments)] object[] args)
-        {
-            Console.WriteLine("BeforeMethod({0}) filtered", methodName);
-            return "";
         }
     }
 }

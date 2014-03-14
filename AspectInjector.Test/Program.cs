@@ -8,6 +8,19 @@ namespace AspectInjector.Test
         {
             TestInterfaceInjection();
             TestMethodInjection();
+
+            var a = false;
+
+            a = true;
+
+            if (a == true)
+                return;
+
+            Ololo(ref a);
+        }
+
+        private static void Ololo(ref bool dd)
+        {
         }
 
         private static void TestInterfaceInjection()

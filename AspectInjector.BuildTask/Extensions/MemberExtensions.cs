@@ -51,11 +51,11 @@ namespace AspectInjector.BuildTask.Extensions
 
         public static bool SignatureMatches(this MethodReference methodReference1, MethodReference methodReference2)
         {
-            if (!methodReference1.MethodReturnType.ReturnType.IsTypeReferenceOf(methodReference2.MethodReturnType.ReturnType))
+            if (!methodReference1.MethodReturnType.ReturnType.IsTypeOf(methodReference2.MethodReturnType.ReturnType))
                 return false;
 
             for (int i = 0; i < methodReference1.Parameters.Count; i++)
-                if (!methodReference1.Parameters[i].ParameterType.IsTypeReferenceOf(methodReference2.Parameters[i].ParameterType))
+                if (!methodReference1.Parameters[i].ParameterType.IsTypeOf(methodReference2.Parameters[i].ParameterType))
                     return false;
 
             return true;
@@ -63,7 +63,7 @@ namespace AspectInjector.BuildTask.Extensions
 
         public static bool IsMemberReferenceOf(this MemberReference memberReference1, MemberReference memberReference2)
         {
-            return memberReference1.Name == memberReference2.Name && memberReference1.DeclaringType.IsTypeReferenceOf(memberReference1.DeclaringType);
+            return memberReference1.Name == memberReference2.Name && memberReference1.DeclaringType.IsTypeOf(memberReference1.DeclaringType);
         }
 
         public static MethodDefinition GetBaseMethod(this MethodDefinition self)

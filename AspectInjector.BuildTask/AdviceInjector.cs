@@ -69,29 +69,28 @@ namespace AspectInjector.BuildTask
 
             if (CheckTarget(targetMethod, targets))
             {
+                ILProcessor processor = targetMethod.Body.GetILProcessor();
+
+                var originRet = targetMethod.Body.Instructions.Single(i => i.OpCode == OpCodes.Ret);
+                var newRet = processor.Create(OpCodes.Ret);
+                var newPreRet = processor.Create(OpCodes.Nop);
+
+                processor.InsertAfter(originRet, newRet);
+                processor.Replace(originRet, newPreRet);
+
                 if ((points & InjectionPoints.Before) != 0)
                 {
                     InjectAdvice(aspectInstanceField,
                         adviceMethod,
                         targetMethod,
-                        targetMethod.Body.Instructions.First());
+                        targetMethod.Body.Instructions.First(), newPreRet);
                 }
                 if ((points & InjectionPoints.After) != 0)
                 {
-                    foreach (var retPoint in targetMethod.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList())
-                    {
-                        ILProcessor processor = targetMethod.Body.GetILProcessor();
-
-                        var injectionPoint = processor.Create(OpCodes.Ret);
-
-                        processor.InsertAfter(retPoint, injectionPoint);
-                        processor.Replace(retPoint, processor.Create(OpCodes.Nop));
-
-                        InjectAdvice(aspectInstanceField,
-                            adviceMethod,
-                            targetMethod,
-                            injectionPoint);
-                    }
+                    InjectAdvice(aspectInstanceField,
+                        adviceMethod,
+                        targetMethod,
+                        newRet, newRet);
                 }
             }
         }
@@ -99,9 +98,30 @@ namespace AspectInjector.BuildTask
         private void InjectAdvice(FieldReference aspectInstanceField,
             MethodDefinition adviceMethod,
             MethodDefinition targetMethod,
-            Instruction lastInstruction)
+            Instruction injectionPoint,
+            Instruction returnPoint
+            )
         {
             ILProcessor processor = targetMethod.Body.GetILProcessor();
+
+            targetMethod.Body.InitLocals = true;
+
+            var abortMethodVar = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == "__a$_abortMethod");
+
+            if (abortMethodVar == null)
+            {
+                abortMethodVar = new VariableDefinition("__a$_abortMethod", targetMethod.Module.TypeSystem.Boolean);
+                targetMethod.Body.Variables.Add(abortMethodVar);
+                SetVar(processor, injectionPoint, abortMethodVar, false);
+            }
+
+            VariableDefinition methodResultVar = null;
+            if (!adviceMethod.ReturnType.IsTypeOf(typeof(void)))
+            {
+                methodResultVar = new VariableDefinition(targetMethod.Module.Import(adviceMethod.ReturnType));
+                targetMethod.Body.Variables.Add(methodResultVar);
+                SetVar<object>(processor, injectionPoint, methodResultVar, null);
+            }
 
             var args = new List<object>();
 
@@ -115,29 +135,59 @@ namespace AspectInjector.BuildTask
                 switch (source)
                 {
                     case AdviceArgumentSource.Instance:
-                        if (!argument.ParameterType.IsType(typeof(object)))
+                        if (!argument.ParameterType.IsTypeOf(typeof(object)))
                             throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.Instance", adviceMethod);
 
                         args.Add(Markers.InstanceSelfMarker);
                         break;
 
                     case AdviceArgumentSource.TargetArguments:
-                        if (!argument.ParameterType.IsTypeReferenceOf(new ArrayType(adviceMethod.Module.TypeSystem.Object.Resolve())))
+                        if (!argument.ParameterType.IsTypeOf(new ArrayType(adviceMethod.Module.TypeSystem.Object.Resolve())))
                             throw new CompilationException("Argument should be of type System.Array<System.Object> to inject AdviceArgumentSource.TargetArguments", adviceMethod);
 
                         args.Add(targetMethod.Parameters.ToArray());
                         break;
 
                     case AdviceArgumentSource.TargetName:
-                        if (!argument.ParameterType.IsType(typeof(string)))
+                        if (!argument.ParameterType.IsTypeOf(typeof(string)))
                             throw new CompilationException("Argument should be of type System.String to inject AdviceArgumentSource.TargetName", adviceMethod);
 
                         args.Add(targetMethod.Name);
                         break;
+
+                    case AdviceArgumentSource.AbortTarget:
+                        if (!argument.ParameterType.IsTypeOf(new ByReferenceType(adviceMethod.Module.TypeSystem.Boolean)))
+                            throw new CompilationException("Argument should be of type ref System.Boolean to inject AdviceArgumentSource.AbortTarget", adviceMethod);
+
+                        if (!targetMethod.ReturnType.IsTypeOf(adviceMethod.ReturnType))
+                            throw new CompilationException("Return types of advice (" + adviceMethod.FullName + ") and target (" + targetMethod.FullName + ") should be the same.", targetMethod);
+
+                        args.Add(abortMethodVar);
+                        break;
                 }
             }
 
-            InjectMethodCall(processor, lastInstruction, aspectInstanceField, adviceMethod, args.ToArray());
+            InjectMethodCall(processor, injectionPoint, aspectInstanceField, adviceMethod, args.ToArray());
+
+            if (!adviceMethod.ReturnType.IsTypeOf(typeof(void)))
+            {
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, methodResultVar.Index));
+            }
+
+            processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, abortMethodVar.Index));
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldc_I4_1));
+
+            var continuePoint = processor.Create(OpCodes.Nop);
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ceq));
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Brfalse_S, continuePoint));
+
+            if (!adviceMethod.ReturnType.IsTypeOf(typeof(void)))
+            {
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, methodResultVar.Index));
+            }
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Br_S, returnPoint));
+
+            processor.InsertBefore(injectionPoint, continuePoint);
         }
 
         private IEnumerable<MethodDefinition> GetAdviceMethods(TypeDefinition aspectType)

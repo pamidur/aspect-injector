@@ -36,7 +36,7 @@ namespace AspectInjector.BuildTask.Extensions
                 return processor.Create(OpCodes.Ldloc_3);
 
             if (localIndex <= 255)
-                processor.Create(OpCodes.Ldloc_S, localIndex);
+                processor.Create(OpCodes.Ldloc_S, checked((byte)localIndex));
 
             return processor.Create(OpCodes.Ldloc, localIndex);
         }
@@ -56,7 +56,7 @@ namespace AspectInjector.BuildTask.Extensions
                 return processor.Create(OpCodes.Stloc_3);
 
             if (localIndex <= 255)
-                processor.Create(OpCodes.Stloc_S, localIndex);
+                processor.Create(OpCodes.Stloc_S, checked((byte)localIndex));
 
             return processor.Create(OpCodes.Stloc, localIndex);
         }
@@ -76,7 +76,7 @@ namespace AspectInjector.BuildTask.Extensions
                 return processor.Create(OpCodes.Ldarg_3);
 
             if (argumentIndex <= 255)
-                processor.Create(OpCodes.Ldarg_S, argumentIndex);
+                processor.Create(OpCodes.Ldarg_S, checked((byte)argumentIndex));
 
             return processor.Create(OpCodes.Ldarg, argumentIndex);
         }
@@ -111,7 +111,7 @@ namespace AspectInjector.BuildTask.Extensions
                 return processor.Create(OpCodes.Ldc_I4_8);
 
             if (integer >= -128 && integer <= 127)
-                processor.Create(OpCodes.Ldc_I4_S, integer);
+                processor.Create(OpCodes.Ldc_I4_S, checked((sbyte)integer));
 
             return processor.Create(OpCodes.Ldc_I4, integer);
         }
