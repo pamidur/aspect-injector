@@ -61,6 +61,7 @@ namespace AspectInjector.BuildTask
                 processor.InsertAfter(originRet, newRet);
                 processor.Replace(originRet, newPreRet);
 
+                var entryPoint = targetMethod.Body.Instructions.First();
 
                 foreach (var aspectAttribute in checkedAttributes)
                 {
@@ -69,7 +70,7 @@ namespace AspectInjector.BuildTask
 
                     foreach (var adviceMethod in GetAdviceMethods(aspectType))
                     {
-                        ProcessAdvice(adviceMethod, aspectInstanceField, targetMethod, newRet, newPreRet);
+                        ProcessAdvice(adviceMethod, aspectInstanceField, targetMethod, newRet, newPreRet, entryPoint);
                     }
                 }
             }
@@ -79,7 +80,8 @@ namespace AspectInjector.BuildTask
             FieldReference aspectInstanceField,
             MethodDefinition targetMethod,
             Instruction returnPoint,
-            Instruction preReturnPont
+            Instruction preReturnPont,
+            Instruction entryPoint
             )
         {
             var adviceAttribute = adviceMethod.CustomAttributes.GetAttributeOfType<AdviceAttribute>();
@@ -105,7 +107,7 @@ namespace AspectInjector.BuildTask
                         InjectAdviceWithResultReplacement(aspectInstanceField,
                         adviceMethod,
                         targetMethod,
-                        targetMethod.Body.Instructions.First(), preReturnPont);
+                        entryPoint, preReturnPont);
                     }
                     else
                     {
@@ -113,7 +115,7 @@ namespace AspectInjector.BuildTask
                             throw new CompilationException("Advice of InjectionPoints.Before and without argument of AdviceArgumentSource.AbortFlag can be System.Void only.", adviceMethod);
 
                         var callArgs = GetCallArguments(args, targetMethod, null);
-                        InjectMethodCall(processor, targetMethod.Body.Instructions.First(), aspectInstanceField, adviceMethod, callArgs.ToArray());
+                        InjectMethodCall(processor, entryPoint, aspectInstanceField, adviceMethod, callArgs.ToArray());
                     }
                 }
                 if ((points & InjectionPoints.After) != 0)
@@ -160,10 +162,22 @@ namespace AspectInjector.BuildTask
             VariableDefinition methodResultVar = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == _abortMethodResultVarName);
             if (methodResultVar == null && !adviceMethod.ReturnType.IsTypeOf(typeof(void)))
             {
-                methodResultVar = processor.CreateLocalVariable<object>(
+                if (adviceMethod.ReturnType.IsValueType)
+                {
+                    methodResultVar = processor.CreateLocalVariable(
+                    injectionPoint,
+                    targetMethod.Module.Import(adviceMethod.ReturnType),
+                    0, _abortMethodResultVarName);
+                }
+                else
+                {
+                    methodResultVar = processor.CreateLocalVariable<object>(
                     injectionPoint,
                     targetMethod.Module.Import(adviceMethod.ReturnType),
                     null, _abortMethodResultVarName);
+                }
+
+                
             }
 
             var args = ExtactArguments(adviceMethod);

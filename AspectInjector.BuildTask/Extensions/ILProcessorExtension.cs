@@ -53,6 +53,11 @@ namespace AspectInjector.BuildTask.Extensions
                 processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
                 processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, variable.Index));
             }
+            else if (valueType.IsValueType)
+            {
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, (int)(object)value));
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, variable.Index));
+            }
             else if (valueType.IsClass && value == null)
             {
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldnull));

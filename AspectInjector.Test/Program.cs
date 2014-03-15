@@ -9,6 +9,8 @@ namespace AspectInjector.Test
             TestInterfaceInjection();
             TestMethodInjection();
 
+            StringComparer b = default(StringComparer);
+
             var a = false;
 
             a = true;
