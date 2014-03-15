@@ -133,6 +133,7 @@ namespace AspectInjector.BuildTask
 
 
         private static readonly string _abortMethodVarName = "__a$_do_abort_method";
+        private static readonly string _abortMethodResultVarName = "__a$_abort_method_result";
 
         private void InjectAdviceWithResultReplacement(FieldReference aspectInstanceField,
             MethodDefinition adviceMethod,
@@ -156,13 +157,13 @@ namespace AspectInjector.BuildTask
                 processor.SetLocalVariable(abortMethodVar, injectionPoint, false);
             }
 
-            VariableDefinition methodResultVar = null;
-            if (!adviceMethod.ReturnType.IsTypeOf(typeof(void)))
+            VariableDefinition methodResultVar = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == _abortMethodResultVarName);
+            if (methodResultVar == null && !adviceMethod.ReturnType.IsTypeOf(typeof(void)))
             {
                 methodResultVar = processor.CreateLocalVariable<object>(
                     injectionPoint,
                     targetMethod.Module.Import(adviceMethod.ReturnType),
-                    null);
+                    null, _abortMethodResultVarName);
             }
 
             var args = ExtactArguments(adviceMethod);

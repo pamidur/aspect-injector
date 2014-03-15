@@ -4,7 +4,6 @@ using System.Text;
 
 namespace AspectInjector.Test
 {
-    [Aspect(typeof(TestMethodAspect))]
     [Aspect(typeof(TestMethodFilteredAspect), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public)]
     [Aspect(typeof(TestMethodFilteredAspect2), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public)]
     internal class TestMethodClass
@@ -53,13 +52,10 @@ namespace AspectInjector.Test
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public int BeforeMethod(
-            [AdviceArgument(AdviceArgumentSource.TargetName)] string methodName,
-            [AdviceArgument(AdviceArgumentSource.TargetArguments)] object[] args,
             [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
 
             )
         {
-            Console.WriteLine("BeforeMethod({0}) filtered", methodName);
             return 1;
         }
     }
