@@ -5,7 +5,8 @@ using System.Text;
 namespace AspectInjector.Test
 {
     [Aspect(typeof(TestMethodAspect))]
-    [Aspect(typeof(TestMethodFilteredAspect), NameFilter = "Filtered", AccessModifierFilter = AccessModifiers.Public)]
+    [Aspect(typeof(TestMethodFilteredAspect), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public)]
+    [Aspect(typeof(TestMethodFilteredAspect2), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public)]
     internal class TestMethodClass
     {
         private readonly StringBuilder b = new StringBuilder();
@@ -21,8 +22,11 @@ namespace AspectInjector.Test
         {
         }
 
-        public void TestMethod(string data)
+        public int TestMethodAAA(string data)
         {
+            var a = 1;
+            a++;
+            return a;
         }
 
         private void TestMethodFiltered1()
@@ -48,7 +52,7 @@ namespace AspectInjector.Test
     internal class TestMethodFilteredAspect
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
-        public string BeforeMethod(
+        public int BeforeMethod(
             [AdviceArgument(AdviceArgumentSource.TargetName)] string methodName,
             [AdviceArgument(AdviceArgumentSource.TargetArguments)] object[] args,
             [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
@@ -56,7 +60,18 @@ namespace AspectInjector.Test
             )
         {
             Console.WriteLine("BeforeMethod({0}) filtered", methodName);
-            return "";
+            return 1;
+        }
+    }
+
+    internal class TestMethodFilteredAspect2
+    {
+        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
+        public int BeforeMethod(
+            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
+            )
+        {
+            return 2;
         }
     }
 

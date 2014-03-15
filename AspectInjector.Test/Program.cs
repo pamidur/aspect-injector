@@ -50,7 +50,7 @@ namespace AspectInjector.Test
 
             testMethod.TestEvent += (s, e) => { };
             testMethod.TestEvent -= (s, e) => { };
-            testMethod.TestMethod("");
+            testMethod.TestMethodAAA("");
             testMethod.TestMethodFiltered2();
             testMethod.TestProperty = 0;
             var a = testMethod.TestProperty;
