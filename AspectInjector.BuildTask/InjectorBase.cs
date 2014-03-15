@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace AspectInjector.BuildTask
 {
-    public abstract class InjectorBase
+    internal abstract class InjectorBase
     {
         protected FieldReference GetOrCreateAspectReference(TypeDefinition targetType, TypeDefinition aspectType)
         {
@@ -148,26 +148,6 @@ namespace AspectInjector.BuildTask
                     processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
                 }
             }
-        }
-
-        protected void SetVar<T>(ILProcessor processor, Instruction injectionPoint, VariableDefinition v, T value)
-        {
-            var argType = typeof(T);
-            if (argType == typeof(bool))
-            {
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, v.Index));
-                return;
-            }
-
-            if (argType.IsClass && value == null)
-            {
-                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldnull));
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, v.Index));
-                return;
-            }
-
-            throw new NotSupportedException();
         }
     }
 }

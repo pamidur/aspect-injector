@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbortConditionInjector.cs" />
     <Compile Include="AdviceInterfaceProxyInjector.cs" />
     <Compile Include="AspectProcessor.cs" />
     <Compile Include="AspectInjectorBuildTask.cs" />

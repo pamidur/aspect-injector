@@ -5,6 +5,6 @@
         Instance,
         TargetName,
         TargetArguments,
-        AbortTarget
+        AbortFlag
     }
 }

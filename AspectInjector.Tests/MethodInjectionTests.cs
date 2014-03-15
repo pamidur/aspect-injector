@@ -227,54 +227,54 @@ namespace AspectInjector.Tests
     internal class TestAfterMethodAspect
     {
         //Property
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Setter)]
+        [Advice(InjectionPoints.After, InjectionTargets.Setter)]
         public void AfterSetter() {  Checker.Passed = true; }
 
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Getter)]
+        [Advice(InjectionPoints.After, InjectionTargets.Getter)]
         public void AfterGetter() {  Checker.Passed = true; }
 
         //Event
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.EventAdd)]
+        [Advice(InjectionPoints.After, InjectionTargets.EventAdd)]
         public void AfterEventAdd() {  Checker.Passed = true; }
 
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.EventRemove)]
+        [Advice(InjectionPoints.After, InjectionTargets.EventRemove)]
         public void AfterEventRemove() {  Checker.Passed = true; }
 
         //Method
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Method)]
+        [Advice(InjectionPoints.After, InjectionTargets.Method)]
         public void AfterMethod() {  Checker.Passed = true; }
     }
 
     internal class TestBeforeMethodAspect
     {
         //Property
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Setter)]
+        [Advice(InjectionPoints.Before, InjectionTargets.Setter)]
         public void BeforeSetter() {  Checker.Passed = true; }
 
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Getter)]
+        [Advice(InjectionPoints.Before, InjectionTargets.Getter)]
         public void BeforeGetter() {  Checker.Passed = true; }
 
         //Event
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.EventAdd)]
+        [Advice(InjectionPoints.Before, InjectionTargets.EventAdd)]
         public void BeforeEventAdd() {  Checker.Passed = true; }
 
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.EventRemove)]
+        [Advice(InjectionPoints.Before, InjectionTargets.EventRemove)]
         public void BeforeEventRemove() {  Checker.Passed = true; }
 
         //Method
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Method)]
+        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public void BeforeMethod() {  Checker.Passed = true; }
     }
 
     internal class TestBeforeConstructorAspect
     {
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Constructor)]
+        [Advice(InjectionPoints.Before, InjectionTargets.Constructor)]
         public void BeforeConstructor() {  Checker.Passed = true; }
     }
 
     internal class TestAfterConstructorAspect
     {
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Constructor)]
+        [Advice(InjectionPoints.After, InjectionTargets.Constructor)]
         public void AfterConstructor() {  Checker.Passed = true; }
     }
 }

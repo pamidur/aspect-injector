@@ -1,4 +1,6 @@
-﻿using Mono.Cecil.Cil;
+﻿using System;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace AspectInjector.BuildTask.Extensions
 {
@@ -19,6 +21,43 @@ namespace AspectInjector.BuildTask.Extensions
                 return OptimizeStoreLocal(processor, checked((ushort)value));
 
             return processor.Create(opCode, value);
+        }
+
+        public static VariableDefinition CreateLocalVariable<T>(this ILProcessor processor, 
+            MethodDefinition method, 
+            Instruction injectionPoint, 
+            TypeReference variableType, 
+            T defaultValue,
+            string variableName = null)
+        {
+            if (!method.Body.InitLocals)
+            {
+                method.Body.InitLocals = true;
+            }
+
+            var variable = variableName == null 
+                ? new VariableDefinition(variableType)
+                : new VariableDefinition(variableName, variableType);
+            method.Body.Variables.Add(variable);
+
+            var defaultValueType = typeof(T);
+
+            if (defaultValueType == typeof(bool))
+            {
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, ((bool)(object)defaultValue) ? 1 : 0));
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, variable.Index));
+            }
+            else if (defaultValueType.IsClass && defaultValue == null)
+            {
+                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldnull));
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, variable.Index));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+
+            return variable;
         }
 
         private static Instruction OptimizeLoadLocal(ILProcessor processor, ushort localIndex)

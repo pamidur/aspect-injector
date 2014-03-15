@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AspectInjector.Test
 {
-    //[Aspect(typeof(TestMethodAspect))]
+    [Aspect(typeof(TestMethodAspect))]
     [Aspect(typeof(TestMethodFilteredAspect), NameFilter = "Filtered", AccessModifierFilter = AccessModifiers.Public)]
     internal class TestMethodClass
     {
@@ -47,11 +47,11 @@ namespace AspectInjector.Test
 
     internal class TestMethodFilteredAspect
     {
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Method)]
+        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public string BeforeMethod(
-            [AdviceArgument(Source = AdviceArgumentSource.TargetName)] string methodName,
-            [AdviceArgument(Source = AdviceArgumentSource.TargetArguments)] object[] args,
-            [AdviceArgument(Source = AdviceArgumentSource.AbortTarget)] ref bool abort
+            [AdviceArgument(AdviceArgumentSource.TargetName)] string methodName,
+            [AdviceArgument(AdviceArgumentSource.TargetArguments)] object[] args,
+            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
 
             )
         {
@@ -63,63 +63,63 @@ namespace AspectInjector.Test
     internal class TestMethodAspect
     {
         //Property
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Setter)]
+        [Advice(InjectionPoints.Before, InjectionTargets.Setter)]
         public void BeforeSetter()
         {
             Console.WriteLine("BeforeSetter");
         }
 
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Setter)]
+        [Advice(InjectionPoints.After, InjectionTargets.Setter)]
         public void AfterSetter()
         {
             Console.WriteLine("AfterSetter");
         }
 
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Getter)]
+        [Advice(InjectionPoints.Before, InjectionTargets.Getter)]
         public void BeforeGetter()
         {
             Console.WriteLine("BeforeGetter");
         }
 
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Getter)]
+        [Advice(InjectionPoints.After, InjectionTargets.Getter)]
         public void AfterGetter()
         {
             Console.WriteLine("AfterGetter");
         }
 
         //Event
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.EventAdd)]
+        [Advice(InjectionPoints.Before, InjectionTargets.EventAdd)]
         public void BeforeEventAdd()
         {
             Console.WriteLine("BeforeEventAdd");
         }
 
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.EventAdd)]
+        [Advice(InjectionPoints.After, InjectionTargets.EventAdd)]
         public void AfterEventAdd()
         {
             Console.WriteLine("AfterEventAdd");
         }
 
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.EventRemove)]
+        [Advice(InjectionPoints.Before, InjectionTargets.EventRemove)]
         public void BeforeEventRemove()
         {
             Console.WriteLine("BeforeEventRemove");
         }
 
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.EventRemove)]
+        [Advice(InjectionPoints.After, InjectionTargets.EventRemove)]
         public void AfterEventRemove()
         {
             Console.WriteLine("AfterEventRemove");
         }
 
         //Method
-        [Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Method)]
+        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public void BeforeMethod()
         {
             Console.WriteLine("BeforeMethod");
         }
 
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Method)]
+        [Advice(InjectionPoints.After, InjectionTargets.Method)]
         public void AfterMethod()
         {
             Console.WriteLine("AfterMethod");
@@ -132,7 +132,7 @@ namespace AspectInjector.Test
             Console.WriteLine("BeforeConstructor");
         }
 
-        [Advice(Points = InjectionPoints.After, Targets = InjectionTargets.Constructor)]
+        [Advice(InjectionPoints.After, InjectionTargets.Constructor)]
         public void AfterConstructor()
         {
             Console.WriteLine("AfterConstructor");
