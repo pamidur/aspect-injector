@@ -57,7 +57,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdviceInjector.cs" />
     <Compile Include="AdviceInterfaceProxyInjector.cs" />
+    <Compile Include="InjectionEnumerator.cs" />
     <Compile Include="AspectProcessor.cs" />
     <Compile Include="AspectInjectorBuildTask.cs" />
     <Compile Include="CompilationException.cs" />
@@ -67,8 +69,8 @@
     <Compile Include="Extensions\ModuleExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="IModuleProcessor.cs" />
+    <Compile Include="InjectionContext.cs" />
     <Compile Include="InjectorBase.cs" />
-    <Compile Include="AdviceInjector.cs" />
     <Compile Include="Janitor.cs" />
     <Compile Include="Markers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

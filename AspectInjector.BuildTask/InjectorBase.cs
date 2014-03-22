@@ -44,7 +44,7 @@ namespace AspectInjector.BuildTask
         protected void InjectMethodCall(ILProcessor processor, Instruction injectionPoint, MemberReference sourceMember, MethodDefinition method, object[] arguments)
         {
             if (method.Parameters.Count != arguments.Length)
-                throw new ArgumentException("Arguments count missmatch", "arguments");
+                throw new ArgumentException("Arguments count mismatch", "arguments");
 
             processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Nop));
 
