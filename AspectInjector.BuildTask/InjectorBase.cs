@@ -70,7 +70,7 @@ namespace AspectInjector.BuildTask
             for (int i = 0; i < method.Parameters.Count; i++)
                 LoadCallArgument(processor, injectionPoint, arguments[i], method.Parameters[i].ParameterType);
 
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Callvirt, method));
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Callvirt, processor.Body.Method.Module.Import(method)));
         }
 
         protected void LoadCallArgument(ILProcessor processor, Instruction injectionPoint, object arg, TypeReference expectedType)

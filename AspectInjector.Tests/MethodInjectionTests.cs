@@ -24,7 +24,6 @@ namespace AspectInjector.Tests
             Checker.Passed = false;
             _beforeTestClass.TestMethod("");
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -34,7 +33,6 @@ namespace AspectInjector.Tests
 
             _beforeTestClass.TestProperty = 1;
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -44,7 +42,6 @@ namespace AspectInjector.Tests
 
             var a = _beforeTestClass.TestProperty;
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -54,7 +51,6 @@ namespace AspectInjector.Tests
 
             _beforeTestClass.TestEvent += (s, e) => { };
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -64,7 +60,6 @@ namespace AspectInjector.Tests
 
             _beforeTestClass.TestEvent += (s, e) => { };
             Assert.IsTrue(Checker.Passed);
-
         }
 
         //after
@@ -76,7 +71,6 @@ namespace AspectInjector.Tests
 
             _afterTestClass.TestMethod("");
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -86,7 +80,6 @@ namespace AspectInjector.Tests
 
             _afterTestClass.TestProperty = 1;
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -96,7 +89,6 @@ namespace AspectInjector.Tests
 
             _afterTestClass.TestCustomSetterProperty = 2;
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -106,7 +98,6 @@ namespace AspectInjector.Tests
 
             _afterTestClass.TestCustomSetterProperty = 1;
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -116,7 +107,6 @@ namespace AspectInjector.Tests
 
             var a = _afterTestClass.TestProperty;
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -126,7 +116,6 @@ namespace AspectInjector.Tests
 
             _afterTestClass.TestEvent += (s, e) => { };
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -136,7 +125,6 @@ namespace AspectInjector.Tests
 
             _afterTestClass.TestEvent += (s, e) => { };
             Assert.IsTrue(Checker.Passed);
-
         }
 
         //constructors
@@ -148,7 +136,15 @@ namespace AspectInjector.Tests
 
             var a = new TestBeforeConstructor();
             Assert.IsTrue(Checker.Passed);
+        }
 
+        [TestMethod]
+        public void InjectInterfaceWithBeforeConstructor()
+        {
+            Checker.Passed = false;
+
+            var a = new TestBeforeConstructorwithIface();
+            Assert.IsTrue(Checker.Passed);
         }
 
         [TestMethod]
@@ -158,7 +154,6 @@ namespace AspectInjector.Tests
 
             var a = new TestAfterConstructor();
             Assert.IsTrue(Checker.Passed);
-
         }
 
         [TestMethod]
@@ -168,12 +163,16 @@ namespace AspectInjector.Tests
 
             var a = new TestAfterConstructor("");
             Assert.IsTrue(Checker.Passed);
-
         }
     }
 
     [Aspect(typeof(TestBeforeConstructorAspect))]
     internal class TestBeforeConstructor
+    {
+    }
+
+    [Aspect(typeof(TestBeforeConstructorWithInterfaceAspect))]
+    internal class TestBeforeConstructorwithIface
     {
     }
 
@@ -228,53 +227,65 @@ namespace AspectInjector.Tests
     {
         //Property
         [Advice(InjectionPoints.After, InjectionTargets.Setter)]
-        public void AfterSetter() {  Checker.Passed = true; }
+        public void AfterSetter() { Checker.Passed = true; }
 
         [Advice(InjectionPoints.After, InjectionTargets.Getter)]
-        public void AfterGetter() {  Checker.Passed = true; }
+        public void AfterGetter() { Checker.Passed = true; }
 
         //Event
         [Advice(InjectionPoints.After, InjectionTargets.EventAdd)]
-        public void AfterEventAdd() {  Checker.Passed = true; }
+        public void AfterEventAdd() { Checker.Passed = true; }
 
         [Advice(InjectionPoints.After, InjectionTargets.EventRemove)]
-        public void AfterEventRemove() {  Checker.Passed = true; }
+        public void AfterEventRemove() { Checker.Passed = true; }
 
         //Method
         [Advice(InjectionPoints.After, InjectionTargets.Method)]
-        public void AfterMethod() {  Checker.Passed = true; }
+        public void AfterMethod() { Checker.Passed = true; }
     }
 
     internal class TestBeforeMethodAspect
     {
         //Property
         [Advice(InjectionPoints.Before, InjectionTargets.Setter)]
-        public void BeforeSetter() {  Checker.Passed = true; }
+        public void BeforeSetter() { Checker.Passed = true; }
 
         [Advice(InjectionPoints.Before, InjectionTargets.Getter)]
-        public void BeforeGetter() {  Checker.Passed = true; }
+        public void BeforeGetter() { Checker.Passed = true; }
 
         //Event
         [Advice(InjectionPoints.Before, InjectionTargets.EventAdd)]
-        public void BeforeEventAdd() {  Checker.Passed = true; }
+        public void BeforeEventAdd() { Checker.Passed = true; }
 
         [Advice(InjectionPoints.Before, InjectionTargets.EventRemove)]
-        public void BeforeEventRemove() {  Checker.Passed = true; }
+        public void BeforeEventRemove() { Checker.Passed = true; }
 
         //Method
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
-        public void BeforeMethod() {  Checker.Passed = true; }
+        public void BeforeMethod() { Checker.Passed = true; }
     }
 
     internal class TestBeforeConstructorAspect
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Constructor)]
-        public void BeforeConstructor() {  Checker.Passed = true; }
+        public void BeforeConstructor() { Checker.Passed = true; }
     }
 
     internal class TestAfterConstructorAspect
     {
         [Advice(InjectionPoints.After, InjectionTargets.Constructor)]
-        public void AfterConstructor() {  Checker.Passed = true; }
+        public void AfterConstructor() { Checker.Passed = true; }
+    }
+
+    [AdviceInterfaceProxy(typeof(IDisposable))]
+    internal class TestBeforeConstructorWithInterfaceAspect : IDisposable
+    {
+        [Advice(InjectionPoints.Before, InjectionTargets.Constructor)]
+        public void BeforeConstructor() { Checker.Passed = true; }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

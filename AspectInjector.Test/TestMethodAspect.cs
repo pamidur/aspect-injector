@@ -23,9 +23,7 @@ namespace AspectInjector.Test
 
         public int TestMethodAAA(string data)
         {
-            var a = 1;
-            a++;
-            return a;
+            throw new NotImplementedException();
         }
 
         private void TestMethodFiltered1()
