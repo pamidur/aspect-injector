@@ -76,6 +76,7 @@
     <Compile Include="Markers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StrictAssemblyResolver.cs" />
+    <Compile Include="TargetMethodContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

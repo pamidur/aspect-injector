@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using AspectInjector.Broker;
+﻿using AspectInjector.Broker;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AspectInjector.BuildTask
 {
@@ -14,36 +14,34 @@ namespace AspectInjector.BuildTask
 
         public virtual void ProcessModule(ModuleDefinition module)
         {
-            module.ForEachInjection(InjectAdvice);
+            var contexts = module.GetInjectionContexts();
+
+            foreach (var context in contexts)
+            {
+                InjectAdvice(context);
+            }
         }
 
         private void InjectAdvice(InjectionContext context)
         {
-            ILProcessor processor = context.TargetMethod.Body.GetILProcessor();
-            FieldReference aspectInstanceField = GetOrCreateAspectReference(context.TargetMethod.DeclaringType, context.AspectType);
-
-            Instruction returnPoint = context.TargetMethod.Body.Instructions.Single(i => i.OpCode == OpCodes.Ret);
-            Instruction newRet = processor.Create(OpCodes.Ret);
-            Instruction preReturnPoint = processor.Create(OpCodes.Nop);
-            processor.InsertAfter(returnPoint, newRet);
-            processor.Replace(returnPoint, preReturnPoint);
-            returnPoint = newRet;
-
-            Instruction entryPoint = context.TargetMethod.Body.Instructions.First();
+            ILProcessor processor = context.TargetMethodContext.Processor;
+            FieldReference aspectInstanceField = GetOrCreateAspectReference(context.TargetMethodContext.TargetMethod.DeclaringType, context.AspectType);
 
             if (context.IsAbortable)
             {
                 InjectMethodCallWithResultReplacement(
                     context,
-                    entryPoint,
-                    preReturnPoint,
+                    context.TargetMethodContext.OriginalEntryPoint,
+                    context.TargetMethodContext.OriginalReturnPoint,
                     aspectInstanceField);
             }
             else
             {
                 InjectMethodCall(
                     processor,
-                    context.InjectionPoint == InjectionPoints.Before ? entryPoint : returnPoint,
+                    context.InjectionPoint == InjectionPoints.Before ?
+                        context.TargetMethodContext.OriginalEntryPoint :
+                        context.TargetMethodContext.ReturnPoint,
                     aspectInstanceField,
                     context.AdviceMethod,
                     GetAdviceArgumentsValues(context, null).ToArray());
@@ -55,17 +53,17 @@ namespace AspectInjector.BuildTask
             Instruction returnPoint,
             FieldReference sourceMember)
         {
-            MethodDefinition targetMethod = context.TargetMethod;
+            MethodDefinition targetMethod = context.TargetMethodContext.TargetMethod;
             MethodDefinition method = context.AdviceMethod;
-            ILProcessor processor = targetMethod.Body.GetILProcessor();
+            ILProcessor processor = context.TargetMethodContext.Processor;
 
             VariableDefinition abortFlagVariable = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == _abortFlagVariableName);
             if (abortFlagVariable == null)
             {
                 abortFlagVariable = processor.CreateLocalVariable(
                     injectionPoint,
-                    context.TargetMethod.Module.TypeSystem.Boolean,
-                    false, 
+                    context.TargetMethodContext.TargetMethod.Module.TypeSystem.Boolean,
+                    false,
                     _abortFlagVariableName);
             }
             else
@@ -81,7 +79,7 @@ namespace AspectInjector.BuildTask
                     resultVariable = processor.CreateLocalVariable(
                         injectionPoint,
                         targetMethod.Module.Import(method.ReturnType),
-                        0, 
+                        0,
                         _abortResultVariableName);
                 }
                 else
@@ -89,15 +87,15 @@ namespace AspectInjector.BuildTask
                     resultVariable = processor.CreateLocalVariable<object>(
                         injectionPoint,
                         targetMethod.Module.Import(method.ReturnType),
-                        null, 
+                        null,
                         _abortResultVariableName);
                 }
             }
 
-            InjectMethodCall(processor, 
-                injectionPoint, 
-                sourceMember, 
-                method, 
+            InjectMethodCall(processor,
+                injectionPoint,
+                sourceMember,
+                method,
                 GetAdviceArgumentsValues(context, abortFlagVariable).ToArray());
 
             if (!method.ReturnType.IsTypeOf(typeof(void)))
@@ -132,7 +130,7 @@ namespace AspectInjector.BuildTask
                         break;
 
                     case AdviceArgumentSource.TargetArguments:
-                        yield return context.TargetMethod.Parameters.ToArray();
+                        yield return context.TargetMethodContext.TargetMethod.Parameters.ToArray();
                         break;
 
                     case AdviceArgumentSource.TargetName:

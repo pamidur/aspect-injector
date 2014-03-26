@@ -1,17 +1,15 @@
-﻿using System;
+﻿using AspectInjector.Broker;
+using AspectInjector.BuildTask.Extensions;
+using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using AspectInjector.Broker;
-using AspectInjector.BuildTask.Extensions;
-using Mono.Cecil;
 
 namespace AspectInjector.BuildTask
 {
     internal static class InjectionEnumerator
     {
-        public static void ForEachInjection(this ModuleDefinition module, 
-            Action<InjectionContext> injectionCallback)
+        public static IEnumerable<InjectionContext> GetInjectionContexts(this ModuleDefinition module)
         {
             List<InjectionContext> contexts = new List<InjectionContext>();
 
@@ -24,7 +22,7 @@ namespace AspectInjector.BuildTask
                     var methodAspectAttributes = method.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
                     var allAspectAttributes = MergeAspectAttributes(classAspectAttributes, methodAspectAttributes).ToList();
 
-                    contexts.AddRange(ProcessAspects(method, method.Name, allAspectAttributes, injectionCallback));
+                    contexts.AddRange(ProcessAspects(method, method.Name, allAspectAttributes));
                 }
 
                 foreach (var property in @class.Properties)
@@ -34,11 +32,11 @@ namespace AspectInjector.BuildTask
 
                     if (property.GetMethod != null)
                     {
-                        contexts.AddRange(ProcessAspects(property.GetMethod, property.Name, allAspectAttributes, injectionCallback));
+                        contexts.AddRange(ProcessAspects(property.GetMethod, property.Name, allAspectAttributes));
                     }
                     if (property.SetMethod != null)
                     {
-                        contexts.AddRange(ProcessAspects(property.SetMethod, property.Name, allAspectAttributes, injectionCallback));
+                        contexts.AddRange(ProcessAspects(property.SetMethod, property.Name, allAspectAttributes));
                     }
                 }
 
@@ -49,11 +47,11 @@ namespace AspectInjector.BuildTask
 
                     if (@event.AddMethod != null)
                     {
-                        contexts.AddRange(ProcessAspects(@event.AddMethod, @event.Name, allAspectAttributes, injectionCallback));
+                        contexts.AddRange(ProcessAspects(@event.AddMethod, @event.Name, allAspectAttributes));
                     }
                     if (@event.RemoveMethod != null)
                     {
-                        contexts.AddRange(ProcessAspects(@event.RemoveMethod, @event.Name, allAspectAttributes, injectionCallback));
+                        contexts.AddRange(ProcessAspects(@event.RemoveMethod, @event.Name, allAspectAttributes));
                     }
                 }
             }
@@ -61,7 +59,7 @@ namespace AspectInjector.BuildTask
             ValidateContexts(contexts);
             contexts.Sort();
 
-            contexts.ForEach(injectionCallback);
+            return contexts;
         }
 
         private static IEnumerable<CustomAttribute> MergeAspectAttributes(IEnumerable<CustomAttribute> classAttributes,
@@ -72,17 +70,18 @@ namespace AspectInjector.BuildTask
                 .Union(memberAttributes);
         }
 
-        private static IEnumerable<InjectionContext> ProcessAspects(MethodDefinition targetMethod, 
-            string targetName, 
-            IEnumerable<CustomAttribute> aspectAttributes,
-            Action<InjectionContext> injectionCallback)
+        private static IEnumerable<InjectionContext> ProcessAspects(MethodDefinition targetMethod,
+            string targetName,
+            IEnumerable<CustomAttribute> aspectAttributes)
         {
-            return aspectAttributes.Where(a => CheckFilter(targetMethod, targetName, a))
-                .Select(a => new InjectionContext() 
-                { 
-                    TargetMethod = targetMethod, 
-                    TargetName = targetName, 
-                    AspectType = (TypeDefinition)a.ConstructorArguments[0].Value 
+            var targetMethodContext = new TargetMethodContext(targetMethod);
+
+            return aspectAttributes.Where(a => CheckFilter(targetMethodContext, targetName, a))
+                .Select(a => new InjectionContext()
+                {
+                    TargetMethodContext = targetMethodContext,
+                    TargetName = targetName,
+                    AspectType = (TypeDefinition)a.ConstructorArguments[0].Value
                 })
                 .SelectMany(ProcessAdvices);
         }
@@ -106,7 +105,7 @@ namespace AspectInjector.BuildTask
             var points = (InjectionPoints)adviceAttribute.ConstructorArguments[0].Value;
             var targets = (InjectionTargets)adviceAttribute.ConstructorArguments[1].Value;
 
-            if (CheckTarget(parentContext.TargetMethod, targets))
+            if (CheckTarget(parentContext.TargetMethodContext, targets))
             {
                 var context = new InjectionContext(parentContext);
 
@@ -116,7 +115,7 @@ namespace AspectInjector.BuildTask
                 if ((points & InjectionPoints.Before) != 0)
                 {
                     if (context.IsAbortable && !context.AdviceMethod.ReturnType.IsTypeOf(adviceMethod.ReturnType))
-                        throw new CompilationException("Return types of advice (" + adviceMethod.FullName + ") and target (" + context.TargetMethod.FullName + ") should be the same", context.TargetMethod);
+                        throw new CompilationException("Return types of advice (" + adviceMethod.FullName + ") and target (" + context.TargetMethodContext.TargetMethod.FullName + ") should be the same", context.TargetMethodContext.TargetMethod);
 
                     if (!context.IsAbortable && !adviceMethod.ReturnType.IsTypeOf(typeof(void)))
                         throw new CompilationException("Advice of InjectionPoints.Before without argument of AdviceArgumentSource.AbortFlag can be System.Void only", adviceMethod);
@@ -139,11 +138,13 @@ namespace AspectInjector.BuildTask
             }
         }
 
-        private static bool CheckFilter(MethodDefinition targetMethod, 
-            string targetName, 
+        private static bool CheckFilter(TargetMethodContext targetMethodContext,
+            string targetName,
             CustomAttribute aspectAttribute)
         {
             var result = true;
+
+            var targetMethod = targetMethodContext.TargetMethod;
 
             var nameFilter = (string)aspectAttribute.GetPropertyValue("NameFilter");
             object accessModifierFilterObject = aspectAttribute.GetPropertyValue("AccessModifierFilter");
@@ -181,8 +182,10 @@ namespace AspectInjector.BuildTask
             return result;
         }
 
-        private static bool CheckTarget(MethodDefinition targetMethod, InjectionTargets targets)
+        private static bool CheckTarget(TargetMethodContext targetMethodContext, InjectionTargets targets)
         {
+            var targetMethod = targetMethodContext.TargetMethod;
+
             if (targetMethod.IsAbstract || targetMethod.IsStatic)
             {
                 return false;
@@ -258,14 +261,14 @@ namespace AspectInjector.BuildTask
         private static void ValidateContexts(IEnumerable<InjectionContext> contexts)
         {
             var firstIncorrectMethod = contexts
-                .GroupBy(c => c.TargetMethod)
+                .GroupBy(c => c.TargetMethodContext)
                 .Where(g => g.Count(c => c.IsAbortable) > 1)
                 .Select(g => g.Key)
                 .FirstOrDefault();
 
             if (firstIncorrectMethod != null)
             {
-                throw new CompilationException("Method may have only one advice with argument of AdviceArgumentSource.AbortFlag applied to it", firstIncorrectMethod);
+                throw new CompilationException("Method may have only one advice with argument of AdviceArgumentSource.AbortFlag applied to it", firstIncorrectMethod.TargetMethod);
             }
         }
     }
