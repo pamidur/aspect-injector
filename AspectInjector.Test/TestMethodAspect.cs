@@ -71,6 +71,30 @@ namespace AspectInjector.Test
         }
     }
 
+    internal class MyClass
+    {
+        [Aspect(typeof(LogMethodCallAspect))]
+        public void Do()
+        {
+            Console.WriteLine("Here I am!");
+        }
+    }
+
+    internal class LogMethodCallAspect
+    {
+        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
+        public void BeforeMethod()
+        {
+            Console.WriteLine("Method executing");
+        }
+
+        [Advice(InjectionPoints.After, InjectionTargets.Method)]
+        public void AfterMethod()
+        {
+            Console.WriteLine("Method executed");
+        }
+    }
+
     internal class TestMethodAspect
     {
         //Property

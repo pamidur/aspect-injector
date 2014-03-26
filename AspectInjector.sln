@@ -24,6 +24,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{90FC
 		packagecontent\Version.txt = packagecontent\Version.txt
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
+	ProjectSection(SolutionItems) = preProject
+		documentation\Readme.md = documentation\Readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

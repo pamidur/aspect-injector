@@ -13,7 +13,7 @@ namespace AspectInjector.BuildTask
             if (!targetType.IsClass)
                 throw new NotSupportedException("Field creation supports only classes.");
 
-            var aspectPropertyName = "__a_" + aspectType.Name;
+            var aspectPropertyName = "__a$_" + aspectType.Name;
 
             var existingField = targetType.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType == aspectType);
 
