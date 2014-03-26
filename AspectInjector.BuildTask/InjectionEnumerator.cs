@@ -10,9 +10,11 @@ namespace AspectInjector.BuildTask
 {
     internal static class InjectionEnumerator
     {
-        public static ModuleDefinition ForEachInjection(this ModuleDefinition module, 
+        public static void ForEachInjection(this ModuleDefinition module, 
             Action<InjectionContext> injectionCallback)
         {
+            List<InjectionContext> contexts = new List<InjectionContext>();
+
             foreach (var @class in module.Types.Where(t => t.IsClass))
             {
                 var classAspectAttributes = @class.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
@@ -20,55 +22,68 @@ namespace AspectInjector.BuildTask
                 foreach (var method in @class.Methods.Where(m => !m.IsSetter && !m.IsGetter && !m.IsAddOn && !m.IsRemoveOn))
                 {
                     var methodAspectAttributes = method.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
-                    ProcessAspects(method, method.Name, classAspectAttributes.Union(methodAspectAttributes), injectionCallback);
+                    var allAspectAttributes = MergeAspectAttributes(classAspectAttributes, methodAspectAttributes).ToList();
+
+                    contexts.AddRange(ProcessAspects(method, method.Name, allAspectAttributes, injectionCallback));
                 }
 
                 foreach (var property in @class.Properties)
                 {
                     var propertyAspectAttributes = property.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
-                    var allAspectAttributes = propertyAspectAttributes.Union(classAspectAttributes).ToList();
+                    var allAspectAttributes = MergeAspectAttributes(classAspectAttributes, propertyAspectAttributes).ToList();
 
                     if (property.GetMethod != null)
                     {
-                        ProcessAspects(property.GetMethod, property.Name, allAspectAttributes, injectionCallback);
+                        contexts.AddRange(ProcessAspects(property.GetMethod, property.Name, allAspectAttributes, injectionCallback));
                     }
                     if (property.SetMethod != null)
                     {
-                        ProcessAspects(property.SetMethod, property.Name, allAspectAttributes, injectionCallback);
+                        contexts.AddRange(ProcessAspects(property.SetMethod, property.Name, allAspectAttributes, injectionCallback));
                     }
                 }
             }
 
-            return module;
+            ValidateContexts(contexts);
+            contexts.Sort();
+
+            contexts.ForEach(injectionCallback);
         }
 
-        private static void ProcessAspects(MethodDefinition targetMethod, 
+        private static IEnumerable<CustomAttribute> MergeAspectAttributes(IEnumerable<CustomAttribute> classAttributes,
+            IEnumerable<CustomAttribute> memberAttributes)
+        {
+            return classAttributes
+                .Except(memberAttributes, new AspectAttributeEqualityComparer())
+                .Union(memberAttributes);
+        }
+
+        private static IEnumerable<InjectionContext> ProcessAspects(MethodDefinition targetMethod, 
             string targetName, 
             IEnumerable<CustomAttribute> aspectAttributes,
             Action<InjectionContext> injectionCallback)
         {
-            aspectAttributes.Where(a => CheckFilter(targetMethod, targetName, a))
+            return aspectAttributes.Where(a => CheckFilter(targetMethod, targetName, a))
                 .Select(a => new InjectionContext() 
                 { 
                     TargetMethod = targetMethod, 
                     TargetName = targetName, 
                     AspectType = (TypeDefinition)a.ConstructorArguments[0].Value 
                 })
-                .ToList()
-                .ForEach(c => ProcessAdvices(c, injectionCallback));
+                .SelectMany(ProcessAdvices);
         }
 
-        private static void ProcessAdvices(InjectionContext parentContext,
-            Action<InjectionContext> injectionCallback)
+        private static IEnumerable<InjectionContext> ProcessAdvices(InjectionContext parentContext)
         {
             foreach (var adviceMethod in GetAdviceMethods(parentContext.AspectType))
             {
-                ProcessAdvice(adviceMethod, injectionCallback, parentContext);
+                foreach (var context in ProcessAdvice(adviceMethod, parentContext))
+                {
+                    yield return context;
+                }
             }
         }
 
-        private static void ProcessAdvice(MethodDefinition adviceMethod,
-            Action<InjectionContext> injectionCallback,
+        private static IEnumerable<InjectionContext> ProcessAdvice(MethodDefinition adviceMethod,
             InjectionContext parentContext)
         {
             var adviceAttribute = adviceMethod.CustomAttributes.GetAttributeOfType<AdviceAttribute>();
@@ -105,7 +120,7 @@ namespace AspectInjector.BuildTask
                     context.InjectionPoint = InjectionPoints.After;
                 }
 
-                injectionCallback(context);
+                yield return context;
             }
         }
 
@@ -222,6 +237,20 @@ namespace AspectInjector.BuildTask
                 }
 
                 yield return source;
+            }
+        }
+
+        private static void ValidateContexts(IEnumerable<InjectionContext> contexts)
+        {
+            var firstIncorrectMethod = contexts
+                .GroupBy(c => c.TargetMethod)
+                .Where(g => g.Count(c => c.IsAbortable) > 1)
+                .Select(g => g.Key)
+                .FirstOrDefault();
+
+            if (firstIncorrectMethod != null)
+            {
+                throw new CompilationException("Method may have only one advice with argument of AdviceArgumentSource.AbortFlag applied to it", firstIncorrectMethod);
             }
         }
     }

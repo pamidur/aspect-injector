@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="AdviceInjector.cs" />
     <Compile Include="AdviceInterfaceProxyInjector.cs" />
+    <Compile Include="AspectAttributeEqualityComparer.cs" />
     <Compile Include="InjectionEnumerator.cs" />
     <Compile Include="AspectProcessor.cs" />
     <Compile Include="AspectInjectorBuildTask.cs" />

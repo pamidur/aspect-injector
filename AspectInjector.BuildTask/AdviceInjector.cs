@@ -23,15 +23,11 @@ namespace AspectInjector.BuildTask
             FieldReference aspectInstanceField = GetOrCreateAspectReference(context.TargetMethod.DeclaringType, context.AspectType);
 
             Instruction returnPoint = context.TargetMethod.Body.Instructions.Single(i => i.OpCode == OpCodes.Ret);
-            Instruction preReturnPoint = returnPoint.Previous;
-            if (preReturnPoint.OpCode != OpCodes.Nop)
-            {
-                Instruction newRet = processor.Create(OpCodes.Ret);
-                preReturnPoint = processor.Create(OpCodes.Nop);
-                processor.InsertAfter(returnPoint, newRet);
-                processor.Replace(returnPoint, preReturnPoint);
-                returnPoint = newRet;
-            }
+            Instruction newRet = processor.Create(OpCodes.Ret);
+            Instruction preReturnPoint = processor.Create(OpCodes.Nop);
+            processor.InsertAfter(returnPoint, newRet);
+            processor.Replace(returnPoint, preReturnPoint);
+            returnPoint = newRet;
 
             Instruction entryPoint = context.TargetMethod.Body.Instructions.First();
 
