@@ -8,6 +8,21 @@ namespace AspectInjector.Test
         {
             TestInterfaceInjection();
             TestMethodInjection();
+
+            StringComparer b = default(StringComparer);
+
+            var a = false;
+
+            a = true;
+
+            if (a == true)
+                return;
+
+            Ololo(ref a);
+        }
+
+        private static void Ololo(ref bool dd)
+        {
         }
 
         private static void TestInterfaceInjection()
@@ -37,7 +52,8 @@ namespace AspectInjector.Test
 
             testMethod.TestEvent += (s, e) => { };
             testMethod.TestEvent -= (s, e) => { };
-            testMethod.TestMethod("");
+            testMethod.TestMethodAAA("");
+            testMethod.TestMethodFiltered2();
             testMethod.TestProperty = 0;
             var a = testMethod.TestProperty;
         }

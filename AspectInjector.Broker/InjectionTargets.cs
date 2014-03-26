@@ -3,7 +3,7 @@
 namespace AspectInjector.Broker
 {
     [Flags]
-    public enum InjectionTarget
+    public enum InjectionTargets
     {
         Constructor = 1,
         Method = 2,

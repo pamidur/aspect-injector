@@ -3,7 +3,7 @@
 namespace AspectInjector.Broker
 {
     [Flags]
-    public enum InjectionPoint
+    public enum InjectionPoints
     {
         Before = 1,
         After = 2

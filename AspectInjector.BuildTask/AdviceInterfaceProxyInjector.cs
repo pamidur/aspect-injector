@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Broker;
+using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
-using System;
+using Mono.Cecil.Cil;
 using System.Linq;
 
 namespace AspectInjector.BuildTask
@@ -31,8 +32,6 @@ namespace AspectInjector.BuildTask
 
                     InjectAspectIntoClass(@class, aspect.type);
                 }
-
-                //todo:: cleanup aspects
             }
         }
 
@@ -48,7 +47,7 @@ namespace AspectInjector.BuildTask
                 //todo:: process other InterfaceProxyInjectionAttribute parameters
 
                 if (classDefinition.ImplementsInterface(interfaceReference))
-                    throw new InvalidOperationException(classDefinition.Name + " already implements " + interfaceReference.Name);
+                    throw new CompilationException(classDefinition.Name + " already implements " + interfaceReference.Name, classDefinition);
 
                 InjectInterfaceProxyIntoClass(classDefinition, aspectDefinition, interfaceReference.Resolve());
             }
@@ -57,10 +56,10 @@ namespace AspectInjector.BuildTask
         protected virtual void InjectInterfaceProxyIntoClass(TypeDefinition classDefinition, TypeDefinition aspectDefinition, TypeDefinition interfaceDefinition)
         {
             if (!interfaceDefinition.IsInterface)
-                throw new NotSupportedException(interfaceDefinition.Name + " is not an interface on interface injection definition on acpect " + aspectDefinition.Name);
+                throw new CompilationException(interfaceDefinition.Name + " is not an interface on interface injection definition on acpect " + aspectDefinition.Name, aspectDefinition);
 
             if (!aspectDefinition.ImplementsInterface(interfaceDefinition))
-                throw new InvalidOperationException(aspectDefinition.Name + " should implement " + interfaceDefinition.Name);
+                throw new CompilationException(aspectDefinition.Name + " should implement " + interfaceDefinition.Name, aspectDefinition);
 
             var ifaces = interfaceDefinition.GetInterfacesTree();
 
@@ -79,6 +78,82 @@ namespace AspectInjector.BuildTask
 
             foreach (var property in properties)
                 GetOrCreatePropertyProxy(classDefinition, aspectDefinition, property);
+        }
+
+        protected PropertyDefinition GetOrCreatePropertyProxy(TypeDefinition targetType, TypeDefinition sourceType, PropertyDefinition originalProperty)
+        {
+            var newGetMethod = GetOrCreateMethodProxy(targetType, sourceType, originalProperty.GetMethod);
+            var newSetMethod = GetOrCreateMethodProxy(targetType, sourceType, originalProperty.SetMethod);
+
+            var pd = new PropertyDefinition(originalProperty.Name, PropertyAttributes.None, targetType.Module.Import(originalProperty.PropertyType));
+            pd.GetMethod = newGetMethod;
+            pd.SetMethod = newSetMethod;
+
+            targetType.Properties.Add(pd);
+
+            return pd;
+        }
+
+        protected EventDefinition GetOrCreateEventProxy(TypeDefinition targetType, TypeDefinition sourceType, EventDefinition originalEvent)
+        {
+            var newAddMethod = GetOrCreateMethodProxy(targetType, sourceType, originalEvent.AddMethod);
+            var newRemoveMethod = GetOrCreateMethodProxy(targetType, sourceType, originalEvent.RemoveMethod);
+
+            var ed = new EventDefinition(originalEvent.Name, EventAttributes.None, targetType.Module.Import(originalEvent.EventType));
+            ed.AddMethod = newAddMethod;
+            ed.RemoveMethod = newRemoveMethod;
+
+            targetType.Events.Add(ed);
+
+            return ed;
+        }
+
+        protected MethodDefinition GetOrCreateMethodProxy(TypeDefinition targetType, TypeDefinition sourceType, MethodDefinition interfaceMethodDefinition)
+        {
+            var methodName = interfaceMethodDefinition.DeclaringType.FullName + "." + interfaceMethodDefinition.Name;
+
+            var existedMethod = targetType.Methods.FirstOrDefault(m => m.Name == methodName && m.SignatureMatches(interfaceMethodDefinition));
+            if (existedMethod != null)
+                return existedMethod;
+
+            var md = new MethodDefinition(methodName
+                , MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
+                , targetType.Module.Import(interfaceMethodDefinition.ReturnType));
+
+            if (interfaceMethodDefinition.IsSpecialName)
+                md.IsSpecialName = true;
+
+            md.Overrides.Add(targetType.Module.Import(interfaceMethodDefinition));
+            targetType.Methods.Add(md);
+
+            foreach (var parameter in interfaceMethodDefinition.Parameters)
+                md.Parameters.Add(parameter);
+
+            foreach (var genericParameter in interfaceMethodDefinition.GenericParameters)
+                md.GenericParameters.Add(genericParameter);
+
+            var aspectField = GetOrCreateAspectReference(targetType, sourceType);
+
+            var processor = md.Body.GetILProcessor();
+            processor.Append(processor.Create(OpCodes.Nop));
+
+            var retCode = processor.Create(OpCodes.Ret);
+            processor.Append(retCode);
+
+            InjectMethodCall(processor, retCode, aspectField, interfaceMethodDefinition, md.Parameters.ToArray());
+
+            if (!interfaceMethodDefinition.ReturnType.IsTypeOf(typeof(void)))
+            {
+                md.Body.InitLocals = true;
+                md.Body.Variables.Add(new VariableDefinition(targetType.Module.Import(interfaceMethodDefinition.ReturnType)));
+
+                processor.InsertBefore(retCode, processor.Create(OpCodes.Stloc_0));
+                var loadresultIstruction = processor.Create(OpCodes.Ldloc_0);
+                processor.InsertBefore(retCode, loadresultIstruction);
+                processor.InsertBefore(loadresultIstruction, processor.Create(OpCodes.Br_S, loadresultIstruction));
+            }
+
+            return md;
         }
     }
 }

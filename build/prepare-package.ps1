@@ -25,6 +25,7 @@ Copy-Item "packagecontent\AspectInjector.nuspec" $packageBuildPlace
 Copy-Item "packagecontent\AspectInjector.targets" $targetsDir
 Copy-Item "packagecontent\AspectInjector.props" $targetsDir
 Copy-Item "packagecontent\install.ps1" $toolsDir
+Copy-Item "documentation\readme.md" (join-path $packageBuildPlace "readme.txt" )
 Get-ChildItem $binDir -Filter "*.dll" -Recurse | %{ Copy-Item $_.Fullname $targetsDir }
 Copy-Item (Join-Path $binDir "AspectInjector.Broker.dll") $libDir
 

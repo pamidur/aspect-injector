@@ -49,7 +49,7 @@ namespace AspectInjector.BuildTask
 
                 Console.WriteLine("Assembly has been loaded");
 
-                var injector = new AspectInjector();
+                var injector = new AspectProcessor();
                 injector.Process(assembly);
 
                 Console.WriteLine("Assembly has been patched");
@@ -62,9 +62,21 @@ namespace AspectInjector.BuildTask
 
                 Console.WriteLine("Assembly has been written");
             }
+            catch (CompilationException ce)
+            {
+                this.Log.LogError("Compilation exception", null, null,
+                    ce.SequencePoint.Document.Url,
+                    ce.SequencePoint.StartLine,
+                    ce.SequencePoint.StartColumn,
+                    ce.SequencePoint.EndLine,
+                    ce.SequencePoint.EndColumn,
+                    ce.Message);
+                Console.Error.WriteLine(ce.Message);
+                return false;
+            }
             catch (Exception e)
             {
-                this.Log.LogErrorFromException(e, false, true, null);
+                this.Log.LogErrorFromException(e, true, true, null);
                 Console.Error.WriteLine(e.Message);
                 return false;
             }

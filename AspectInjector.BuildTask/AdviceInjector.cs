@@ -1,183 +1,147 @@
 ﻿using AspectInjector.Broker;
+using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.BuildTask
 {
-    public class AdviceInjector : InjectorBase, IModuleProcessor
+    internal class AdviceInjector : InjectorBase, IModuleProcessor
     {
+        private static readonly string _abortFlagVariableName = "__a$_do_abort_method";
+        private static readonly string _abortResultVariableName = "__a$_abort_method_result";
+
         public virtual void ProcessModule(ModuleDefinition module)
         {
-            foreach (var @class in module.Types.Where(t => t.IsClass))
+            var contexts = module.GetInjectionContexts();
+
+            foreach (var context in contexts)
             {
-                var classAspectAttributes = @class.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
-
-                foreach (var method in @class.Methods.Where(m => !m.IsSetter && !m.IsGetter))
-                {
-                    var methodAspectAttributes = method.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
-                    ProcessMethod(method, method.Name, classAspectAttributes.Union(methodAspectAttributes));
-                    methodAspectAttributes.ForEach(a => method.CustomAttributes.Remove(a));
-                }
-
-                foreach (var property in @class.Properties)
-                {
-                    var propertyAspectAttributes = property.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
-                    var allAspectAttributes = propertyAspectAttributes.Union(classAspectAttributes).ToList();
-
-                    if (property.GetMethod != null)
-                    {
-                        ProcessMethod(property.GetMethod, property.Name, allAspectAttributes);
-                    }
-                    if (property.SetMethod != null)
-                    {
-                        ProcessMethod(property.SetMethod, property.Name, allAspectAttributes);
-                    }
-
-                    propertyAspectAttributes.ForEach(a => property.CustomAttributes.Remove(a));
-                }
-
-                classAspectAttributes.ForEach(a => @class.CustomAttributes.Remove(a));
+                InjectAdvice(context);
             }
         }
 
-        private void ProcessMethod(MethodDefinition targetMethod,
-            string targetName,
-            IEnumerable<CustomAttribute> aspectAttributes)
+        private void InjectAdvice(InjectionContext context)
         {
-            foreach (var aspectAttribute in aspectAttributes)
-            {
-                var aspectType = (TypeDefinition)aspectAttribute.ConstructorArguments.First().Value;
-                var aspectInstanceField = GetOrCreateAspectReference(targetMethod.DeclaringType, aspectType);
+            ILProcessor processor = context.TargetMethodContext.Processor;
+            FieldReference aspectInstanceField = GetOrCreateAspectReference(context.TargetMethodContext.TargetMethod.DeclaringType, context.AspectType);
 
-                foreach (var adviceMethod in GetAdviceMethods(aspectType))
-                {
-                    ProcessAdvice(adviceMethod, aspectInstanceField, targetMethod, targetName);
-                }
+            if (context.IsAbortable)
+            {
+                InjectMethodCallWithResultReplacement(
+                    context,
+                    context.TargetMethodContext.OriginalEntryPoint,
+                    context.TargetMethodContext.OriginalReturnPoint,
+                    aspectInstanceField);
+            }
+            else
+            {
+                InjectMethodCall(
+                    processor,
+                    context.InjectionPoint == InjectionPoints.Before ?
+                        context.TargetMethodContext.OriginalEntryPoint :
+                        context.TargetMethodContext.ReturnPoint,
+                    aspectInstanceField,
+                    context.AdviceMethod,
+                    GetAdviceArgumentsValues(context, null).ToArray());
             }
         }
 
-        private void ProcessAdvice(MethodDefinition adviceMethod,
-            FieldReference aspectInstanceField,
-            MethodDefinition targetMethod,
-            string targetName)
+        private void InjectMethodCallWithResultReplacement(InjectionContext context,
+            Instruction injectionPoint,
+            Instruction returnPoint,
+            FieldReference sourceMember)
         {
-            var adviceAttribute = adviceMethod.CustomAttributes.GetAttributeOfType<AdviceAttribute>();
+            MethodDefinition targetMethod = context.TargetMethodContext.TargetMethod;
+            MethodDefinition method = context.AdviceMethod;
+            ILProcessor processor = context.TargetMethodContext.Processor;
 
-            //todo:: rethink getting attribute parameters
-            var targetsObject = adviceAttribute.Properties.Where(p => p.Name == "Targets").Select(p => p.Argument.Value).FirstOrDefault();
-            var targets = (InjectionTarget)(targetsObject ?? InjectionTarget.Constructor | InjectionTarget.Getter | InjectionTarget.Method | InjectionTarget.Setter);
-
-            var pointsObject = adviceAttribute.Properties.Where(p => p.Name == "Points").Select(p => p.Argument.Value).FirstOrDefault();
-            var points = (InjectionPoint)(pointsObject ?? InjectionPoint.After | InjectionPoint.Before);
-
-            if (CheckTargetMethod(targetMethod, targets))
+            VariableDefinition abortFlagVariable = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == _abortFlagVariableName);
+            if (abortFlagVariable == null)
             {
-                if ((points & InjectionPoint.Before) != 0)
+                abortFlagVariable = processor.CreateLocalVariable(
+                    injectionPoint,
+                    context.TargetMethodContext.TargetMethod.Module.TypeSystem.Boolean,
+                    false,
+                    _abortFlagVariableName);
+            }
+            else
+            {
+                processor.SetLocalVariable(abortFlagVariable, injectionPoint, false);
+            }
+
+            VariableDefinition resultVariable = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == _abortResultVariableName);
+            if (resultVariable == null && !method.ReturnType.IsTypeOf(typeof(void)))
+            {
+                if (method.ReturnType.IsValueType)
                 {
-                    InjectAdvice(aspectInstanceField,
-                        adviceMethod,
-                        targetMethod,
-                        targetName,
-                        targetMethod.Body.Instructions.First());
+                    resultVariable = processor.CreateLocalVariable(
+                        injectionPoint,
+                        targetMethod.Module.Import(method.ReturnType),
+                        0,
+                        _abortResultVariableName);
                 }
-                if ((points & InjectionPoint.After) != 0)
+                else
                 {
-                    InjectAdvice(aspectInstanceField,
-                        adviceMethod,
-                        targetMethod,
-                        targetName,
-                        targetMethod.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).First());
+                    resultVariable = processor.CreateLocalVariable<object>(
+                        injectionPoint,
+                        targetMethod.Module.Import(method.ReturnType),
+                        null,
+                        _abortResultVariableName);
                 }
             }
+
+            InjectMethodCall(processor,
+                injectionPoint,
+                sourceMember,
+                method,
+                GetAdviceArgumentsValues(context, abortFlagVariable).ToArray());
+
+            if (!method.ReturnType.IsTypeOf(typeof(void)))
+            {
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, resultVariable.Index));
+            }
+
+            processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, abortFlagVariable.Index));
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldc_I4_1));
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ceq));
+
+            Instruction continuePoint = processor.Create(OpCodes.Nop);
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Brfalse_S, continuePoint));
+
+            if (!method.ReturnType.IsTypeOf(typeof(void)))
+            {
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, resultVariable.Index));
+            }
+
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Br_S, returnPoint));
+            processor.InsertBefore(injectionPoint, continuePoint);
         }
 
-        private void InjectAdvice(FieldReference aspectInstanceField,
-            MethodDefinition adviceMethod,
-            MethodDefinition targetMethod,
-            string targetName,
-            Instruction lastInstruction)
+        private IEnumerable<object> GetAdviceArgumentsValues(InjectionContext context, VariableDefinition abortFlagVariable)
         {
-            ILProcessor processor = targetMethod.Body.GetILProcessor();
-            processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Nop));
-            processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Ldarg_0));
-            processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Ldfld, aspectInstanceField));
-
-            foreach (var argument in adviceMethod.Parameters)
+            foreach (var argumentSource in context.AdviceArgumentsSources)
             {
-                var argumentAttribute = argument.CustomAttributes.GetAttributeOfType<AdviceArgumentAttribute>();
-                if (argumentAttribute == null)
-                {
-                    throw new NotSupportedException("Unbound advice arguments are not supported");
-                }
-
-                var source = (AdviceArgumentSource)argumentAttribute.Properties.Where(p => p.Name == "Source").Select(p => p.Argument.Value).First();
-                switch (source)
+                switch (argumentSource)
                 {
                     case AdviceArgumentSource.Instance:
-                        if (!argument.ParameterType.IsType(typeof(object)))
-                        {
-                            //todo:: throw appropriate exception
-                        }
-                        processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Ldarg_0));
+                        yield return Markers.InstanceSelfMarker;
                         break;
 
                     case AdviceArgumentSource.TargetArguments:
-                        throw new NotSupportedException("Bindind of method arguments to advice arguments is not supported yet");
+                        yield return context.TargetMethodContext.TargetMethod.Parameters.ToArray();
+                        break;
 
                     case AdviceArgumentSource.TargetName:
-                        if (!argument.ParameterType.IsType(typeof(string)))
-                        {
-                            //todo:: throw appropriate exception
-                        }
-                        processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Ldstr, targetName));
+                        yield return context.TargetName;
+                        break;
+
+                    case AdviceArgumentSource.AbortFlag:
+                        yield return abortFlagVariable;
                         break;
                 }
             }
-
-            processor.InsertBefore(lastInstruction, processor.Create(OpCodes.Callvirt, adviceMethod));
-        }
-
-        private IEnumerable<MethodDefinition> GetAdviceMethods(TypeDefinition aspectType)
-        {
-            return aspectType.Methods.Where(m => m.CustomAttributes.HasAttributeOfType<AdviceAttribute>());
-        }
-
-        private bool CheckTargetMethod(MethodDefinition targetMethod, InjectionTarget targets)
-        {
-            if (targetMethod.IsAbstract || targetMethod.IsStatic)
-            {
-                return false;
-            }
-
-            if (targetMethod.IsConstructor)
-            {
-                return (targets & InjectionTarget.Constructor) != 0;
-            }
-
-            if (targetMethod.IsGetter)
-            {
-                return (targets & InjectionTarget.Getter) != 0;
-            }
-
-            if (targetMethod.IsSetter)
-            {
-                return (targets & InjectionTarget.Setter) != 0;
-            }
-
-            if (targetMethod.IsAddOn)
-            {
-                return (targets & InjectionTarget.EventAdd) != 0;
-            }
-
-            if (targetMethod.IsRemoveOn)
-            {
-                return (targets & InjectionTarget.EventRemove) != 0;
-            }
-
-            return (targets & InjectionTarget.Method) != 0;
         }
     }
 }
