@@ -5,7 +5,7 @@ using System.Text;
 namespace AspectInjector.Test
 {
     //[Aspect(typeof(TestMethodFilteredAspect), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public)]
-    [Aspect(typeof(TestMethodFilteredAspect2), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public)]
+    [Aspect(typeof(TestMethodFilteredAspect2), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public, CustomData = new object[] { "ololo", typeof(StringBuilder), 34, new object[] { 12, 31 } })]
     internal class TestMethodClass
     {
         private readonly StringBuilder b = new StringBuilder();
@@ -62,7 +62,9 @@ namespace AspectInjector.Test
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public int BeforeMethod(
-            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
+            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort,
+            [AdviceArgument(AdviceArgumentSource.CustomData)] object[] cdata
+
             )
         {
             return 2;

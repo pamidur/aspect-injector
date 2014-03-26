@@ -12,6 +12,8 @@ namespace AspectInjector.BuildTask
 
         public string TargetName { get; set; }
 
+        public object[] AspectCustomData { get; set; }
+
         public TargetMethodContext TargetMethodContext { get; set; }
 
         public MethodDefinition AdviceMethod { get; set; }

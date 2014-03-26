@@ -6,7 +6,11 @@ namespace AspectInjector.Broker
     public class AspectAttribute : Attribute
     {
         public Type Type { get; private set; }
+
         public string NameFilter { get; set; }
+
+        public object[] CustomData { get; set; }
+
         public AccessModifiers AccessModifierFilter { get; set; }
 
         public AspectAttribute(Type aspectType)
