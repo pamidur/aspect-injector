@@ -41,6 +41,21 @@ namespace AspectInjector.BuildTask
                         contexts.AddRange(ProcessAspects(property.SetMethod, property.Name, allAspectAttributes, injectionCallback));
                     }
                 }
+
+                foreach (var @event in @class.Events)
+                {
+                    var eventAspectAttributes = @event.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
+                    var allAspectAttributes = MergeAspectAttributes(classAspectAttributes, eventAspectAttributes).ToList();
+
+                    if (@event.AddMethod != null)
+                    {
+                        contexts.AddRange(ProcessAspects(@event.AddMethod, @event.Name, allAspectAttributes, injectionCallback));
+                    }
+                    if (@event.RemoveMethod != null)
+                    {
+                        contexts.AddRange(ProcessAspects(@event.RemoveMethod, @event.Name, allAspectAttributes, injectionCallback));
+                    }
+                }
             }
 
             ValidateContexts(contexts);
