@@ -44,10 +44,7 @@ namespace AspectInjector.BuildTask
             foreach (var interfaceInjectionDefinition in interfaceInjectionDefinitions)
             {
                 var interfaceReference = interfaceInjectionDefinition.@interface;
-                //todo:: process other InterfaceProxyInjectionAttribute parameters
-
-                if (classDefinition.ImplementsInterface(interfaceReference))
-                    throw new CompilationException(classDefinition.Name + " already implements " + interfaceReference.Name, classDefinition);
+                //todo:: process other InterfaceProxyInjectionAttribute parameters        
 
                 InjectInterfaceProxyIntoClass(classDefinition, aspectDefinition, interfaceReference.Resolve());
             }
@@ -61,10 +58,18 @@ namespace AspectInjector.BuildTask
             if (!aspectDefinition.ImplementsInterface(interfaceDefinition))
                 throw new CompilationException(aspectDefinition.Name + " should implement " + interfaceDefinition.Name, aspectDefinition);
 
-            var ifaces = interfaceDefinition.GetInterfacesTree();
+            if (!classDefinition.ImplementsInterface(interfaceDefinition))
+            {
+                var ifaces = interfaceDefinition.GetInterfacesTree();
 
-            foreach (var iface in ifaces)
-                classDefinition.Interfaces.Add(classDefinition.Module.Import(iface));
+                foreach (var iface in ifaces)
+                    classDefinition.Interfaces.Add(classDefinition.Module.Import(iface));
+            }
+            else if (!classDefinition.Interfaces.Contains(interfaceDefinition))
+            {
+                //In order to behave the same as csc
+                classDefinition.Interfaces.Add(interfaceDefinition);
+            }
 
             var methods = interfaceDefinition.GetInterfaceTreeMemebers(td => td.Methods).Where(m => !m.IsAddOn && !m.IsRemoveOn && !m.IsSetter && !m.IsGetter);
             var properties = interfaceDefinition.GetInterfaceTreeMemebers(td => td.Properties);

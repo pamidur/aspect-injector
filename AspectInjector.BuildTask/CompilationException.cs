@@ -14,12 +14,12 @@ namespace AspectInjector.BuildTask
         }
 
         public CompilationException(string message, MethodReference mr)
-            : this(message, mr.Resolve().Body.Instructions.First(i => i.SequencePoint != null).SequencePoint)
+            : this(message, mr != null ? mr.Resolve().Body.Instructions.FirstOrDefault(i => i.SequencePoint != null).SequencePoint : null)
         {
         }
 
         public CompilationException(string message, TypeReference tr)
-            : this(message, tr.Resolve().Methods.First(m => m.Body.Instructions.Any(i => i.SequencePoint != null)))
+            : this(message, tr != null ? tr.Resolve().Methods.FirstOrDefault(m => m.Body.Instructions.Any(i => i.SequencePoint != null)) : null)
         {
         }
 
