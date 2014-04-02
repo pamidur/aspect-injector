@@ -22,7 +22,7 @@ namespace AspectInjector.BuildTask
                     var methodAspectAttributes = method.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
                     var allAspectAttributes = MergeAspectAttributes(classAspectAttributes, methodAspectAttributes).ToList();
 
-                    contexts.AddRange(ProcessAspects(method, method.Name, allAspectAttributes));
+                    contexts.AddRange(ProcessAspectAttributes(method, method.Name, allAspectAttributes));
                 }
 
                 foreach (var property in @class.Properties)
@@ -32,11 +32,11 @@ namespace AspectInjector.BuildTask
 
                     if (property.GetMethod != null)
                     {
-                        contexts.AddRange(ProcessAspects(property.GetMethod, property.Name, allAspectAttributes));
+                        contexts.AddRange(ProcessAspectAttributes(property.GetMethod, property.Name, allAspectAttributes));
                     }
                     if (property.SetMethod != null)
                     {
-                        contexts.AddRange(ProcessAspects(property.SetMethod, property.Name, allAspectAttributes));
+                        contexts.AddRange(ProcessAspectAttributes(property.SetMethod, property.Name, allAspectAttributes));
                     }
                 }
 
@@ -47,11 +47,11 @@ namespace AspectInjector.BuildTask
 
                     if (@event.AddMethod != null)
                     {
-                        contexts.AddRange(ProcessAspects(@event.AddMethod, @event.Name, allAspectAttributes));
+                        contexts.AddRange(ProcessAspectAttributes(@event.AddMethod, @event.Name, allAspectAttributes));
                     }
                     if (@event.RemoveMethod != null)
                     {
-                        contexts.AddRange(ProcessAspects(@event.RemoveMethod, @event.Name, allAspectAttributes));
+                        contexts.AddRange(ProcessAspectAttributes(@event.RemoveMethod, @event.Name, allAspectAttributes));
                     }
                 }
             }
@@ -70,7 +70,7 @@ namespace AspectInjector.BuildTask
                 .Union(memberAttributes);
         }
 
-        private static IEnumerable<InjectionContext> ProcessAspects(MethodDefinition targetMethod,
+        private static IEnumerable<InjectionContext> ProcessAspectAttributes(MethodDefinition targetMethod,
             string targetName,
             IEnumerable<CustomAttribute> aspectAttributes)
         {
@@ -81,12 +81,13 @@ namespace AspectInjector.BuildTask
                 {
                     TargetMethodContext = targetMethodContext,
                     TargetName = targetName,
-                    AspectType = (TypeDefinition)a.ConstructorArguments[0].Value
+                    AspectType = (TypeDefinition)a.ConstructorArguments[0].Value,
+                    //AspectCustomData = (object[])(a.GetPropertyValue("CustomData") ?? new object[] { })
                 })
-                .SelectMany(ProcessAdvices);
+                .SelectMany(ProcessAspect);
         }
 
-        private static IEnumerable<InjectionContext> ProcessAdvices(InjectionContext parentContext)
+        private static IEnumerable<InjectionContext> ProcessAspect(InjectionContext parentContext)
         {
             foreach (var adviceMethod in GetAdviceMethods(parentContext.AspectType))
             {
@@ -132,6 +133,11 @@ namespace AspectInjector.BuildTask
                         throw new CompilationException("Method should have a return value and inject into InjectionPoints.Before in order to use AdviceArgumentSource.AbortFlag", adviceMethod);
 
                     context.InjectionPoint = InjectionPoints.After;
+                }
+
+                if ((points & InjectionPoints.Exception) != 0)
+                {
+                    throw new CompilationException("InjectionPoints.Exception not supported yet", adviceMethod);
                 }
 
                 yield return context;
@@ -252,6 +258,15 @@ namespace AspectInjector.BuildTask
                 {
                     if (!argument.ParameterType.IsTypeOf(new ByReferenceType(adviceMethod.Module.TypeSystem.Boolean)))
                         throw new CompilationException("Argument should be of type ref System.Boolean to inject AdviceArgumentSource.AbortFlag", adviceMethod);
+                }
+                else if (source == AdviceArgumentSource.ReturningValue)
+                {
+                    throw new CompilationException("AdviceArgumentSource.ReturningValue is not supported yet. Reserved to inspect returning value on after methods", adviceMethod);
+                }
+                else if (source == AdviceArgumentSource.CustomData)
+                {
+                    if (!argument.ParameterType.IsTypeOf(new ArrayType(adviceMethod.Module.TypeSystem.Object)))
+                        throw new CompilationException("Argument should be of type System.Array<System.Object> to inject AdviceArgumentSource.CustomData", adviceMethod);
                 }
 
                 yield return source;

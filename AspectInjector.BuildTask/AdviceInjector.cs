@@ -140,6 +140,10 @@ namespace AspectInjector.BuildTask
                     case AdviceArgumentSource.AbortFlag:
                         yield return abortFlagVariable;
                         break;
+
+                    case AdviceArgumentSource.CustomData:
+                        yield return context.AspectCustomData;
+                        break;
                 }
             }
         }

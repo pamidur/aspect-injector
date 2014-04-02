@@ -11,6 +11,10 @@ namespace AspectInjector.BuildTask
             TargetMethod = targetMethod;
             Processor = TargetMethod.Body.GetILProcessor();
             OriginalEntryPoint = TargetMethod.Body.Instructions.First();
+
+            if (TargetMethod.Body.Instructions.All(i => i.OpCode != OpCodes.Ret))
+                Processor.Append(Processor.Create(OpCodes.Ret));
+
             OriginalReturnPoint = TargetMethod.Body.Instructions.Single(i => i.OpCode == OpCodes.Ret);
         }
 

@@ -15,12 +15,12 @@ namespace AspectInjector.BuildTask
 
             var aspectPropertyName = "__a$_" + aspectType.Name;
 
-            var existingField = targetType.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType == aspectType);
+            var existingField = FindExistingAspectReference(targetType, aspectType, aspectPropertyName);
 
             if (existingField != null)
                 return existingField;
 
-            var fd = new FieldDefinition(aspectPropertyName, FieldAttributes.Private | FieldAttributes.InitOnly, targetType.Module.Import(aspectType));
+            var fd = new FieldDefinition(aspectPropertyName, /*FieldAttributes.Family*/ FieldAttributes.Private | FieldAttributes.InitOnly, targetType.Module.Import(aspectType));
 
             var constructors = targetType.Methods.Where(m => m.IsConstructor && !m.IsStatic);
 
@@ -39,6 +39,16 @@ namespace AspectInjector.BuildTask
             targetType.Fields.Add(fd);
 
             return fd;
+        }
+
+        private static FieldDefinition FindExistingAspectReference(TypeDefinition targetType, TypeDefinition aspectType, string aspectPropertyName)
+        {
+            var existingField = targetType.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType == aspectType);
+
+            //if (existingField == null && !targetType.BaseType.IsTypeOf(targetType.Module.TypeSystem.Object))
+            //    existingField = FindExistingAspectReference(targetType.BaseType.Resolve(), aspectType, aspectPropertyName);
+
+            return existingField;
         }
 
         protected void InjectMethodCall(ILProcessor processor, Instruction injectionPoint, MemberReference sourceMember, MethodDefinition method, object[] arguments)
@@ -70,7 +80,7 @@ namespace AspectInjector.BuildTask
             for (int i = 0; i < method.Parameters.Count; i++)
                 LoadCallArgument(processor, injectionPoint, arguments[i], method.Parameters[i].ParameterType);
 
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Callvirt, method));
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Callvirt, processor.Body.Method.Module.Import(method)));
         }
 
         protected void LoadCallArgument(ILProcessor processor, Instruction injectionPoint, object arg, TypeReference expectedType)

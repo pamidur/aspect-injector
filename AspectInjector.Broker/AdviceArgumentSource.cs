@@ -5,6 +5,8 @@
         Instance,
         TargetName,
         TargetArguments,
-        AbortFlag
+        AbortFlag,
+        ReturningValue,
+        CustomData
     }
 }

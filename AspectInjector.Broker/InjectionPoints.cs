@@ -6,6 +6,7 @@ namespace AspectInjector.Broker
     public enum InjectionPoints
     {
         Before = 1,
-        After = 2
+        After = 2,
+        Exception = 4
     }
 }
