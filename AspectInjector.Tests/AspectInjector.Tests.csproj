@@ -50,13 +50,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="AspectFactoryMethodTests.cs" />
-    <Compile Include="AspectInheritanceTests.cs" />
-    <Compile Include="Checker.cs" />
-    <Compile Include="InterfaceInjectionInheritanceTests.cs" />
-    <Compile Include="InterfaceInjectionTests.cs" />
+    <Compile Include="AdviceInjectionTests\AspectFactoryMethodTests.cs" />
+    <Compile Include="Utils\Checker.cs" />
+    <Compile Include="AdviceInjectionTests\InjectionAdviceBeforeOrderTests.cs" />
+    <Compile Include="AdviceInjectionTests\InjectionAdviceBeforeTests.cs" />
+    <Compile Include="InterfaceInjectionTests\InterfaceInjectionInheritanceTests.cs" />
+    <Compile Include="InterfaceInjectionTests\InterfaceInjectionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MethodInjectionTests.cs" />
+    <Compile Include="AdviceInjectionTests\InjectionAdviceAfterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj">

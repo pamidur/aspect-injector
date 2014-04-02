@@ -7,6 +7,6 @@ namespace AspectInjector.BuildTask.Contracts
   {
     bool CanProcess(TypeDefinition aspectType);
 
-    void Process(InjectionContext context);
+    void Process(AspectContext context);
   }
 }

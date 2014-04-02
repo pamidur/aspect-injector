@@ -1,11 +1,12 @@
 ﻿using AspectInjector.Broker;
+using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using System.Collections.Generic;
 
-namespace AspectInjector.BuildTask.Common
+namespace AspectInjector.BuildTask.Processors
 {
-  internal class ProcessingUtils
+  internal static class ProcessingUtils
   {
     public static IEnumerable<AdviceArgumentSource> GetAdviceArgumentsSources(MethodDefinition adviceMethod)
     {

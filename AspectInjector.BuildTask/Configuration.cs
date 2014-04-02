@@ -18,7 +18,8 @@ namespace AspectInjector.BuildTask
                 {
                     new InjectionProcessor(new List<IAspectProcessor>
                     {
-                        new AdviceProcessor(new AdviceInjector())
+                        new AdviceProcessor(new AdviceInjector()),
+                        new InterfaceProcessor(new InterfaceInjector())
                     }),
 
                     new Janitor()

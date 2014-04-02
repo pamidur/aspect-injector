@@ -1,13 +1,13 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AspectInjector.Tests
+namespace AspectInjector.Tests.InterfaceInjectionInheritance
 {
     [TestClass]
     public class InterfaceInjectionInheritanceTests
     {
         [TestMethod]
-        public void InterfaceInjectionInheritanceTest()
+        public void Interface_Injection_Supports_Inheritance()
         {
             var ti = (ITestInheritance)new TestInheritance();
             var r1 = ti.GetAspectType();

@@ -23,7 +23,7 @@ namespace AspectInjector.Tests.AspectFactoryMethod
         }
     }
 
-    //[Aspect(typeof(TestAspectWithArgs))]
+    [Aspect(typeof(TestAspectWithArgs))]
     public class TestClassWithArgs
     {
     }

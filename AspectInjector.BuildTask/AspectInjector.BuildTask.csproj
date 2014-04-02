@@ -58,8 +58,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
+    <Compile Include="Contexts\AdviceInjectionContext.cs" />
+    <Compile Include="Contexts\InterfaceInjectionContext.cs" />
+    <Compile Include="Contracts\IInjectionContext.cs" />
     <Compile Include="Injectors\AdviceInjector.cs" />
-    <Compile Include="Processors\ModuleProcessors\AdviceInterfaceProxyInjector.cs" />
+    <Compile Include="Injectors\InterfaceInjector.cs" />
+    <Compile Include="Processors\AspectProcessors\InterfaceProcessor.cs" />
     <Compile Include="Contracts\IAspectInjector.cs" />
     <Compile Include="Contracts\IAspectProcessor.cs" />
     <Compile Include="Processors\ModuleProcessors\InjectionProcessor.cs" />
@@ -72,11 +76,11 @@
     <Compile Include="Extensions\ModuleExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Contracts\IModuleProcessor.cs" />
-    <Compile Include="Contexts\InjectionContext.cs" />
+    <Compile Include="Contexts\AspectContext.cs" />
     <Compile Include="Injectors\InjectorBase.cs" />
     <Compile Include="Processors\ModuleProcessors\Janitor.cs" />
     <Compile Include="Common\Markers.cs" />
-    <Compile Include="Common\ProcessingUtils.cs" />
+    <Compile Include="Processors\ProcessingUtils.cs" />
     <Compile Include="Processors\AspectProcessors\AdviceProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StrictAssemblyResolver.cs" />

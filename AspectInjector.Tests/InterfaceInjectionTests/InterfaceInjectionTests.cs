@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AspectInjector.Tests
+namespace AspectInjector.Tests.InterfaceInjection
 {
     [TestClass]
     public class InterfaceInjectionTests
@@ -16,7 +16,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void InjectProxySecondConstructor()
+        public void Inject_AspectReference_Into_SecondConstructor()
         {
             Checker.Passed = false;
             var result = ((ITestInterface)new TestInterfaceProxyClass(1)).TestMethod("ok");
@@ -25,7 +25,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void InjectMethodProxy()
+        public void Inject_Method_Proxy()
         {
             Checker.Passed = false;
             var result = _testClass.TestMethod("ok");
@@ -34,7 +34,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void InjectSetterProxy()
+        public void Inject_Setter_Proxy()
         {
             Checker.Passed = false;
             _testClass.TestProperty = 4;
@@ -42,7 +42,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void InjectGetterProxy()
+        public void Inject_Getter_Proxy()
         {
             Checker.Passed = false;
             var a = _testClass.TestProperty;
@@ -50,7 +50,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void InjectEventAddProxy()
+        public void Inject_EventAdd_Proxy()
         {
             Checker.Passed = false;
             _testClass.TestEvent += (s, e) => { };
@@ -58,7 +58,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void InjectEventRemoveProxy()
+        public void Inject_EventRemove_Proxy()
         {
             Checker.Passed = false;
             _testClass.TestEvent -= (s, e) => { };
