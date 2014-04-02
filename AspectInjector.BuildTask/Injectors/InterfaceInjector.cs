@@ -1,13 +1,9 @@
 ﻿using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
-using Mono.Cecil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AspectInjector.BuildTask.Extensions;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System.Linq;
 
 namespace AspectInjector.BuildTask.Injectors
 {
@@ -27,10 +23,16 @@ namespace AspectInjector.BuildTask.Injectors
 
         protected EventDefinition GetOrCreateEventProxy(InterfaceInjectionContext context, EventDefinition originalEvent)
         {
+            var eventName = GenerateMemberProxyName(originalEvent);
+
+            var existedEvent = context.AspectContext.TargetType.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.IsTypeOf(originalEvent.EventType));
+            if (existedEvent != null)
+                return existedEvent;
+
             var newAddMethod = GetOrCreateMethodProxy(context, originalEvent.AddMethod);
             var newRemoveMethod = GetOrCreateMethodProxy(context, originalEvent.RemoveMethod);
 
-            var ed = new EventDefinition(originalEvent.Name, EventAttributes.None, context.AspectContext.TargetType.Module.Import(originalEvent.EventType));
+            var ed = new EventDefinition(eventName, EventAttributes.None, context.AspectContext.TargetType.Module.Import(originalEvent.EventType));
             ed.AddMethod = newAddMethod;
             ed.RemoveMethod = newRemoveMethod;
 
@@ -41,10 +43,16 @@ namespace AspectInjector.BuildTask.Injectors
 
         protected PropertyDefinition GetOrCreatePropertyProxy(InterfaceInjectionContext context, PropertyDefinition originalProperty)
         {
+            var propertyName = GenerateMemberProxyName(originalProperty);
+
+            var existedProperty = context.AspectContext.TargetType.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.IsTypeOf(originalProperty.PropertyType));
+            if (existedProperty != null)
+                return existedProperty;
+
             var newGetMethod = GetOrCreateMethodProxy(context, originalProperty.GetMethod);
             var newSetMethod = GetOrCreateMethodProxy(context, originalProperty.SetMethod);
 
-            var pd = new PropertyDefinition(originalProperty.Name, PropertyAttributes.None, context.AspectContext.TargetType.Module.Import(originalProperty.PropertyType));
+            var pd = new PropertyDefinition(propertyName, PropertyAttributes.None, context.AspectContext.TargetType.Module.Import(originalProperty.PropertyType));
             pd.GetMethod = newGetMethod;
             pd.SetMethod = newSetMethod;
 
@@ -53,11 +61,16 @@ namespace AspectInjector.BuildTask.Injectors
             return pd;
         }
 
+        private static string GenerateMemberProxyName(IMemberDefinition member)
+        {
+            return member.DeclaringType.FullName + "." + member.Name;
+        }
+
         protected MethodDefinition GetOrCreateMethodProxy(InterfaceInjectionContext context, MethodDefinition interfaceMethodDefinition)
         {
             var targetType = context.AspectContext.TargetType;
 
-            var methodName = interfaceMethodDefinition.DeclaringType.FullName + "." + interfaceMethodDefinition.Name;
+            var methodName = GenerateMemberProxyName(interfaceMethodDefinition);
 
             var existedMethod = targetType.Methods.FirstOrDefault(m => m.Name == methodName && m.SignatureMatches(interfaceMethodDefinition));
             if (existedMethod != null)
@@ -101,6 +114,6 @@ namespace AspectInjector.BuildTask.Injectors
             }
 
             return md;
-        }       
+        }
     }
 }

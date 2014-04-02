@@ -29,9 +29,9 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
         {
             var adviceContexts = GetAdviceMethods(context.AspectType).Select(m => ProcessAdvice(m, context)).Where(ac => ac != null).ToList();
 
-            adviceContexts.ForEach(ValidateContext);            
+            adviceContexts.ForEach(ValidateContext);
 
-            foreach (var adviceContext in adviceContexts)            
+            foreach (var adviceContext in adviceContexts)
                 _injector.Inject(adviceContext);
         }
 
@@ -70,6 +70,9 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
 
                     if (!context.IsAbortable && !adviceMethod.ReturnType.IsTypeOf(typeof(void)))
                         throw new CompilationException("Advice of InjectionPoints.Before without argument of AdviceArgumentSource.AbortFlag can be System.Void only", adviceMethod);
+
+                    if (context.AdviceArgumentsSources.Any(s => s == AdviceArgumentSource.ReturningValue))
+                        throw new CompilationException("Before methods don't support AdviceArgumentSource.ReturningValue", adviceMethod);
 
                     context.InjectionPoint = InjectionPoints.Before;
                 }

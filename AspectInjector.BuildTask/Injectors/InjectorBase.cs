@@ -31,7 +31,7 @@ namespace AspectInjector.BuildTask.Injectors
             foreach (var constructor in constructors)
             {
                 ILProcessor processor = constructor.Body.GetILProcessor();
-                Instruction firstInstruction = constructor.Body.Instructions.First();
+                Instruction firstInstruction = constructor.Body.Instructions.Skip(2).First();
 
                 processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldarg_0));
 

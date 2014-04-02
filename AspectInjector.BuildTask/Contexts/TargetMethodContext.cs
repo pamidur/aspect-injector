@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.BuildTask.Extensions;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Linq;
 
@@ -7,22 +8,53 @@ namespace AspectInjector.BuildTask.Contexts
     public class TargetMethodContext
     {
         private Instruction _returnPoint;
-        private Instruction _entryPoint;
+        private Instruction _originalReturnPoint;
 
         public TargetMethodContext(MethodDefinition targetMethod)
         {
             TargetMethod = targetMethod;
             Processor = TargetMethod.Body.GetILProcessor();
-            OriginalEntryPoint = TargetMethod.Body.Instructions.First();
+            OriginalEntryPoint = TargetMethod.IsConstructor ?
+                TargetMethod.Body.Instructions.Skip(2).First() :
+                TargetMethod.Body.Instructions.First();
 
-            if (TargetMethod.Body.Instructions.All(i => i.OpCode != OpCodes.Ret))
-                Processor.Append(Processor.Create(OpCodes.Ret));
-
-            OriginalReturnPoint = TargetMethod.Body.Instructions.Single(i => i.OpCode == OpCodes.Ret);
+            EntryPoint = Processor.Create(OpCodes.Nop);
+            Processor.InsertBefore(TargetMethod.IsConstructor ?
+                TargetMethod.Body.Instructions.Skip(2).First() :
+                TargetMethod.Body.Instructions.First(),
+                        EntryPoint);
         }
 
         public Instruction OriginalEntryPoint { get; private set; }
-        public Instruction OriginalReturnPoint { get; private set; }
+
+
+        public Instruction OriginalReturnPoint
+        {
+            get
+            {
+                if (_originalReturnPoint == null)
+                {
+                    if (TargetMethod.Body.Instructions.All(i => i.OpCode != OpCodes.Ret))
+                    {
+                        if (!TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void))
+                        {
+                            if (TargetMethod.ReturnType.IsValueType)
+                                Processor.Append(Processor.Create(OpCodes.Ldc_I4_0));
+                            else
+                                Processor.Append(Processor.Create(OpCodes.Ldnull));
+                        }
+
+                        Processor.Append(Processor.Create(OpCodes.Ret));
+                    }
+
+                    _originalReturnPoint = TargetMethod.Body.Instructions.Single(i => i.OpCode == OpCodes.Ret);
+                }
+
+                return _originalReturnPoint;
+            }
+        }
+
+
         public ILProcessor Processor { get; private set; }
         public Instruction ReturnPoint
         {
@@ -39,19 +71,7 @@ namespace AspectInjector.BuildTask.Contexts
             }
         }
 
-        public Instruction EntryPoint
-        {
-            get
-            {
-                if (_entryPoint == null)
-                {
-                    _entryPoint = Processor.Create(OpCodes.Nop);
-                    Processor.InsertBefore(Processor.Body.Instructions.First(), _entryPoint);
-                }
-
-                return _entryPoint;
-            }
-        }
+        public Instruction EntryPoint { get; private set; }
         public MethodDefinition TargetMethod { get; private set; }
     }
 }
