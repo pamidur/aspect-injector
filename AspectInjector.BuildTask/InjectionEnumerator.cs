@@ -89,9 +89,6 @@ namespace AspectInjector.BuildTask
 
         private static IEnumerable<InjectionContext> ProcessAspect(InjectionContext parentContext)
         {
-            if (parentContext.AspectType.CustomAttributes.HasAttributeOfType<AspectInjectionOptionsAttribute>())
-                throw new CompilationException("AspectInjectionOptionsAttribute not supported yet", parentContext.AspectType);
-
             foreach (var adviceMethod in GetAdviceMethods(parentContext.AspectType))
             {
                 foreach (var context in ProcessAdvice(adviceMethod, parentContext))

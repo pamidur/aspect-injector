@@ -50,6 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AspectInheritanceTests.cs" />
     <Compile Include="Checker.cs" />
     <Compile Include="InterfaceInjectionInheritanceTests.cs" />
     <Compile Include="InterfaceInjectionTests.cs" />

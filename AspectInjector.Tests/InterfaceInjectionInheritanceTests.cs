@@ -17,18 +17,6 @@ namespace AspectInjector.Tests
 
             Assert.AreEqual(r1, r2);
         }
-
-        [TestMethod]
-        public void InterfaceInjectionAspectInheritanceTest()
-        {
-            var ti = (ITestInheritance)new TestInheritance();
-            var r1 = ti.GetHashCode();
-
-            var tib = (ITestInheritance)new TestInheritanceBase();
-            var r2 = tib.GetHashCode();
-
-            Assert.AreEqual(r1, r2);
-        }
     }
 
     [Aspect(typeof(TestInheritanceAspect))]
@@ -40,6 +28,7 @@ namespace AspectInjector.Tests
     public interface ITestInheritance
     {
         string GetAspectType();
+
         int GetAspectHash();
     }
 
