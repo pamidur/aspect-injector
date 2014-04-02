@@ -58,6 +58,9 @@ namespace AspectInjector.BuildTask.Extensions
         {
             var module = typeReference.Module;
 
+            if (type == typeof(object))
+                return typeReference.IsTypeOf(module.TypeSystem.Object);
+
             if (type == typeof(bool))
                 return typeReference.IsTypeOf(module.TypeSystem.Boolean);
 

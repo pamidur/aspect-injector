@@ -1,38 +1,45 @@
-﻿using AspectInjector.BuildTask.Extensions;
+﻿using AspectInjector.Broker;
+using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.BuildTask
 {
     internal abstract class InjectorBase
     {
-        protected FieldReference GetOrCreateAspectReference(TypeDefinition targetType, TypeDefinition aspectType)
+        protected FieldReference GetOrCreateAspectReference(InjectionContext context)
+        {
+            return GetOrCreateAspectReference(context.TargetType, context.AspectType, context.AspectFactory);
+        }
+
+        protected FieldReference GetOrCreateAspectReference(TypeDefinition targetType, TypeDefinition aspectType, MethodDefinition aspectFactory = null)
         {
             if (!targetType.IsClass)
                 throw new NotSupportedException("Field creation supports only classes.");
 
+            var aspectFactoryMethod = aspectFactory ?? aspectType.Methods.First(c => c.IsConstructor && !c.IsStatic);
+
             var aspectPropertyName = "__a$_" + aspectType.Name;
 
-            var existingField = FindExistingAspectReference(targetType, aspectType, aspectPropertyName);
+            var existingField = targetType.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType == aspectType);
 
             if (existingField != null)
                 return existingField;
 
-            var fd = new FieldDefinition(aspectPropertyName, /*FieldAttributes.Family*/ FieldAttributes.Private | FieldAttributes.InitOnly, targetType.Module.Import(aspectType));
+            var fd = new FieldDefinition(aspectPropertyName, FieldAttributes.Private | FieldAttributes.InitOnly, targetType.Module.Import(aspectType));
 
             var constructors = targetType.Methods.Where(m => m.IsConstructor && !m.IsStatic);
 
             foreach (var constructor in constructors)
             {
-                var aspectConstructor = targetType.Module.ImportConstructor(aspectType);
-
                 ILProcessor processor = constructor.Body.GetILProcessor();
                 Instruction firstInstruction = constructor.Body.Instructions.First();
 
                 processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldarg_0));
-                processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Newobj, aspectConstructor));
+                InjectMethodCall(processor, firstInstruction, null, aspectFactoryMethod, new object[] { });
                 processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Stfld, fd));
             }
 
@@ -41,22 +48,12 @@ namespace AspectInjector.BuildTask
             return fd;
         }
 
-        private static FieldDefinition FindExistingAspectReference(TypeDefinition targetType, TypeDefinition aspectType, string aspectPropertyName)
-        {
-            var existingField = targetType.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType == aspectType);
-
-            //if (existingField == null && !targetType.BaseType.IsTypeOf(targetType.Module.TypeSystem.Object))
-            //    existingField = FindExistingAspectReference(targetType.BaseType.Resolve(), aspectType, aspectPropertyName);
-
-            return existingField;
-        }
-
         protected void InjectMethodCall(ILProcessor processor, Instruction injectionPoint, MemberReference sourceMember, MethodDefinition method, object[] arguments)
         {
             if (method.Parameters.Count != arguments.Length)
                 throw new ArgumentException("Arguments count mismatch", "arguments");
 
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Nop));
+            //processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Nop));
 
             var type = processor.Body.Method.DeclaringType;
 
@@ -72,15 +69,28 @@ namespace AspectInjector.BuildTask
                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldfld, fr));
                 }
             }
+            else if (sourceMember == null)
+            {
+                //Nothig should be loaded into stack
+            }
             else
             {
-                throw new NotSupportedException("Only FieldRefences supported at the moment");
+                throw new NotSupportedException("Only FieldRefences and nulls supported at the moment");
             }
 
             for (int i = 0; i < method.Parameters.Count; i++)
                 LoadCallArgument(processor, injectionPoint, arguments[i], method.Parameters[i].ParameterType);
 
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Callvirt, processor.Body.Method.Module.Import(method)));
+            OpCode code;
+
+            if (method.IsConstructor)
+                code = OpCodes.Newobj;
+            else if (method.IsVirtual)
+                code = OpCodes.Callvirt;
+            else
+                code = OpCodes.Call;
+
+            processor.InsertBefore(injectionPoint, processor.Create(code, processor.Body.Method.Module.Import(method)));
         }
 
         protected void LoadCallArgument(ILProcessor processor, Instruction injectionPoint, object arg, TypeReference expectedType)

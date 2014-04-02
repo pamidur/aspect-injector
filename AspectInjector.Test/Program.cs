@@ -2,8 +2,19 @@
 
 namespace AspectInjector.Test
 {
+    internal class A
+    {
+        public static A Create()
+        {
+            return new A();
+        }
+    }
+
     internal class Program
     {
+        private readonly A inst = A.Create();
+        private readonly A inst2 = new A();
+
         private static void Main(string[] args)
         {
             TestInterfaceInjection();

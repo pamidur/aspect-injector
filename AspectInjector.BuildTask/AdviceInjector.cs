@@ -25,7 +25,7 @@ namespace AspectInjector.BuildTask
         private void InjectAdvice(InjectionContext context)
         {
             ILProcessor processor = context.TargetMethodContext.Processor;
-            FieldReference aspectInstanceField = GetOrCreateAspectReference(context.TargetMethodContext.TargetMethod.DeclaringType, context.AspectType);
+            FieldReference aspectInstanceField = GetOrCreateAspectReference(context);
 
             if (context.IsAbortable)
             {

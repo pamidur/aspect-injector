@@ -81,6 +81,7 @@ namespace AspectInjector.BuildTask
                 {
                     TargetMethodContext = targetMethodContext,
                     TargetName = targetName,
+                    TargetType = targetMethod.DeclaringType,
                     AspectType = (TypeDefinition)a.ConstructorArguments[0].Value,
                     //AspectCustomData = (object[])(a.GetPropertyValue("CustomData") ?? new object[] { })
                 })
@@ -89,6 +90,27 @@ namespace AspectInjector.BuildTask
 
         private static IEnumerable<InjectionContext> ProcessAspect(InjectionContext parentContext)
         {
+            var aspectFactories = parentContext.AspectType.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>()).ToList();
+
+            if (aspectFactories.Count > 1)
+                throw new CompilationException("Only one method can be AspectFactory", aspectFactories.Last());
+
+            if (aspectFactories.Count == 1)
+            {
+                parentContext.AspectFactory = aspectFactories[0];
+                parentContext.AspectFactoryArgumentsSources = GetAdviceArgumentsSources(parentContext.AspectFactory).ToList();
+            }
+            else
+            {
+                var ctors = parentContext.AspectType.Methods.Where(c => c.IsConstructor && !c.IsStatic && c.Parameters.Count == 0).ToList();
+
+                if (ctors.Count == 0)
+                    throw new CompilationException("Cannot find empty constructor for aspect. Create one or use AspectFactory", parentContext.AspectType);
+
+                parentContext.AspectFactory = ctors.First();
+                parentContext.AspectFactoryArgumentsSources = new List<AdviceArgumentSource>();
+            }
+
             foreach (var adviceMethod in GetAdviceMethods(parentContext.AspectType))
             {
                 foreach (var context in ProcessAdvice(adviceMethod, parentContext))
