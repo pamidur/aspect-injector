@@ -48,7 +48,7 @@ namespace AspectInjector.Test
 
     internal class TestMethodFilteredAspect
     {
-        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
+        [Advice(InjectionPoints.After, InjectionTargets.Method)]
         public int BeforeMethod(
             [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
 
@@ -62,8 +62,8 @@ namespace AspectInjector.Test
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public int BeforeMethod(
-            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort,
-            [AdviceArgument(AdviceArgumentSource.CustomData)] object[] cdata
+            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
+            //,[AdviceArgument(AdviceArgumentSource.CustomData)] object[] cdata
 
             )
         {

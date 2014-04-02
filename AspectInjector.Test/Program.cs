@@ -1,9 +1,11 @@
 ﻿using System;
 
 namespace AspectInjector.Test
-{
+{ 
+
     internal class Program
     {
+
         private static void Main(string[] args)
         {
             TestInterfaceInjection();
@@ -12,6 +14,9 @@ namespace AspectInjector.Test
             StringComparer b = default(StringComparer);
 
             var a = false;
+
+            var b1 = default(StringComparer);
+            var b2 = default(int);
 
             a = true;
 
@@ -34,28 +39,24 @@ namespace AspectInjector.Test
 
             var testInterface = (ITestInterface)new TestInterfaceProxyClass();
 
-            testInterface.TestEvent += (s, e) => { };
-            testInterface.TestEvent -= (s, e) => { };
             testInterface.TestMethod("");
-            testInterface.TestProperty = 0;
-            var a = testInterface.TestProperty;
         }
 
         private static void TestMethodInjection()
         {
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("TestMethodInjection");
-            Console.WriteLine();
+            //Console.WriteLine();
+            //Console.WriteLine();
+            //Console.WriteLine("TestMethodInjection");
+            //Console.WriteLine();
 
-            var testMethod = new TestMethodClass("");
+            //var testMethod = new TestMethodClass("");
 
-            testMethod.TestEvent += (s, e) => { };
-            testMethod.TestEvent -= (s, e) => { };
-            testMethod.TestMethodAAA("");
-            testMethod.TestMethodFiltered2();
-            testMethod.TestProperty = 0;
-            var a = testMethod.TestProperty;
+            //testMethod.TestEvent += (s, e) => { };
+            //testMethod.TestEvent -= (s, e) => { };
+            //testMethod.TestMethodAAA("");
+            //testMethod.TestMethodFiltered2();
+            //testMethod.TestProperty = 0;
+            //var a = testMethod.TestProperty;
         }
     }
 }

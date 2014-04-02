@@ -57,26 +57,34 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdviceInjector.cs" />
-    <Compile Include="AdviceInterfaceProxyInjector.cs" />
-    <Compile Include="AspectAttributeEqualityComparer.cs" />
-    <Compile Include="InjectionEnumerator.cs" />
-    <Compile Include="AspectProcessor.cs" />
+    <Compile Include="Configuration.cs" />
+    <Compile Include="Contexts\AdviceInjectionContext.cs" />
+    <Compile Include="Contexts\InterfaceInjectionContext.cs" />
+    <Compile Include="Contracts\IInjectionContext.cs" />
+    <Compile Include="Injectors\AdviceInjector.cs" />
+    <Compile Include="Injectors\InterfaceInjector.cs" />
+    <Compile Include="Processors\AspectProcessors\InterfaceProcessor.cs" />
+    <Compile Include="Contracts\IAspectInjector.cs" />
+    <Compile Include="Contracts\IAspectProcessor.cs" />
+    <Compile Include="Processors\ModuleProcessors\InjectionProcessor.cs" />
+    <Compile Include="Processors\AssemblyProcessor.cs" />
     <Compile Include="AspectInjectorBuildTask.cs" />
-    <Compile Include="CompilationException.cs" />
+    <Compile Include="Common\CompilationException.cs" />
     <Compile Include="Extensions\CustomAttributeExtensions.cs" />
     <Compile Include="Extensions\ILProcessorExtension.cs" />
     <Compile Include="Extensions\MemberExtensions.cs" />
     <Compile Include="Extensions\ModuleExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
-    <Compile Include="IModuleProcessor.cs" />
-    <Compile Include="InjectionContext.cs" />
-    <Compile Include="InjectorBase.cs" />
-    <Compile Include="Janitor.cs" />
-    <Compile Include="Markers.cs" />
+    <Compile Include="Contracts\IModuleProcessor.cs" />
+    <Compile Include="Contexts\AspectContext.cs" />
+    <Compile Include="Injectors\InjectorBase.cs" />
+    <Compile Include="Processors\ModuleProcessors\Janitor.cs" />
+    <Compile Include="Common\Markers.cs" />
+    <Compile Include="Processors\ProcessingUtils.cs" />
+    <Compile Include="Processors\AspectProcessors\AdviceProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StrictAssemblyResolver.cs" />
-    <Compile Include="TargetMethodContext.cs" />
+    <Compile Include="Contexts\TargetMethodContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -87,6 +95,7 @@
       <Name>AspectInjector.Broker</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

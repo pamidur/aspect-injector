@@ -1,54 +1,49 @@
-﻿using AspectInjector.BuildTask.Extensions;
+﻿using AspectInjector.Broker;
+using AspectInjector.BuildTask.Common;
+using AspectInjector.BuildTask.Contexts;
+using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace AspectInjector.BuildTask
+namespace AspectInjector.BuildTask.Injectors
 {
     internal abstract class InjectorBase
     {
-        protected FieldReference GetOrCreateAspectReference(TypeDefinition targetType, TypeDefinition aspectType)
+        protected FieldReference GetOrCreateAspectReference(AspectContext context)
         {
-            if (!targetType.IsClass)
+            if (!context.TargetType.IsClass)
                 throw new NotSupportedException("Field creation supports only classes.");
 
-            var aspectPropertyName = "__a$_" + aspectType.Name;
+            var aspectPropertyName = "__a$_" + context.AspectType.Name;
 
-            var existingField = FindExistingAspectReference(targetType, aspectType, aspectPropertyName);
+            var existingField = context.TargetType.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType == context.AspectType);
 
             if (existingField != null)
                 return existingField;
 
-            var fd = new FieldDefinition(aspectPropertyName, /*FieldAttributes.Family*/ FieldAttributes.Private | FieldAttributes.InitOnly, targetType.Module.Import(aspectType));
+            var fd = new FieldDefinition(aspectPropertyName, FieldAttributes.Private | FieldAttributes.InitOnly, context.TargetType.Module.Import(context.AspectType));
 
-            var constructors = targetType.Methods.Where(m => m.IsConstructor && !m.IsStatic);
+            var constructors = context.TargetType.Methods.Where(m => m.IsConstructor && !m.IsStatic);
 
             foreach (var constructor in constructors)
             {
-                var aspectConstructor = targetType.Module.ImportConstructor(aspectType);
-
                 ILProcessor processor = constructor.Body.GetILProcessor();
-                Instruction firstInstruction = constructor.Body.Instructions.First();
+                Instruction firstInstruction = constructor.Body.Instructions.Skip(2).First();
 
                 processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldarg_0));
-                processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Newobj, aspectConstructor));
+
+                var args = ResolveArgumentsValues(context, context.AspectFactoryArgumentsSources,null).ToArray();
+                InjectMethodCall(processor, firstInstruction, null, context.AspectFactory, args);
+
                 processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Stfld, fd));
             }
 
-            targetType.Fields.Add(fd);
+            context.TargetType.Fields.Add(fd);
 
             return fd;
-        }
-
-        private static FieldDefinition FindExistingAspectReference(TypeDefinition targetType, TypeDefinition aspectType, string aspectPropertyName)
-        {
-            var existingField = targetType.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType == aspectType);
-
-            //if (existingField == null && !targetType.BaseType.IsTypeOf(targetType.Module.TypeSystem.Object))
-            //    existingField = FindExistingAspectReference(targetType.BaseType.Resolve(), aspectType, aspectPropertyName);
-
-            return existingField;
         }
 
         protected void InjectMethodCall(ILProcessor processor, Instruction injectionPoint, MemberReference sourceMember, MethodDefinition method, object[] arguments)
@@ -56,7 +51,7 @@ namespace AspectInjector.BuildTask
             if (method.Parameters.Count != arguments.Length)
                 throw new ArgumentException("Arguments count mismatch", "arguments");
 
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Nop));
+            //processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Nop));
 
             var type = processor.Body.Method.DeclaringType;
 
@@ -72,15 +67,28 @@ namespace AspectInjector.BuildTask
                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldfld, fr));
                 }
             }
+            else if (sourceMember == null)
+            {
+                //Nothig should be loaded into stack
+            }
             else
             {
-                throw new NotSupportedException("Only FieldRefences supported at the moment");
+                throw new NotSupportedException("Only FieldRefences and nulls supported at the moment");
             }
 
             for (int i = 0; i < method.Parameters.Count; i++)
                 LoadCallArgument(processor, injectionPoint, arguments[i], method.Parameters[i].ParameterType);
 
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Callvirt, processor.Body.Method.Module.Import(method)));
+            OpCode code;
+
+            if (method.IsConstructor)
+                code = OpCodes.Newobj;
+            else if (method.IsVirtual)
+                code = OpCodes.Callvirt;
+            else
+                code = OpCodes.Call;
+
+            processor.InsertBefore(injectionPoint, processor.Create(code, processor.Body.Method.Module.Import(method)));
         }
 
         protected void LoadCallArgument(ILProcessor processor, Instruction injectionPoint, object arg, TypeReference expectedType)
@@ -156,6 +164,38 @@ namespace AspectInjector.BuildTask
                     }
 
                     processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
+                }
+            }
+        }
+
+        protected IEnumerable<object> ResolveArgumentsValues(AspectContext context, List<AdviceArgumentSource> sources, VariableDefinition abortFlagVariable)
+        {
+            foreach (var argumentSource in sources)
+            {
+                switch (argumentSource)
+                {
+                    case AdviceArgumentSource.Instance:
+                        yield return Markers.InstanceSelfMarker;
+                        break;
+
+                    case AdviceArgumentSource.TargetArguments:
+                        yield return context.TargetMethodContext.TargetMethod.Parameters.ToArray();
+                        break;
+
+                    case AdviceArgumentSource.TargetName:
+                        yield return context.TargetName;
+                        break;
+
+                    case AdviceArgumentSource.AbortFlag:
+                        if (abortFlagVariable != null)
+                            yield return abortFlagVariable;
+                        else
+                            throw new ArgumentNullException("abortFlagVariable", "abortFlagVariable should be set for AdviceArgumentSource.AbortFlag");
+                        break;
+
+                    case AdviceArgumentSource.CustomData:
+                        yield return context.AspectCustomData;
+                        break;
                 }
             }
         }

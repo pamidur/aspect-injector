@@ -48,6 +48,7 @@
     <Compile Include="AdviceAttribute.cs" />
     <Compile Include="AdviceInterfaceProxyAttribute.cs" />
     <Compile Include="AspectAttribute.cs" />
+    <Compile Include="AspectFactoryAttribute.cs" />
     <Compile Include="InjectionPoints.cs" />
     <Compile Include="InjectionTargets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
