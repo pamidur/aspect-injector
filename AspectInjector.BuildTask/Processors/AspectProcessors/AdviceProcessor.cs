@@ -63,6 +63,18 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
                 context.AdviceMethod = adviceMethod;
                 context.AdviceArgumentsSources = ProcessingUtils.GetAdviceArgumentsSources(adviceMethod).ToList();
 
+                if ((targets & InjectionTargets.Constructor) != 0)
+                {
+                    if (!adviceMethod.ReturnType.IsTypeOf(typeof(void)))
+                        throw new CompilationException("Advice of InjectionTargets.Constructor can be System.Void only", adviceMethod);
+
+                    if (context.IsAbortable)
+                        throw new CompilationException("Constructors methods don't support AdviceArgumentSource.AbortFlag", adviceMethod);
+
+                    if (context.AdviceArgumentsSources.Any(s => s == AdviceArgumentSource.ReturningValue))
+                        throw new CompilationException("Constructors methods don't support AdviceArgumentSource.ReturningValue", adviceMethod);
+                }
+
                 if ((points & InjectionPoints.Before) != 0)
                 {
                     if (context.IsAbortable && !context.AdviceMethod.ReturnType.IsTypeOf(adviceMethod.ReturnType))
