@@ -121,7 +121,13 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             if (aspectFactories.Count == 1)
             {
                 context.AspectFactory = aspectFactories[0];
-                context.AspectFactoryArgumentsSources = ProcessingUtils.GetAdviceArgumentsSources(context.AspectFactory).ToList();
+
+                var args = ProcessingUtils.GetAdviceArgumentsSources(context.AspectFactory).ToList();
+
+                if (args.Any(a => a != AdviceArgumentSource.Instance))
+                    throw new CompilationException("AspectFactory argument can be only AdviceArgumentSource.Instance", context.AspectType);
+
+                context.AspectFactoryArgumentsSources = args;
             }
             else
             {
@@ -133,7 +139,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 context.AspectFactory = ctors.First();
                 context.AspectFactoryArgumentsSources = new List<AdviceArgumentSource>();
             }
-        }      
+        }
 
         private IEnumerable<CustomAttribute> MergeAspectAttributes(IEnumerable<CustomAttribute> classAttributes,
             IEnumerable<CustomAttribute> memberAttributes)
