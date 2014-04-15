@@ -55,6 +55,7 @@ namespace AspectInjector.BuildTask.Contexts
         }
 
 
+
         public ILProcessor Processor { get; private set; }
         public Instruction ReturnPoint
         {
@@ -64,7 +65,9 @@ namespace AspectInjector.BuildTask.Contexts
                 {
                     _returnPoint = Processor.Create(OpCodes.Ret);
                     Processor.InsertAfter(OriginalReturnPoint, _returnPoint);
-                    Processor.Replace(OriginalReturnPoint, Processor.Create(OpCodes.Nop));
+
+                    var newOrigRetPoint = Processor.Create(OpCodes.Nop);
+                    _originalReturnPoint = Processor.SafeReplace(OriginalReturnPoint, newOrigRetPoint);
                 }
 
                 return _returnPoint;

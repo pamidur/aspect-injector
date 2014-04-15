@@ -1,11 +1,24 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Linq;
 
 namespace AspectInjector.BuildTask.Extensions
 {
     public static class ILProcessorExtension
     {
+        public static Instruction SafeReplace(this ILProcessor processor, Instruction target, Instruction instruction)
+        {
+            var refs = processor.Body.Instructions.Where(i => i.Operand == target).ToList();
+
+            foreach (var @ref in refs)
+                processor.Replace(@ref, processor.Create(@ref.OpCode, instruction));
+
+            processor.Replace(target, instruction);
+
+            return instruction;
+        }
+
         public static Instruction CreateOptimized(this ILProcessor processor, OpCode opCode, int value)
         {
             if (opCode == OpCodes.Ldarg || opCode == OpCodes.Ldarg_S)
