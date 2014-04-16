@@ -67,13 +67,11 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             //ValidateContexts(contexts);
         }
 
-        private static bool CheckFilter(TargetMethodContext targetMethodContext,
+        private static bool CheckFilter(MethodDefinition targetMethod,
             string targetName,
             CustomAttribute aspectAttribute)
         {
             var result = true;
-
-            var targetMethod = targetMethodContext.TargetMethod;
 
             var nameFilter = (string)aspectAttribute.GetPropertyValue("NameFilter");
             object accessModifierFilterObject = aspectAttribute.GetPropertyValue("AccessModifierFilter");
@@ -111,7 +109,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             return result;
         }
 
-        private static void SetAspectFactoryToContext(AspectContext context)
+        private static AspectContext SetAspectFactoryToContext(AspectContext context)
         {
             var aspectFactories = context.AspectType.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>()).ToList();
 
@@ -139,6 +137,8 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 context.AspectFactory = ctors.First();
                 context.AspectFactoryArgumentsSources = new List<AdviceArgumentSource>();
             }
+
+            return context;
         }
 
         private IEnumerable<CustomAttribute> MergeAspectAttributes(IEnumerable<CustomAttribute> classAttributes,
@@ -153,25 +153,27 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             string targetName,
             IEnumerable<CustomAttribute> aspectAttributes)
         {
-            var targetMethodContext = new TargetMethodContext(targetMethod);
-
-            foreach (var attr in aspectAttributes.Where(a => CheckFilter(targetMethodContext, targetName, a)))
-            {
-                var context = new AspectContext()
+            var contexts = aspectAttributes.Where(attr => CheckFilter(targetMethod, targetName, attr)).Select(attr =>
+                new AspectContext()
                 {
-                    TargetMethodContext = targetMethodContext,
                     TargetName = targetName,
                     TargetType = targetMethod.DeclaringType,
                     AspectType = (TypeDefinition)attr.ConstructorArguments[0].Value,
                     //AspectCustomData = (object[])(a.GetPropertyValue("CustomData") ?? new object[] { })
-                };
+                }
+                ).Select(SetAspectFactoryToContext).Where(ctx => _processors.Any(p => p.CanProcess(ctx.AspectType))).ToList();
 
-                SetAspectFactoryToContext(context);
+            if (contexts.Count != 0)
+            {
+                var targetMethodContext = new TargetMethodContext(targetMethod);
 
-                foreach (var processor in _processors)
+                foreach (var context in contexts)
                 {
-                    if (processor.CanProcess(context.AspectType))
-                        processor.Process(context);
+                    context.TargetMethodContext = targetMethodContext;
+
+                    foreach (var processor in _processors)
+                        if (processor.CanProcess(context.AspectType))
+                            processor.Process(context);
                 }
             }
         }

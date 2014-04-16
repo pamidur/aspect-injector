@@ -7,74 +7,72 @@ namespace AspectInjector.BuildTask.Contexts
 {
     public class TargetMethodContext
     {
-        private Instruction _returnPoint;
-        private Instruction _originalReturnPoint;
-
         public TargetMethodContext(MethodDefinition targetMethod)
         {
             TargetMethod = targetMethod;
             Processor = TargetMethod.Body.GetILProcessor();
+
+            SetupEntryPoints();
+            SetupReturnPoints();
+        }
+
+        public ILProcessor Processor { get; private set; }
+
+        public Instruction EntryPoint { get; private set; }
+
+        public Instruction OriginalEntryPoint { get; private set; }
+
+        public Instruction OriginalCodeReturnPoint { get; private set; }
+
+        public Instruction ReturnPoint { get; private set; }
+
+        public Instruction ExitPoint { get; private set; }
+
+        public MethodDefinition TargetMethod { get; private set; }
+
+        private void SetupEntryPoints()
+        {
             OriginalEntryPoint = TargetMethod.IsConstructor ?
                 TargetMethod.Body.Instructions.Skip(2).First() :
                 TargetMethod.Body.Instructions.First();
 
-            EntryPoint = Processor.Create(OpCodes.Nop);
-            Processor.InsertBefore(TargetMethod.IsConstructor ?
-                TargetMethod.Body.Instructions.Skip(2).First() :
-                TargetMethod.Body.Instructions.First(),
-                        EntryPoint);
+            EntryPoint = Processor.SafeInsertBefore(OriginalEntryPoint, Processor.Create(OpCodes.Nop));
         }
 
-        public Instruction OriginalEntryPoint { get; private set; }
-
-
-        public Instruction OriginalReturnPoint
+        private void SetupReturnPoints()
         {
-            get
-            {
-                if (_originalReturnPoint == null)
-                {
-                    if (TargetMethod.Body.Instructions.All(i => i.OpCode != OpCodes.Ret))
-                    {
-                        if (!TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void))
-                        {
-                            if (TargetMethod.ReturnType.IsValueType)
-                                Processor.Append(Processor.Create(OpCodes.Ldc_I4_0));
-                            else
-                                Processor.Append(Processor.Create(OpCodes.Ldnull));
-                        }
+            ReturnPoint = Processor.Create(OpCodes.Nop);
+            OriginalCodeReturnPoint = SetupSingleReturnPoint(Processor.Create(OpCodes.Br_S, ReturnPoint));
 
-                        Processor.Append(Processor.Create(OpCodes.Ret));
-                    }
-
-                    _originalReturnPoint = TargetMethod.Body.Instructions.Single(i => i.OpCode == OpCodes.Ret);
-                }
-
-                return _originalReturnPoint;
-            }
+            Processor.SafeAppend(ReturnPoint);
+            ExitPoint = Processor.SafeAppend(Processor.Create(OpCodes.Ret));
         }
 
-
-
-        public ILProcessor Processor { get; private set; }
-        public Instruction ReturnPoint
+        private Instruction SetupSingleReturnPoint(Instruction singleReturnPoint)
         {
-            get
+            var rets = Processor.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList();
+
+            if (rets.Count == 1)
+                return Processor.SafeReplace(rets.First(), singleReturnPoint);//todo:: optimize, may fails on large methods
+
+            foreach (var i in rets)
+                Processor.SafeReplace(i, Processor.Create(OpCodes.Br_S, singleReturnPoint)); //todo:: optimize, may fails on large methods
+
+            if (!TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void))
             {
-                if (_returnPoint == null)
-                {
-                    _returnPoint = Processor.Create(OpCodes.Ret);
-                    Processor.InsertAfter(OriginalReturnPoint, _returnPoint);
-
-                    var newOrigRetPoint = Processor.Create(OpCodes.Nop);
-                    _originalReturnPoint = Processor.SafeReplace(OriginalReturnPoint, newOrigRetPoint);
-                }
-
-                return _returnPoint;
+                if (TargetMethod.ReturnType.IsValueType)
+                    Processor.SafeAppend(Processor.Create(OpCodes.Ldc_I4_0));
+                else
+                    Processor.SafeAppend(Processor.Create(OpCodes.Ldnull));
             }
+
+            Processor.SafeAppend(singleReturnPoint);
+
+            return singleReturnPoint;
         }
 
-        public Instruction EntryPoint { get; private set; }
-        public MethodDefinition TargetMethod { get; private set; }
+        private void SetupCatchBlock()
+        {
+        }
     }
 }

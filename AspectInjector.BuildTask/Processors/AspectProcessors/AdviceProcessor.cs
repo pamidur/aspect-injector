@@ -37,10 +37,13 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
 
         private void ValidateContext(AdviceInjectionContext context)
         {
-            if (context.IsAbortable && _abortableInjectionHistory.Contains(context.AspectContext.TargetMethodContext))
-                throw new CompilationException("Method may have only one advice with argument of AdviceArgumentSource.AbortFlag applied to it", context.AspectContext.TargetMethodContext.TargetMethod);
+            if (context.IsAbortable)
+            {
+                if (_abortableInjectionHistory.Contains(context.AspectContext.TargetMethodContext))
+                    throw new CompilationException("Method may have only one advice with argument of AdviceArgumentSource.AbortFlag applied to it", context.AspectContext.TargetMethodContext.TargetMethod);
 
-            _abortableInjectionHistory.Add(context.AspectContext.TargetMethodContext);
+                _abortableInjectionHistory.Add(context.AspectContext.TargetMethodContext);
+            }
         }
 
         private static IEnumerable<MethodDefinition> GetAdviceMethods(TypeDefinition aspectType)
@@ -109,7 +112,6 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
             }
             return null;
         }
-
 
         private static bool CheckTarget(TargetMethodContext targetMethodContext, InjectionTargets targets)
         {

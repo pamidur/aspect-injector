@@ -3,9 +3,9 @@ using System;
 
 namespace AspectInjector.Test
 {
-    class check : ITestInterface
+    internal class check : ITestInterface
     {
-        int TestProperty { get; set; }
+        private int TestProperty { get; set; }
 
         string ITestInterface.TestMethod(string data)
         {
@@ -24,14 +24,12 @@ namespace AspectInjector.Test
             }
         }
 
-
         event EventHandler<EventArgs> ITestInterface.TestEvent
         {
             add { throw new NotImplementedException(); }
             remove { throw new NotImplementedException(); }
         }
     }
-
 
     [Aspect(typeof(TestInterfaceAspect))]
     internal class TestInterfaceProxyClass

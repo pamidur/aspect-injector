@@ -14,8 +14,51 @@ namespace AspectInjector.BuildTask.Extensions
             foreach (var @ref in refs)
                 processor.Replace(@ref, processor.Create(@ref.OpCode, instruction));
 
+            foreach (var handler in processor.Body.ExceptionHandlers)
+            {
+                if (handler.FilterStart == target)
+                    handler.FilterStart = instruction;
+
+                if (handler.HandlerEnd == target)
+                    handler.HandlerEnd = instruction;
+
+                if (handler.HandlerStart == target)
+                    handler.HandlerStart = instruction;
+
+                if (handler.TryEnd == target)
+                    handler.TryEnd = instruction;
+
+                if (handler.TryStart == target)
+                    handler.TryStart = instruction;
+            }
+
             processor.Replace(target, instruction);
 
+            return instruction;
+        }
+
+        public static Instruction SafeAppend(this ILProcessor processor, Instruction instruction)
+        {
+            processor.Append(instruction);
+
+            foreach (var handler in processor.Body.ExceptionHandlers.Where(h => h.HandlerEnd == null).ToList())
+                handler.HandlerEnd = instruction;
+
+            return instruction;
+        }
+
+        public static Instruction SafeInsertBefore(this ILProcessor processor, Instruction target, Instruction instruction)
+        {
+            processor.InsertBefore(target, instruction);
+            return instruction;
+        }
+
+        public static Instruction SafeInsertAfter(this ILProcessor processor, Instruction target, Instruction instruction)
+        {
+            if (target == processor.Body.Instructions.Last())
+                return processor.SafeAppend(instruction);
+
+            processor.InsertAfter(target, instruction);
             return instruction;
         }
 

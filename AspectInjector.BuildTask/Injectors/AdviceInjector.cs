@@ -5,9 +5,9 @@ using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace AspectInjector.BuildTask.Injectors
 {
@@ -26,7 +26,7 @@ namespace AspectInjector.BuildTask.Injectors
                 InjectMethodCallWithResultReplacement(
                     context,
                     context.AspectContext.TargetMethodContext.OriginalEntryPoint,
-                    context.AspectContext.TargetMethodContext.OriginalReturnPoint,
+                    context.AspectContext.TargetMethodContext.ReturnPoint,
                     aspectInstanceField);
             }
             else
@@ -35,12 +35,12 @@ namespace AspectInjector.BuildTask.Injectors
                     processor,
                     context.InjectionPoint == InjectionPoints.Before ?
                         context.AspectContext.TargetMethodContext.EntryPoint :
-                        context.AspectContext.TargetMethodContext.ReturnPoint,
+                        context.AspectContext.TargetMethodContext.ExitPoint,
                     aspectInstanceField,
                     context.AdviceMethod,
                     ResolveArgumentsValues(context.AspectContext, context.AdviceArgumentsSources, null).ToArray());
             }
-        }        
+        }
 
         private void InjectMethodCallWithResultReplacement(AdviceInjectionContext context,
             Instruction injectionPoint,
