@@ -7,6 +7,13 @@ namespace AspectInjector.BuildTask.Contexts
 {
     public class TargetMethodContext
     {
+        private static readonly string _exceptionVariableName = "__a$_exception";
+        private static readonly string _methodResultVariableName = "__a$_method_result";
+
+        private Instruction _exceptionPoint;
+        private VariableDefinition _exceptionVar;
+        private VariableDefinition _resultVar;
+
         public TargetMethodContext(MethodDefinition targetMethod)
         {
             TargetMethod = targetMethod;
@@ -16,19 +23,74 @@ namespace AspectInjector.BuildTask.Contexts
             SetupReturnPoints();
         }
 
-        public ILProcessor Processor { get; private set; }
-
         public Instruction EntryPoint { get; private set; }
+        public Instruction ExceptionPoint
+        {
+            get
+            {
+                if (_exceptionPoint == null)
+                    SetupCatchBlock();
 
-        public Instruction OriginalEntryPoint { get; private set; }
+                return _exceptionPoint;
+            }
+        }
+        public VariableDefinition ExceptionVariable
+        {
+            get
+            {
+                if (_exceptionVar == null)
+                    SetupCatchBlock();
 
-        public Instruction OriginalCodeReturnPoint { get; private set; }
-
-        public Instruction ReturnPoint { get; private set; }
+                return _exceptionVar;
+            }
+        }
 
         public Instruction ExitPoint { get; private set; }
+        public VariableDefinition MethodResultVariable
+        {
+            get
+            {
+                if (TargetMethod.ReturnType.IsTypeOf(typeof(void)))
+                    return null;
 
+                if (_resultVar == null)
+                {
+                    _resultVar = new VariableDefinition(_methodResultVariableName, TargetMethod.ReturnType);
+                    Processor.Body.Variables.Add(_resultVar);
+                    Processor.Body.InitLocals = true;
+                }
+
+                return _resultVar;
+            }
+        }
+
+        public Instruction OriginalCodeReturnPoint { get; private set; }
+        public Instruction OriginalEntryPoint { get; private set; }
+        public ILProcessor Processor { get; private set; }
+        public Instruction ReturnPoint { get; private set; }
         public MethodDefinition TargetMethod { get; private set; }
+
+        private void SetupCatchBlock()
+        {
+            var exceptionType = new TypeReference("System", "Exception", TargetMethod.Module, TargetMethod.Module.TypeSystem.Corlib);
+            _exceptionVar = new VariableDefinition(_exceptionVariableName, exceptionType);
+            Processor.Body.Variables.Add(_exceptionVar);
+            Processor.Body.InitLocals = true;
+
+            var setVarInst = Processor.SafeInsertAfter(OriginalCodeReturnPoint, Processor.CreateOptimized(OpCodes.Stloc, _exceptionVar.Index));
+            _exceptionPoint = Processor.SafeInsertAfter(setVarInst, Processor.Create(OpCodes.Rethrow));
+
+            OriginalCodeReturnPoint = Processor.SafeReplace(OriginalCodeReturnPoint, Processor.Create(OpCodes.Leave, ReturnPoint)); //todo:: optimize
+
+            Processor.Body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Catch)
+            {
+                TryStart = OriginalEntryPoint,
+                TryEnd = OriginalCodeReturnPoint.Next,
+                HandlerStart = OriginalCodeReturnPoint.Next,
+                HandlerEnd = _exceptionPoint.Next,
+                CatchType = exceptionType
+            });
+        }
 
         private void SetupEntryPoints()
         {
@@ -42,10 +104,19 @@ namespace AspectInjector.BuildTask.Contexts
         private void SetupReturnPoints()
         {
             ReturnPoint = Processor.Create(OpCodes.Nop);
-            OriginalCodeReturnPoint = SetupSingleReturnPoint(Processor.Create(OpCodes.Br_S, ReturnPoint));
 
+            OriginalCodeReturnPoint = SetupSingleReturnPoint(Processor.Create(OpCodes.Br, ReturnPoint));
             Processor.SafeAppend(ReturnPoint);
-            ExitPoint = Processor.SafeAppend(Processor.Create(OpCodes.Ret));
+
+            if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
+            {
+                ExitPoint = Processor.SafeAppend(Processor.CreateOptimized(OpCodes.Ldloc, MethodResultVariable.Index));
+                Processor.SafeAppend(Processor.Create(OpCodes.Ret));
+            }
+            else
+            {
+                ExitPoint = Processor.SafeAppend(Processor.Create(OpCodes.Ret));
+            }
         }
 
         private Instruction SetupSingleReturnPoint(Instruction suggestedSingleReturnPoint)
@@ -53,26 +124,24 @@ namespace AspectInjector.BuildTask.Contexts
             var rets = Processor.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList();
 
             if (rets.Count == 1)
-                return Processor.SafeReplace(rets.First(), suggestedSingleReturnPoint);//todo:: optimize, may fails on large methods
+            {
+                if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
+                    Processor.SafeInsertBefore(rets.First(), Processor.CreateOptimized(OpCodes.Stloc, MethodResultVariable.Index));
+
+                return Processor.SafeReplace(rets.First(), suggestedSingleReturnPoint);//todo:: optimize
+            }
 
             foreach (var i in rets)
-                Processor.SafeReplace(i, Processor.Create(OpCodes.Br_S, suggestedSingleReturnPoint)); //todo:: optimize, may fails on large methods
-
-            if (!TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void))
             {
-                if (TargetMethod.ReturnType.IsValueType)
-                    Processor.SafeAppend(Processor.Create(OpCodes.Ldc_I4_0));
-                else
-                    Processor.SafeAppend(Processor.Create(OpCodes.Ldnull));
+                if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
+                    Processor.SafeInsertBefore(rets.First(), Processor.CreateOptimized(OpCodes.Stloc, MethodResultVariable.Index));
+
+                Processor.SafeReplace(i, Processor.Create(OpCodes.Br, suggestedSingleReturnPoint)); //todo:: optimize
             }
 
             Processor.SafeAppend(suggestedSingleReturnPoint);
 
             return suggestedSingleReturnPoint;
-        }
-
-        private void SetupCatchBlock()
-        {
         }
     }
 }

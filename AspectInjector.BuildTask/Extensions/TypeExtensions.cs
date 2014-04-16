@@ -7,6 +7,11 @@ namespace AspectInjector.BuildTask.Extensions
 {
     internal static class TypeExtensions
     {
+        public static bool BelongsToAssembly(this TypeReference tr, string publicKey)
+        {
+            return BitConverter.ToString(tr.Resolve().Module.Assembly.Name.PublicKeyToken).Replace("-", "").ToLowerInvariant() == publicKey.ToLowerInvariant();
+        }
+
         public static MethodDefinition GetInterfaceImplementation(this TypeReference typeReference, MethodDefinition interfaceMethodDefinition)
         {
             if (interfaceMethodDefinition.DeclaringType.Resolve().IsInterface == false)
@@ -95,11 +100,6 @@ namespace AspectInjector.BuildTask.Extensions
                 return null;
 
             return baseType.Resolve();
-        }
-
-        public static bool BelongsToAssembly(this TypeReference tr, string publicKey)
-        {
-            return BitConverter.ToString(tr.Resolve().Module.Assembly.Name.PublicKeyToken).Replace("-", "").ToLowerInvariant() == publicKey.ToLowerInvariant();
         }
     }
 }

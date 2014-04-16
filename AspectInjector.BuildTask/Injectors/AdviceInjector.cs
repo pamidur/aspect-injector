@@ -1,12 +1,10 @@
 ﻿using AspectInjector.Broker;
-using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.BuildTask.Injectors
@@ -14,7 +12,6 @@ namespace AspectInjector.BuildTask.Injectors
     internal class AdviceInjector : InjectorBase, IAspectInjector<AdviceInjectionContext>
     {
         private static readonly string _abortFlagVariableName = "__a$_do_abort_method";
-        private static readonly string _abortResultVariableName = "__a$_abort_method_result";
 
         public void Inject(AdviceInjectionContext context)
         {
@@ -31,14 +28,44 @@ namespace AspectInjector.BuildTask.Injectors
             }
             else
             {
-                InjectMethodCall(
-                    processor,
-                    context.InjectionPoint == InjectionPoints.Before ?
-                        context.AspectContext.TargetMethodContext.EntryPoint :
-                        context.AspectContext.TargetMethodContext.ExitPoint,
-                    aspectInstanceField,
-                    context.AdviceMethod,
-                    ResolveArgumentsValues(context.AspectContext, context.AdviceArgumentsSources, null).ToArray());
+                object[] argumentValue;
+                Instruction injectionPoint;
+
+                switch (context.InjectionPoint)
+                {
+                    case InjectionPoints.Before:
+                        injectionPoint = context.AspectContext.TargetMethodContext.EntryPoint;
+                        argumentValue = ResolveArgumentsValues(
+                            context.AspectContext,
+                            context.AdviceArgumentsSources,
+                            context.InjectionPoint).ToArray();
+                        break;
+
+                    case InjectionPoints.After:
+                        injectionPoint = context.AspectContext.TargetMethodContext.ExitPoint;
+                        argumentValue = ResolveArgumentsValues(
+                            context.AspectContext,
+                            context.AdviceArgumentsSources,
+                            context.InjectionPoint,
+                            returnObjectVariable: context.AspectContext.TargetMethodContext.MethodResultVariable)
+                            .ToArray();
+                        break;
+
+                    case InjectionPoints.Exception:
+                        injectionPoint = context.AspectContext.TargetMethodContext.ExceptionPoint;
+                        argumentValue = ResolveArgumentsValues(
+                            context.AspectContext,
+                            context.AdviceArgumentsSources,
+                            context.InjectionPoint,
+                            exceptionVariable: context.AspectContext.TargetMethodContext.ExceptionVariable)
+                            .ToArray();
+                        break;
+
+                    default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
+                }
+
+                InjectMethodCall(processor, injectionPoint, aspectInstanceField,
+                    context.AdviceMethod, argumentValue);
             }
         }
 
@@ -65,36 +92,15 @@ namespace AspectInjector.BuildTask.Injectors
                 processor.SetLocalVariable(abortFlagVariable, injectionPoint, false);
             }
 
-            VariableDefinition resultVariable = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == _abortResultVariableName);
-            if (resultVariable == null && !method.ReturnType.IsTypeOf(typeof(void)))
-            {
-                if (method.ReturnType.IsValueType)
-                {
-                    resultVariable = processor.CreateLocalVariable(
-                        injectionPoint,
-                        targetMethod.Module.Import(method.ReturnType),
-                        0,
-                        _abortResultVariableName);
-                }
-                else
-                {
-                    resultVariable = processor.CreateLocalVariable<object>(
-                        injectionPoint,
-                        targetMethod.Module.Import(method.ReturnType),
-                        null,
-                        _abortResultVariableName);
-                }
-            }
-
             InjectMethodCall(processor,
                 injectionPoint,
                 sourceMember,
                 method,
-                ResolveArgumentsValues(context.AspectContext, context.AdviceArgumentsSources, abortFlagVariable).ToArray());
+                ResolveArgumentsValues(context.AspectContext, context.AdviceArgumentsSources, context.InjectionPoint, abortFlagVariable: abortFlagVariable).ToArray());
 
             if (!method.ReturnType.IsTypeOf(typeof(void)))
             {
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, resultVariable.Index));
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, context.AspectContext.TargetMethodContext.MethodResultVariable.Index));
             }
 
             processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, abortFlagVariable.Index));
@@ -102,14 +108,8 @@ namespace AspectInjector.BuildTask.Injectors
             processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ceq));
 
             Instruction continuePoint = processor.Create(OpCodes.Nop);
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Brfalse_S, continuePoint));
-
-            if (!method.ReturnType.IsTypeOf(typeof(void)))
-            {
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, resultVariable.Index));
-            }
-
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Br_S, returnPoint));
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Brfalse, continuePoint)); //todo::optimize
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Br, returnPoint)); //todo::optimize
             processor.InsertBefore(injectionPoint, continuePoint);
         }
     }

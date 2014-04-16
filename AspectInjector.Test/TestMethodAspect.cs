@@ -4,12 +4,116 @@ using System.Text;
 
 namespace AspectInjector.Test
 {
+    internal class LogMethodCallAspect
+    {
+        [Advice(InjectionPoints.After, InjectionTargets.Method)]
+        public void AfterMethod()
+        {
+            Console.WriteLine("Method executed");
+        }
+
+        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
+        public void BeforeMethod()
+        {
+            Console.WriteLine("Method executing");
+        }
+    }
+
+    internal class MyClass
+    {
+        [Aspect(typeof(LogMethodCallAspect))]
+        public void Do()
+        {
+            Console.WriteLine("Here I am!");
+        }
+    }
+
+    internal class TestMethodAspect
+    {
+        [Advice(InjectionPoints.After, InjectionTargets.Constructor)]
+        public void AfterConstructor()
+        {
+            Console.WriteLine("AfterConstructor");
+        }
+
+        [Advice(InjectionPoints.After, InjectionTargets.EventAdd)]
+        public void AfterEventAdd()
+        {
+            Console.WriteLine("AfterEventAdd");
+        }
+
+        [Advice(InjectionPoints.After, InjectionTargets.EventRemove)]
+        public void AfterEventRemove()
+        {
+            Console.WriteLine("AfterEventRemove");
+        }
+
+        [Advice(InjectionPoints.After, InjectionTargets.Getter)]
+        public void AfterGetter()
+        {
+            Console.WriteLine("AfterGetter");
+        }
+
+        [Advice(InjectionPoints.After, InjectionTargets.Method)]
+        public void AfterMethod()
+        {
+            Console.WriteLine("AfterMethod");
+        }
+
+        [Advice(InjectionPoints.After, InjectionTargets.Setter)]
+        public void AfterSetter()
+        {
+            Console.WriteLine("AfterSetter");
+        }
+
+        //Constructor
+        //[Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Constructor)]   <--there is a bug
+        public void BeforeConstructor()
+        {
+            Console.WriteLine("BeforeConstructor");
+        }
+
+        //Event
+        [Advice(InjectionPoints.Before, InjectionTargets.EventAdd)]
+        public void BeforeEventAdd()
+        {
+            Console.WriteLine("BeforeEventAdd");
+        }
+
+        [Advice(InjectionPoints.Before, InjectionTargets.EventRemove)]
+        public void BeforeEventRemove()
+        {
+            Console.WriteLine("BeforeEventRemove");
+        }
+
+        [Advice(InjectionPoints.Before, InjectionTargets.Getter)]
+        public void BeforeGetter()
+        {
+            Console.WriteLine("BeforeGetter");
+        }
+
+        //Method
+        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
+        public void BeforeMethod()
+        {
+            Console.WriteLine("BeforeMethod");
+        }
+
+        //Property
+        [Advice(InjectionPoints.Before, InjectionTargets.Setter)]
+        public void BeforeSetter()
+        {
+            Console.WriteLine("BeforeSetter");
+        }
+    }
+
     // [Aspect(typeof(TestMethodFilteredAspect), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public)]
     [Aspect(typeof(TestMethodFilteredAspect2), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public, CustomData = new object[] { "ololo", typeof(StringBuilder), 34, new object[] { 12, 31 } })]
     internal class TestMethodClass
     {
-        private readonly StringBuilder b = new StringBuilder();
         private static readonly StringBuilder c = new StringBuilder();
+        private readonly StringBuilder b = new StringBuilder();
+        public event EventHandler<EventArgs> TestEvent = (s, e) => { };
 
         public TestMethodClass(string a)
         {
@@ -21,13 +125,11 @@ namespace AspectInjector.Test
         {
         }
 
+        public int TestProperty { get; set; }
+
         public int TestMethodAAA(string data)
         {
             throw new NotImplementedException();
-        }
-
-        private void TestMethodFiltered1()
-        {
         }
 
         public string TestMethodFiltered2()
@@ -41,15 +143,18 @@ namespace AspectInjector.Test
             return "sdfsdfs";
         }
 
-        public event EventHandler<EventArgs> TestEvent = (s, e) => { };
-
-        public int TestProperty { get; set; }
+        private void TestMethodFiltered1()
+        {
+        }
     }
 
     internal class TestMethodFilteredAspect
     {
         [Advice(InjectionPoints.After, InjectionTargets.Method)]
-        public void AfterMethod()
+        public void AfterMethod(
+            [AdviceArgument(AdviceArgumentSource.ReturningValue)] object result
+
+            )
         {
         }
     }
@@ -67,106 +172,14 @@ namespace AspectInjector.Test
         }
     }
 
-    internal class MyClass
+    internal class TestMethodFilteredAspect3
     {
-        [Aspect(typeof(LogMethodCallAspect))]
-        public void Do()
-        {
-            Console.WriteLine("Here I am!");
-        }
-    }
+        [Advice(InjectionPoints.Exception, InjectionTargets.Method)]
+        public void ExcpMethod(
+            [AdviceArgument(AdviceArgumentSource.Exception)] Exception ex
 
-    internal class LogMethodCallAspect
-    {
-        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
-        public void BeforeMethod()
+              )
         {
-            Console.WriteLine("Method executing");
-        }
-
-        [Advice(InjectionPoints.After, InjectionTargets.Method)]
-        public void AfterMethod()
-        {
-            Console.WriteLine("Method executed");
-        }
-    }
-
-    internal class TestMethodAspect
-    {
-        //Property
-        [Advice(InjectionPoints.Before, InjectionTargets.Setter)]
-        public void BeforeSetter()
-        {
-            Console.WriteLine("BeforeSetter");
-        }
-
-        [Advice(InjectionPoints.After, InjectionTargets.Setter)]
-        public void AfterSetter()
-        {
-            Console.WriteLine("AfterSetter");
-        }
-
-        [Advice(InjectionPoints.Before, InjectionTargets.Getter)]
-        public void BeforeGetter()
-        {
-            Console.WriteLine("BeforeGetter");
-        }
-
-        [Advice(InjectionPoints.After, InjectionTargets.Getter)]
-        public void AfterGetter()
-        {
-            Console.WriteLine("AfterGetter");
-        }
-
-        //Event
-        [Advice(InjectionPoints.Before, InjectionTargets.EventAdd)]
-        public void BeforeEventAdd()
-        {
-            Console.WriteLine("BeforeEventAdd");
-        }
-
-        [Advice(InjectionPoints.After, InjectionTargets.EventAdd)]
-        public void AfterEventAdd()
-        {
-            Console.WriteLine("AfterEventAdd");
-        }
-
-        [Advice(InjectionPoints.Before, InjectionTargets.EventRemove)]
-        public void BeforeEventRemove()
-        {
-            Console.WriteLine("BeforeEventRemove");
-        }
-
-        [Advice(InjectionPoints.After, InjectionTargets.EventRemove)]
-        public void AfterEventRemove()
-        {
-            Console.WriteLine("AfterEventRemove");
-        }
-
-        //Method
-        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
-        public void BeforeMethod()
-        {
-            Console.WriteLine("BeforeMethod");
-        }
-
-        [Advice(InjectionPoints.After, InjectionTargets.Method)]
-        public void AfterMethod()
-        {
-            Console.WriteLine("AfterMethod");
-        }
-
-        //Constructor
-        //[Advice(Points = InjectionPoints.Before, Targets = InjectionTargets.Constructor)]   <--there is a bug
-        public void BeforeConstructor()
-        {
-            Console.WriteLine("BeforeConstructor");
-        }
-
-        [Advice(InjectionPoints.After, InjectionTargets.Constructor)]
-        public void AfterConstructor()
-        {
-            Console.WriteLine("AfterConstructor");
         }
     }
 }

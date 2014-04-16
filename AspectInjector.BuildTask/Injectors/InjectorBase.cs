@@ -35,7 +35,7 @@ namespace AspectInjector.BuildTask.Injectors
 
                 processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldarg_0));
 
-                var args = ResolveArgumentsValues(context, context.AspectFactoryArgumentsSources, null).ToArray();
+                var args = ResolveArgumentsValues(context, context.AspectFactoryArgumentsSources, InjectionPoints.Before).ToArray();
                 InjectMethodCall(processor, firstInstruction, null, context.AspectFactory, args);
 
                 processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Stfld, fd));
@@ -103,6 +103,8 @@ namespace AspectInjector.BuildTask.Injectors
 
                 if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
+
+                return;
             }
 
             if (arg is VariableDefinition)
@@ -110,9 +112,11 @@ namespace AspectInjector.BuildTask.Injectors
                 var var = (VariableDefinition)arg;
 
                 if (!expectedType.Resolve().IsTypeOf(var.VariableType))
-                    throw new ArgumentException("Argument type mismatch");
+                    throw new ArgumentException("Argument type mismatch");//todo:: fix for boxing, return value might be by ref
 
                 processor.InsertBefore(injectionPoint, processor.CreateOptimized(expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
+
+                return;
             }
 
             if (arg is string)
@@ -122,6 +126,17 @@ namespace AspectInjector.BuildTask.Injectors
 
                 var str = (string)arg;
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldstr, str));
+
+                return;
+            }
+
+            if (arg is Enum)
+            {
+                //todo:: type check
+                var i = (int)arg;
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, i));
+
+                return;
             }
 
             if (arg == Markers.InstanceSelfMarker)
@@ -130,6 +145,21 @@ namespace AspectInjector.BuildTask.Injectors
                     throw new ArgumentException("Argument type mismatch");
 
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldarg_0));
+
+                return;
+            }
+
+            if (arg == Markers.DefaultMarker)
+            {
+                if (!expectedType.IsTypeOf(expectedType.Module.TypeSystem.Void))
+                {
+                    if (expectedType.IsValueType)
+                        processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldc_I4_0));
+                    else
+                        processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldnull));
+                }
+
+                return;
             }
 
             if (arg is Array)
@@ -165,14 +195,22 @@ namespace AspectInjector.BuildTask.Injectors
 
                     processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
                 }
+
+                return;
             }
 
-            //TODO:: thtow new NotSupportedExc
-            //TODO:: supportNulls
+            throw new NotSupportedException("Argument type of " + arg.GetType().ToString() + " is not supported");
         }
 
-        protected IEnumerable<object> ResolveArgumentsValues(AspectContext context, List<AdviceArgumentSource> sources, VariableDefinition abortFlagVariable)
-        {//todo::support exception, returndata, pointfired,
+        protected IEnumerable<object> ResolveArgumentsValues(
+            AspectContext context,
+            List<AdviceArgumentSource> sources,
+            InjectionPoints injectionPointFired,
+            VariableDefinition abortFlagVariable = null,
+            VariableDefinition exceptionVariable = null,
+            VariableDefinition returnObjectVariable = null
+             )
+        {
             foreach (var argumentSource in sources)
             {
                 switch (argumentSource)
@@ -189,16 +227,27 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return context.TargetName;
                         break;
 
+                    case AdviceArgumentSource.InjectionPointFired:
+                        yield return injectionPointFired;
+                        break;
+
                     case AdviceArgumentSource.AbortFlag:
-                        if (abortFlagVariable != null)
-                            yield return abortFlagVariable;
-                        else //todo:: throw markers.Null (default)
-                            throw new ArgumentNullException("abortFlagVariable", "abortFlagVariable should be set for AdviceArgumentSource.AbortFlag");
+                        yield return abortFlagVariable ?? Markers.DefaultMarker;
+                        break;
+
+                    case AdviceArgumentSource.Exception:
+                        yield return exceptionVariable ?? Markers.DefaultMarker;
+                        break;
+
+                    case AdviceArgumentSource.ReturningValue:
+                        yield return returnObjectVariable ?? Markers.DefaultMarker;
                         break;
 
                     case AdviceArgumentSource.CustomData:
                         yield return context.AspectCustomData;
                         break;
+
+                    default: throw new NotSupportedException(argumentSource.ToString() + " is not supported (yet?)");
                 }
             }
         }

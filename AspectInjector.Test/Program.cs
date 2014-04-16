@@ -3,15 +3,15 @@ using System;
 
 namespace AspectInjector.Test
 {
-    internal class T2 : T1
+    internal class Program
     {
-        public T2()
+        private static void Main(string[] args)
         {
-            try
-            {
-                int a = 1;
-            }
-            catch { }
+            Test(StringComparison.InvariantCulture);
+        }
+
+        private static void Test(StringComparison ip)
+        {
         }
     }
 
@@ -35,8 +35,8 @@ namespace AspectInjector.Test
                 throw new NotImplementedException();
         }
 
-        [Aspect(typeof(TestMethodFilteredAspect2))]
-        [Aspect(typeof(TestMethodFilteredAspect))]
+        //[Aspect(typeof(TestMethodFilteredAspect2))]
+        //[Aspect(typeof(TestMethodFilteredAspect))]
         public int Do3(bool a)
         {
             if (a)
@@ -52,11 +52,30 @@ namespace AspectInjector.Test
             throw new NotImplementedException();
         }
 
+        [Aspect(typeof(TestMethodFilteredAspect3))]
+        public int Do5()
+        {
+            return 1;
+        }
+
+        public int Do6()
+        {
+            try
+            {
+                return 1;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
+        }
+
         public int Test1()
         {
             try
             {
-                throw new NotImplementedException();
+                return 1;
             }
             catch (Exception e)
             {
@@ -65,59 +84,15 @@ namespace AspectInjector.Test
         }
     }
 
-    internal class Program
+    internal class T2 : T1
     {
-        private static void Main(string[] args)
+        public T2()
         {
-            //        TestInterfaceInjection();
-            //        TestMethodInjection();
-
-            //        StringComparer b = default(StringComparer);
-
-            //        var a = false;
-
-            //        var b1 = default(StringComparer);
-            //        var b2 = default(int);
-
-            //        a = true;
-
-            //        if (a == true)
-            //            return;
-
-            //        Ololo(ref a);
-            //    }
-
-            //    private static void Ololo(ref bool dd)
-            //    {
-            //    }
-
-            //    private static void TestInterfaceInjection()
-            //    {
-            //        Console.WriteLine();
-            //        Console.WriteLine();
-            //        Console.WriteLine("TestInterfaceInjection");
-            //        Console.WriteLine();
-
-            //        var testInterface = (ITestInterface)new TestInterfaceProxyClass();
-
-            //        testInterface.TestMethod("");
-            //    }
-
-            //    private static void TestMethodInjection()
-            //    {
-            //        //Console.WriteLine();
-            //        //Console.WriteLine();
-            //        //Console.WriteLine("TestMethodInjection");
-            //        //Console.WriteLine();
-
-            //        //var testMethod = new TestMethodClass("");
-
-            //        //testMethod.TestEvent += (s, e) => { };
-            //        //testMethod.TestEvent -= (s, e) => { };
-            //        //testMethod.TestMethodAAA("");
-            //        //testMethod.TestMethodFiltered2();
-            //        //testMethod.TestProperty = 0;
-            //        //var a = testMethod.TestProperty;
+            try
+            {
+                int a = 1;
+            }
+            catch { }
         }
     }
 }

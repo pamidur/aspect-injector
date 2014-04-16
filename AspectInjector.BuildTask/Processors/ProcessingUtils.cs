@@ -2,6 +2,7 @@
 using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
+using System;
 using System.Collections.Generic;
 
 namespace AspectInjector.BuildTask.Processors
@@ -41,22 +42,16 @@ namespace AspectInjector.BuildTask.Processors
                 {
                     if (!argument.ParameterType.IsTypeOf(typeof(object)))
                         throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.ReturningValue", adviceMethod);
-
-                    throw new CompilationException("AdviceArgumentSource.ReturningValue is not supported yet. Reserved to inspect returning value on after methods", adviceMethod);
                 }
                 else if (source == AdviceArgumentSource.Exception)
                 {
-                    if (!argument.ParameterType.IsTypeOf(typeof(object)))//todo:: System.Exception
+                    if (!argument.ParameterType.IsTypeOf(adviceMethod.Module.Import(typeof(Exception)))) //todo:: optimize typeref creatino
                         throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.Exception", adviceMethod);
-
-                    throw new CompilationException("AdviceArgumentSource.Exception is not supported yet.", adviceMethod);
                 }
                 else if (source == AdviceArgumentSource.InjectionPointFired)
                 {
-                    if (!argument.ParameterType.IsTypeOf(typeof(object)))//todo:: InjectionPoints
+                    if (!argument.ParameterType.IsTypeOf(adviceMethod.Module.Import(typeof(InjectionPoints)))) //todo:: should another way to represent injecion reason
                         throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.InjectionPointFired", adviceMethod);
-
-                    throw new CompilationException("AdviceArgumentSource.InjectionPointFired is not supported yet.", adviceMethod);
                 }
                 else if (source == AdviceArgumentSource.CustomData)
                 {
