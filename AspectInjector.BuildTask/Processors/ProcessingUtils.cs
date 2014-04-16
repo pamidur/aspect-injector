@@ -39,7 +39,24 @@ namespace AspectInjector.BuildTask.Processors
                 }
                 else if (source == AdviceArgumentSource.ReturningValue)
                 {
+                    if (!argument.ParameterType.IsTypeOf(typeof(object)))
+                        throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.ReturningValue", adviceMethod);
+
                     throw new CompilationException("AdviceArgumentSource.ReturningValue is not supported yet. Reserved to inspect returning value on after methods", adviceMethod);
+                }
+                else if (source == AdviceArgumentSource.Exception)
+                {
+                    if (!argument.ParameterType.IsTypeOf(typeof(object)))//todo:: System.Exception
+                        throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.Exception", adviceMethod);
+
+                    throw new CompilationException("AdviceArgumentSource.Exception is not supported yet.", adviceMethod);
+                }
+                else if (source == AdviceArgumentSource.InjectionPointFired)
+                {
+                    if (!argument.ParameterType.IsTypeOf(typeof(object)))//todo:: InjectionPoints
+                        throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.InjectionPointFired", adviceMethod);
+
+                    throw new CompilationException("AdviceArgumentSource.InjectionPointFired is not supported yet.", adviceMethod);
                 }
                 else if (source == AdviceArgumentSource.CustomData)
                 {
@@ -47,7 +64,6 @@ namespace AspectInjector.BuildTask.Processors
                         throw new CompilationException("Argument should be of type System.Array<System.Object> to inject AdviceArgumentSource.CustomData", adviceMethod);
 
                     throw new CompilationException("AdviceArgumentSource.CustomData is not supported yet", adviceMethod);
-
                 }
 
                 yield return source;

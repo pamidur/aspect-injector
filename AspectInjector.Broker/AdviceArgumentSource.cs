@@ -7,6 +7,8 @@
         TargetArguments,
         AbortFlag,
         ReturningValue,
+        Exception,
+        InjectionPointFired,
         CustomData
     }
 }

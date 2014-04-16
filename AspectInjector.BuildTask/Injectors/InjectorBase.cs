@@ -35,7 +35,7 @@ namespace AspectInjector.BuildTask.Injectors
 
                 processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldarg_0));
 
-                var args = ResolveArgumentsValues(context, context.AspectFactoryArgumentsSources,null).ToArray();
+                var args = ResolveArgumentsValues(context, context.AspectFactoryArgumentsSources, null).ToArray();
                 InjectMethodCall(processor, firstInstruction, null, context.AspectFactory, args);
 
                 processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Stfld, fd));
@@ -166,10 +166,13 @@ namespace AspectInjector.BuildTask.Injectors
                     processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
                 }
             }
+
+            //TODO:: thtow new NotSupportedExc
+            //TODO:: supportNulls
         }
 
         protected IEnumerable<object> ResolveArgumentsValues(AspectContext context, List<AdviceArgumentSource> sources, VariableDefinition abortFlagVariable)
-        {
+        {//todo::support exception, returndata, pointfired,
             foreach (var argumentSource in sources)
             {
                 switch (argumentSource)
@@ -189,7 +192,7 @@ namespace AspectInjector.BuildTask.Injectors
                     case AdviceArgumentSource.AbortFlag:
                         if (abortFlagVariable != null)
                             yield return abortFlagVariable;
-                        else
+                        else //todo:: throw markers.Null (default)
                             throw new ArgumentNullException("abortFlagVariable", "abortFlagVariable should be set for AdviceArgumentSource.AbortFlag");
                         break;
 

@@ -48,15 +48,15 @@ namespace AspectInjector.BuildTask.Contexts
             ExitPoint = Processor.SafeAppend(Processor.Create(OpCodes.Ret));
         }
 
-        private Instruction SetupSingleReturnPoint(Instruction singleReturnPoint)
+        private Instruction SetupSingleReturnPoint(Instruction suggestedSingleReturnPoint)
         {
             var rets = Processor.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList();
 
             if (rets.Count == 1)
-                return Processor.SafeReplace(rets.First(), singleReturnPoint);//todo:: optimize, may fails on large methods
+                return Processor.SafeReplace(rets.First(), suggestedSingleReturnPoint);//todo:: optimize, may fails on large methods
 
             foreach (var i in rets)
-                Processor.SafeReplace(i, Processor.Create(OpCodes.Br_S, singleReturnPoint)); //todo:: optimize, may fails on large methods
+                Processor.SafeReplace(i, Processor.Create(OpCodes.Br_S, suggestedSingleReturnPoint)); //todo:: optimize, may fails on large methods
 
             if (!TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void))
             {
@@ -66,9 +66,9 @@ namespace AspectInjector.BuildTask.Contexts
                     Processor.SafeAppend(Processor.Create(OpCodes.Ldnull));
             }
 
-            Processor.SafeAppend(singleReturnPoint);
+            Processor.SafeAppend(suggestedSingleReturnPoint);
 
-            return singleReturnPoint;
+            return suggestedSingleReturnPoint;
         }
 
         private void SetupCatchBlock()
