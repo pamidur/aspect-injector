@@ -38,12 +38,12 @@ namespace AspectInjector.BuildTask.Processors
                     if (!argument.ParameterType.IsTypeOf(new ByReferenceType(adviceMethod.Module.TypeSystem.Boolean)))
                         throw new CompilationException("Argument should be of type ref System.Boolean to inject AdviceArgumentSource.AbortFlag", adviceMethod);
                 }
-                else if (source == AdviceArgumentSource.ReturningValue)
+                else if (source == AdviceArgumentSource.TargetReturnValue)
                 {
                     if (!argument.ParameterType.IsTypeOf(typeof(object)))
                         throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.ReturningValue", adviceMethod);
                 }
-                else if (source == AdviceArgumentSource.Exception)
+                else if (source == AdviceArgumentSource.TargetException)
                 {
                     if (!argument.ParameterType.IsTypeOf(adviceMethod.Module.Import(typeof(Exception)))) //todo:: optimize typeref creatino
                         throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.Exception", adviceMethod);

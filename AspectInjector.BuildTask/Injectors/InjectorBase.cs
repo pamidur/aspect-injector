@@ -235,11 +235,11 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return abortFlagVariable ?? Markers.DefaultMarker;
                         break;
 
-                    case AdviceArgumentSource.Exception:
+                    case AdviceArgumentSource.TargetException:
                         yield return exceptionVariable ?? Markers.DefaultMarker;
                         break;
 
-                    case AdviceArgumentSource.ReturningValue:
+                    case AdviceArgumentSource.TargetReturnValue:
                         yield return returnObjectVariable ?? Markers.DefaultMarker;
                         break;
 

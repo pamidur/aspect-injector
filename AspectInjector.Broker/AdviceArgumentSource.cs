@@ -5,9 +5,9 @@
         Instance,
         TargetName,
         TargetArguments,
+        TargetReturnValue,
+        TargetException,
         AbortFlag,
-        ReturningValue,
-        Exception,
         InjectionPointFired,
         CustomData
     }
