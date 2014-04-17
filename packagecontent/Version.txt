@@ -1,1 +1,1 @@
-0.7.{BuildNumber}
+0.8.{BuildNumber}
