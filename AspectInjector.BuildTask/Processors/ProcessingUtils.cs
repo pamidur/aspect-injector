@@ -45,7 +45,7 @@ namespace AspectInjector.BuildTask.Processors
                 }
                 else if (source == AdviceArgumentSource.TargetException)
                 {
-                    if (!argument.ParameterType.IsTypeOf(adviceMethod.Module.Import(typeof(Exception)))) //todo:: optimize typeref creatino
+                    if (!argument.ParameterType.IsTypeOf(adviceMethod.Module.TypeSystem.ResolveType(typeof(Exception))))
                         throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.Exception", adviceMethod);
                 }
                 else if (source == AdviceArgumentSource.CustomData)

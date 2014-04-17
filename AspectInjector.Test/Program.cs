@@ -44,7 +44,7 @@ namespace AspectInjector.Test
                 throw new NotImplementedException();
         }
 
-        [Aspect(typeof(TestMethodFilteredAspect2))]
+        //[Aspect(typeof(TestMethodFilteredAspect2))]
         public int Do2(bool a)
         {
             if (a)
@@ -63,17 +63,18 @@ namespace AspectInjector.Test
                 throw new NotImplementedException();
         }
 
-        [Aspect(typeof(TestMethodFilteredAspect2))]
+        //[Aspect(typeof(TestMethodFilteredAspect2))]
         [Aspect(typeof(TestMethodFilteredAspect), CustomData = new object[] { StringSplitOptions.None, (short)12, true, new object[] { new string[] { "fgf" } }, new int[] { } })]
         public int Do4(bool a)
         {
             return 2;
         }
 
-        [Aspect(typeof(TestMethodFilteredAspect3))]
-        public int Do5()
+        [Aspect(typeof(TestMethodFilteredAspect))]
+        [Aspect(typeof(TestMethodFilteredAspect2))]
+        public int Do5(bool a)
         {
-            return 1;
+            return 3;
         }
 
         public int Do6()

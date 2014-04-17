@@ -171,7 +171,7 @@ namespace AspectInjector.BuildTask.Injectors
 
             if (arg == Markers.DefaultMarker)
             {
-                if (!expectedType.IsTypeOf(expectedType.Module.TypeSystem.Void))
+                if (!expectedType.IsTypeOf(module.TypeSystem.Void))
                 {
                     if (expectedType.IsValueType)
                         processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldc_I4_0));
@@ -217,14 +217,14 @@ namespace AspectInjector.BuildTask.Injectors
             throw new NotSupportedException("Argument type of " + arg.GetType().ToString() + " is not supported");
         }
 
-        private void LoadArray(Instruction injectionPoint, ILProcessor processor, object arg, TypeReference targetElementType, TypeReference expectedType)
+        private void LoadArray(Instruction injectionPoint, ILProcessor processor, object args, TypeReference targetElementType, TypeReference expectedType)
         {
             var module = processor.Body.Method.Module;
 
             if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(new ArrayType(module.TypeSystem.Object)))
                 throw new ArgumentException("Argument type mismatch");
 
-            var parameters = ((Array)arg).Cast<object>().ToArray();
+            var parameters = ((Array)args).Cast<object>().ToArray();
 
             var elementType = module.Import(targetElementType.Resolve());
 

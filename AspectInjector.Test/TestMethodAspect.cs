@@ -108,7 +108,7 @@ namespace AspectInjector.Test
     }
 
     // [Aspect(typeof(TestMethodFilteredAspect), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public)]
-    [Aspect(typeof(TestMethodFilteredAspect2), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public, CustomData = new object[] { "ololo", typeof(StringBuilder), 34, new object[] { 12, 31 } })]
+    //[Aspect(typeof(TestMethodFilteredAspect2), NameFilter = "AAA", AccessModifierFilter = AccessModifiers.Public, CustomData = new object[] { "ololo", typeof(StringBuilder), 34, new object[] { 12, 31 } })]
     internal class TestMethodClass
     {
         private static readonly StringBuilder c = new StringBuilder();
@@ -168,15 +168,15 @@ namespace AspectInjector.Test
 
     internal class TestMethodFilteredAspect2
     {
-        //[Advice(InjectionPoints.Before, InjectionTargets.Method)]
-        //public int BeforeMethod(
-        //    [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
-        //    // , [AdviceArgument(AdviceArgumentSource.CustomData)] object[] cdata
+        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
+        public int BeforeMethod(
+            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
+            // , [AdviceArgument(AdviceArgumentSource.CustomData)] object[] cdata
 
-        //     )
-        //{
-        //    return 2;
-        //}
+             )
+        {
+            return 1;
+        }
     }
 
     internal class TestMethodFilteredAspect3

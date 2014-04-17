@@ -113,7 +113,7 @@ namespace AspectInjector.BuildTask.Contexts
         {
             ReturnPoint = Processor.Create(OpCodes.Nop);
 
-            OriginalCodeReturnPoint = SetupSingleReturnPoint(Processor.Create(OpCodes.Br, ReturnPoint));
+            OriginalCodeReturnPoint = SetupSingleReturnPoint(Processor.Create(OpCodes.Br, ReturnPoint));//todo:: optimize
             Processor.SafeAppend(ReturnPoint);
 
             if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
@@ -136,7 +136,7 @@ namespace AspectInjector.BuildTask.Contexts
                 if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
                     Processor.SafeInsertBefore(rets.First(), Processor.CreateOptimized(OpCodes.Stloc, MethodResultVariable.Index));
 
-                return Processor.SafeReplace(rets.First(), suggestedSingleReturnPoint);//todo:: optimize
+                return Processor.SafeReplace(rets.First(), suggestedSingleReturnPoint);
             }
 
             foreach (var i in rets)
