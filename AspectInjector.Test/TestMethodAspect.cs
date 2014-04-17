@@ -113,6 +113,7 @@ namespace AspectInjector.Test
     {
         private static readonly StringBuilder c = new StringBuilder();
         private readonly StringBuilder b = new StringBuilder();
+
         public event EventHandler<EventArgs> TestEvent = (s, e) => { };
 
         public TestMethodClass(string a)
@@ -150,10 +151,16 @@ namespace AspectInjector.Test
 
     internal class TestMethodFilteredAspect
     {
-        [Advice(InjectionPoints.After, InjectionTargets.Method)]
-        public void AfterMethod(
-            [AdviceArgument(AdviceArgumentSource.ReturningValue)] object result
+        [Advice(InjectionPoints.Exception | InjectionPoints.After | InjectionPoints.Before, InjectionTargets.Method)]
+        public void InjectionMethod(
+            [AdviceArgument(AdviceArgumentSource.TargetException)] Exception ex,
+            [AdviceArgument(AdviceArgumentSource.TargetReturnValue)] object result,
+            [AdviceArgument(AdviceArgumentSource.TargetName)] string targetName,
+            [AdviceArgument(AdviceArgumentSource.TargetArguments)] object[] args,
+            [AdviceArgument(AdviceArgumentSource.Instance)] object target,
+            [AdviceArgument(AdviceArgumentSource.CustomData)] object[] data
 
+            //,            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
             )
         {
         }
@@ -161,22 +168,22 @@ namespace AspectInjector.Test
 
     internal class TestMethodFilteredAspect2
     {
-        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
-        public int BeforeMethod(
-            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
-            // , [AdviceArgument(AdviceArgumentSource.CustomData)] object[] cdata
+        //[Advice(InjectionPoints.Before, InjectionTargets.Method)]
+        //public int BeforeMethod(
+        //    [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
+        //    // , [AdviceArgument(AdviceArgumentSource.CustomData)] object[] cdata
 
-             )
-        {
-            return 2;
-        }
+        //     )
+        //{
+        //    return 2;
+        //}
     }
 
     internal class TestMethodFilteredAspect3
     {
         [Advice(InjectionPoints.Exception, InjectionTargets.Method)]
         public void ExcpMethod(
-            [AdviceArgument(AdviceArgumentSource.Exception)] Exception ex
+            [AdviceArgument(AdviceArgumentSource.TargetException)] Exception ex
 
               )
         {

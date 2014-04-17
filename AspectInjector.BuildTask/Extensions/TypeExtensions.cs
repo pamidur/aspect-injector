@@ -61,24 +61,8 @@ namespace AspectInjector.BuildTask.Extensions
 
         public static bool IsTypeOf(this TypeReference typeReference, Type type)
         {
-            var module = typeReference.Module;
-
-            if (type == typeof(object))
-                return typeReference.IsTypeOf(module.TypeSystem.Object);
-
-            if (type == typeof(bool))
-                return typeReference.IsTypeOf(module.TypeSystem.Boolean);
-
-            if (type == typeof(string))
-                return typeReference.IsTypeOf(module.TypeSystem.String);
-
-            if (type == typeof(int))
-                return typeReference.IsTypeOf(module.TypeSystem.Int32);
-
-            if (type == typeof(void))
-                return typeReference.IsTypeOf(module.TypeSystem.Void);
-
-            throw new NotSupportedException();
+            var resolvedType = typeReference.Module.TypeSystem.ResolveType(type);
+            return typeReference.IsTypeOf(resolvedType);
         }
 
         public static bool IsTypeOf(this TypeReference typeReference1, TypeReference typeReference2)
@@ -87,6 +71,7 @@ namespace AspectInjector.BuildTask.Extensions
 
             var tr1UniqueString = typeReference1.FullName + "@" + typeReference1.Resolve().Module.Assembly.Name.Name.ToLowerInvariant();
             var tr2UniqueString = typeReference2.FullName + "@" + typeReference2.Resolve().Module.Assembly.Name.Name.ToLowerInvariant();
+
             return tr1UniqueString == tr2UniqueString;
         }
 

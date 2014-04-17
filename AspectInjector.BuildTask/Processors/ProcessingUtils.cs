@@ -48,17 +48,10 @@ namespace AspectInjector.BuildTask.Processors
                     if (!argument.ParameterType.IsTypeOf(adviceMethod.Module.Import(typeof(Exception)))) //todo:: optimize typeref creatino
                         throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.Exception", adviceMethod);
                 }
-                else if (source == AdviceArgumentSource.InjectionPointFired)
-                {
-                    if (!argument.ParameterType.IsTypeOf(adviceMethod.Module.Import(typeof(InjectionPoints)))) //todo:: should another way to represent injecion reason
-                        throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.InjectionPointFired", adviceMethod);
-                }
                 else if (source == AdviceArgumentSource.CustomData)
                 {
                     if (!argument.ParameterType.IsTypeOf(new ArrayType(adviceMethod.Module.TypeSystem.Object)))
                         throw new CompilationException("Argument should be of type System.Array<System.Object> to inject AdviceArgumentSource.CustomData", adviceMethod);
-
-                    throw new CompilationException("AdviceArgumentSource.CustomData is not supported yet", adviceMethod);
                 }
 
                 yield return source;

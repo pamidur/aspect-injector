@@ -24,14 +24,18 @@ namespace AspectInjector.BuildTask.Contexts
             TargetName = other.TargetName;
         }
 
+        public CustomAttributeArgument? AspectCustomData { get; set; }
 
-        public object[] AspectCustomData { get; set; }
         public MethodDefinition AspectFactory { get; set; }
+
         public List<AdviceArgumentSource> AspectFactoryArgumentsSources { get; set; }
+
         public TypeDefinition AspectType { get; set; }
-        
+
         public TargetMethodContext TargetMethodContext { get; set; }
+
         public string TargetName { get; set; }
-        public TypeDefinition TargetType { get; set; }        
+
+        public TypeDefinition TargetType { get; set; }
     }
 }

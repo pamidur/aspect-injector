@@ -159,7 +159,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                     TargetName = targetName,
                     TargetType = targetMethod.DeclaringType,
                     AspectType = (TypeDefinition)attr.ConstructorArguments[0].Value,
-                    //AspectCustomData = (object[])(a.GetPropertyValue("CustomData") ?? new object[] { })
+                    AspectCustomData = attr.GetProperty("CustomData")
                 }
                 ).Select(SetAspectFactoryToContext).Where(ctx => _processors.Any(p => p.CanProcess(ctx.AspectType))).ToList();
 

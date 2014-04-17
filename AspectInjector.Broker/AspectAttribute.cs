@@ -2,7 +2,7 @@
 
 namespace AspectInjector.Broker
 {
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = true)]
     public class AspectAttribute : Attribute
     {
         public Type Type { get; private set; }

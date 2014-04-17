@@ -8,7 +8,6 @@
         TargetReturnValue,
         TargetException,
         AbortFlag,
-        InjectionPointFired,
         CustomData
     }
 }

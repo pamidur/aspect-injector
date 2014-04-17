@@ -1,6 +1,7 @@
 ﻿using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System;
 using System.Linq;
 
 namespace AspectInjector.BuildTask.Contexts
@@ -24,6 +25,7 @@ namespace AspectInjector.BuildTask.Contexts
         }
 
         public Instruction EntryPoint { get; private set; }
+
         public Instruction ExceptionPoint
         {
             get
@@ -34,6 +36,7 @@ namespace AspectInjector.BuildTask.Contexts
                 return _exceptionPoint;
             }
         }
+
         public VariableDefinition ExceptionVariable
         {
             get
@@ -46,6 +49,7 @@ namespace AspectInjector.BuildTask.Contexts
         }
 
         public Instruction ExitPoint { get; private set; }
+
         public VariableDefinition MethodResultVariable
         {
             get
@@ -65,14 +69,18 @@ namespace AspectInjector.BuildTask.Contexts
         }
 
         public Instruction OriginalCodeReturnPoint { get; private set; }
+
         public Instruction OriginalEntryPoint { get; private set; }
+
         public ILProcessor Processor { get; private set; }
+
         public Instruction ReturnPoint { get; private set; }
+
         public MethodDefinition TargetMethod { get; private set; }
 
         private void SetupCatchBlock()
         {
-            var exceptionType = new TypeReference("System", "Exception", TargetMethod.Module, TargetMethod.Module.TypeSystem.Corlib);
+            var exceptionType = TargetMethod.Module.TypeSystem.ResolveType(typeof(Exception));
             _exceptionVar = new VariableDefinition(_exceptionVariableName, exceptionType);
             Processor.Body.Variables.Add(_exceptionVar);
             Processor.Body.InitLocals = true;

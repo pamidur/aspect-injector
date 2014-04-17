@@ -8,6 +8,24 @@ namespace AspectInjector.Test
         private static void Main(string[] args)
         {
             Test(StringComparison.InvariantCulture);
+
+            var a = typeof(Int32);
+
+            var b = (short)1;
+            var b1 = (ushort)1;
+            var b2 = (byte)1;
+            var b3 = (sbyte)1;
+            var b4 = (long)99999999999999;
+            var b5 = (ulong)99999999999999;
+            var b6 = (int)1;
+            var b7 = (uint)1;
+            var b8 = 'c';
+            var b9 = (float)1.5;
+            var b10 = (double)1.5;
+            var b11 = true;
+
+            var b12 = new DateTime();
+            var b122 = new object[] { StringSplitOptions.None };
         }
 
         private static void Test(StringComparison ip)
@@ -46,10 +64,10 @@ namespace AspectInjector.Test
         }
 
         [Aspect(typeof(TestMethodFilteredAspect2))]
-        [Aspect(typeof(TestMethodFilteredAspect))]
+        [Aspect(typeof(TestMethodFilteredAspect), CustomData = new object[] { StringSplitOptions.None, (short)12, true, new object[] { new string[] { "fgf" } }, new int[] { } })]
         public int Do4(bool a)
         {
-            throw new NotImplementedException();
+            return 2;
         }
 
         [Aspect(typeof(TestMethodFilteredAspect3))]

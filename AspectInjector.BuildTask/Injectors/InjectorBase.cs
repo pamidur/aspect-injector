@@ -7,6 +7,7 @@ using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace AspectInjector.BuildTask.Injectors
 {
@@ -111,17 +112,20 @@ namespace AspectInjector.BuildTask.Injectors
             {
                 var var = (VariableDefinition)arg;
 
-                if (!expectedType.Resolve().IsTypeOf(var.VariableType))
-                    throw new ArgumentException("Argument type mismatch");//todo:: fix for boxing, return value might be by ref
+                if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.Resolve().IsTypeOf(var.VariableType))
+                    throw new ArgumentException("Argument type mismatch");
 
                 processor.InsertBefore(injectionPoint, processor.CreateOptimized(expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
+
+                if (var.VariableType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
+                    processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Box, module.Import(var.VariableType)));
 
                 return;
             }
 
             if (arg is string)
             {
-                if (!expectedType.IsTypeOf(module.TypeSystem.String))
+                if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(module.TypeSystem.String))
                     throw new ArgumentException("Argument type mismatch");
 
                 var str = (string)arg;
@@ -130,11 +134,27 @@ namespace AspectInjector.BuildTask.Injectors
                 return;
             }
 
-            if (arg is Enum)
+            if (arg is CustomAttributeArgument)
             {
-                //todo:: type check
-                var i = (int)arg;
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, i));
+                var caa = (CustomAttributeArgument)arg;
+
+                if (caa.Type.IsArray)
+                {
+                    if (!expectedType.IsTypeOf(module.TypeSystem.Object) &&
+                        !expectedType.IsTypeOf(new ArrayType(module.TypeSystem.Object))
+                        )
+                        throw new ArgumentException("Argument type mismatch");
+
+                    LoadArray(injectionPoint, processor, caa.Value, caa.Type.GetElementType(), expectedType);
+                }
+                else if (caa.Value is CustomAttributeArgument || caa.Type.IsTypeOf(module.TypeSystem.String))
+                {
+                    LoadCallArgument(processor, injectionPoint, caa.Value, expectedType);
+                }
+                else
+                {
+                    LoadValueTypedArgument(injectionPoint, processor, caa.Value, caa.Type, expectedType);
+                }
 
                 return;
             }
@@ -162,44 +182,118 @@ namespace AspectInjector.BuildTask.Injectors
                 return;
             }
 
-            if (arg is Array)
+            if (arg is TypeReference)
             {
-                if (!expectedType.IsTypeOf(new ArrayType(module.TypeSystem.Object)))
+                var typeOfType = module.TypeSystem.ResolveType(typeof(Type));
+
+                if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(typeOfType))
                     throw new ArgumentException("Argument type mismatch");
 
-                var parameters = (object[])arg;
+                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldtoken, (TypeReference)arg));
+                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Call, module.Import(typeOfType.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle"))));
 
-                var objectDef = module.Import(module.TypeSystem.Object.Resolve());
+                return;
+            }
 
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, parameters.Length));
-                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Newarr, objectDef));
+            if (arg.GetType().IsValueType)
+            {
+                var type = module.TypeSystem.ResolveType(arg.GetType());
+                LoadValueTypedArgument(injectionPoint, processor, arg, type, expectedType);
+                return;
+            }
 
-                if (parameters.Length > 0)
-                {
-                    processor.Body.InitLocals = true;
+            if (arg is Array)
+            {
+                var elementType = arg.GetType().GetElementType();
 
-                    var paramsArrayVar = new VariableDefinition(new ArrayType(objectDef));
-                    processor.Body.Variables.Add(paramsArrayVar);
+                if (elementType == typeof(ParameterDefinition))
+                    elementType = typeof(object);
 
-                    processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, paramsArrayVar.Index));
-
-                    for (var i = 0; i < parameters.Length; i++)
-                    {
-                        processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
-                        processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, i));
-
-                        LoadCallArgument(processor, injectionPoint, parameters[i], module.TypeSystem.Object);
-
-                        processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Stelem_Ref));
-                    }
-
-                    processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
-                }
+                LoadArray(injectionPoint, processor, arg, module.TypeSystem.ResolveType(elementType), expectedType);
 
                 return;
             }
 
             throw new NotSupportedException("Argument type of " + arg.GetType().ToString() + " is not supported");
+        }
+
+        private void LoadArray(Instruction injectionPoint, ILProcessor processor, object arg, TypeReference targetElementType, TypeReference expectedType)
+        {
+            var module = processor.Body.Method.Module;
+
+            if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(new ArrayType(module.TypeSystem.Object)))
+                throw new ArgumentException("Argument type mismatch");
+
+            var parameters = ((Array)arg).Cast<object>().ToArray();
+
+            var elementType = module.Import(targetElementType.Resolve());
+
+            processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, parameters.Length));
+            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Newarr, elementType));
+
+            if (parameters.Length > 0)
+            {
+                processor.Body.InitLocals = true;
+
+                var paramsArrayVar = new VariableDefinition(new ArrayType(elementType));
+                processor.Body.Variables.Add(paramsArrayVar);
+
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, paramsArrayVar.Index));
+
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
+                    processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, i));
+
+                    LoadCallArgument(processor, injectionPoint, parameters[i], module.TypeSystem.Object);
+
+                    processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Stelem_Ref));
+                }
+
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
+            }
+        }
+
+        private void LoadValueTypedArgument(Instruction injectionPoint, ILProcessor processor, object arg, TypeReference type, TypeReference expectedType)
+        {
+            if (!arg.GetType().IsValueType)
+                throw new NotSupportedException("Only value types are supported.");
+
+            var module = processor.Body.Method.Module;
+
+            if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(type))
+                throw new ArgumentException("Argument type mismatch");
+
+            if (arg is long || arg is ulong || arg is double)
+            {
+                var rawdata = GetRawValueType(arg, 8);
+                var val = BitConverter.ToInt64(rawdata, 0);
+
+                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldc_I8, val));
+            }
+            else
+            {
+                var rawdata = GetRawValueType(arg, 4);
+                var val = BitConverter.ToInt32(rawdata, 0);
+
+                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, val));
+            }
+
+            if (expectedType.IsTypeOf(module.TypeSystem.Object))
+                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Box, module.Import(type)));
+
+            return;
+        }
+
+        private byte[] GetRawValueType(object value, int @base = 0)
+        {
+            byte[] rawdata = new byte[@base == 0 ? Marshal.SizeOf(value) : @base];
+
+            GCHandle handle = GCHandle.Alloc(rawdata, GCHandleType.Pinned);
+            Marshal.StructureToPtr(value, handle.AddrOfPinnedObject(), false);
+            handle.Free();
+
+            return rawdata;
         }
 
         protected IEnumerable<object> ResolveArgumentsValues(
@@ -227,10 +321,6 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return context.TargetName;
                         break;
 
-                    case AdviceArgumentSource.InjectionPointFired:
-                        yield return injectionPointFired;
-                        break;
-
                     case AdviceArgumentSource.AbortFlag:
                         yield return abortFlagVariable ?? Markers.DefaultMarker;
                         break;
@@ -244,7 +334,7 @@ namespace AspectInjector.BuildTask.Injectors
                         break;
 
                     case AdviceArgumentSource.CustomData:
-                        yield return context.AspectCustomData;
+                        yield return context.AspectCustomData ?? Markers.DefaultMarker;
                         break;
 
                     default: throw new NotSupportedException(argumentSource.ToString() + " is not supported (yet?)");

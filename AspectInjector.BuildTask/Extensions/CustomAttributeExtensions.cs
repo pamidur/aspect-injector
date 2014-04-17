@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Mono.Cecil;
+using System.Collections.Generic;
 using System.Linq;
-using Mono.Cecil;
 
 namespace AspectInjector.BuildTask.Extensions
 {
@@ -28,7 +28,14 @@ namespace AspectInjector.BuildTask.Extensions
 
         public static object GetPropertyValue(this CustomAttribute attribute, string propertyName)
         {
-            return attribute.Properties.Where(p => p.Name == propertyName).Select(p => p.Argument.Value).FirstOrDefault();
+            var prop = GetProperty(attribute, propertyName);
+            return prop.HasValue ? (object)prop.Value.Value : null;
+        }
+
+        public static CustomAttributeArgument? GetProperty(this CustomAttribute attribute, string propertyName)
+        {
+            var prop = attribute.Properties.Where(p => p.Name == propertyName).ToList();
+            return prop.Count > 0 ? prop[0].Argument : (CustomAttributeArgument?)null;
         }
     }
 }
