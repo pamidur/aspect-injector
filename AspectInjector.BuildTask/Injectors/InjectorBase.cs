@@ -1,13 +1,13 @@
-﻿using AspectInjector.Broker;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using AspectInjector.Broker;
 using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace AspectInjector.BuildTask.Injectors
 {
@@ -61,7 +61,9 @@ namespace AspectInjector.BuildTask.Injectors
                 var fr = (FieldReference)sourceMember;
 
                 if (fr.Resolve().IsStatic)
+                {
                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldsfld, fr));
+                }
                 else
                 {
                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldarg_0));
@@ -104,11 +106,8 @@ namespace AspectInjector.BuildTask.Injectors
 
                 if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
-
-                return;
             }
-
-            if (arg is VariableDefinition)
+            else if (arg is VariableDefinition)
             {
                 var var = (VariableDefinition)arg;
 
@@ -119,22 +118,16 @@ namespace AspectInjector.BuildTask.Injectors
 
                 if (var.VariableType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
                     processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Box, module.Import(var.VariableType)));
-
-                return;
             }
-
-            if (arg is string)
+            else if (arg is string)
             {
                 if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(module.TypeSystem.String))
                     throw new ArgumentException("Argument type mismatch");
 
                 var str = (string)arg;
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldstr, str));
-
-                return;
             }
-
-            if (arg is CustomAttributeArgument)
+            else if (arg is CustomAttributeArgument)
             {
                 var caa = (CustomAttributeArgument)arg;
 
@@ -155,21 +148,15 @@ namespace AspectInjector.BuildTask.Injectors
                 {
                     LoadValueTypedArgument(injectionPoint, processor, caa.Value, caa.Type, expectedType);
                 }
-
-                return;
             }
-
-            if (arg == Markers.InstanceSelfMarker)
+            else if (arg == Markers.InstanceSelfMarker)
             {
                 if (!expectedType.IsTypeOf(module.TypeSystem.Object))
                     throw new ArgumentException("Argument type mismatch");
 
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldarg_0));
-
-                return;
             }
-
-            if (arg == Markers.DefaultMarker)
+            else  if (arg == Markers.DefaultMarker)
             {
                 if (!expectedType.IsTypeOf(module.TypeSystem.Void))
                 {
@@ -178,11 +165,8 @@ namespace AspectInjector.BuildTask.Injectors
                     else
                         processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldnull));
                 }
-
-                return;
             }
-
-            if (arg is TypeReference)
+            else if (arg is TypeReference)
             {
                 var typeOfType = module.TypeSystem.ResolveType(typeof(Type));
 
@@ -191,18 +175,13 @@ namespace AspectInjector.BuildTask.Injectors
 
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldtoken, (TypeReference)arg));
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Call, module.Import(typeOfType.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle"))));
-
-                return;
             }
-
-            if (arg.GetType().IsValueType)
+            else if (arg.GetType().IsValueType)
             {
                 var type = module.TypeSystem.ResolveType(arg.GetType());
                 LoadValueTypedArgument(injectionPoint, processor, arg, type, expectedType);
-                return;
             }
-
-            if (arg is Array)
+            else if (arg is Array)
             {
                 var elementType = arg.GetType().GetElementType();
 
@@ -210,11 +189,11 @@ namespace AspectInjector.BuildTask.Injectors
                     elementType = typeof(object);
 
                 LoadArray(injectionPoint, processor, arg, module.TypeSystem.ResolveType(elementType), expectedType);
-
-                return;
             }
-
-            throw new NotSupportedException("Argument type of " + arg.GetType().ToString() + " is not supported");
+            else
+            {
+                throw new NotSupportedException("Argument type of " + arg.GetType().ToString() + " is not supported");
+            }
         }
 
         private void LoadArray(Instruction injectionPoint, ILProcessor processor, object args, TypeReference targetElementType, TypeReference expectedType)
@@ -281,8 +260,6 @@ namespace AspectInjector.BuildTask.Injectors
 
             if (expectedType.IsTypeOf(module.TypeSystem.Object))
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Box, module.Import(type)));
-
-            return;
         }
 
         private byte[] GetRawValueType(object value, int @base = 0)
@@ -302,8 +279,7 @@ namespace AspectInjector.BuildTask.Injectors
             InjectionPoints injectionPointFired,
             VariableDefinition abortFlagVariable = null,
             VariableDefinition exceptionVariable = null,
-            VariableDefinition returnObjectVariable = null
-             )
+            VariableDefinition returnObjectVariable = null)
         {
             foreach (var argumentSource in sources)
             {
@@ -337,7 +313,8 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return context.AspectCustomData ?? Markers.DefaultMarker;
                         break;
 
-                    default: throw new NotSupportedException(argumentSource.ToString() + " is not supported (yet?)");
+                    default: 
+                        throw new NotSupportedException(argumentSource.ToString() + " is not supported (yet?)");
                 }
             }
         }

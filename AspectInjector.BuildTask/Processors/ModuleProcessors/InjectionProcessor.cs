@@ -1,12 +1,12 @@
-﻿using AspectInjector.Broker;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using AspectInjector.Broker;
 using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 {

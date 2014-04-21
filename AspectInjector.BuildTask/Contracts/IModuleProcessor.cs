@@ -2,8 +2,8 @@
 
 namespace AspectInjector.BuildTask.Contracts
 {
-  public interface IModuleProcessor
-  {
-    void ProcessModule(ModuleDefinition module);
-  }
+    public interface IModuleProcessor
+    {
+        void ProcessModule(ModuleDefinition module);
+    }
 }

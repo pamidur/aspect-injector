@@ -1,14 +1,10 @@
-﻿using AspectInjector.BuildTask.Contracts;
-using Mono.Cecil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AspectInjector.BuildTask.Extensions;
+﻿using System.Linq;
 using AspectInjector.Broker;
-using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Common;
+using AspectInjector.BuildTask.Contexts;
+using AspectInjector.BuildTask.Contracts;
+using AspectInjector.BuildTask.Extensions;
+using Mono.Cecil;
 
 namespace AspectInjector.BuildTask.Processors.AspectProcessors
 {

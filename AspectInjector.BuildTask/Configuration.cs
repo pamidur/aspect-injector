@@ -1,20 +1,20 @@
-﻿using AspectInjector.BuildTask.Contracts;
+﻿using System.Collections.Generic;
+using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Injectors;
 using AspectInjector.BuildTask.Processors.AspectProcessors;
 using AspectInjector.BuildTask.Processors.ModuleProcessors;
-using System.Collections.Generic;
 
 namespace AspectInjector.BuildTask
 {
-  internal class Configuration
-  {
-    private static List<IModuleProcessor> _processorsTree;
-
-    public static List<IModuleProcessor> GetProcessorsTree()
+    internal class Configuration
     {
-      if (_processorsTree == null)
-      {
-        _processorsTree = new List<IModuleProcessor>
+        private static List<IModuleProcessor> _processorsTree;
+
+        public static List<IModuleProcessor> GetProcessorsTree()
+        {
+            if (_processorsTree == null)
+            {
+                _processorsTree = new List<IModuleProcessor>
                 {
                     new InjectionProcessor(new List<IAspectProcessor>
                     {
@@ -24,9 +24,9 @@ namespace AspectInjector.BuildTask
 
                     new Janitor()
                 };
-      }
+            }
 
-      return _processorsTree;
+            return _processorsTree;
+        }
     }
-  }
 }
