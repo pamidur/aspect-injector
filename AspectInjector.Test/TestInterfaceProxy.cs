@@ -1,8 +1,27 @@
 ﻿using AspectInjector.Broker;
 using System;
+using System.Linq.Expressions;
 
 namespace AspectInjector.Test
 {
+    internal class Model
+    {
+        public int Data { get; set; }
+    }
+
+    internal class ViewModel
+    {
+        public Model Model { get; set; }
+
+        public int Data
+        {
+            get { return Model.Data; }
+            set { Model.Data = value; }
+        }
+
+        private Expression<Func<string>> a = () => "ololo";
+    }
+
     internal class check : ITestInterface
     {
         private int TestProperty { get; set; }

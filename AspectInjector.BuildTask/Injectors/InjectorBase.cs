@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using AspectInjector.Broker;
+﻿using AspectInjector.Broker;
 using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace AspectInjector.BuildTask.Injectors
 {
@@ -32,7 +32,7 @@ namespace AspectInjector.BuildTask.Injectors
             foreach (var constructor in constructors)
             {
                 ILProcessor processor = constructor.Body.GetILProcessor();
-                Instruction firstInstruction = constructor.Body.Instructions.Skip(2).First();
+                Instruction firstInstruction = constructor.FindBaseClassCtorCall();
 
                 processor.InsertBefore(firstInstruction, processor.Create(OpCodes.Ldarg_0));
 
@@ -156,7 +156,7 @@ namespace AspectInjector.BuildTask.Injectors
 
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldarg_0));
             }
-            else  if (arg == Markers.DefaultMarker)
+            else if (arg == Markers.DefaultMarker)
             {
                 if (!expectedType.IsTypeOf(module.TypeSystem.Void))
                 {
@@ -313,7 +313,7 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return context.AspectCustomData ?? Markers.DefaultMarker;
                         break;
 
-                    default: 
+                    default:
                         throw new NotSupportedException(argumentSource.ToString() + " is not supported (yet?)");
                 }
             }

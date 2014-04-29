@@ -179,6 +179,14 @@ namespace AspectInjector.Test
         }
     }
 
+    internal class ConstructorBeforeAspect
+    {
+        [Advice(InjectionPoints.Before, InjectionTargets.Constructor)]
+        public void BeforeMethod()
+        {
+        }
+    }
+
     internal class TestMethodFilteredAspect3
     {
         [Advice(InjectionPoints.Exception, InjectionTargets.Method)]

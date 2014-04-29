@@ -103,7 +103,7 @@ namespace AspectInjector.BuildTask.Contexts
         private void SetupEntryPoints()
         {
             OriginalEntryPoint = TargetMethod.IsConstructor ?
-                TargetMethod.Body.Instructions.Skip(2).First() :
+                TargetMethod.FindBaseClassCtorCall() :
                 TargetMethod.Body.Instructions.First();
 
             EntryPoint = Processor.SafeInsertBefore(OriginalEntryPoint, Processor.Create(OpCodes.Nop));
