@@ -35,6 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -52,6 +53,7 @@
   <ItemGroup>
     <Compile Include="AdviceInjectionTests\AspectFactoryMethodTests.cs" />
     <Compile Include="AdviceInjectionTests\StringBuider.cs" />
+    <Compile Include="PETest.cs" />
     <Compile Include="Utils\Checker.cs" />
     <Compile Include="AdviceInjectionTests\InjectionAdviceBeforeOrderTests.cs" />
     <Compile Include="AdviceInjectionTests\InjectionAdviceBeforeTests.cs" />
