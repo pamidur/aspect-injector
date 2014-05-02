@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Broker;
+using AspectInjector.Tests.AdviceInjectionTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -88,6 +89,7 @@ namespace AspectInjector.Tests.InjectionAdviceBefore
     [Aspect(typeof(TestBeforeConstructorAspect))]
     internal class TestBeforeConstructor
     {
+        private StringBuider test_field = new StringBuider();
     }
 
     [Aspect(typeof(TestAspect))]
@@ -128,7 +130,11 @@ namespace AspectInjector.Tests.InjectionAdviceBefore
     internal class TestBeforeConstructorAspect
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Constructor)]
-        public void BeforeConstructor() { Checker.Passed = true; }
+        public void BeforeConstructor([AdviceArgument(AdviceArgumentSource.Instance)] object instance)
+        {
+            if (instance != null)
+                Checker.Passed = true;
+        }
     }
 
     [AdviceInterfaceProxy(typeof(IDisposable))]

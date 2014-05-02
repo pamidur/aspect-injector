@@ -1,11 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using AspectInjector.BuildTask.Common;
+﻿using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Processors;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Mono.Cecil;
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace AspectInjector.BuildTask
 {

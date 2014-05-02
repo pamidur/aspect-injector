@@ -1,4 +1,5 @@
 ﻿using Mono.Cecil;
+using Mono.Cecil.Cil;
 using System;
 using System.Linq;
 
@@ -6,6 +7,23 @@ namespace AspectInjector.BuildTask.Extensions
 {
     internal static class MemberExtensions
     {
+        public static Instruction FindBaseClassCtorCall(this MethodDefinition md)
+        {
+            if (!md.IsConstructor)
+                throw new Exception(md.ToString() + " is not ctor.");
+
+            var point = md.Body.Instructions.FirstOrDefault(
+                i => i.OpCode == OpCodes.Ldarg_0
+                    && i.Next != null && i.Next.OpCode == OpCodes.Call && i.Next.Operand is MethodReference
+                    && ((MethodReference)i.Next.Operand).Resolve().IsConstructor
+                    && ((MethodReference)i.Next.Operand).DeclaringType.IsTypeOf(md.DeclaringType.BaseType));
+
+            if (point == null)
+                throw new Exception("Cannot find base class ctor call");
+
+            return point.Next.Next;
+        }
+
         public static bool IsInterfaceImplementation(this MethodDefinition method, MethodReference overridden)
         {
             if (method.IsExplicitInterfaceImplementation(overridden))

@@ -1,12 +1,52 @@
 ﻿using AspectInjector.Broker;
 using System;
+using System.Text;
 
 namespace AspectInjector.Test
 {
+    internal struct A
+    {
+        public A(int b)
+            : this()
+        {
+            ABC = b;
+        }
+
+        public int ABC;
+    }
+
     internal class Program
     {
+        public event EventHandler<EventArgs> a;
+
+        public StringComparer b { get; set; }
+
+        private struct B : ITestInterface
+        {
+            public string TestMethod(string data)
+            {
+                throw new NotImplementedException();
+            }
+
+            public event EventHandler<EventArgs> TestEvent;
+
+            public int TestProperty
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+        }
+
         private static void Main(string[] args)
         {
+            var fff = (ITestInterface)new B();
+
             Test(StringComparison.InvariantCulture);
 
             var a = typeof(Int32);
@@ -28,13 +68,23 @@ namespace AspectInjector.Test
             var b122 = new object[] { StringSplitOptions.None };
         }
 
-        private static void Test(StringComparison ip)
+        private static void Test(StringComparison b)
         {
+        }
+
+        private static Lazy<AspectAttribute> Test2<T>(Lazy<AspectAttribute> a)
+        {
+            return null;
         }
     }
 
-    internal class T1
+    internal class Base { }
+
+    [Aspect(typeof(ConstructorBeforeAspect))]
+    internal class T1 : Base
     {
+        //private StringBuilder a = new StringBuilder();
+
         [Aspect(typeof(TestMethodFilteredAspect))]
         public int Do(bool a)
         {
