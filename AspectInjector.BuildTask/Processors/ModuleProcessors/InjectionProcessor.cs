@@ -165,7 +165,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
             if (contexts.Count != 0)
             {
-                var targetMethodContext = new TargetMethodContext(targetMethod);
+                var targetMethodContext = MethodContextFactory.GetOrCreateContext(targetMethod);
 
                 foreach (var context in contexts)
                 {

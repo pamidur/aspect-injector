@@ -10,19 +10,7 @@ namespace AspectInjector.BuildTask.Contexts
     {
         public AspectContext()
         {
-        }
-
-        public AspectContext(AspectContext other)
-        {
-            AspectType = other.AspectType;
-            AspectFactory = other.AspectFactory;
-            AspectFactoryArgumentsSources = other.AspectFactoryArgumentsSources;
-            AspectCustomData = other.AspectCustomData;
-
-            TargetType = other.TargetType;
-            TargetMethodContext = other.TargetMethodContext;
-            TargetName = other.TargetName;
-        }
+        }        
 
         public CustomAttributeArgument? AspectCustomData { get; set; }
 

@@ -61,6 +61,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Contexts\AdviceInjectionContext.cs" />
     <Compile Include="Contexts\InterfaceInjectionContext.cs" />
+    <Compile Include="Contexts\MethodContextFactory.cs" />
     <Compile Include="Contracts\IInjectionContext.cs" />
     <Compile Include="Extensions\TypeSystemExtensions.cs" />
     <Compile Include="Injectors\AdviceInjector.cs" />

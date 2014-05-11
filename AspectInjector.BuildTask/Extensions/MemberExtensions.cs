@@ -12,6 +12,9 @@ namespace AspectInjector.BuildTask.Extensions
             if (!md.IsConstructor)
                 throw new Exception(md.ToString() + " is not ctor.");
 
+            if (md.DeclaringType.IsValueType)
+                return md.Body.Instructions.First();
+
             var point = md.Body.Instructions.FirstOrDefault(
                 i => i.OpCode == OpCodes.Ldarg_0
                     && i.Next != null && i.Next.OpCode == OpCodes.Call && i.Next.Operand is MethodReference
