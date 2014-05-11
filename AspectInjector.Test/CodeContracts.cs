@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace AspectInjector.Test.CodeContracts
 {
+    internal static class Factory{
+
+
+    }
 
     class Test
     {

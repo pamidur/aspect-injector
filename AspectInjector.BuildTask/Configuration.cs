@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using AspectInjector.BuildTask.Contracts;
+﻿using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Injectors;
 using AspectInjector.BuildTask.Processors.AspectProcessors;
 using AspectInjector.BuildTask.Processors.ModuleProcessors;
+using System.Collections.Generic;
 
 namespace AspectInjector.BuildTask
 {
@@ -16,6 +16,8 @@ namespace AspectInjector.BuildTask
             {
                 _processorsTree = new List<IModuleProcessor>
                 {
+                   // new SnippetsProcessor(),
+
                     new InjectionProcessor(new List<IAspectProcessor>
                     {
                         new AdviceProcessor(new AdviceInjector()),
