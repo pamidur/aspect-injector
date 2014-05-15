@@ -55,6 +55,7 @@
     </Compile>
     <Compile Include="AsyncTests.cs" />
     <Compile Include="CodeContracts.cs" />
+    <Compile Include="Snippet.cs" />
     <Compile Include="TestMethodAspect.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
