@@ -61,6 +61,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Contexts\AdviceInjectionContext.cs" />
     <Compile Include="Contexts\InterfaceInjectionContext.cs" />
+    <Compile Include="Contexts\MethodContextFactory.cs" />
     <Compile Include="Contracts\IInjectionContext.cs" />
     <Compile Include="Extensions\TypeSystemExtensions.cs" />
     <Compile Include="Injectors\AdviceInjector.cs" />
@@ -82,9 +83,11 @@
     <Compile Include="Injectors\InjectorBase.cs" />
     <Compile Include="Processors\ModuleProcessors\Janitor.cs" />
     <Compile Include="Common\Markers.cs" />
+    <Compile Include="Processors\ModuleProcessors\SnippetsProcessor.cs" />
     <Compile Include="Processors\ProcessingUtils.cs" />
     <Compile Include="Processors\AspectProcessors\AdviceProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Snippets\AspectFactory.cs" />
     <Compile Include="StrictAssemblyResolver.cs" />
     <Compile Include="Contexts\TargetMethodContext.cs" />
   </ItemGroup>

@@ -72,10 +72,7 @@ namespace AspectInjector.Test
         {
         }
 
-        private static Lazy<AspectAttribute> Test2<T>(Lazy<AspectAttribute> a)
-        {
-            return null;
-        }
+        
     }
 
     internal class Base { }
