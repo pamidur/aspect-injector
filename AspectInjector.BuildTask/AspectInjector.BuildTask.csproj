@@ -83,6 +83,7 @@
     <Compile Include="Injectors\InjectorBase.cs" />
     <Compile Include="Processors\ModuleProcessors\Janitor.cs" />
     <Compile Include="Common\Markers.cs" />
+    <Compile Include="Processors\ModuleProcessors\ModuleProcessorBase.cs" />
     <Compile Include="Processors\ModuleProcessors\SnippetsProcessor.cs" />
     <Compile Include="Processors\ProcessingUtils.cs" />
     <Compile Include="Processors\AspectProcessors\AdviceProcessor.cs" />

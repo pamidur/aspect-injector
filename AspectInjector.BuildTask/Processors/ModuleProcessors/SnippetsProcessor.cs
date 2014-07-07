@@ -1,57 +1,134 @@
 ﻿using AspectInjector.BuildTask.Contracts;
 using Mono.Cecil;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 {
     class SnippetsProcessor : IModuleProcessor
     {
+        private static readonly string _namespace = "__$_aspect_injector_namespaces";
+        private static readonly string _snippetsFilename = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AspectInjector.Snippets.dll");
+
+        private ModuleDefinition _module;
+        private AssemblyDefinition _snippetsAssembly;
+
+        private Dictionary<MemberReference, MemberReference> _refsMap;
+
+
         public SnippetsProcessor()
-        {            
-            string assemblyFile = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),"AspectInjector.Snippets.dll");
-            
-            assembly = AssemblyDefinition.ReadAssembly(assemblyFile,
+        {
+            _snippetsAssembly = AssemblyDefinition.ReadAssembly(_snippetsFilename,
                 new ReaderParameters
                 {
                     ReadingMode = Mono.Cecil.ReadingMode.Deferred,
                 });
-
-
-
         }
 
-        private static readonly string _namespace = "__$_aspect_injector_namespaces";
-        private AssemblyDefinition assembly;
-        private ModuleDefinition module;
 
         public void ProcessModule(ModuleDefinition module)
         {
-            this.module = module;
+            _module = module;
+            _refsMap = new Dictionary<MemberReference, MemberReference>();
 
-            foreach (var type in assembly.MainModule.Types.Where(t => t.Name != "<Module>"))
-                MigrateType(module, type);
+            var snippets = _snippetsAssembly.MainModule.Types.Where(t => t.Name != "<Module>").ToList();
+            foreach (var type in snippets)
+            {
+                GetMappedMember(type);
+
+                foreach (var field in type.Fields)
+                    GetMappedMember(field);
+
+                foreach (var method in type.Methods)
+                    GetMappedMember(method);
+            }
         }
 
-        public void MigrateType(ModuleDefinition destination, TypeDefinition type)
+        public TypeDefinition MigrateType(TypeDefinition destination, TypeDefinition type)
         {
-            var newtype = new TypeDefinition(_namespace, type.Name, type.Attributes, MigrateReference(module, type.BaseType));
+            var newtype = new TypeDefinition(_namespace, type.Name, type.Attributes, MigrateReference(type.BaseType));
 
-            foreach (var field in type.Fields)
-                MigrateField(destination, newtype, field);
+            if (destination == null)
+                _module.Types.Add(newtype);
+            else
+                destination.NestedTypes.Add(newtype);
 
-            destination.Types.Add(newtype);
+            return newtype;
         }
 
-        private void MigrateField(ModuleDefinition module, TypeDefinition newtype, FieldDefinition field)
+        private FieldDefinition MigrateField(TypeDefinition newtype, FieldDefinition field)
         {
-            var newField = new FieldDefinition(field.Name, field.Attributes, MigrateReference(module, field.FieldType));
+            var newField = new FieldDefinition(field.Name, field.Attributes, MigrateReference(field.FieldType));
             newtype.Fields.Add(newField);
+            return newField;
         }
 
-        private TypeReference MigrateReference(ModuleDefinition module, TypeReference reference)
+        private MethodDefinition MigrateMethod(TypeDefinition newtype, MethodDefinition method)
         {
-            return module.Import(reference);
+
+
+            var newMethod = new MethodDefinition(method.Name, method.Attributes, method.GenericParameters.Any(gp=>gp.) MigrateReference(method.ReturnType));  
+            newtype.Methods.Add(newMethod);
+            return newMethod;
+        }
+
+        //private void MigrateCustomAttributes(IMemberDefinition member, IEnumerable<CustomAttribute> attributes)
+        //{
+        //    reference
+
+        //    foreach(var attribute in attributes)
+        //    {
+        //        var newAttr = new CustomAttribute(attribute.)
+        //    }
+
+        //    member.CustomAttributes.Add()
+        //}  
+
+        private T CreateMappedMember<T>(T reference) where T : MemberReference
+        {
+            if (reference is TypeReference)
+                return (T)(object)MigrateType((TypeDefinition)GetMappedMember(reference.DeclaringType), (TypeDefinition)(object)reference);
+
+            if (reference is MethodReference)
+                return (T)(object)MigrateMethod((TypeDefinition)GetMappedMember(reference.DeclaringType), (MethodDefinition)(object)reference);
+
+            if (reference is FieldReference)
+                return (T)(object)MigrateField((TypeDefinition)GetMappedMember(reference.DeclaringType), (FieldDefinition)(object)reference);
+
+            throw new NotSupportedException();
+        }
+
+        private T GetMappedMember<T>(T reference) where T : MemberReference
+        {
+            if (reference == null)
+                return null;
+
+            MemberReference resolvedRef = ((dynamic)reference).Resolve();
+
+            if (resolvedRef == null || resolvedRef.Module.Assembly != _snippetsAssembly)
+                return reference;
+
+            MemberReference existingType;
+            if (_refsMap.TryGetValue(resolvedRef, out existingType))
+                return (T)existingType;
+
+            var member = CreateMappedMember(resolvedRef);
+            _refsMap.Add(resolvedRef, member);
+            return (T)member;
+        }
+
+        private T MigrateReference<T>(T reference)
+            where T : MemberReference
+        {
+            var memberRef = GetMappedMember(reference);
+            var memberRefType = typeof(T);
+
+            return (T)(object)((dynamic)_module).Import(memberRef);
+
+            //return (T)(object) _module.GetType().GetMethod("Import", new[] { memberRefType }).Invoke(_module, new[] { memberRef });
         }
     }
 }
