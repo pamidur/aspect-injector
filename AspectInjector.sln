@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.BuildTask", "AspectInjector.BuildTask\AspectInjector.BuildTask.csproj", "{B711C00C-9E4D-4005-A82F-A78B1F444205}"
 EndProject
@@ -27,7 +27,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
 	ProjectSection(SolutionItems) = preProject
 		documentation\readme.md = documentation\readme.md
+		documentation\reference.md = documentation\reference.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Snippets", "AspectInjector.Snippets\AspectInjector.Snippets.csproj", "{16309079-D308-497A-B1A6-68F3956F39AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +46,10 @@ Global
 		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16309079-D308-497A-B1A6-68F3956F39AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16309079-D308-497A-B1A6-68F3956F39AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16309079-D308-497A-B1A6-68F3956F39AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16309079-D308-497A-B1A6-68F3956F39AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

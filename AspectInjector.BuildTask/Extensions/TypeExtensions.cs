@@ -9,7 +9,10 @@ namespace AspectInjector.BuildTask.Extensions
     {
         public static bool BelongsToAssembly(this TypeReference tr, string publicKey)
         {
-            return BitConverter.ToString(tr.Resolve().Module.Assembly.Name.PublicKeyToken).Replace("-", "").ToLowerInvariant() == publicKey.ToLowerInvariant();
+            var token = tr.Resolve().Module.Assembly.Name.PublicKeyToken;
+            if (token == null)
+                return false;
+            return BitConverter.ToString(token).Replace("-", "").ToLowerInvariant() == publicKey.ToLowerInvariant();
         }
 
         public static MethodDefinition GetInterfaceImplementation(this TypeReference typeReference, MethodDefinition interfaceMethodDefinition)
