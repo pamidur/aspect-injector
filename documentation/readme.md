@@ -1,4 +1,4 @@
-﻿AspectInjector
+AspectInjector
 ==========
 
 Description here
@@ -13,7 +13,7 @@ Why we do what we do
 * Injection aspects into **properties**.
 * Injection aspects into **events**.
 * Injection aspects into **constructors**.
-* Injection **interface proxies**.
+* Injection of **interface proxies**.
 * **No external dependencies**. Reference to `AspectInjector.Broker.dll` will be deleted at compile-time.
 * Possibility to **abort method** and **replace return value**
 
@@ -23,7 +23,7 @@ Why we do what we do
 
 #### Implementing simple aspect.
 
-Let's implement simple aspect that logs method calls into console.
+Let's implement a simple aspect that logs method calls into console.
 
 	class LogMethodCallAspect
 	{
@@ -68,7 +68,7 @@ Let's compile and decompile code to see what happened
 		}
 	}
 
-Note that there no more attribures connected to AspectInjector. They were deleted. So were atttributes from aspect itself:
+Note that there are no more attribures connected to AspectInjector. They were deleted. So were attributes from aspect itself:
 
 	class LogMethodCallAspect
 	{
