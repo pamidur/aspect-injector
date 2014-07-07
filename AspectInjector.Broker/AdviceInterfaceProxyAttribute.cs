@@ -3,7 +3,7 @@
 namespace AspectInjector.Broker
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class AdviceInterfaceProxyAttribute : Attribute
+    public sealed class AdviceInterfaceProxyAttribute : Attribute
     {
         public AdviceInterfaceProxyAttribute(Type @interface)
         {

@@ -3,7 +3,7 @@
 namespace AspectInjector.Broker
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class AspectFactoryAttribute : Attribute
+    public sealed class AspectFactoryAttribute : Attribute
     {
     }
 }
