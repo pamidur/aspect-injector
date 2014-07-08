@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace AspectInjector.Snippets
 {
@@ -28,12 +27,12 @@ namespace AspectInjector.Snippets
 
         private static void DisposeAspectDefault(object aspect)
         {
-            
+
         }
 
         private readonly static Dictionary<Type, object> AspectCache = new Dictionary<Type, object>();
 
-        private static object GetOrCreateAspectDefault(Type aspectType, object target, Type targetType, int scope)          
+        private static object GetOrCreateAspectDefault(Type aspectType, object target, Type targetType, int scope)
         {
             if (!AspectCache.ContainsKey(targetType))
             {
@@ -55,3 +54,4 @@ namespace AspectInjector.Snippets
         }
     }
 }
+
