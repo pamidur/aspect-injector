@@ -46,6 +46,9 @@ Please note that there will be only one instace of an aspect per target class re
 
 Indicates that the aspect of the specified type should be applied to a specific class member or every class member matching the specified filter.
 
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = true)]
+    public sealed class AspectAttribute : Attribute
+
 Parameters
 
 |Name |Type |Description  |
@@ -55,9 +58,6 @@ Parameters
 |NameFilter |string | Specify a string which 
 |AsseccModifierFilter| AccessModifiers |
 
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = true)]
-    public sealed class AspectAttribute : Attribute
-
 **AspectFactoryAttribute**
 
 	[AttributeUsage(AttributeTargets.Method)]
@@ -65,13 +65,28 @@ Parameters
 
 **AdviceAttribute**
 
+
+
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
     public sealed class AdviceAttribute : Attribute
+
+Parameters
+
+|Name |Type |Description  |
+|-----|-----|-------------|
+|Points|InjectionPoints|Point in the target class member, where the current advice should be injected.|
+|Targets|InjectionTargets|Kind of target class members to which the current advice should be injected.|
 
 **AdviceArgumentAttribute**
 
 	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public sealed class AdviceArgumentAttribute : Attribute
+
+Parameters
+
+|Name |Type |Description  |
+|-----|-----|-------------|
+|Source|AdviceArgumentSource| A source from which specific advice parameter should be populated |
 
 **AdviceInterfaceProxyAttribute**
 
@@ -82,7 +97,7 @@ Parameters
 <br/>
 **AccessModifiers**
 
-Is used to specify target members filtering criteria for AspectAttribute, the meaning of the values correspond to the member access modifiers in C#.     
+Is used to specify target members filtering criteria for AspectAttribute, the meaning of the values correspond to the member access modifiers in C#.
 
 |Name |
 |:----|
@@ -104,22 +119,22 @@ Is used to specify the source from which specific advice parameter should be pop
 |TargetReturnValue| object | The return value of the target member.
 |TargetException| Exception | An exception occurred in the target.
 |AbortFlag| ref bool | A flag through which an advice can abort execution of the current target. Is appliable only for "Before" injection point and non-constructor targets.
-|CustomData| object |
+|CustomData| object | The data specified in CustomData property of the corresponding AspectAttribute
 
 **InjectionPoints**
 
-Is used to specify the point in the target class member, where the current aspect should be injected.
+Is used to specify the point in the target class member, where the current advice should be injected.
 
 |Name|Description
 |:---|:----------
 |Before| Before the target body is executed.
-|After| Aflter the target body is executed.
-|Exception| 
+|After| After the target body is executed.
+|Exception| On any exception occured inside the target method.
 
 
 **InjectionTargets**
 
-Is used to specify the kind of target class members to which the crrent aspect should be injected.
+Is used to specify the kind of target class members to which the current advice should be injected.
 
 |Name|
 |:---|
