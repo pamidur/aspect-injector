@@ -4,7 +4,7 @@ AspectInjector reference
 ### Concept ###
 
 Aspect is a class which contains a set of advices - methods which should be injected to certain points in the code. Each advice has mandatory attributes which define a kind of target class members (constructor, getter, setter, regular method etc.) and join points - points in the code where this advice should be injected (before target member, after or both). Aspects and advices are marked with appropriate attributes. For example, we have a class with one method marked as advice:
-
+```C#
     class TraceAspect
     {
         private int count;
@@ -16,6 +16,7 @@ Aspect is a class which contains a set of advices - methods which should be inje
             count++;
         }
     } 
+```
 
 Having it we can apply this aspect to any method or a set of methods of some class:
 
