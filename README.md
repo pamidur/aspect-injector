@@ -19,7 +19,7 @@ Aspect is a class which contains a set of advices - methods which should be inje
 ```
 
 Having it we can apply this aspect to any method or a set of methods of some class:
-
+```C#
     //Method CallCountTrace of TraceAspect instance will be called at the beginning of Calculate() 
     [Aspect(typeof(TraceAspect))]
     public void Calculate() { }
@@ -37,7 +37,7 @@ Having it we can apply this aspect to any method or a set of methods of some cla
     //Will not work - CallCountTrace() advice is applicable to regular methods only
     [Aspect(typeof(TraceAspect))]
     public string Name { get; set; }
-
+```
 Please note that there will be only one instace of an aspect per target class regardless of number of affected members. So in the example above Container class will have only one instance of TraceAspect, so both Load() and Save() will increment the same call counter.
 
 
@@ -46,10 +46,10 @@ Please note that there will be only one instace of an aspect per target class re
 **AspectAttribute**
 
 Indicates that the aspect of the specified type should be applied to a specific class member or every class member matching the specified filter.
-
+```C#
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = true)]
     public sealed class AspectAttribute : Attribute
-
+```
 Parameters
 
 |Name |Type |Description  |
@@ -69,10 +69,10 @@ TBD
 **AdviceAttribute**
 
 Marks methods of an aspect class which should be injected to the target classes according to the matching rules. Specifying it on class level is equal to marking all public class methods with this attribute.   
-
+```C#
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
     public sealed class AdviceAttribute : Attribute
-
+```
 Parameters
 
 |Name |Type |Description  |
@@ -96,10 +96,10 @@ Parameters
 **AdviceInterfaceProxyAttribute**
 
 Specifies an interface which will be automatically implemented by any target class associated with the aspect. All calls to interface methods on a target class will be redirected to the corresponding aspect instance, so any aspect class having this attribute must implement the specified interface explicitly.   
-
+```C#
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class AdviceInterfaceProxyAttribute : Attribute
-    
+```
 Parameters
 
 |Name |Type |Description  |
@@ -107,7 +107,7 @@ Parameters
 |Interface|Type| Interface which should be implemented by any target class |
 
 The following example shows how to create an aspect which will automatically implement INotifyPropertyChanged on all target classes and inject raising PropertyChanged event to all property setters:
-
+```C#
     [AdviceInterfaceProxy(typeof(INotifyPropertyChanged))]
     public class NotifyPropertyChangedAspect : INotifyPropertyChanged
     {
@@ -125,7 +125,7 @@ The following example shows how to create an aspect which will automatically imp
             }
         }
     }
-
+```
 ### Enumerations ###
 <br/>
 **AccessModifiers**
