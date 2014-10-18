@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.BuildTask", "AspectInjector.BuildTask\AspectInjector.BuildTask.csproj", "{B711C00C-9E4D-4005-A82F-A78B1F444205}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Broker", "AspectInjector.Broker\AspectInjector.Broker.csproj", "{0926FE28-73BA-4F73-9188-B196FBBC9410}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buildtools", "buildtools", "{C6F13967-CDA3-4CD0-BB8D-CE14DBBA0382}"
+	ProjectSection(SolutionItems) = preProject
+		build\GitNugetTemplate.xaml = build\GitNugetTemplate.xaml
+		build\modify-versions.ps1 = build\modify-versions.ps1
+		build\nuget.exe = build\nuget.exe
+		build\prepare-package.ps1 = build\prepare-package.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{90FC62D4-109D-4FDD-A119-1CAD4717AB7F}"
+	ProjectSection(SolutionItems) = preProject
+		packagecontent\AspectInjector.nuspec = packagecontent\AspectInjector.nuspec
+		packagecontent\AspectInjector.props = packagecontent\AspectInjector.props
+		packagecontent\AspectInjector.targets = packagecontent\AspectInjector.targets
+		packagecontent\install.ps1 = packagecontent\install.ps1
+		packagecontent\Version.txt = packagecontent\Version.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
+	ProjectSection(SolutionItems) = preProject
+		documentation\readme.md = documentation\readme.md
+		documentation\reference.md = documentation\reference.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Snippets", "AspectInjector.Snippets\AspectInjector.Snippets.csproj", "{16309079-D308-497A-B1A6-68F3956F39AC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B711C00C-9E4D-4005-A82F-A78B1F444205}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B711C00C-9E4D-4005-A82F-A78B1F444205}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B711C00C-9E4D-4005-A82F-A78B1F444205}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B711C00C-9E4D-4005-A82F-A78B1F444205}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16309079-D308-497A-B1A6-68F3956F39AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16309079-D308-497A-B1A6-68F3956F39AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16309079-D308-497A-B1A6-68F3956F39AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16309079-D308-497A-B1A6-68F3956F39AC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
