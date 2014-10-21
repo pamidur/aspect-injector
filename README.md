@@ -1,5 +1,14 @@
-AspectInjector reference
+Aspect Injector Reference
 ========================
+
+### Features ###
+- Compile-time injection
+- No runtime dependencies
+- Advice debugging
+- Interface injection
+- Injection into Methods, Properties, Events
+- Ability to terminate method execution 
+- Ability to catch exceptions (try-catch wrapper)
 
 ### Concept ###
 
