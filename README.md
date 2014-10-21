@@ -9,6 +9,59 @@ Aspect Injector Reference
 - Injection into Methods, Properties, Events
 - Ability to terminate method execution 
 - Ability to catch exceptions (try-catch wrapper)
+ 
+### Demo ##
+
+This
+```C#
+namespace Test
+{
+    class LogMethodCallAspect
+    {
+        [Advice(InjectionPoints.Before, InjectionTargets.Method)]
+        public void BeforeMethod()
+        {
+            Console.WriteLine("Method executing");
+        }
+    }
+
+    class MyClass
+    {
+        [Aspect(typeof(LogMethodCallAspect))]
+        public void Do()
+        {
+            Console.WriteLine("Here I am!");
+        }
+    }
+}
+```
+will be translated to 
+```C#
+namespace Test
+{
+	class LogMethodCallAspect
+	{
+		public void BeforeMethod()
+		{
+			Console.WriteLine("Method executing");
+		}
+	}
+
+	class MyClass
+	{
+		private readonly LogMethodCallAspect __a$_LogMethodCallAspect;
+		public void Do()
+		{
+			this.__a$_LogMethodCallAspect.BeforeMethod();
+			Console.WriteLine("Here I am!");
+		}
+		public MyClass()
+		{
+			this.__a$_LogMethodCallAspect = new LogMethodCallAspect();
+		}
+	}
+}
+```
 
 ### Concept ###
 
