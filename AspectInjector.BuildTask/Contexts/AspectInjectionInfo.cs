@@ -6,24 +6,24 @@ using System.Linq;
 
 namespace AspectInjector.BuildTask.Contexts
 {
-    public class AspectContext
+    public class AspectInjectionInfo
     {
-        public AspectContext()
+        public AspectInjectionInfo()
         {
-        }        
+        }
 
         public CustomAttributeArgument? AspectCustomData { get; set; }
 
         public MethodDefinition AspectFactory { get; set; }
 
-        public List<AdviceArgumentSource> AspectFactoryArgumentsSources { get; set; }
-
         public TypeDefinition AspectType { get; set; }
+
+        public AspectScope AspectScope { get; set; }
 
         public TargetMethodContext TargetMethodContext { get; set; }
 
         public string TargetName { get; set; }
 
-        public TypeDefinition TargetType { get; set; }
+        public TargetTypeContext TargetTypeContext { get; set; }
     }
 }

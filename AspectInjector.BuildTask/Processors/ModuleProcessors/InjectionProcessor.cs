@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using AspectInjector.Broker;
+﻿using AspectInjector.Broker;
 using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 {
@@ -109,7 +109,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             return result;
         }
 
-        private static AspectContext SetAspectFactoryToContext(AspectContext context)
+        private static AspectInjectionInfo SetAspectFactoryToContext(AspectInjectionInfo context)
         {
             var aspectFactories = context.AspectType.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>()).ToList();
 
@@ -119,23 +119,6 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             if (aspectFactories.Count == 1)
             {
                 context.AspectFactory = aspectFactories[0];
-
-                var args = ProcessingUtils.GetAdviceArgumentsSources(context.AspectFactory).ToList();
-
-                if (args.Any(a => a != AdviceArgumentSource.Instance))
-                    throw new CompilationException("AspectFactory argument can be only AdviceArgumentSource.Instance", context.AspectType);
-
-                context.AspectFactoryArgumentsSources = args;
-            }
-            else
-            {
-                var ctors = context.AspectType.Methods.Where(c => c.IsConstructor && !c.IsStatic && c.Parameters.Count == 0).ToList();
-
-                if (ctors.Count == 0)
-                    throw new CompilationException("Cannot find empty constructor for aspect. Create one or use AspectFactory", context.AspectType);
-
-                context.AspectFactory = ctors.First();
-                context.AspectFactoryArgumentsSources = new List<AdviceArgumentSource>();
             }
 
             return context;
@@ -154,22 +137,30 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             IEnumerable<CustomAttribute> aspectAttributes)
         {
             var contexts = aspectAttributes.Where(attr => CheckFilter(targetMethod, targetName, attr)).Select(attr =>
-                new AspectContext()
                 {
-                    TargetName = targetName,
-                    TargetType = targetMethod.DeclaringType,
-                    AspectType = (TypeDefinition)attr.ConstructorArguments[0].Value,
-                    AspectCustomData = attr.GetProperty("CustomData")
+                    var aspectType = (TypeDefinition)attr.ConstructorArguments[0].Value;
+
+                    var aspectScope = AspectScope.PerInstanse;
+                    if (aspectType.CustomAttributes.HasAttributeOfType<AspectScopeAttribute>())
+                        aspectScope = (AspectScope)aspectType.CustomAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
+
+                    return new AspectInjectionInfo()
+                    {
+                        TargetName = targetName,
+                        TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType),
+                        AspectType = aspectType,
+                        AspectScope = aspectScope,
+                        AspectCustomData = attr.GetProperty("CustomData")
+                    };
                 }
                 ).Select(SetAspectFactoryToContext).Where(ctx => _processors.Any(p => p.CanProcess(ctx.AspectType))).ToList();
 
             if (contexts.Count != 0)
             {
-                var targetMethodContext = MethodContextFactory.GetOrCreateContext(targetMethod);
-
                 foreach (var context in contexts)
                 {
-                    context.TargetMethodContext = targetMethodContext;
+                    var targetMethodContext = MethodContextFactory.GetOrCreateContext(targetMethod);
+                    context.TargetMethodContext = targetMethodContext; //setting it here for better performance
 
                     foreach (var processor in _processors)
                         if (processor.CanProcess(context.AspectType))

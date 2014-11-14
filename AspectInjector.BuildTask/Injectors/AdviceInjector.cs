@@ -16,7 +16,7 @@ namespace AspectInjector.BuildTask.Injectors
         public void Inject(AdviceInjectionContext context)
         {
             ILProcessor processor = context.AspectContext.TargetMethodContext.Processor;
-            FieldReference aspectInstanceField = GetOrCreateAspectReference(context.AspectContext);
+            FieldReference aspectInstanceField = context.AspectContext.TargetTypeContext.GetOrCreateAspectReference(context.AspectContext);
 
             if (context.IsAbortable)
             {
@@ -64,7 +64,7 @@ namespace AspectInjector.BuildTask.Injectors
                     default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
                 }
 
-                InjectMethodCall(processor, injectionPoint, aspectInstanceField,
+                context.AspectContext.TargetMethodContext.InjectMethodCall(injectionPoint, aspectInstanceField,
                     context.AdviceMethod, argumentValue);
             }
         }
@@ -92,7 +92,7 @@ namespace AspectInjector.BuildTask.Injectors
                 processor.SetLocalVariable(abortFlagVariable, injectionPoint, false);
             }
 
-            InjectMethodCall(processor,
+            context.AspectContext.TargetMethodContext.InjectMethodCall(
                 injectionPoint,
                 sourceMember,
                 method,

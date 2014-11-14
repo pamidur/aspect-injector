@@ -10,10 +10,12 @@ namespace AspectInjector.BuildTask.Contexts
     public class AdviceInjectionContext : IInjectionContext
     {
         public List<AdviceArgumentSource> AdviceArgumentsSources { get; set; }
+
         public MethodDefinition AdviceMethod { get; set; }
+
         public InjectionPoints InjectionPoint { get; set; }
 
-        public AspectContext AspectContext { get; set; }
+        public AspectInjectionInfo AspectContext { get; set; }
 
         public bool IsAbortable
         {

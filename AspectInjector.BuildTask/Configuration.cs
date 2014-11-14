@@ -16,15 +16,13 @@ namespace AspectInjector.BuildTask
             {
                 _processorsTree = new List<IModuleProcessor>
                 {
+                    new SnippetsProcessor(),
 
                     new InjectionProcessor(new List<IAspectProcessor>
                     {
                         new AdviceProcessor(new AdviceInjector()),
                         new InterfaceProcessor(new InterfaceInjector())
                     }),
-
-                    new SnippetsProcessor(),
-
 
                     new Janitor()
                 };

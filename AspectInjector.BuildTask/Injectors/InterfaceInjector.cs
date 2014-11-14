@@ -1,13 +1,13 @@
-﻿using System.Linq;
-using AspectInjector.BuildTask.Contexts;
+﻿using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System.Linq;
 
 namespace AspectInjector.BuildTask.Injectors
 {
-    class InterfaceInjector : InjectorBase, IAspectInjector<InterfaceInjectionContext>
+    internal class InterfaceInjector : InjectorBase, IAspectInjector<InterfaceInjectionContext>
     {
         public void Inject(InterfaceInjectionContext context)
         {
@@ -25,17 +25,17 @@ namespace AspectInjector.BuildTask.Injectors
         {
             var eventName = GenerateMemberProxyName(originalEvent);
 
-            var ed = context.AspectContext.TargetType.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.IsTypeOf(originalEvent.EventType));
+            var ed = context.AspectContext.TargetTypeContext.TypeDefinition.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.IsTypeOf(originalEvent.EventType));
             if (ed == null)
             {
                 var newAddMethod = GetOrCreateMethodProxy(context, originalEvent.AddMethod);
                 var newRemoveMethod = GetOrCreateMethodProxy(context, originalEvent.RemoveMethod);
 
-                ed = new EventDefinition(eventName, EventAttributes.None, context.AspectContext.TargetType.Module.Import(originalEvent.EventType));
+                ed = new EventDefinition(eventName, EventAttributes.None, context.AspectContext.TargetTypeContext.TypeDefinition.Module.Import(originalEvent.EventType));
                 ed.AddMethod = newAddMethod;
                 ed.RemoveMethod = newRemoveMethod;
 
-                context.AspectContext.TargetType.Events.Add(ed);
+                context.AspectContext.TargetTypeContext.TypeDefinition.Events.Add(ed);
             }
 
             return ed;
@@ -45,17 +45,17 @@ namespace AspectInjector.BuildTask.Injectors
         {
             var propertyName = GenerateMemberProxyName(originalProperty);
 
-            var pd = context.AspectContext.TargetType.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.IsTypeOf(originalProperty.PropertyType));
+            var pd = context.AspectContext.TargetTypeContext.TypeDefinition.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.IsTypeOf(originalProperty.PropertyType));
             if (pd == null)
             {
                 var newGetMethod = GetOrCreateMethodProxy(context, originalProperty.GetMethod);
                 var newSetMethod = GetOrCreateMethodProxy(context, originalProperty.SetMethod);
 
-                pd = new PropertyDefinition(propertyName, PropertyAttributes.None, context.AspectContext.TargetType.Module.Import(originalProperty.PropertyType));
+                pd = new PropertyDefinition(propertyName, PropertyAttributes.None, context.AspectContext.TargetTypeContext.TypeDefinition.Module.Import(originalProperty.PropertyType));
                 pd.GetMethod = newGetMethod;
                 pd.SetMethod = newSetMethod;
 
-                context.AspectContext.TargetType.Properties.Add(pd);
+                context.AspectContext.TargetTypeContext.TypeDefinition.Properties.Add(pd);
             }
 
             return pd;
@@ -68,21 +68,22 @@ namespace AspectInjector.BuildTask.Injectors
 
         protected MethodDefinition GetOrCreateMethodProxy(InterfaceInjectionContext context, MethodDefinition interfaceMethodDefinition)
         {
-            var targetType = context.AspectContext.TargetType;
+            var targetType = context.AspectContext.TargetTypeContext.TypeDefinition;
             var methodName = GenerateMemberProxyName(interfaceMethodDefinition);
 
             var md = targetType.Methods.FirstOrDefault(m => m.Name == methodName && m.SignatureMatches(interfaceMethodDefinition));
             if (md == null)
             {
-                md = new MethodDefinition(methodName,
+                var ctx = context.AspectContext.TargetTypeContext.CreateMethod(methodName,
                     MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
                     targetType.Module.Import(interfaceMethodDefinition.ReturnType));
+
+                md = ctx.TargetMethod;
 
                 if (interfaceMethodDefinition.IsSpecialName)
                     md.IsSpecialName = true;
 
                 md.Overrides.Add(targetType.Module.Import(interfaceMethodDefinition));
-                targetType.Methods.Add(md);
 
                 foreach (var parameter in interfaceMethodDefinition.Parameters)
                     md.Parameters.Add(parameter);
@@ -90,15 +91,12 @@ namespace AspectInjector.BuildTask.Injectors
                 foreach (var genericParameter in interfaceMethodDefinition.GenericParameters)
                     md.GenericParameters.Add(genericParameter);
 
-                var aspectField = GetOrCreateAspectReference(context.AspectContext);
+                var aspectField = context.AspectContext.TargetTypeContext.GetOrCreateAspectReference(context.AspectContext);
 
-                var processor = md.Body.GetILProcessor();
-                processor.Append(processor.Create(OpCodes.Nop));
+                var processor = ctx.Processor;
+                var retCode = ctx.ReturnPoint;
 
-                var retCode = processor.Create(OpCodes.Ret);
-                processor.Append(retCode);
-
-                InjectMethodCall(processor, retCode, aspectField, interfaceMethodDefinition, md.Parameters.ToArray());
+                ctx.InjectMethodCall(retCode, aspectField, interfaceMethodDefinition, md.Parameters.ToArray());
 
                 if (!interfaceMethodDefinition.ReturnType.IsTypeOf(typeof(void)))
                 {

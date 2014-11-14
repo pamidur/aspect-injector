@@ -4,6 +4,40 @@ using System.Text;
 
 namespace AspectInjector.Test
 {
+    public class TestAttr : Attribute
+    {
+        private object _a;
+        private static object _b;
+
+        public TestAttr()
+        {
+            B();
+        }
+
+        public T Olololo<T>(T a)
+        {
+            return a;
+        }
+
+        static TestAttr()
+        {
+            A();
+        }
+
+        private static void A()
+        {
+        }
+
+        private void B()
+        {
+            if (_a == null)
+                _a = new object();
+
+            if (_b == null)
+                _b = new object();
+        }
+    }
+
     internal struct A
     {
         public A(int b)
@@ -71,8 +105,6 @@ namespace AspectInjector.Test
         private static void Test(StringComparison b)
         {
         }
-
-        
     }
 
     internal class Base { }

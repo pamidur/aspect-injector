@@ -10,16 +10,15 @@ using System.Reflection;
 
 namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 {
-    class SnippetsProcessor : IModuleProcessor
+    internal class SnippetsProcessor : IModuleProcessor
     {
-        private static readonly string _namespace = "__$_aspect_injector_namespaces";
+        public static readonly string SnippetsNamespace = "__$_aspect_injector_namespaces";
         private static readonly string _snippetsFilename = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AspectInjector.Snippets.dll");
 
         private ModuleDefinition _module;
         private AssemblyDefinition _snippetsAssembly;
 
         private Dictionary<object, object> _refsMap;
-
 
         public SnippetsProcessor()
         {
@@ -29,7 +28,6 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                     ReadingMode = Mono.Cecil.ReadingMode.Deferred,
                 });
         }
-
 
         public void ProcessModule(ModuleDefinition module)
         {
@@ -56,7 +54,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         public TypeDefinition CopyType(TypeDefinition destination, TypeDefinition type)
         {
-            var newtype = new TypeDefinition(_namespace, type.Name, type.Attributes, CopyReference(type.BaseType));
+            var newtype = new TypeDefinition(SnippetsNamespace, type.Name, type.Attributes, CopyReference(type.BaseType));
             _refsMap.Add(type, newtype);
 
             if (destination == null)
@@ -97,7 +95,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             _refsMap.Add(prop, newProp);
             target.Properties.Add(newProp);
             return newProp;
-        }       
+        }
 
         private ParameterDefinition CopyParameterDefinition(ParameterDefinition parmd)
         {
@@ -111,12 +109,11 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             _refsMap.Add(method, newMethod);
             newtype.Methods.Add(newMethod);
 
-            CopyCommonStuff(method.MethodReturnType,newMethod.MethodReturnType);
+            CopyCommonStuff(method.MethodReturnType, newMethod.MethodReturnType);
 
             var instMap = new Dictionary<Instruction, Instruction>();
             var varMap = new Dictionary<VariableDefinition, VariableDefinition>();
             var parMap = new Dictionary<ParameterDefinition, ParameterDefinition>();
-
 
             foreach (var par in method.Parameters)
             {
@@ -202,7 +199,6 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             var args = new object[] { opcode };
             if (operand != null)
                 args = args.Concat(new object[] { operand }).ToArray();
-
 
             var factory = ilp.GetType().GetMethod("Create", argTypes);
             var ni = (Instruction)(object)factory.Invoke(ilp, args);
@@ -313,8 +309,6 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             var member = CopyMember(resolvedRef);
             return (T)member;
         }
-
-
 
         private T CopyReference<T>(T reference)
             where T : MemberReference

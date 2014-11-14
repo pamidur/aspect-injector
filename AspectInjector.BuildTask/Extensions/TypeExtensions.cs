@@ -10,7 +10,7 @@ namespace AspectInjector.BuildTask.Extensions
         public static bool BelongsToAssembly(this TypeReference tr, string publicKey)
         {
             var td = tr.Resolve();
-            if(td == null)
+            if (td == null)
                 return false;
 
             var token = td.Module.Assembly.Name.PublicKeyToken;
@@ -78,6 +78,12 @@ namespace AspectInjector.BuildTask.Extensions
 
             var tr1UniqueString = typeReference1.FullName + "@" + typeReference1.Resolve().Module.Assembly.Name.Name.ToLowerInvariant();
             var tr2UniqueString = typeReference2.FullName + "@" + typeReference2.Resolve().Module.Assembly.Name.Name.ToLowerInvariant();
+
+            //var td1 = typeReference1.Resolve();
+            //var td2 = typeReference2.Resolve();
+
+            //var tr1UniqueString = typeReference1.FullName + "@" + (td1 == null ? td1.Module.Assembly.Name.Name.ToLowerInvariant() : "");
+            //var tr2UniqueString = typeReference2.FullName + "@" + (td2 == null ? td2.Module.Assembly.Name.Name.ToLowerInvariant() : "");
 
             return tr1UniqueString == tr2UniqueString;
         }
