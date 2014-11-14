@@ -92,22 +92,8 @@ namespace AspectInjector.BuildTask.Injectors
                     md.GenericParameters.Add(genericParameter);
 
                 var aspectField = context.AspectContext.TargetTypeContext.GetOrCreateAspectReference(context.AspectContext);
-
-                var processor = ctx.Processor;
-                var retCode = ctx.ReturnPoint;
-
-                ctx.InjectMethodCall(retCode, aspectField, interfaceMethodDefinition, md.Parameters.ToArray());
-
-                if (!interfaceMethodDefinition.ReturnType.IsTypeOf(typeof(void)))
-                {
-                    md.Body.InitLocals = true;
-                    md.Body.Variables.Add(new VariableDefinition(targetType.Module.Import(interfaceMethodDefinition.ReturnType)));
-
-                    processor.InsertBefore(retCode, processor.Create(OpCodes.Stloc_0));
-                    var loadResultIstruction = processor.Create(OpCodes.Ldloc_0);
-                    processor.InsertBefore(retCode, loadResultIstruction);
-                    processor.InsertBefore(loadResultIstruction, processor.Create(OpCodes.Br_S, loadResultIstruction));
-                }
+                
+                ctx.InjectMethodCall(ctx.EntryPoint, aspectField, interfaceMethodDefinition, md.Parameters.ToArray());                
             }
 
             return md;

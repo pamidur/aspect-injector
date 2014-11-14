@@ -169,6 +169,12 @@ namespace AspectInjector.BuildTask.Contexts
             }
         }
 
+        //public void TestValuesOnStack(Instruction point, Action ontrue, Action onfalse)
+        //{
+        //    var blockend = 
+        //    Processor.InsertBefore(point, Processor.Create(OpCodes.Ceq));
+        //}
+
         public void SetFieldFromStack(Instruction injectionPoint, FieldReference field, Action loadValueToStack)
         {
             if (field.Resolve().IsStatic)

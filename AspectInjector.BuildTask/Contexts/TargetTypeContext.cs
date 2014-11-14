@@ -133,7 +133,7 @@ namespace AspectInjector.BuildTask.Contexts
             proc.InsertBefore(point, proc.Create(OpCodes.Ceq));
             proc.InsertBefore(point, proc.Create(OpCodes.Brtrue_S, blockend));
             {
-                initMethod.SetFieldFromStack(point, fd, () => initMethod.InjectMethodCall(initMethod.EntryPoint, null, factory, factoryArgs.ToArray()));
+                initMethod.SetFieldFromStack(point, fd, () => initMethod.InjectMethodCall(point, null, factory, factoryArgs.ToArray()));
             }
             proc.InsertBefore(point, blockend);
 
