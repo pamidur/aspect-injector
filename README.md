@@ -1,6 +1,9 @@
 Aspect Injector Reference
 ========================
 
+### Download ###
+[Nuget Gallery](https://www.nuget.org/packages/AspectInjector/)
+
 ### Features ###
 - Compile-time injection
 - No runtime dependencies
