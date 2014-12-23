@@ -4,14 +4,13 @@
 
 using AspectInjector.Broker;
 using AspectInjector.BuildTask.Common;
+using AspectInjector.BuildTask.Extensions;
 using AspectInjector.BuildTask.Processors.ModuleProcessors;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.BuildTask.Contexts
 {
@@ -36,7 +35,7 @@ namespace AspectInjector.BuildTask.Contexts
 
         public TargetMethodContext CreateMethod(string name, MethodAttributes attrs, TypeReference returnType)
         {
-            var method = new MethodDefinition(name, attrs, returnType);
+            var method = new MethodDefinition(name, attrs, TypeDefinition.Module.Import(returnType));
             var processor = method.Body.GetILProcessor();
             processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ret));
@@ -87,7 +86,7 @@ namespace AspectInjector.BuildTask.Contexts
 
             var aspectPropertyName = "__a$_" + info.AspectType.Name;
 
-            var existingField = TypeDefinition.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType == info.AspectType);
+            var existingField = TypeDefinition.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(info.AspectType));
             if (existingField != null)
                 return existingField;
 
@@ -116,7 +115,7 @@ namespace AspectInjector.BuildTask.Contexts
                 factory = TypeDefinition.Module.Types.First(t => t.Namespace == SnippetsProcessor.SnippetsNamespace && t.Name == "AspectFactory")
                     .Methods.First(m => m.Name == "GetPerTypeAspect");
             }
-            else throw new NotSupportedException("Scope " + info.AspectScope.ToString() + " is not supported.");
+            else throw new NotSupportedException("Scope " + info.AspectScope.ToString() + " is not supported (yet).");
 
             var fd = new FieldDefinition(aspectPropertyName, fieldAttrs, TypeDefinition.Module.Import(info.AspectType));
             TypeDefinition.Fields.Add(fd);
