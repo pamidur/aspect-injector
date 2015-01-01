@@ -31,6 +31,7 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
             foreach (var interfaceInjectionDefinition in interfaceInjectionDefinitions)
             {
                 var interfaceReference = interfaceInjectionDefinition.@interface;
+
                 //todo:: process other InterfaceProxyInjectionAttribute parameters
 
                 var interfaceInjectionContext = new InterfaceInjectionContext

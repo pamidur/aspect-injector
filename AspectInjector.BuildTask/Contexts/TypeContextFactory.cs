@@ -14,19 +14,19 @@ namespace AspectInjector.BuildTask.Contexts
 {
     internal static class TypeContextFactory
     {
-        private static readonly Dictionary<TypeDefinition, TargetTypeContext> _contexts = new Dictionary<TypeDefinition, TargetTypeContext>();
+        private static readonly Dictionary<TypeDefinition, TargetTypeContext> Contexts = new Dictionary<TypeDefinition, TargetTypeContext>();
 
         public static TargetTypeContext GetOrCreateContext(TypeDefinition td)
         {
-            lock (_contexts)
+            lock (Contexts)
             {
                 TargetTypeContext result;
 
-                if (!_contexts.TryGetValue(td, out result))
+                if (!Contexts.TryGetValue(td, out result))
                 {
                     var ctors = td.Methods.Where(m => m.IsConstructor).Select(c => MethodContextFactory.GetOrCreateContext(c)).ToArray();
                     result = new TargetTypeContext(td, ctors);
-                    _contexts.Add(td, result);
+                    Contexts.Add(td, result);
                 }
 
                 return result;

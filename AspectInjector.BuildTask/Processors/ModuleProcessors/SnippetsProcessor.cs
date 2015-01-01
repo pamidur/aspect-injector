@@ -13,7 +13,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
     internal class SnippetsProcessor : IModuleProcessor
     {
         public static readonly string SnippetsNamespace = "__$_aspect_injector_namespaces";
-        private static readonly string _snippetsFilename = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AspectInjector.Snippets.dll");
+        private static readonly string SnippetsFilename = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AspectInjector.Snippets.dll");
 
         private ModuleDefinition _module;
         private AssemblyDefinition _snippetsAssembly;
@@ -22,7 +22,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         public SnippetsProcessor()
         {
-            _snippetsAssembly = AssemblyDefinition.ReadAssembly(_snippetsFilename,
+            _snippetsAssembly = AssemblyDefinition.ReadAssembly(SnippetsFilename,
                 new ReaderParameters
                 {
                     ReadingMode = Mono.Cecil.ReadingMode.Deferred,

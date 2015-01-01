@@ -8,20 +8,20 @@ using System.Threading.Tasks;
 
 namespace AspectInjector.BuildTask.Contexts
 {
-    static class MethodContextFactory
+    internal static class MethodContextFactory
     {
-        private static readonly Dictionary<MethodDefinition, TargetMethodContext> contexts = new Dictionary<MethodDefinition, TargetMethodContext>();
+        private static readonly Dictionary<MethodDefinition, TargetMethodContext> Contexts = new Dictionary<MethodDefinition, TargetMethodContext>();
 
         public static TargetMethodContext GetOrCreateContext(MethodDefinition md)
         {
-            lock (contexts)
+            lock (Contexts)
             {
                 TargetMethodContext result;
 
-                if (!contexts.TryGetValue(md, out result))
+                if (!Contexts.TryGetValue(md, out result))
                 {
                     result = new TargetMethodContext(md);
-                    contexts.Add(md, result);
+                    Contexts.Add(md, result);
                 }
 
                 return result;

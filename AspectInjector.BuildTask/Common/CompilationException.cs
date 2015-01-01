@@ -11,7 +11,7 @@ namespace AspectInjector.BuildTask.Common
         public CompilationException(string message, SequencePoint sp)
             : base(message)
         {
-            SequencePoint = sp ?? new SequencePoint(new Document(""));
+            SequencePoint = sp ?? new SequencePoint(new Document(string.Empty));
         }
 
         public CompilationException(string message, Instruction inst)

@@ -50,26 +50,6 @@ namespace AspectInjector.BuildTask.Extensions
             return method.Overrides.Any(o => o.IsMemberReferenceOf(overridden));
         }
 
-        private static bool IsImplicitInterfaceImplementation(this MethodDefinition method, MethodReference overridden)
-        {
-            // check that the 'overridden' method is iface method and the iface is implemented by method.DeclaringType
-            if (overridden.DeclaringType.Resolve().IsInterface == false ||
-                !method.DeclaringType.ImplementsInterface(overridden.DeclaringType))
-            {
-                return false;
-            }
-
-            // check whether the type contains some other explicit implementation of the method
-            if (method.DeclaringType.Methods.SelectMany(m => m.Overrides).Any(m => m.IsMemberReferenceOf(overridden)))
-            {
-                // explicit implementation -> no implicit implementation possible
-                return false;
-            }
-
-            // now it is enough to just match the signatures and names:
-            return method.Name == overridden.Name && method.SignatureMatches(overridden);
-        }
-
         public static bool SignatureMatches(this MethodReference methodReference1, MethodReference methodReference2)
         {
             if (!methodReference1.MethodReturnType.ReturnType.IsTypeOf(methodReference2.MethodReturnType.ReturnType))
@@ -121,6 +101,26 @@ namespace AspectInjector.BuildTask.Extensions
 
                 self = @base;
             }
+        }
+
+        private static bool IsImplicitInterfaceImplementation(this MethodDefinition method, MethodReference overridden)
+        {
+            // check that the 'overridden' method is iface method and the iface is implemented by method.DeclaringType
+            if (overridden.DeclaringType.Resolve().IsInterface == false ||
+                !method.DeclaringType.ImplementsInterface(overridden.DeclaringType))
+            {
+                return false;
+            }
+
+            // check whether the type contains some other explicit implementation of the method
+            if (method.DeclaringType.Methods.SelectMany(m => m.Overrides).Any(m => m.IsMemberReferenceOf(overridden)))
+            {
+                // explicit implementation -> no implicit implementation possible
+                return false;
+            }
+
+            // now it is enough to just match the signatures and names:
+            return method.Name == overridden.Name && method.SignatureMatches(overridden);
         }
     }
 }

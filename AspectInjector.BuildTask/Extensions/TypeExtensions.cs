@@ -16,7 +16,9 @@ namespace AspectInjector.BuildTask.Extensions
             var token = td.Module.Assembly.Name.PublicKeyToken;
             if (token == null)
                 return false;
-            return BitConverter.ToString(token).Replace("-", "").ToLowerInvariant() == publicKey.ToLowerInvariant();
+
+            return BitConverter.ToString(token)
+                .Replace("-", string.Empty).ToLowerInvariant() == publicKey.ToLowerInvariant();
         }
 
         public static MethodDefinition GetInterfaceImplementation(this TypeReference typeReference, MethodDefinition interfaceMethodDefinition)

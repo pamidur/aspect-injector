@@ -1,5 +1,4 @@
-﻿
-namespace AspectInjector.BuildTask.Contracts
+﻿namespace AspectInjector.BuildTask.Contracts
 {
     public interface IAspectInjector<in TContext>
         where TContext : class, IInjectionContext

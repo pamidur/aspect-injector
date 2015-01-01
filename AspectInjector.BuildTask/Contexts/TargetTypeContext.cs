@@ -15,9 +15,9 @@ namespace AspectInjector.BuildTask.Contexts
 {
     public class TargetTypeContext
     {
-        private static readonly string _instanceAspectsInitializerMethodName = "__a$_initializeInstanceAspects";
-        private static readonly string _typeAspectsInitializerMethodName = "__a$_initializeTypeAspects";
-        private static readonly string _aspectPropertyNamePrefix = "__a$_";
+        private static readonly string InstanceAspectsInitializerMethodName = "__a$_initializeInstanceAspects";
+        private static readonly string TypeAspectsInitializerMethodName = "__a$_initializeTypeAspects";
+        private static readonly string AspectPropertyNamePrefix = "__a$_";
 
         public TypeDefinition TypeDefinition { get; private set; }
 
@@ -38,7 +38,7 @@ namespace AspectInjector.BuildTask.Contexts
             {
                 if (_typeAspectsInitializer == null)
                 {
-                    _typeAspectsInitializer = CreateMethod(_typeAspectsInitializerMethodName,
+                    _typeAspectsInitializer = CreateMethod(TypeAspectsInitializerMethodName,
                         MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig,
                         TypeDefinition.Module.TypeSystem.Void);
 
@@ -56,7 +56,7 @@ namespace AspectInjector.BuildTask.Contexts
             {
                 if (_instanceAspectsInitializer == null)
                 {
-                    _instanceAspectsInitializer = CreateMethod(_instanceAspectsInitializerMethodName,
+                    _instanceAspectsInitializer = CreateMethod(InstanceAspectsInitializerMethodName,
                         MethodAttributes.Private | MethodAttributes.HideBySig,
                         TypeDefinition.Module.TypeSystem.Void);
 
@@ -85,7 +85,7 @@ namespace AspectInjector.BuildTask.Contexts
             if (info.TargetTypeContext != this)
                 throw new NotSupportedException("Aspect info mismatch.");
 
-            var aspectPropertyName = _aspectPropertyNamePrefix + info.AspectType.Name;
+            var aspectPropertyName = AspectPropertyNamePrefix + info.AspectType.Name;
 
             var existingField = TypeDefinition.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(info.AspectType));
             if (existingField != null)
@@ -144,11 +144,11 @@ namespace AspectInjector.BuildTask.Contexts
             proc.InsertBefore(point, proc.Create(OpCodes.Ldc_I4_0));
             proc.InsertBefore(point, proc.Create(OpCodes.Ceq));
             proc.InsertBefore(point, proc.Create(OpCodes.Brtrue_S, endBlock));
-            {
-                initMethod.SetFieldFromStack(point,
-                    field,
-                    () => initMethod.InjectMethodCall(point, null, factoryMethod, new object[] { }));
-            }
+
+            initMethod.SetFieldFromStack(point,
+                field,
+                () => initMethod.InjectMethodCall(point, null, factoryMethod, new object[] { }));
+
             proc.InsertBefore(point, endBlock);
         }
     }

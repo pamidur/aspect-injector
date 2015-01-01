@@ -58,17 +58,20 @@ namespace AspectInjector.BuildTask
 
                 Console.WriteLine("Assembly has been patched");
 
-                assembly.Write(assemblyFile, new WriterParameters()
-                {
-                    WriteSymbols = true,
-                    //StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
-                });
+                assembly.Write(assemblyFile, 
+                    new WriterParameters()
+                    {
+                        WriteSymbols = true,
+                        ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
+                    });
 
                 Console.WriteLine("Assembly has been written");
             }
             catch (CompilationException ce)
             {
-                this.Log.LogError("Compilation exception", null, null,
+                this.Log.LogError("Compilation exception", 
+                    null, 
+                    null,
                     ce.SequencePoint.Document.Url,
                     ce.SequencePoint.StartLine,
                     ce.SequencePoint.StartColumn,

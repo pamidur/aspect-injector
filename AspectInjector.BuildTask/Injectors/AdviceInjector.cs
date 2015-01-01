@@ -11,7 +11,7 @@ namespace AspectInjector.BuildTask.Injectors
 {
     internal class AdviceInjector : InjectorBase, IAspectInjector<AdviceInjectionContext>
     {
-        private static readonly string _abortFlagVariableName = "__a$_do_abort_method";
+        private static readonly string AbortFlagVariableName = "__a$_doAbortMethod";
 
         public void Inject(AdviceInjectionContext context)
         {
@@ -64,8 +64,10 @@ namespace AspectInjector.BuildTask.Injectors
                     default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
                 }
 
-                context.AspectContext.TargetMethodContext.InjectMethodCall(injectionPoint, aspectInstanceField,
-                    context.AdviceMethod, argumentValue);
+                context.AspectContext.TargetMethodContext.InjectMethodCall(injectionPoint, 
+                    aspectInstanceField,
+                    context.AdviceMethod, 
+                    argumentValue);
             }
         }
 
@@ -78,14 +80,14 @@ namespace AspectInjector.BuildTask.Injectors
             MethodDefinition method = context.AdviceMethod;
             ILProcessor processor = context.AspectContext.TargetMethodContext.Processor;
 
-            VariableDefinition abortFlagVariable = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == _abortFlagVariableName);
+            VariableDefinition abortFlagVariable = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == AbortFlagVariableName);
             if (abortFlagVariable == null)
             {
                 abortFlagVariable = processor.CreateLocalVariable(
                     injectionPoint,
                     context.AspectContext.TargetMethodContext.TargetMethod.Module.TypeSystem.Boolean,
                     false,
-                    _abortFlagVariableName);
+                    AbortFlagVariableName);
             }
             else
             {

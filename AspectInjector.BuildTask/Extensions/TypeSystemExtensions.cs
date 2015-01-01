@@ -19,7 +19,7 @@ namespace AspectInjector.BuildTask.Extensions
             if (type == typeof(string))
                 return ts.String;
 
-            if (type == typeof(Int32))
+            if (type == typeof(int))
                 return ts.Int32;
 
             if (type == typeof(void))

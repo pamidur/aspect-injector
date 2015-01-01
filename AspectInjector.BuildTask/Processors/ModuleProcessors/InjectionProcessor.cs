@@ -42,6 +42,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                     {
                         ProcessAspectAttributes(property.GetMethod, property.Name, allAspectAttributes);
                     }
+
                     if (property.SetMethod != null)
                     {
                         ProcessAspectAttributes(property.SetMethod, property.Name, allAspectAttributes);
@@ -57,6 +58,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                     {
                         ProcessAspectAttributes(@event.AddMethod, @event.Name, allAspectAttributes);
                     }
+
                     if (@event.RemoveMethod != null)
                     {
                         ProcessAspectAttributes(@event.RemoveMethod, @event.Name, allAspectAttributes);
@@ -153,8 +155,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                         AspectScope = aspectScope,
                         AspectCustomData = attr.GetProperty("CustomData")
                     };
-                }
-                )
+                })
                 .Select(SetAspectFactoryToContext)
                 .Where(ctx => _processors.Any(p => p.CanProcess(ctx.AspectType)))
                 .ToList();

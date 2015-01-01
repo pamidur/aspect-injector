@@ -11,7 +11,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 {
     internal class Janitor : IModuleProcessor
     {
-        private static readonly string _brokerAssemblyPublicKeyToken = "a29e12442a3d3609";
+        private static readonly string BrokerAssemblyPublicKeyToken = "a29e12442a3d3609";
 
         public void ProcessModule(ModuleDefinition module)
         {
@@ -37,7 +37,10 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                     RemoveBrokerAttributes(@event.CustomAttributes);
             }
 
-            var reference = module.AssemblyReferences.FirstOrDefault(ar => BitConverter.ToString(ar.PublicKeyToken).Replace("-", "").ToLowerInvariant() == _brokerAssemblyPublicKeyToken.ToLowerInvariant());
+            var reference = module.AssemblyReferences.FirstOrDefault(
+                ar => BitConverter.ToString(ar.PublicKeyToken)
+                    .Replace("-", string.Empty).ToLowerInvariant() == BrokerAssemblyPublicKeyToken.ToLowerInvariant());
+
             if (reference != null)
                 module.AssemblyReferences.Remove(reference);
 
@@ -47,7 +50,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         private void RemoveBrokerAttributes(Collection<CustomAttribute> collection)
         {
             foreach (var attr in collection.ToList())
-                if (attr.AttributeType.BelongsToAssembly(_brokerAssemblyPublicKeyToken))
+                if (attr.AttributeType.BelongsToAssembly(BrokerAssemblyPublicKeyToken))
                     collection.Remove(attr);
         }
 
@@ -55,8 +58,8 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         {
             type.Methods.ToList().ForEach(CheckMethodReferencesBroker);
 
-            if (type.BaseType != null && (type.BaseType.BelongsToAssembly(_brokerAssemblyPublicKeyToken) || IsGenericInstanceArgumentsReferenceBroker(type.BaseType as IGenericInstance)) 
-                || type.Fields.Any(f => f.FieldType.BelongsToAssembly(_brokerAssemblyPublicKeyToken) || IsGenericInstanceArgumentsReferenceBroker(f.FieldType as IGenericInstance))
+            if ((type.BaseType != null && (type.BaseType.BelongsToAssembly(BrokerAssemblyPublicKeyToken) || IsGenericInstanceArgumentsReferenceBroker(type.BaseType as IGenericInstance)))
+                || type.Fields.Any(f => f.FieldType.BelongsToAssembly(BrokerAssemblyPublicKeyToken) || IsGenericInstanceArgumentsReferenceBroker(f.FieldType as IGenericInstance))
                 || IsGenericParametersReferenceBroker(type))
             {
                 throw new CompilationException("Types from AspectInjector.Broker can't be referenced", type);
@@ -67,9 +70,9 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         private void CheckMethodReferencesBroker(MethodDefinition method)
         {
-            if (method.Parameters.Any(p => p.ParameterType.BelongsToAssembly(_brokerAssemblyPublicKeyToken) || IsGenericInstanceArgumentsReferenceBroker(p.ParameterType as IGenericInstance))
+            if (method.Parameters.Any(p => p.ParameterType.BelongsToAssembly(BrokerAssemblyPublicKeyToken) || IsGenericInstanceArgumentsReferenceBroker(p.ParameterType as IGenericInstance))
                 || (method.Body != null && IsMethodBodyReferencesBroker(method.Body))
-                || method.ReturnType.BelongsToAssembly(_brokerAssemblyPublicKeyToken)
+                || method.ReturnType.BelongsToAssembly(BrokerAssemblyPublicKeyToken)
                 || IsGenericParametersReferenceBroker(method)
                 || IsGenericInstanceArgumentsReferenceBroker(method.ReturnType as IGenericInstance))
             {
@@ -80,7 +83,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         private bool IsGenericParametersReferenceBroker(IGenericParameterProvider genericParameters)
         {
             return genericParameters.GenericParameters.Any(p =>
-                p.Constraints.Any(c => c.BelongsToAssembly(_brokerAssemblyPublicKeyToken) 
+                p.Constraints.Any(c => c.BelongsToAssembly(BrokerAssemblyPublicKeyToken) 
                     || IsGenericInstanceArgumentsReferenceBroker(c as IGenericInstance)));
         }
 
@@ -88,35 +91,37 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         {
             if (genericInstance != null)
             {
-                return genericInstance.GenericArguments.Any(a => a.BelongsToAssembly(_brokerAssemblyPublicKeyToken) ||
+                return genericInstance.GenericArguments.Any(a => a.BelongsToAssembly(BrokerAssemblyPublicKeyToken) ||
                     IsGenericInstanceArgumentsReferenceBroker(a as IGenericInstance));
             }
+
             return false;
         }
 
         private bool IsMethodBodyReferencesBroker(MethodBody methodBody)
         {
-            return methodBody.Variables.Any(v => v.VariableType.BelongsToAssembly(_brokerAssemblyPublicKeyToken))
+            return methodBody.Variables.Any(v => v.VariableType.BelongsToAssembly(BrokerAssemblyPublicKeyToken))
                 || methodBody.Instructions.Any(IsInstructionReferencesBroker);
         }
 
         private bool IsInstructionReferencesBroker(Instruction instruction)
         {
-            if(instruction.OpCode == OpCodes.Ldtoken || 
+            if (instruction.OpCode == OpCodes.Ldtoken || 
                 instruction.OpCode == OpCodes.Isinst || 
                 instruction.OpCode == OpCodes.Castclass ||
                 instruction.OpCode == OpCodes.Newarr)
             {
-                return ((TypeReference)instruction.Operand).BelongsToAssembly(_brokerAssemblyPublicKeyToken) ||
+                return ((TypeReference)instruction.Operand).BelongsToAssembly(BrokerAssemblyPublicKeyToken) ||
                     IsGenericInstanceArgumentsReferenceBroker(instruction.Operand as GenericInstanceType);
             }
             else if (instruction.OpCode == OpCodes.Call ||
                 instruction.OpCode == OpCodes.Callvirt ||
                 instruction.OpCode == OpCodes.Newobj)
             {
-                return ((MethodReference)instruction.Operand).DeclaringType.BelongsToAssembly(_brokerAssemblyPublicKeyToken) ||
+                return ((MethodReference)instruction.Operand).DeclaringType.BelongsToAssembly(BrokerAssemblyPublicKeyToken) ||
                     IsGenericInstanceArgumentsReferenceBroker(instruction.Operand as GenericInstanceMethod);
             }
+
             return false;
         }
     }
