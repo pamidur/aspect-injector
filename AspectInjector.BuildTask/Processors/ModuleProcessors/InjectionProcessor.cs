@@ -136,11 +136,12 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             string targetName,
             IEnumerable<CustomAttribute> aspectAttributes)
         {
-            var contexts = aspectAttributes.Where(attr => CheckFilter(targetMethod, targetName, attr)).Select(attr =>
+            var contexts = aspectAttributes.Where(attr => CheckFilter(targetMethod, targetName, attr))
+                .Select(attr =>
                 {
                     var aspectType = (TypeDefinition)attr.ConstructorArguments[0].Value;
 
-                    var aspectScope = AspectScope.PerInstanse;
+                    var aspectScope = AspectScope.Instance;
                     if (aspectType.CustomAttributes.HasAttributeOfType<AspectScopeAttribute>())
                         aspectScope = (AspectScope)aspectType.CustomAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
 
@@ -153,7 +154,10 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                         AspectCustomData = attr.GetProperty("CustomData")
                     };
                 }
-                ).Select(SetAspectFactoryToContext).Where(ctx => _processors.Any(p => p.CanProcess(ctx.AspectType))).ToList();
+                )
+                .Select(SetAspectFactoryToContext)
+                .Where(ctx => _processors.Any(p => p.CanProcess(ctx.AspectType)))
+                .ToList();
 
             if (contexts.Count != 0)
             {

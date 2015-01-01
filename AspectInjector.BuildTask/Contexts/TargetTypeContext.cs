@@ -5,7 +5,6 @@
 using AspectInjector.Broker;
 using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Extensions;
-using AspectInjector.BuildTask.Processors.ModuleProcessors;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
@@ -16,21 +15,59 @@ namespace AspectInjector.BuildTask.Contexts
 {
     public class TargetTypeContext
     {
-        private static readonly string _perTypeAspectInitializerMethodName = "__a$_initializePerTypeAspects";
+        private static readonly string _instanceAspectsInitializerMethodName = "__a$_initializeInstanceAspects";
+        private static readonly string _typeAspectsInitializerMethodName = "__a$_initializeTypeAspects";
+        private static readonly string _aspectPropertyNamePrefix = "__a$_";
 
         public TypeDefinition TypeDefinition { get; private set; }
 
         private TargetMethodContext[] _constructors;
 
-        private bool _isAspectsInitialized = false;
-
-        private TargetMethodContext _perTypeAspectsInitializer = null;
-        private TargetMethodContext _perInstanseAspectsInitializer = null;
+        private TargetMethodContext _typeAspectsInitializer = null;
+        private TargetMethodContext _instanceAspectsInitializer = null;
 
         public TargetTypeContext(TypeDefinition typeDefinition, TargetMethodContext[] ctorCtx)
         {
             TypeDefinition = typeDefinition;
             _constructors = ctorCtx;
+        }
+
+        private TargetMethodContext TypeAspectsInitializer
+        {
+            get
+            {
+                if (_typeAspectsInitializer == null)
+                {
+                    _typeAspectsInitializer = CreateMethod(_typeAspectsInitializerMethodName,
+                        MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig,
+                        TypeDefinition.Module.TypeSystem.Void);
+
+                    var cctor = _constructors.FirstOrDefault(c => c.TargetMethod.IsStatic) ?? CreateStaticConstructor();
+                    cctor.InjectMethodCall(cctor.EntryPoint, null, _typeAspectsInitializer.TargetMethod, new object[] { });
+                }
+
+                return _typeAspectsInitializer;
+            }
+        }
+
+        private TargetMethodContext InstanсeAspectsInitializer
+        {
+            get
+            {
+                if (_instanceAspectsInitializer == null)
+                {
+                    _instanceAspectsInitializer = CreateMethod(_instanceAspectsInitializerMethodName,
+                        MethodAttributes.Private | MethodAttributes.HideBySig,
+                        TypeDefinition.Module.TypeSystem.Void);
+
+                    var ctors = _constructors.Where(c => !c.TargetMethod.IsStatic).ToList();
+
+                    foreach (var ctor in ctors)
+                        ctor.InjectMethodCall(ctor.EntryPoint, null, _instanceAspectsInitializer.TargetMethod, new object[] { });
+                }
+
+                return _instanceAspectsInitializer;
+            }
         }
 
         public TargetMethodContext CreateMethod(string name, MethodAttributes attrs, TypeReference returnType)
@@ -43,48 +80,12 @@ namespace AspectInjector.BuildTask.Contexts
             return MethodContextFactory.GetOrCreateContext(method);
         }
 
-        private TargetMethodContext PerTypeAspectsInitializer
-        {
-            get
-            {
-                if (_perTypeAspectsInitializer != null)
-                    return _perTypeAspectsInitializer;
-
-                _perTypeAspectsInitializer = CreateMethod(_perTypeAspectInitializerMethodName, MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig, TypeDefinition.Module.TypeSystem.Void);
-
-                var cctor = _constructors.FirstOrDefault(c => c.TargetMethod.IsStatic);
-
-                if (cctor != null)
-                    cctor.InjectMethodCall(cctor.EntryPoint, null, _perTypeAspectsInitializer.TargetMethod, new object[] { });
-
-                return _perTypeAspectsInitializer;
-            }
-        }
-
-        private TargetMethodContext PerInstanseAspectsInitializer
-        {
-            get
-            {
-                if (_perInstanseAspectsInitializer != null)
-                    return _perInstanseAspectsInitializer;
-
-                _perInstanseAspectsInitializer = CreateMethod(_perTypeAspectInitializerMethodName, MethodAttributes.Private | MethodAttributes.HideBySig, TypeDefinition.Module.TypeSystem.Void);
-
-                var ctors = _constructors.Where(c => !c.TargetMethod.IsStatic).ToList();
-
-                foreach (var ctor in ctors)
-                    ctor.InjectMethodCall(ctor.EntryPoint, null, _perInstanseAspectsInitializer.TargetMethod, new object[] { });
-
-                return _perInstanseAspectsInitializer;
-            }
-        }
-
         public FieldReference GetOrCreateAspectReference(AspectInjectionInfo info)
         {
             if (info.TargetTypeContext != this)
                 throw new NotSupportedException("Aspect info mismatch.");
 
-            var aspectPropertyName = "__a$_" + info.AspectType.Name;
+            var aspectPropertyName = _aspectPropertyNamePrefix + info.AspectType.Name;
 
             var existingField = TypeDefinition.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(info.AspectType));
             if (existingField != null)
@@ -92,51 +93,63 @@ namespace AspectInjector.BuildTask.Contexts
 
             TargetMethodContext initMethod = null;
             FieldAttributes fieldAttrs;
-            MethodDefinition factory;
-            var factoryArgs = new List<object>();
+            MethodDefinition factoryMethod;
 
-            if (info.AspectScope == AspectScope.PerInstanse)
+            if (info.AspectScope == AspectScope.Instance)
             {
                 fieldAttrs = FieldAttributes.Private;
-                initMethod = PerInstanseAspectsInitializer;
-
-                var ctors = info.AspectType.Methods.Where(c => c.IsConstructor && !c.IsStatic && c.Parameters.Count == 0).ToList();
-
-                if (ctors.Count == 0)
-                    throw new CompilationException("Cannot find empty constructor for aspect.", info.AspectType);
-
-                factory = ctors.First();
+                initMethod = InstanсeAspectsInitializer;
             }
-            else if (info.AspectScope == AspectScope.PerType)
+            else if (info.AspectScope == AspectScope.Type)
             {
                 fieldAttrs = FieldAttributes.Private | FieldAttributes.Static;
-                initMethod = PerTypeAspectsInitializer;
-
-                factory = TypeDefinition.Module.Types.First(t => t.Namespace == SnippetsProcessor.SnippetsNamespace && t.Name == "AspectFactory")
-                    .Methods.First(m => m.Name == "GetPerTypeAspect");
+                initMethod = TypeAspectsInitializer;
             }
             else throw new NotSupportedException("Scope " + info.AspectScope.ToString() + " is not supported (yet).");
 
-            var fd = new FieldDefinition(aspectPropertyName, fieldAttrs, TypeDefinition.Module.Import(info.AspectType));
-            TypeDefinition.Fields.Add(fd);
+            factoryMethod = info.AspectFactory ?? info.AspectType.Methods
+                .Where(c => c.IsConstructor && !c.IsStatic && !c.Parameters.Any())
+                .FirstOrDefault();
 
+            if (factoryMethod == null)
+                throw new CompilationException("Cannot find either empty constructor or factory for aspect.", info.AspectType);
+
+            var field = new FieldDefinition(aspectPropertyName, fieldAttrs, TypeDefinition.Module.Import(info.AspectType));
+            TypeDefinition.Fields.Add(field);
+
+            InjectInitialization(initMethod, field, factoryMethod);
+
+            return field;
+        }
+
+        private TargetMethodContext CreateStaticConstructor()
+        {
+            return CreateMethod(".cctor",
+                MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+                TypeDefinition.Module.TypeSystem.Void);
+        }
+
+        private void InjectInitialization(TargetMethodContext initMethod, 
+            FieldDefinition field,
+            MethodDefinition factoryMethod)
+        {
             var proc = initMethod.Processor;
             var point = initMethod.EntryPoint;
 
-            var blockend = proc.Create(OpCodes.Nop);
+            var endBlock = proc.Create(OpCodes.Nop);
 
-            initMethod.LoadFieldOntoStack(point, fd);
+            initMethod.LoadFieldOntoStack(point, field);
             proc.InsertBefore(point, proc.Create(OpCodes.Ldnull));
             proc.InsertBefore(point, proc.Create(OpCodes.Ceq));
             proc.InsertBefore(point, proc.Create(OpCodes.Ldc_I4_0));
             proc.InsertBefore(point, proc.Create(OpCodes.Ceq));
-            proc.InsertBefore(point, proc.Create(OpCodes.Brtrue_S, blockend));
+            proc.InsertBefore(point, proc.Create(OpCodes.Brtrue_S, endBlock));
             {
-                initMethod.SetFieldFromStack(point, fd, () => initMethod.InjectMethodCall(point, null, factory, factoryArgs.ToArray()));
+                initMethod.SetFieldFromStack(point,
+                    field,
+                    () => initMethod.InjectMethodCall(point, null, factoryMethod, new object[] { }));
             }
-            proc.InsertBefore(point, blockend);
-
-            return fd;
+            proc.InsertBefore(point, endBlock);
         }
     }
 }

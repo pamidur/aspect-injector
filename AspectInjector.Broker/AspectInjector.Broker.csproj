@@ -50,6 +50,8 @@
     <Compile Include="AdviceInterfaceProxyAttribute.cs" />
     <Compile Include="AspectAttribute.cs" />
     <Compile Include="AspectFactoryAttribute.cs" />
+    <Compile Include="AspectScope.cs" />
+    <Compile Include="AspectScopeAttribute.cs" />
     <Compile Include="InjectionPoints.cs" />
     <Compile Include="InjectionTargets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
