@@ -68,7 +68,7 @@ namespace AspectInjector.Tests.InterfaceInjection
 	}
 
 	[Aspect(typeof(TestInterfaceAspect))]
-	[Aspect(typeof(INotifyTest))]
+	//[Aspect(typeof(INotifyTest))]
 	internal class TestInterfaceProxyClass
 	{
 		public TestInterfaceProxyClass()

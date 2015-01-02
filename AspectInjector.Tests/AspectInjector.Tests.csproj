@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="AdviceInjectionTests\AspectFactoryMethodTests.cs" />
     <Compile Include="AdviceInjectionTests\StringBuider.cs" />
+    <Compile Include="AdviceInjectionTests\AspectScopeTest.cs" />
     <Compile Include="PETest.cs" />
     <Compile Include="Utils\Checker.cs" />
     <Compile Include="AdviceInjectionTests\InjectionAdviceBeforeOrderTests.cs" />
