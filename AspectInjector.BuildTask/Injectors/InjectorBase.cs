@@ -1,20 +1,16 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Contexts;
-using AspectInjector.BuildTask.Extensions;
-using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace AspectInjector.BuildTask.Injectors
 {
     internal abstract class InjectorBase
     {
         protected IEnumerable<object> ResolveArgumentsValues(
-            AspectInjectionInfo context,
+            AspectInjectionContext context,
             List<AdviceArgumentSource> sources,
             InjectionPoints injectionPointFired,
             VariableDefinition abortFlagVariable = null,

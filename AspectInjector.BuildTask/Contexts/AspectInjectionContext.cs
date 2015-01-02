@@ -1,14 +1,11 @@
 ﻿using AspectInjector.Broker;
 using Mono.Cecil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace AspectInjector.BuildTask.Contexts
 {
-    public class AspectInjectionInfo
+    public class AspectInjectionContext
     {
-        public AspectInjectionInfo()
+        public AspectInjectionContext()
         {
         }
 

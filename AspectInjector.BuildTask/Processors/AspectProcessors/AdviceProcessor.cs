@@ -26,7 +26,7 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
             return aspectType.Methods.Any(m => m.CustomAttributes.HasAttributeOfType<AdviceAttribute>());
         }
 
-        public void Process(AspectInjectionInfo context)
+        public void Process(AspectInjectionContext context)
         {
             var adviceContexts = GetAdviceMethods(context.AspectType).SelectMany(m => ProcessAdvice(m, context)).Where(ac => ac != null).ToList();
 
@@ -79,7 +79,7 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
         }
 
         private static IEnumerable<AdviceInjectionContext> ProcessAdvice(MethodDefinition adviceMethod,
-            AspectInjectionInfo parentContext)
+            AspectInjectionContext parentContext)
         {
             var adviceAttribute = adviceMethod.CustomAttributes.GetAttributeOfType<AdviceAttribute>();
 

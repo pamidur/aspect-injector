@@ -377,15 +377,15 @@ namespace AspectInjector.BuildTask.Contexts
 
             if (arg is long || arg is ulong || arg is double)
             {
-                var rawdata = GetRawValueType(arg, 8);
-                var val = BitConverter.ToInt64(rawdata, 0);
+                var rawData = GetRawValueType(arg, 8);
+                var val = BitConverter.ToInt64(rawData, 0);
 
                 processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldc_I8, val));
             }
             else
             {
-                var rawdata = GetRawValueType(arg, 4);
-                var val = BitConverter.ToInt32(rawdata, 0);
+                var rawData = GetRawValueType(arg, 4);
+                var val = BitConverter.ToInt32(rawData, 0);
 
                 processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, val));
             }
@@ -396,13 +396,13 @@ namespace AspectInjector.BuildTask.Contexts
 
         private byte[] GetRawValueType(object value, int @base = 0)
         {
-            byte[] rawdata = new byte[@base == 0 ? Marshal.SizeOf(value) : @base];
+            byte[] rawData = new byte[@base == 0 ? Marshal.SizeOf(value) : @base];
 
-            GCHandle handle = GCHandle.Alloc(rawdata, GCHandleType.Pinned);
+            GCHandle handle = GCHandle.Alloc(rawData, GCHandleType.Pinned);
             Marshal.StructureToPtr(value, handle.AddrOfPinnedObject(), false);
             handle.Free();
 
-            return rawdata;
+            return rawData;
         }
     }
 }

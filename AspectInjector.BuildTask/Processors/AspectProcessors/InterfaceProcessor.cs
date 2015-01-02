@@ -22,7 +22,7 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
             return aspectType.CustomAttributes.HasAttributeOfType<AdviceInterfaceProxyAttribute>();
         }
 
-        public void Process(AspectInjectionInfo context)
+        public void Process(AspectInjectionContext context)
         {
             var interfaceInjectionDefinitions = from ca in context.AspectType.CustomAttributes
                                                 where ca.IsAttributeOfType<AdviceInterfaceProxyAttribute>()
@@ -73,14 +73,14 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
                 classDefinition.TypeDefinition.Interfaces.Add(interfaceDefinition);
             }
 
-            context.Methods = interfaceDefinition.GetInterfaceTreeMemebers(td => td.Methods)
+            context.Methods = interfaceDefinition.GetInterfaceTreeMembers(td => td.Methods)
                 .Where(m => !m.IsAddOn && !m.IsRemoveOn && !m.IsSetter && !m.IsGetter)
                 .ToArray();
 
-            context.Properties = interfaceDefinition.GetInterfaceTreeMemebers(td => td.Properties)
+            context.Properties = interfaceDefinition.GetInterfaceTreeMembers(td => td.Properties)
                 .ToArray();
 
-            context.Events = interfaceDefinition.GetInterfaceTreeMemebers(td => td.Events)
+            context.Events = interfaceDefinition.GetInterfaceTreeMembers(td => td.Events)
                 .ToArray();
         }
     }

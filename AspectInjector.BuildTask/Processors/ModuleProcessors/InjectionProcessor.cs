@@ -21,7 +21,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         public void ProcessModule(ModuleDefinition module)
         {
-            foreach (var @class in module.Types.Where(t => t.IsClass))
+            foreach (var @class in module.Types.Where(t => t.IsClass).SelectMany(t => t.GetClassesTree()))
             {
                 var classAspectAttributes = @class.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
 
@@ -111,7 +111,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             return result;
         }
 
-        private static AspectInjectionInfo SetAspectFactoryToContext(AspectInjectionInfo context)
+        private static void SetAspectFactoryToContext(AspectInjectionContext context)
         {
             var aspectFactories = context.AspectType.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>()).ToList();
 
@@ -122,8 +122,6 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             {
                 context.AspectFactory = aspectFactories[0];
             }
-
-            return context;
         }
 
         private IEnumerable<CustomAttribute> MergeAspectAttributes(IEnumerable<CustomAttribute> classAttributes,
@@ -138,7 +136,8 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             string targetName,
             IEnumerable<CustomAttribute> aspectAttributes)
         {
-            var contexts = aspectAttributes.Where(attr => CheckFilter(targetMethod, targetName, attr))
+            var contexts = aspectAttributes
+                .Where(attr => CheckFilter(targetMethod, targetName, attr))
                 .Select(attr =>
                 {
                     var aspectType = (TypeDefinition)attr.ConstructorArguments[0].Value;
@@ -147,7 +146,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                     if (aspectType.CustomAttributes.HasAttributeOfType<AspectScopeAttribute>())
                         aspectScope = (AspectScope)aspectType.CustomAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
 
-                    return new AspectInjectionInfo()
+                    var aspectContext = new AspectInjectionContext()
                     {
                         TargetName = targetName,
                         TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType),
@@ -155,8 +154,11 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                         AspectScope = aspectScope,
                         AspectCustomData = attr.GetProperty("CustomData")
                     };
+
+                    SetAspectFactoryToContext(aspectContext);
+
+                    return aspectContext;
                 })
-                .Select(SetAspectFactoryToContext)
                 .Where(ctx => _processors.Any(p => p.CanProcess(ctx.AspectType)))
                 .ToList();
 

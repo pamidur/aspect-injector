@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Configuration.cs" />
     <Compile Include="Contexts\AdviceInjectionContext.cs" />
+    <Compile Include="Contexts\AspectInjectionContext.cs" />
     <Compile Include="Contexts\InterfaceInjectionContext.cs" />
     <Compile Include="Contexts\TypeContextFactory.cs" />
     <Compile Include="Contexts\MethodContextFactory.cs" />
@@ -86,7 +87,6 @@
     <Compile Include="Extensions\ModuleExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Contracts\IModuleProcessor.cs" />
-    <Compile Include="Contexts\AspectInjectionInfo.cs" />
     <Compile Include="Injectors\InjectorBase.cs" />
     <Compile Include="Processors\ModuleProcessors\Janitor.cs" />
     <Compile Include="Common\Markers.cs" />

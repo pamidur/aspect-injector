@@ -15,7 +15,7 @@ namespace AspectInjector.BuildTask.Contexts
 
         public InjectionPoints InjectionPoint { get; set; }
 
-        public AspectInjectionInfo AspectContext { get; set; }
+        public AspectInjectionContext AspectContext { get; set; }
 
         public bool IsAbortable
         {

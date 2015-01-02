@@ -43,7 +43,7 @@ namespace AspectInjector.BuildTask.Extensions
             return new[] { definition }.Concat(definition.Interfaces);
         }
 
-        public static IEnumerable<T> GetInterfaceTreeMemebers<T>(this TypeReference typeReference, Func<TypeDefinition, IEnumerable<T>> selector)
+        public static IEnumerable<T> GetInterfaceTreeMembers<T>(this TypeReference typeReference, Func<TypeDefinition, IEnumerable<T>> selector)
         {
             var definition = typeReference.Resolve();
             if (!definition.IsInterface)
@@ -55,6 +55,18 @@ namespace AspectInjector.BuildTask.Extensions
                 members = members.Concat(definition.Interfaces.Select(i => selector(i.Resolve())).Aggregate<IEnumerable<T>>((a, b) => a.Concat(b)));
 
             return members;
+        }
+
+        public static IEnumerable<TypeDefinition> GetClassesTree(this TypeDefinition type)
+        {
+            yield return type;
+
+            foreach (var nestedType in type.NestedTypes
+                .Where(t => t.IsClass)
+                .SelectMany(t => GetClassesTree(t)))
+            {
+                yield return nestedType;
+            }
         }
 
         public static bool HasType(this IEnumerable<TypeReference> typeReferences, Type type)

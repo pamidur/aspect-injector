@@ -80,7 +80,7 @@ namespace AspectInjector.BuildTask.Contexts
             return MethodContextFactory.GetOrCreateContext(method);
         }
 
-        public FieldReference GetOrCreateAspectReference(AspectInjectionInfo info)
+        public FieldReference GetOrCreateAspectReference(AspectInjectionContext info)
         {
             if (info.TargetTypeContext != this)
                 throw new NotSupportedException("Aspect info mismatch.");
