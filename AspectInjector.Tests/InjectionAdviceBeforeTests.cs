@@ -3,17 +3,17 @@ using AspectInjector.Tests.AdviceInjectionTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AspectInjector.Tests.InjectionAdviceBefore
+namespace AspectInjector.Tests
 {
     [TestClass]
     public class InjectionAdviceBeforeTests
     {
-        private TestClass _beforeTestClass;
+        private InjectionAdviceBeforeTests_Target _beforeTestClass;
 
         [TestInitialize]
         public void SetUp()
         {
-            _beforeTestClass = new TestClass();
+            _beforeTestClass = new InjectionAdviceBeforeTests_Target();
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace AspectInjector.Tests.InjectionAdviceBefore
         {
             Checker.Passed = false;
 
-            var a = new TestBeforeConstructor();
+            var a = new InjectionAdviceBeforeTests_BeforeConstructorTarget();
             Assert.IsTrue(Checker.Passed);
         }
 
@@ -74,26 +74,26 @@ namespace AspectInjector.Tests.InjectionAdviceBefore
         {
             Checker.Passed = false;
 
-            var a = new TestBeforeConstructorWithIface();
+            var a = new InjectionAdviceBeforeTests_BeforeConstructorWithIfaceTarget();
             Assert.IsTrue(Checker.Passed);
         }
     }
 
     //test classes
 
-    [Aspect(typeof(TestBeforeConstructorWithIfaceAspect))]
-    internal class TestBeforeConstructorWithIface
+    [Aspect(typeof(InjectionAdviceBeforeTests_BeforeConstructorWithIfaceAspect))]
+    internal class InjectionAdviceBeforeTests_BeforeConstructorWithIfaceTarget
     {
     }
 
-    [Aspect(typeof(TestBeforeConstructorAspect))]
-    internal class TestBeforeConstructor
+    [Aspect(typeof(InjectionAdviceBeforeTests_BeforeConstructorAspect))]
+    internal class InjectionAdviceBeforeTests_BeforeConstructorTarget
     {
-        private StringBuider test_field = new StringBuider();
+        private StringBuider testField = new StringBuider();
     }
 
-    [Aspect(typeof(TestAspect))]
-    internal class TestClass
+    [Aspect(typeof(InjectionAdviceBeforeTests_Aspect))]
+    internal class InjectionAdviceBeforeTests_Target
     {
         public void TestMethod(string data)
         {
@@ -106,7 +106,7 @@ namespace AspectInjector.Tests.InjectionAdviceBefore
 
     //aspects
 
-    internal class TestAspect
+    internal class InjectionAdviceBeforeTests_Aspect
     {
         //Property
         [Advice(InjectionPoints.Before, InjectionTargets.Setter)]
@@ -127,7 +127,7 @@ namespace AspectInjector.Tests.InjectionAdviceBefore
         public void BeforeMethod() { Checker.Passed = true; }
     }
 
-    internal class TestBeforeConstructorAspect
+    internal class InjectionAdviceBeforeTests_BeforeConstructorAspect
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Constructor)]
         public void BeforeConstructor([AdviceArgument(AdviceArgumentSource.Instance)] object instance)
@@ -138,7 +138,7 @@ namespace AspectInjector.Tests.InjectionAdviceBefore
     }
 
     [AdviceInterfaceProxy(typeof(IDisposable))]
-    internal class TestBeforeConstructorWithIfaceAspect : IDisposable
+    internal class InjectionAdviceBeforeTests_BeforeConstructorWithIfaceAspect : IDisposable
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Constructor)]
         public void BeforeConstructor() { Checker.Passed = true; }

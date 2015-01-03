@@ -2,18 +2,18 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AspectInjector.Broker;
 
-namespace AspectInjector.Tests.AdviceInjectionTests
+namespace AspectInjector.Tests
 {
     [TestClass]
-    public class AspectScopeTest
+    public class AspectScopeTests
     {
         [TestMethod]
         public void Create_Aspect_Per_Instance()
         {
             for(int i = 0; i < 10; i++)
             {
-                var t = new PerInstanceTarget();
-                t.Do();
+                var t = new AspectScopeTests_PerInstanceTarget();
+                t.TestMethod();
                 Assert.AreEqual(1, t.Counter);
             }
         }
@@ -23,15 +23,15 @@ namespace AspectInjector.Tests.AdviceInjectionTests
         {
             for (int i = 0; i < 10; i++)
             {
-                var t = new PerTypeTarget();
-                t.Do();
+                var t = new AspectScopeTests_PerTypeTarget();
+                t.TestMethod();
                 Assert.AreEqual(i + 1, t.Counter);
             }
         }
     }
 
     [AspectScope(AspectScope.Instance)]
-    internal class PerInstanceAspect
+    internal class AspectScopeTests_PerInstanceAspect
     {
         private int _counter;
 
@@ -50,7 +50,7 @@ namespace AspectInjector.Tests.AdviceInjectionTests
     }
 
     [AspectScope(AspectScope.Type)]
-    internal class PerTypeAspect
+    internal class AspectScopeTests_PerTypeAspect
     {
         private int _counter;
 
@@ -68,31 +68,29 @@ namespace AspectInjector.Tests.AdviceInjectionTests
         }
     }
 
-    [Aspect(typeof(PerInstanceAspect))]
-    internal class PerInstanceTarget
+    [Aspect(typeof(AspectScopeTests_PerInstanceAspect))]
+    internal class AspectScopeTests_PerInstanceTarget
     {
         public int Counter
         {
             get { return 0; }
         }
 
-        public void Do()
+        public void TestMethod()
         {
-
         }
     }
 
-    [Aspect(typeof(PerTypeAspect))]
-    internal class PerTypeTarget
+    [Aspect(typeof(AspectScopeTests_PerTypeAspect))]
+    internal class AspectScopeTests_PerTypeTarget
     {
         public int Counter
         {
             get { return 0; }
         }
 
-        public void Do()
+        public void TestMethod()
         {
-
         }
     }
 }

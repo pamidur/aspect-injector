@@ -1,25 +1,22 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AspectInjector.Broker;
 
-namespace AspectInjector.Tests.AdviceInjectionTests
+namespace AspectInjector.Tests
 {
     [TestClass]
-    public class NestedClassesTest
+    public class NestedClassesTests
     {
         [TestMethod]
         public void Process_Nested_Classes()
         {
             Checker.Passed = false;
-            var testClass = new TestNestedClass();
+            var testClass = new NestedClassesTests_Target();
             testClass.Do();
             Assert.IsTrue(Checker.Passed);
         }
 
-        [Aspect(typeof(TestAspect))]
-        private class TestNestedClass
+        [Aspect(typeof(NestedClassesTests_Aspect))]
+        private class NestedClassesTests_Target
         {
             public void Do()
             {
@@ -28,10 +25,10 @@ namespace AspectInjector.Tests.AdviceInjectionTests
         }
     }
 
-    public class TestAspect
+    public class NestedClassesTests_Aspect
     {
         [AdviceAttribute(InjectionPoints.Before, InjectionTargets.Method)]
-        public void Do()
+        public void TestMethod()
         {
             Checker.Passed = true;
         }

@@ -1,7 +1,7 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AspectInjector.Tests.AspectFactoryMethod
+namespace AspectInjector.Tests
 {
 	[TestClass]
 	public class AspectFactoryMethodTests
@@ -10,28 +10,28 @@ namespace AspectInjector.Tests.AspectFactoryMethod
 		public void Create_Aspect_Through_Factory_Method()
 		{
 			Checker.Passed = false;
-			var test = new TestClass();
+			var test = new AspectFactoryMethodTests_Target();
 			Assert.IsTrue(Checker.Passed);
 		}
 	}
 
-	[Aspect(typeof(TestAspect))]
-	public class TestClass
+	[Aspect(typeof(AspectFactoryMethodTests_Aspect))]
+	public class AspectFactoryMethodTests_Target
 	{
 	}
 
-	public class TestAspect
+	public class AspectFactoryMethodTests_Aspect
 	{
 		[Advice(InjectionPoints.After, InjectionTargets.Constructor)]
-		public void TestAdvice()
+		public void TestMethod()
 		{
 		}
 
 		[AspectFactory]
-		public static TestAspect Create()
+		public static AspectFactoryMethodTests_Aspect Create()
 		{
 			Checker.Passed = true;
-			return new TestAspect();
+			return new AspectFactoryMethodTests_Aspect();
 		}
 	}
 }

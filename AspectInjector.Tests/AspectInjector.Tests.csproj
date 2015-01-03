@@ -51,18 +51,18 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="AdviceInjectionTests\AspectFactoryMethodTests.cs" />
-    <Compile Include="AdviceInjectionTests\NestedClassesTests.cs" />
-    <Compile Include="AdviceInjectionTests\StringBuider.cs" />
-    <Compile Include="AdviceInjectionTests\AspectScopeTest.cs" />
+    <Compile Include="AspectFactoryMethodTests.cs" />
+    <Compile Include="AspectScopeTest.cs" />
+    <Compile Include="InjectionAdviceAfterTests.cs" />
+    <Compile Include="InjectionAdviceBeforeOrderTests.cs" />
+    <Compile Include="InjectionAdviceBeforeTests.cs" />
+    <Compile Include="InterfaceInjectionInheritanceTests.cs" />
+    <Compile Include="InterfaceInjectionTests.cs" />
+    <Compile Include="NestedClassesTests.cs" />
     <Compile Include="PETest.cs" />
+    <Compile Include="StringBuider.cs" />
     <Compile Include="Utils\Checker.cs" />
-    <Compile Include="AdviceInjectionTests\InjectionAdviceBeforeOrderTests.cs" />
-    <Compile Include="AdviceInjectionTests\InjectionAdviceBeforeTests.cs" />
-    <Compile Include="InterfaceInjectionTests\InterfaceInjectionInheritanceTests.cs" />
-    <Compile Include="InterfaceInjectionTests\InterfaceInjectionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="AdviceInjectionTests\InjectionAdviceAfterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj">

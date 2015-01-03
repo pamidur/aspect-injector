@@ -3,24 +3,24 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.ComponentModel;
 
-namespace AspectInjector.Tests.InterfaceInjection
+namespace AspectInjector.Tests
 {
 	[TestClass]
 	public class InterfaceInjectionTests
 	{
-		private ITestInterface _testClass;
+		private IInterfaceInjectionTests _testClass;
 
 		[TestInitialize]
 		public void SetUp()
 		{
-			_testClass = (ITestInterface)new TestInterfaceProxyClass();
+			_testClass = (IInterfaceInjectionTests)new InterfaceInjectionTests_Target();
 		}
 
 		[TestMethod]
 		public void Inject_AspectReference_Into_SecondConstructor()
 		{
 			Checker.Passed = false;
-			var result = ((ITestInterface)new TestInterfaceProxyClass(1)).TestMethod("ok");
+			var result = ((IInterfaceInjectionTests)new InterfaceInjectionTests_Target(1)).TestMethod("ok");
 			Assert.AreEqual("ok", result);
 			Assert.IsTrue(Checker.Passed);
 		}
@@ -67,20 +67,20 @@ namespace AspectInjector.Tests.InterfaceInjection
 		}
 	}
 
-	[Aspect(typeof(TestInterfaceAspect))]
-	//[Aspect(typeof(INotifyTest))]
-	internal class TestInterfaceProxyClass
+	[Aspect(typeof(InterfaceInjectionTests_Aspect))]
+    //[Aspect(typeof(INotifyPropertyChanged_Aspect))]
+	internal class InterfaceInjectionTests_Target
 	{
-		public TestInterfaceProxyClass()
+		public InterfaceInjectionTests_Target()
 		{
 		}
 
-		public TestInterfaceProxyClass(int a)
+		public InterfaceInjectionTests_Target(int a)
 		{
 		}
 	}
 
-	internal interface ITestInterface
+	internal interface IInterfaceInjectionTests
 	{
 		string TestMethod(string data);
 
@@ -90,15 +90,15 @@ namespace AspectInjector.Tests.InterfaceInjection
 	}
 
 	[AdviceInterfaceProxy(typeof(INotifyPropertyChanged))]
-	internal class INotifyTest : INotifyPropertyChanged
+	internal class INotifyPropertyChanged_Aspect : INotifyPropertyChanged
 	{
 		public event PropertyChangedEventHandler PropertyChanged;
 	}
 
-	[AdviceInterfaceProxy(typeof(ITestInterface))]
-	internal class TestInterfaceAspect : ITestInterface
+	[AdviceInterfaceProxy(typeof(IInterfaceInjectionTests))]
+	internal class InterfaceInjectionTests_Aspect : IInterfaceInjectionTests
 	{
-		string ITestInterface.TestMethod(string data)
+		string IInterfaceInjectionTests.TestMethod(string data)
 		{
 			Checker.Passed = true;
 			return data;

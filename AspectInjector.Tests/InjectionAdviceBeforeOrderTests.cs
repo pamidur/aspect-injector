@@ -2,17 +2,17 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AspectInjector.Tests.InjectionAdviceBeforeOrder
+namespace AspectInjector.Tests
 {
     [TestClass]
     public class InjectionAdviceBeforeOrderTests
     {
-        private TestClass _beforeTestClass;
+        private InjectionAdviceBeforeOrderTests_Target _beforeTestClass;
 
         [TestInitialize]
         public void SetUp()
         {
-            _beforeTestClass = new TestClass();
+            _beforeTestClass = new InjectionAdviceBeforeOrderTests_Target();
         }
 
         [TestMethod]
@@ -25,17 +25,17 @@ namespace AspectInjector.Tests.InjectionAdviceBeforeOrder
     }
 
 
-    [Aspect(typeof(TestAspect1))]
-    [Aspect(typeof(TestAspect2))]
-    [Aspect(typeof(TestAspect3))]
-    internal class TestClass
+    [Aspect(typeof(InjectionAdviceBeforeOrderTests_Aspect1))]
+    [Aspect(typeof(InjectionAdviceBeforeOrderTests_Aspect2))]
+    [Aspect(typeof(InjectionAdviceBeforeOrderTests_Aspect3))]
+    internal class InjectionAdviceBeforeOrderTests_Target
     {
         public void TestMethod()
         {
         }
     }
 
-    internal class TestAspect1
+    internal class InjectionAdviceBeforeOrderTests_Aspect1
     {       
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public void BeforeMethod()
@@ -44,7 +44,7 @@ namespace AspectInjector.Tests.InjectionAdviceBeforeOrder
         }
     }
 
-    internal class TestAspect2
+    internal class InjectionAdviceBeforeOrderTests_Aspect2
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public void BeforeMethod([AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort)
@@ -53,7 +53,7 @@ namespace AspectInjector.Tests.InjectionAdviceBeforeOrder
         }
     }
 
-    internal class TestAspect3
+    internal class InjectionAdviceBeforeOrderTests_Aspect3
     {       
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public void BeforeMethod()
