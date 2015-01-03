@@ -51,11 +51,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AdviceInjectionAfterTests.cs" />
+    <Compile Include="AdviceInjectionBeforeTests.cs" />
+    <Compile Include="AdviceOrderedInjectionBeforeTests.cs" />
     <Compile Include="AspectFactoryMethodTests.cs" />
-    <Compile Include="AspectScopeTest.cs" />
-    <Compile Include="InjectionAdviceAfterTests.cs" />
-    <Compile Include="InjectionAdviceBeforeOrderTests.cs" />
-    <Compile Include="InjectionAdviceBeforeTests.cs" />
+    <Compile Include="AspectScopeTests.cs" />
     <Compile Include="InterfaceInjectionInheritanceTests.cs" />
     <Compile Include="InterfaceInjectionTests.cs" />
     <Compile Include="NestedClassesTests.cs" />

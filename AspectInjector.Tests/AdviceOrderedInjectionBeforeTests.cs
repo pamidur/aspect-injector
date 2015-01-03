@@ -5,14 +5,14 @@ using System;
 namespace AspectInjector.Tests
 {
     [TestClass]
-    public class InjectionAdviceBeforeOrderTests
+    public class AdviceOrderedInjectionBeforeTests
     {
-        private InjectionAdviceBeforeOrderTests_Target _beforeTestClass;
+        private AdviceOrderedInjectionBeforeTests_Target _beforeTestClass;
 
         [TestInitialize]
         public void SetUp()
         {
-            _beforeTestClass = new InjectionAdviceBeforeOrderTests_Target();
+            _beforeTestClass = new AdviceOrderedInjectionBeforeTests_Target();
         }
 
         [TestMethod]
@@ -25,17 +25,17 @@ namespace AspectInjector.Tests
     }
 
 
-    [Aspect(typeof(InjectionAdviceBeforeOrderTests_Aspect1))]
-    [Aspect(typeof(InjectionAdviceBeforeOrderTests_Aspect2))]
-    [Aspect(typeof(InjectionAdviceBeforeOrderTests_Aspect3))]
-    internal class InjectionAdviceBeforeOrderTests_Target
+    [Aspect(typeof(AdviceOrderedInjectionBeforeTests_Aspect1))]
+    [Aspect(typeof(AdviceOrderedInjectionBeforeTests_Aspect2))]
+    [Aspect(typeof(AdviceOrderedInjectionBeforeTests_Aspect3))]
+    internal class AdviceOrderedInjectionBeforeTests_Target
     {
         public void TestMethod()
         {
         }
     }
 
-    internal class InjectionAdviceBeforeOrderTests_Aspect1
+    internal class AdviceOrderedInjectionBeforeTests_Aspect1
     {       
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public void BeforeMethod()
@@ -44,7 +44,7 @@ namespace AspectInjector.Tests
         }
     }
 
-    internal class InjectionAdviceBeforeOrderTests_Aspect2
+    internal class AdviceOrderedInjectionBeforeTests_Aspect2
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public void BeforeMethod([AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort)
@@ -53,7 +53,7 @@ namespace AspectInjector.Tests
         }
     }
 
-    internal class InjectionAdviceBeforeOrderTests_Aspect3
+    internal class AdviceOrderedInjectionBeforeTests_Aspect3
     {       
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public void BeforeMethod()
