@@ -111,15 +111,25 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 instruction.OpCode == OpCodes.Castclass ||
                 instruction.OpCode == OpCodes.Newarr)
             {
-                return ((TypeReference)instruction.Operand).BelongsToAssembly(BrokerAssemblyPublicKeyToken) ||
-                    IsGenericInstanceArgumentsReferenceBroker(instruction.Operand as GenericInstanceType);
+                TypeReference type = instruction.Operand as TypeReference;
+                if (type != null)
+                {
+                    return type.BelongsToAssembly(BrokerAssemblyPublicKeyToken) ||
+                        IsGenericInstanceArgumentsReferenceBroker(type as GenericInstanceType);
+                }
             }
-            else if (instruction.OpCode == OpCodes.Call ||
+            
+            if (instruction.OpCode == OpCodes.Ldtoken ||
+                instruction.OpCode == OpCodes.Call ||
                 instruction.OpCode == OpCodes.Callvirt ||
                 instruction.OpCode == OpCodes.Newobj)
             {
-                return ((MethodReference)instruction.Operand).DeclaringType.BelongsToAssembly(BrokerAssemblyPublicKeyToken) ||
-                    IsGenericInstanceArgumentsReferenceBroker(instruction.Operand as GenericInstanceMethod);
+                MethodReference method = instruction.Operand as MethodReference;
+                if (method != null)
+                {
+                    return method.DeclaringType.BelongsToAssembly(BrokerAssemblyPublicKeyToken) ||
+                        IsGenericInstanceArgumentsReferenceBroker(method as GenericInstanceMethod);
+                }
             }
 
             return false;
