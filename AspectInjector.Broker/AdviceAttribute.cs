@@ -6,6 +6,7 @@ namespace AspectInjector.Broker
     public sealed class AdviceAttribute : Attribute
     {
         public InjectionPoints Points { get; private set; }
+
         public InjectionTargets Targets { get; private set; }
 
         public AdviceAttribute(InjectionPoints points, InjectionTargets targets)
