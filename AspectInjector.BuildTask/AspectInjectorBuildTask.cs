@@ -11,12 +11,15 @@ namespace AspectInjector.BuildTask
 {
     [ComVisible(false)]
     public class AspectInjectorBuildTask : Task
-    {
+    {       
         [Required]
         public string Assembly { get; set; }
 
         [Required]
         public string OutputPath { get; set; }
+
+        [Required]
+        public string ConfigurationName { get; set; }
 
         //public string StrongKeyPath { get; set; }
         //public bool Sing { get; set; }
@@ -33,14 +36,20 @@ namespace AspectInjector.BuildTask
                 System.Diagnostics.Debugger.Launch();
 #endif
 
+                var cacheFolder = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(typeof(AspectInjectorBuildTask).Assembly.Location)), "_assemblycache", ConfigurationName);
+
+                if (!Directory.Exists(cacheFolder))
+                    Directory.CreateDirectory(cacheFolder);
+
                 Console.WriteLine("Aspect Injector has started for {0}", Assembly);
 
-                var assemblyResolver = new StrictAssemblyResolver();
+                var assemblyResolver = new CachedAssemblyResolver(cacheFolder);
 
                 foreach (var r in References)
                     assemblyResolver.RegisterAssembly(r);
 
                 string assemblyFile = Path.Combine(OutputPath, Assembly);
+                File.Copy(assemblyFile, Path.Combine(cacheFolder, Assembly), true);
                 string pdbFile = Path.Combine(OutputPath, Path.GetFileNameWithoutExtension(Assembly) + ".pdb");
 
                 var assembly = AssemblyDefinition.ReadAssembly(assemblyFile,
@@ -58,7 +67,7 @@ namespace AspectInjector.BuildTask
 
                 Console.WriteLine("Assembly has been patched");
 
-                assembly.Write(assemblyFile, 
+                assembly.Write(assemblyFile,
                     new WriterParameters()
                     {
                         WriteSymbols = true,
@@ -69,8 +78,8 @@ namespace AspectInjector.BuildTask
             }
             catch (CompilationException ce)
             {
-                this.Log.LogError("Compilation exception", 
-                    null, 
+                this.Log.LogError("Compilation exception",
+                    null,
                     null,
                     ce.SequencePoint.Document.Url,
                     ce.SequencePoint.StartLine,

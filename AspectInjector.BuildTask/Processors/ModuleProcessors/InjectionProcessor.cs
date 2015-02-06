@@ -140,7 +140,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 .Where(attr => CheckFilter(targetMethod, targetName, attr))
                 .Select(attr =>
                 {
-                    var aspectType = (TypeDefinition)attr.ConstructorArguments[0].Value;
+                    var aspectType = ((TypeReference)attr.ConstructorArguments[0].Value).Resolve();
 
                     var aspectScope = AspectScope.Instance;
                     if (aspectType.CustomAttributes.HasAttributeOfType<AspectScopeAttribute>())

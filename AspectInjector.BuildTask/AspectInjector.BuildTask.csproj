@@ -63,6 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CachedAssemblyResolver.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Contexts\AdviceInjectionContext.cs" />
     <Compile Include="Contexts\AspectInjectionContext.cs" />

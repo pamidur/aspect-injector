@@ -5,6 +5,7 @@
     <AspectInjectorBuildTask Assembly="$(TargetFileName)"
                              References="@(ReferencePath)"
                              OutputPath="$(IntermediateOutputPath)"
+                             ConfigurationName="$(Configuration)"
  />
 
     <GetFrameworkSdkPath>

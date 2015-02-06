@@ -1,8 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using AspectInjector.Broker;
 using Mono.Cecil;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace AspectInjector.BuildTask
-{
+{  
     [ComVisible(false)]
     public class StrictAssemblyResolver : DefaultAssemblyResolver
     {
