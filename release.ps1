@@ -98,7 +98,7 @@ Update-Nuspec (get-item $nuspec) $buildNumber
 if($nugetkey -ne ""){
 	"Pushing package to nuget"
 	$pkg = get-item ("AspectInjector." + $buildNumber + ".nupkg")
-	& $nuget push $pkg $nugetkey
+	& $nuget push $pkg $nugetkey -s "https://nuget.org/"
 	Remove-Item $pkg -Force | Out-Null
 }
 
