@@ -90,6 +90,14 @@ namespace AspectInjector.BuildTask.Extensions
         {
             //see https://www.mail-archive.com/mono-cecil@googlegroups.com/msg01520.html for more info
 
+            //todo: find out correct way to compare generic params
+
+            if (typeReference1.IsGenericParameter && typeReference2.IsGenericParameter)
+                return typeReference1 == typeReference2; 
+
+            if (typeReference1.IsGenericParameter || typeReference2.IsGenericParameter)
+                return false;
+
             var tr1UniqueString = typeReference1.FullName + "@" + typeReference1.Resolve().Module.Assembly.Name.Name.ToLowerInvariant();
             var tr2UniqueString = typeReference2.FullName + "@" + typeReference2.Resolve().Module.Assembly.Name.Name.ToLowerInvariant();
 

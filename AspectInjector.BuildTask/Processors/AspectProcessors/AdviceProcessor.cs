@@ -75,12 +75,18 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
 
         private static IEnumerable<MethodDefinition> GetAdviceMethods(TypeDefinition aspectType)
         {
+            if (aspectType.GenericParameters.Any())
+                throw new CompilationException("Aspect cannot be generic", aspectType);
+
             return aspectType.Methods.Where(m => m.CustomAttributes.HasAttributeOfType<AdviceAttribute>());
         }
 
         private static IEnumerable<AdviceInjectionContext> ProcessAdvice(MethodDefinition adviceMethod,
             AspectInjectionContext parentContext)
         {
+            if (adviceMethod.GenericParameters.Any() || adviceMethod.ReturnType.IsGenericParameter)
+                throw new CompilationException("Advice cannot be generic", adviceMethod);
+
             var adviceAttribute = adviceMethod.CustomAttributes.GetAttributeOfType<AdviceAttribute>();
 
             var points = (InjectionPoints)adviceAttribute.ConstructorArguments[0].Value;

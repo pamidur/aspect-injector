@@ -82,29 +82,33 @@ namespace AspectInjector.BuildTask.Contexts
 
         public void LoadFieldOntoStack(Instruction injectionPoint, FieldReference field)
         {
+            var fieldRef = (FieldReference)CreateMemberReference(field);
+
             if (field.Resolve().IsStatic)
             {
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldsfld, field));
+                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldsfld, fieldRef));
             }
             else
             {
                 Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldarg_0));
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldfld, field));
+                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldfld, fieldRef));
             }
         }
 
         public void SetFieldFromStack(Instruction injectionPoint, FieldReference field, Action loadValueToStack)
         {
+            var fieldRef = (FieldReference)CreateMemberReference(field);
+
             if (field.Resolve().IsStatic)
             {
                 loadValueToStack();
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Stsfld, field));
+                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Stsfld, fieldRef));
             }
             else
             {
                 Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldarg_0));
                 loadValueToStack();
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Stfld, field));
+                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Stfld, fieldRef));
             }
         }
 
@@ -150,7 +154,8 @@ namespace AspectInjector.BuildTask.Contexts
             else
                 code = OpCodes.Call;
 
-            Processor.InsertBefore(injectionPoint, Processor.Create(code, Processor.Body.Method.Module.Import(method)));
+            var methodRef = (MethodReference)CreateMemberReference(method);
+            Processor.InsertBefore(injectionPoint, Processor.Create(code, methodRef));
         }
 
         protected void LoadCallArgument(Instruction injectionPoint, object arg, TypeReference expectedType)
@@ -252,6 +257,28 @@ namespace AspectInjector.BuildTask.Contexts
             {
                 throw new NotSupportedException("Argument type of " + arg.GetType().ToString() + " is not supported");
             }
+        }
+
+        private MemberReference CreateMemberReference(MemberReference member)
+        {
+            var dectype = TargetMethod.Module.Import(member.DeclaringType);
+            if (member.DeclaringType is IGenericParameterProvider && ((IGenericParameterProvider)member.DeclaringType).HasGenericParameters)
+            {
+                dectype = new GenericInstanceType(TargetMethod.Module.Import(member.DeclaringType));
+                ((IGenericParameterProvider)member.DeclaringType).GenericParameters.ToList()
+                    .ForEach(tr => ((IGenericInstance)dectype).GenericArguments.Add(TargetMethod.Module.Import(tr)));
+            }
+
+            if (member is FieldReference)
+                return new FieldReference(member.Name, TargetMethod.Module.Import(((FieldReference)member).FieldType), dectype);
+
+            if (member is MethodReference)
+                return new MethodReference(member.Name, TargetMethod.Module.Import(((MethodReference)member).ReturnType), dectype)
+                {
+                    HasThis = ((MethodReference)member).HasThis
+                };
+
+            throw new NotSupportedException("Not supported member type " + member.GetType().FullName);
         }
 
         private void SetupCatchBlock()
