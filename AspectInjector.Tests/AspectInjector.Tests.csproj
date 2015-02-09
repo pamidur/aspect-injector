@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="AdviceInjectionAfterTests.cs" />
     <Compile Include="AdviceInjectionBeforeTests.cs" />
+    <Compile Include="AdviceInjectionGenericTests.cs" />
     <Compile Include="AdviceOrderedInjectionBeforeTests.cs" />
     <Compile Include="AspectFactoryMethodTests.cs" />
     <Compile Include="AspectScopeTests.cs" />

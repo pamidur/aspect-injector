@@ -261,22 +261,38 @@ namespace AspectInjector.BuildTask.Contexts
 
         private MemberReference CreateMemberReference(MemberReference member)
         {
-            var dectype = TargetMethod.Module.Import(member.DeclaringType);
-            if (member.DeclaringType is IGenericParameterProvider && ((IGenericParameterProvider)member.DeclaringType).HasGenericParameters)
+            var declaringType = TargetMethod.Module.Import(member.DeclaringType);
+            var generic = member.DeclaringType as IGenericParameterProvider;
+
+            if (generic != null && generic.HasGenericParameters)
             {
-                dectype = new GenericInstanceType(TargetMethod.Module.Import(member.DeclaringType));
-                ((IGenericParameterProvider)member.DeclaringType).GenericParameters.ToList()
-                    .ForEach(tr => ((IGenericInstance)dectype).GenericArguments.Add(TargetMethod.Module.Import(tr)));
+                declaringType = new GenericInstanceType(TargetMethod.Module.Import(member.DeclaringType));
+                generic.GenericParameters.ToList()
+                    .ForEach(tr => ((IGenericInstance)declaringType).GenericArguments.Add(TargetMethod.Module.Import(tr)));
             }
 
-            if (member is FieldReference)
-                return new FieldReference(member.Name, TargetMethod.Module.Import(((FieldReference)member).FieldType), dectype);
+            var fieldReference = member as FieldReference;
+            if (fieldReference != null)
+                return new FieldReference(member.Name, TargetMethod.Module.Import(fieldReference.FieldType), declaringType);
 
-            if (member is MethodReference)
-                return new MethodReference(member.Name, TargetMethod.Module.Import(((MethodReference)member).ReturnType), dectype)
+            var methodReference = member as MethodReference;
+            if (methodReference != null)
+            {
+                //TODO: more fields may need to be copied 
+                var methodReferenceCopy = new MethodReference(member.Name, TargetMethod.Module.Import(methodReference.ReturnType), declaringType)
                 {
-                    HasThis = ((MethodReference)member).HasThis
+                    HasThis = methodReference.HasThis,
+                    ExplicitThis = methodReference.ExplicitThis,
+                    CallingConvention = methodReference.CallingConvention
                 };
+
+                foreach (var parameter in methodReference.Parameters)
+                {
+                    methodReferenceCopy.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
+                }
+
+                return methodReferenceCopy;
+            }
 
             throw new NotSupportedException("Not supported member type " + member.GetType().FullName);
         }
