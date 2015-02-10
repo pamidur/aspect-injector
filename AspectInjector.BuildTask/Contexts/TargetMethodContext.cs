@@ -361,7 +361,7 @@ namespace AspectInjector.BuildTask.Contexts
             foreach (var i in rets)
             {
                 if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
-                    Processor.SafeInsertBefore(rets.First(), Processor.CreateOptimized(OpCodes.Stloc, MethodResultVariable.Index));
+                    Processor.SafeInsertBefore(i, Processor.CreateOptimized(OpCodes.Stloc, MethodResultVariable.Index));
 
                 Processor.SafeReplace(i, Processor.Create(OpCodes.Br, suggestedSingleReturnPoint)); //todo:: optimize
             }
