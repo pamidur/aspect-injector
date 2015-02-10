@@ -35,7 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Build.Utilities.v4.0" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -46,7 +48,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+          <Private>True</Private>
+        </Reference>
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -91,6 +95,6 @@
   </Choose>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <UsingTask TaskName="AspectInjector.BuildTask.AspectInjectorBuildTask" AssemblyFile="..\AspectInjector.BuildTask\bin\Debug\AspectInjector.BuildTask.dll" />
+  <UsingTask TaskName="AspectInjector.BuildTask.AspectInjectorBuildTask" AssemblyFile="..\AspectInjector.BuildTask\bin\$(Configuration)\AspectInjector.BuildTask.dll" />
   <Import Project="..\packagecontent\AspectInjector.targets" />
 </Project>

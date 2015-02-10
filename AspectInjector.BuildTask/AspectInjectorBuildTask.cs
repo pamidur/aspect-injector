@@ -32,7 +32,7 @@ namespace AspectInjector.BuildTask
         {
             try
             {
-#if DEBUG
+#if ATTACH_DEBUGGER
                 System.Diagnostics.Debugger.Launch();
 #endif
 

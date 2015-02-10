@@ -18,24 +18,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             RemoveBrokerAttributes(module.CustomAttributes);
 
             foreach (var type in module.Types)
-            {
-                RemoveBrokerAttributes(type.CustomAttributes);
-
-                foreach (var method in type.Methods)
-                {
-                    RemoveBrokerAttributes(method.CustomAttributes);
-                    RemoveBrokerAttributes(method.MethodReturnType.CustomAttributes);
-
-                    foreach (var parameter in method.Parameters)
-                        RemoveBrokerAttributes(parameter.CustomAttributes);
-                }
-
-                foreach (var property in type.Properties)
-                    RemoveBrokerAttributes(property.CustomAttributes);
-
-                foreach (var @event in type.Events)
-                    RemoveBrokerAttributes(@event.CustomAttributes);
-            }
+                RemoveBrokerAttributes(type);
 
             var reference = module.AssemblyReferences.FirstOrDefault(
                 ar => BitConverter.ToString(ar.PublicKeyToken)
@@ -45,6 +28,29 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 module.AssemblyReferences.Remove(reference);
 
             module.Types.ToList().ForEach(CheckTypeReferencesBroker);
+        }
+
+        private void RemoveBrokerAttributes(TypeDefinition type)
+        {
+            foreach (var nestedType in type.NestedTypes)
+                RemoveBrokerAttributes(nestedType);
+
+            RemoveBrokerAttributes(type.CustomAttributes);
+
+            foreach (var method in type.Methods)
+            {
+                RemoveBrokerAttributes(method.CustomAttributes);
+                RemoveBrokerAttributes(method.MethodReturnType.CustomAttributes);
+
+                foreach (var parameter in method.Parameters)
+                    RemoveBrokerAttributes(parameter.CustomAttributes);
+            }
+
+            foreach (var property in type.Properties)
+                RemoveBrokerAttributes(property.CustomAttributes);
+
+            foreach (var @event in type.Events)
+                RemoveBrokerAttributes(@event.CustomAttributes);
         }
 
         private void RemoveBrokerAttributes(Collection<CustomAttribute> collection)
@@ -83,7 +89,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         private bool IsGenericParametersReferenceBroker(IGenericParameterProvider genericParameters)
         {
             return genericParameters.GenericParameters.Any(p =>
-                p.Constraints.Any(c => c.BelongsToAssembly(BrokerAssemblyPublicKeyToken) 
+                p.Constraints.Any(c => c.BelongsToAssembly(BrokerAssemblyPublicKeyToken)
                     || IsGenericInstanceArgumentsReferenceBroker(c as IGenericInstance)));
         }
 
@@ -106,8 +112,8 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         private bool IsInstructionReferencesBroker(Instruction instruction)
         {
-            if (instruction.OpCode == OpCodes.Ldtoken || 
-                instruction.OpCode == OpCodes.Isinst || 
+            if (instruction.OpCode == OpCodes.Ldtoken ||
+                instruction.OpCode == OpCodes.Isinst ||
                 instruction.OpCode == OpCodes.Castclass ||
                 instruction.OpCode == OpCodes.Newarr)
             {
@@ -118,7 +124,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                         IsGenericInstanceArgumentsReferenceBroker(type as GenericInstanceType);
                 }
             }
-            
+
             if (instruction.OpCode == OpCodes.Ldtoken ||
                 instruction.OpCode == OpCodes.Call ||
                 instruction.OpCode == OpCodes.Callvirt ||

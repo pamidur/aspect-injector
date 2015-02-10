@@ -323,9 +323,17 @@ namespace AspectInjector.BuildTask.Contexts
         {
             OriginalEntryPoint = TargetMethod.IsConstructor && !TargetMethod.IsStatic ?
                 TargetMethod.FindBaseClassCtorCall() :
-                TargetMethod.Body.Instructions.First();
+                GetMethodOriginalEntryPoint();
 
             EntryPoint = Processor.SafeInsertBefore(OriginalEntryPoint, Processor.Create(OpCodes.Nop));
+        }
+
+        private Instruction GetMethodOriginalEntryPoint()
+        {
+            if (TargetMethod.Body.Instructions.Count == 1) //optimized code            
+                Processor.SafeInsertBefore(TargetMethod.Body.Instructions.First(), Processor.Create(OpCodes.Nop));            
+
+            return TargetMethod.Body.Instructions.First();
         }
 
         private void SetupReturnPoints()

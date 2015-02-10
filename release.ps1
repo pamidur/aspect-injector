@@ -4,7 +4,9 @@ Param (
 )
 
 $solutionFilename = "AspectInjector.sln"
+$testsSolutionFilename = "AspectInjector.Test.sln"
 $binDir = ".\AspectInjector.BuildTask\bin\Release"
+$testsDll = ".\AspectInjector.Tests\bin\Release\AspectInjector.Tests.dll"
 $packageBuildPlace = ".\packagebuildplace"
 
 function Update-SourceVersion
@@ -59,8 +61,38 @@ Update-AllAssemblyInfoFiles $buildNumber
 
 "Building app"
 $msbuild = join-path (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0").MSBuildToolsPath "msbuild.exe"
-$buildargs = @( $solutionFilename, "/t:Rebuild", "/p:Configuration=Release;Platform=Any CPU" )
-& $msbuild $buildargs
+
+$mstest = "C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\mstest.exe"
+
+$buildargs = @( $solutionFilename, "/t:Rebuild", "/p:Configuration=Release;DefineConstants=Trace;Platform=Any CPU" )
+& $msbuild $buildargs | out-null
+
+if ($LastExitCode -ne 0) {
+    throw "MSBuild failed with exit code $LastExitCode."
+	break
+}
+
+if(test-path $mstest)
+{
+	"Building tests"
+	$buildargs = @( $testsSolutionFilename, "/t:Rebuild", "/p:Configuration=Release;Platform=Any CPU" )
+	& $msbuild $buildargs | out-null
+
+	if ($LastExitCode -ne 0) {
+		throw "MSBuild failed with exit code $LastExitCode."
+		break
+	}
+
+	$testargs = @("/noisolation", "/noresults", "/nologo", "/testcontainer:$testsDll" )
+	& $mstest $testargs
+
+	if ($LastExitCode -ne 0) {
+		throw "MSTest failed with exit code $LastExitCode."
+		break
+	}
+}else{
+	"Could not find MSTest.exe. Skipping tests..."
+}
 
 "Creating folders."
 if(Test-Path $packageBuildPlace ){
@@ -93,7 +125,11 @@ $nuspec = join-path $packageBuildPlace "AspectInjector.nuspec"
 Update-Nuspec (get-item $nuspec) $buildNumber
 
 "Creating Package"
-& $nuget pack $nuspec
+& $nuget pack $nuspec | out-null
+if ($LastExitCode -ne 0) {
+    throw "Nuget Pack failed with exit code $LastExitCode."
+	break
+}
 
 if($nugetkey -ne ""){
 	"Pushing package to nuget"
