@@ -288,7 +288,7 @@ namespace AspectInjector.BuildTask.Contexts
 
                 foreach (var parameter in methodReference.Parameters)
                 {
-                    methodReferenceCopy.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
+                    methodReferenceCopy.Parameters.Add(new ParameterDefinition(TargetMethod.Module.Import(parameter.ParameterType)));
                 }
 
                 return methodReferenceCopy;
