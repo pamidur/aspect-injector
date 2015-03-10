@@ -1,9 +1,10 @@
 Aspect Injector Reference
 ========================
-*Aspect Injector* is a framework for creating and injecting aspects into your .net asseblies.
+**Aspect Injector** is a framework for creating and injecting aspects into your .net asseblies.
 
 ### Download ###
 [Nuget Gallery](https://www.nuget.org/packages/AspectInjector/)
+
 	PM> Install-Package AspectInjector
 
 ### Features ###
