@@ -73,7 +73,8 @@ Parameters
 
 **AspectFactoryAttribute**
 
-TBD
+Marks a static method to be called for creating a new aspect instance. When there are no methods in the class marked with this attribute, instances are created by calling default constructor directly.
+This feature allows to pass runtime parameters to aspect instances, for example, to implement dependency injection.
 ```C#
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class AspectFactoryAttribute : Attribute
