@@ -22,8 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{90FC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
 	ProjectSection(SolutionItems) = preProject
-		documentation\readme.md = documentation\readme.md
-		documentation\reference.md = documentation\reference.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Snippets", "AspectInjector.Snippets\AspectInjector.Snippets.csproj", "{16309079-D308-497A-B1A6-68F3956F39AC}"

@@ -4,8 +4,9 @@ Aspect Injector Reference
 
 ### Download ###
 [Nuget Gallery](https://www.nuget.org/packages/AspectInjector/)
-
-	PM> Install-Package AspectInjector
+```ps
+PM> Install-Package AspectInjector
+```
 
 ### Features ###
 - Compile-time injection
