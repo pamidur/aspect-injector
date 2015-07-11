@@ -57,6 +57,7 @@
     <Compile Include="AspectFactoryAttribute.cs" />
     <Compile Include="AspectScope.cs" />
     <Compile Include="AspectScopeAttribute.cs" />
+    <Compile Include="CustomAspectDefinitionAttribute.cs" />
     <Compile Include="InjectionPoints.cs" />
     <Compile Include="InjectionTargets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

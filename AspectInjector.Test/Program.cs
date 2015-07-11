@@ -1,6 +1,5 @@
 ﻿using AspectInjector.Broker;
 using System;
-using System.Text;
 
 namespace AspectInjector.Test
 {
@@ -143,7 +142,7 @@ namespace AspectInjector.Test
         }
 
         //[Aspect(typeof(TestMethodFilteredAspect2))]
-        [Aspect(typeof(TestMethodFilteredAspect), CustomData = new object[] { StringSplitOptions.None, (short)12, true, new object[] { new string[] { "fgf" } }, new int[] { } })]
+        [Aspect(typeof(TestMethodFilteredAspect), RoutableData = new object[] { StringSplitOptions.None, (short)12, true, new object[] { new string[] { "fgf" } }, new int[] { } })]
         public int Do4(bool a)
         {
             return 2;

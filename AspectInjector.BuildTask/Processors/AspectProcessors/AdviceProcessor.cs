@@ -1,5 +1,4 @@
 ﻿using AspectInjector.Broker;
-using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
@@ -14,8 +13,6 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
     {
         private readonly IAspectInjector<AdviceInjectionContext> _injector;
 
-        private List<TargetMethodContext> _abortableInjectionHistory = new List<TargetMethodContext>();
-
         public AdviceProcessor(IAspectInjector<AdviceInjectionContext> injector)
         {
             _injector = injector;
@@ -26,11 +23,9 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
             return aspectType.Methods.Any(m => m.CustomAttributes.HasAttributeOfType<AdviceAttribute>());
         }
 
-        public void Process(AspectInjectionContext context)
+        public void Process(AspectContext context)
         {
-            var adviceContexts = GetAdviceMethods(context.AspectType).SelectMany(m => ProcessAdvice(m, context)).Where(ac => ac != null).ToList();
-
-            adviceContexts.ForEach(ValidateContext);
+            var adviceContexts = GetAdviceMethods(context.AdviceClassType).SelectMany(m => ProcessAdvice(m, context)).Where(ac => ac != null).ToList();
 
             foreach (var adviceContext in adviceContexts)
                 _injector.Inject(adviceContext);
@@ -73,19 +68,29 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
             return target == InjectionTargets.Method;
         }
 
-        private static IEnumerable<MethodDefinition> GetAdviceMethods(TypeDefinition aspectType)
+        private static IEnumerable<MethodDefinition> GetAdviceMethods(TypeDefinition adviceClassType)
         {
-            if (aspectType.GenericParameters.Any())
-                throw new CompilationException("Aspect cannot be generic", aspectType);
+            Validation.ValidateAdviceClassType(adviceClassType);
 
-            return aspectType.Methods.Where(m => m.CustomAttributes.HasAttributeOfType<AdviceAttribute>());
+            return adviceClassType.Methods.Where(m => m.CustomAttributes.HasAttributeOfType<AdviceAttribute>());
+        }
+
+        private static IEnumerable<AdviceArgumentSource> GetAdviceArgumentsSources(MethodDefinition adviceMethod)
+        {
+            foreach (var parameter in adviceMethod.Parameters)
+            {
+                Validation.ValidateAdviceMethodParameter(parameter, adviceMethod);
+
+                var argumentAttribute = parameter.CustomAttributes.GetAttributeOfType<AdviceArgumentAttribute>();
+                var source = (AdviceArgumentSource)argumentAttribute.ConstructorArguments[0].Value;
+                yield return source;
+            }
         }
 
         private static IEnumerable<AdviceInjectionContext> ProcessAdvice(MethodDefinition adviceMethod,
-            AspectInjectionContext parentContext)
+            AspectContext parentContext)
         {
-            if (adviceMethod.GenericParameters.Any() || adviceMethod.ReturnType.IsGenericParameter)
-                throw new CompilationException("Advice cannot be generic", adviceMethod);
+            Validation.ValidateAdviceMethod(adviceMethod);
 
             var adviceAttribute = adviceMethod.CustomAttributes.GetAttributeOfType<AdviceAttribute>();
 
@@ -101,64 +106,14 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
                         var context = new AdviceInjectionContext() { AspectContext = parentContext };
 
                         context.AdviceMethod = adviceMethod;
-                        context.AdviceArgumentsSources = ProcessingUtils.GetAdviceArgumentsSources(adviceMethod).ToList();
+                        context.AdviceArgumentsSources = GetAdviceArgumentsSources(adviceMethod).ToList();
+                        context.InjectionPoint = point;
 
-                        if (target == InjectionTargets.Constructor)
-                        {
-                            if (!adviceMethod.ReturnType.IsTypeOf(typeof(void)))
-                                throw new CompilationException("Advice of InjectionTargets.Constructor can be System.Void only", adviceMethod);
-
-                            if (context.IsAbortable)
-                                throw new CompilationException("Constructors methods don't support AdviceArgumentSource.AbortFlag", adviceMethod);
-                        }
-
-                        if (point == InjectionPoints.Before)
-                        {
-                            if (context.IsAbortable && !context.AdviceMethod.ReturnType.IsTypeOf(adviceMethod.ReturnType))
-                                throw new CompilationException("Return types of advice (" + adviceMethod.FullName + ") and target (" + context.AspectContext.TargetMethodContext.TargetMethod.FullName + ") should be the same", context.AspectContext.TargetMethodContext.TargetMethod);
-
-                            if (!context.IsAbortable && !adviceMethod.ReturnType.IsTypeOf(typeof(void)))
-                                throw new CompilationException("Advice of InjectionPoints.Before without argument of AdviceArgumentSource.AbortFlag can be System.Void only", adviceMethod);
-
-                            context.InjectionPoint = InjectionPoints.Before;
-                        }
-
-                        if (point == InjectionPoints.After)
-                        {
-                            if (!adviceMethod.ReturnType.IsTypeOf(typeof(void)))
-                                throw new CompilationException("Advice of InjectionPoints.After can be System.Void only", adviceMethod);
-
-                            if (context.IsAbortable)
-                                throw new CompilationException("Method should inject into only InjectionPoints.Before in order to use AdviceArgumentSource.AbortFlag", adviceMethod);
-
-                            context.InjectionPoint = InjectionPoints.After;
-                        }
-
-                        if (point == InjectionPoints.Exception)
-                        {
-                            if (context.IsAbortable)
-                                throw new CompilationException("Method should inject into only InjectionPoints.Before in order to use AdviceArgumentSource.AbortFlag", adviceMethod);
-
-                            if (!adviceMethod.ReturnType.IsTypeOf(typeof(void)))
-                                throw new CompilationException("Advice of InjectionPoints.After can be System.Void only", adviceMethod);
-
-                            context.InjectionPoint = InjectionPoints.Exception;
-                        }
+                        Validation.ValidateAdviceInjectionContext(context, target);
 
                         yield return context;
                     }
                 }
-            }
-        }
-
-        private void ValidateContext(AdviceInjectionContext context)
-        {
-            if (context.IsAbortable)
-            {
-                if (_abortableInjectionHistory.Contains(context.AspectContext.TargetMethodContext))
-                    throw new CompilationException("Method may have only one advice with argument of AdviceArgumentSource.AbortFlag applied to it", context.AspectContext.TargetMethodContext.TargetMethod);
-
-                _abortableInjectionHistory.Add(context.AspectContext.TargetMethodContext);
             }
         }
     }

@@ -158,7 +158,7 @@ namespace AspectInjector.Test
             [AdviceArgument(AdviceArgumentSource.TargetName)] string targetName,
             [AdviceArgument(AdviceArgumentSource.TargetArguments)] object[] args,
             [AdviceArgument(AdviceArgumentSource.Instance)] object target,
-            [AdviceArgument(AdviceArgumentSource.CustomData)] object[] data
+            [AdviceArgument(AdviceArgumentSource.RoutableData)] object data
 
             //,            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
             )

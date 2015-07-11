@@ -9,6 +9,6 @@ namespace AspectInjector.BuildTask.Contracts
 {
     public interface IInjectionContext
     {
-        AspectInjectionContext AspectContext { get; }
+        AspectContext AspectContext { get; }
     }
 }

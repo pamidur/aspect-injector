@@ -22,9 +22,9 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
             return aspectType.CustomAttributes.HasAttributeOfType<AdviceInterfaceProxyAttribute>();
         }
 
-        public void Process(AspectInjectionContext context)
+        public void Process(AspectContext context)
         {
-            var interfaceInjectionDefinitions = from ca in context.AspectType.CustomAttributes
+            var interfaceInjectionDefinitions = from ca in context.AdviceClassType.CustomAttributes
                                                 where ca.IsAttributeOfType<AdviceInterfaceProxyAttribute>()
                                                 select new { @interface = (TypeReference)ca.ConstructorArguments[0].Value };
 
@@ -50,14 +50,14 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
 
         protected virtual void FillinInterfaceMembers(InterfaceInjectionContext context)
         {
-            var aspectDefinition = context.AspectContext.AspectType;
+            var aspectDefinition = context.AspectContext.AdviceClassType;
             var interfaceDefinition = context.InterfaceDefinition;
             var classDefinition = context.AspectContext.TargetTypeContext;
 
             if (!context.InterfaceDefinition.IsInterface)
                 throw new CompilationException(context.InterfaceDefinition.Name + " is not an interface on interface injection definition on acpect " + aspectDefinition.Name, aspectDefinition);
 
-            if (!context.AspectContext.AspectType.ImplementsInterface(context.InterfaceDefinition))
+            if (!context.AspectContext.AdviceClassType.ImplementsInterface(context.InterfaceDefinition))
                 throw new CompilationException(aspectDefinition.Name + " should implement " + interfaceDefinition.Name, aspectDefinition);
 
             if (!classDefinition.TypeDefinition.ImplementsInterface(interfaceDefinition))

@@ -10,7 +10,7 @@ namespace AspectInjector.BuildTask.Injectors
     internal abstract class InjectorBase
     {
         protected IEnumerable<object> ResolveArgumentsValues(
-            AspectInjectionContext context,
+            AspectContext context,
             List<AdviceArgumentSource> sources,
             InjectionPoints injectionPointFired,
             VariableDefinition abortFlagVariable = null,
@@ -45,8 +45,8 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return returnObjectVariable ?? Markers.DefaultMarker;
                         break;
 
-                    case AdviceArgumentSource.CustomData:
-                        yield return context.AspectCustomData ?? Markers.DefaultMarker;
+                    case AdviceArgumentSource.RoutableData:
+                        yield return context.AspectRoutableData ?? Markers.DefaultMarker;
                         break;
 
                     default:

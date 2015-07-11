@@ -5,7 +5,7 @@ namespace AspectInjector.BuildTask.Contexts
 {
     public class InterfaceInjectionContext : IInjectionContext
     {
-        public AspectInjectionContext AspectContext { get; set; }
+        public AspectContext AspectContext { get; set; }
 
         public TypeDefinition InterfaceDefinition { get; set; }
 

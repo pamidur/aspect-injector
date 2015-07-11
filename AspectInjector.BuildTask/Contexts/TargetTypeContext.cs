@@ -3,12 +3,10 @@
 // Licensed under the Apache License, Version 2.0
 
 using AspectInjector.Broker;
-using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.BuildTask.Contexts
@@ -43,7 +41,7 @@ namespace AspectInjector.BuildTask.Contexts
                         TypeDefinition.Module.TypeSystem.Void);
 
                     var cctor = _constructors.FirstOrDefault(c => c.TargetMethod.IsStatic) ?? CreateStaticConstructor();
-                    cctor.InjectMethodCall(cctor.EntryPoint, null, _typeAspectsInitializer.TargetMethod, new object[] { });
+                    cctor.InjectMethodCall(cctor.EntryPoint, _typeAspectsInitializer.TargetMethod, new object[] { });
                 }
 
                 return _typeAspectsInitializer;
@@ -63,7 +61,10 @@ namespace AspectInjector.BuildTask.Contexts
                     var ctors = _constructors.Where(c => !c.TargetMethod.IsStatic).ToList();
 
                     foreach (var ctor in ctors)
-                        ctor.InjectMethodCall(ctor.EntryPoint, null, _instanceAspectsInitializer.TargetMethod, new object[] { });
+                    {
+                        ctor.LoadSelfOntoStack(ctor.EntryPoint);
+                        ctor.InjectMethodCall(ctor.EntryPoint, _instanceAspectsInitializer.TargetMethod, new object[] { });
+                    }
                 }
 
                 return _instanceAspectsInitializer;
@@ -80,44 +81,36 @@ namespace AspectInjector.BuildTask.Contexts
             return MethodContextFactory.GetOrCreateContext(method);
         }
 
-        public FieldReference GetOrCreateAspectReference(AspectInjectionContext info)
+        public FieldReference GetOrCreateAspectReference(AspectContext info)
         {
             if (info.TargetTypeContext != this)
                 throw new NotSupportedException("Aspect info mismatch.");
 
-            var aspectPropertyName = AspectPropertyNamePrefix + info.AspectType.Name;
+            var aspectPropertyName = AspectPropertyNamePrefix + info.AdviceClassType.Name;
 
-            var existingField = TypeDefinition.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(info.AspectType));
+            var existingField = TypeDefinition.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(info.AdviceClassType));
             if (existingField != null)
                 return existingField;
 
             TargetMethodContext initMethod = null;
             FieldAttributes fieldAttrs;
-            MethodDefinition factoryMethod;
 
-            if (info.AspectScope == AspectScope.Instance)
+            if (info.AdviceClassScope == AspectScope.Instance)
             {
                 fieldAttrs = FieldAttributes.Private;
                 initMethod = InstanсeAspectsInitializer;
             }
-            else if (info.AspectScope == AspectScope.Type)
+            else if (info.AdviceClassScope == AspectScope.Type)
             {
                 fieldAttrs = FieldAttributes.Private | FieldAttributes.Static;
                 initMethod = TypeAspectsInitializer;
             }
-            else throw new NotSupportedException("Scope " + info.AspectScope.ToString() + " is not supported (yet).");
+            else throw new NotSupportedException("Scope " + info.AdviceClassScope.ToString() + " is not supported (yet).");
 
-            factoryMethod = info.AspectFactory ?? info.AspectType.Methods
-                .Where(c => c.IsConstructor && !c.IsStatic && !c.Parameters.Any())
-                .FirstOrDefault();
-
-            if (factoryMethod == null)
-                throw new CompilationException("Cannot find either empty constructor or factory for aspect.", info.AspectType);
-
-            var field = new FieldDefinition(aspectPropertyName, fieldAttrs, TypeDefinition.Module.Import(info.AspectType));
+            var field = new FieldDefinition(aspectPropertyName, fieldAttrs, TypeDefinition.Module.Import(info.AdviceClassType));
             TypeDefinition.Fields.Add(field);
 
-            InjectInitialization(initMethod, field, factoryMethod);
+            InjectInitialization(initMethod, field, info.AdviceClassFactory);
 
             return field;
         }
@@ -129,7 +122,7 @@ namespace AspectInjector.BuildTask.Contexts
                 TypeDefinition.Module.TypeSystem.Void);
         }
 
-        private void InjectInitialization(TargetMethodContext initMethod, 
+        private void InjectInitialization(TargetMethodContext initMethod,
             FieldDefinition field,
             MethodDefinition factoryMethod)
         {
@@ -147,7 +140,7 @@ namespace AspectInjector.BuildTask.Contexts
 
             initMethod.SetFieldFromStack(point,
                 field,
-                () => initMethod.InjectMethodCall(point, null, factoryMethod, new object[] { }));
+                () => initMethod.InjectMethodCall(point, factoryMethod, new object[] { }));
 
             proc.InsertBefore(point, endBlock);
         }

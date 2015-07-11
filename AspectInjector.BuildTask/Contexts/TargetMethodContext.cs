@@ -12,6 +12,7 @@ namespace AspectInjector.BuildTask.Contexts
     {
         private static readonly string ExceptionVariableName = "__a$_exception";
         private static readonly string MethodResultVariableName = "__a$_methodResult";
+        private static readonly string RoutableAttributeVariableName = "__a$_routable_attr";
 
         private Instruction _exceptionPoint;
         private VariableDefinition _exceptionVar;
@@ -80,6 +81,16 @@ namespace AspectInjector.BuildTask.Contexts
 
         public MethodDefinition TargetMethod { get; private set; }
 
+        public void LoadVariableOntoStack(Instruction injectionPoint, VariableReference var)
+        {
+            Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(OpCodes.Ldloc, var.Index));
+        }
+
+        public void SetVariableFromStack(Instruction injectionPoint, VariableReference var)
+        {
+            Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(OpCodes.Stloc, var.Index));
+        }
+
         public void LoadFieldOntoStack(Instruction injectionPoint, FieldReference field)
         {
             var fieldRef = (FieldReference)CreateMemberReference(field);
@@ -112,35 +123,15 @@ namespace AspectInjector.BuildTask.Contexts
             }
         }
 
-        public void InjectMethodCall(Instruction injectionPoint, MemberReference sourceMember, MethodDefinition method, object[] arguments)
+        public void LoadSelfOntoStack(Instruction injectionPoint)
+        {
+            Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldarg_0));
+        }
+
+        public void InjectMethodCall(Instruction injectionPoint, MethodDefinition method, object[] arguments)
         {
             if (method.Parameters.Count != arguments.Length)
                 throw new ArgumentException("Arguments count mismatch", "arguments");
-
-            //processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Nop));
-
-            var type = Processor.Body.Method.DeclaringType;
-
-            if (sourceMember is FieldReference)
-            {
-                LoadFieldOntoStack(injectionPoint, (FieldReference)sourceMember);
-            }
-            else if (sourceMember == null)
-            {
-                if (method.IsStatic)
-                {
-                    //Nothing should be loaded onto stack
-                }
-                else
-                {
-                    if (method.DeclaringType == TargetMethod.DeclaringType)
-                        Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldarg_0));
-                }
-            }
-            else
-            {
-                throw new NotSupportedException("Only FieldRefences and nulls supported at the moment");
-            }
 
             for (int i = 0; i < method.Parameters.Count; i++)
                 LoadCallArgument(injectionPoint, arguments[i], method.Parameters[i].ParameterType);
@@ -190,6 +181,40 @@ namespace AspectInjector.BuildTask.Contexts
 
                 var str = (string)arg;
                 Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldstr, str));
+            }
+            else if (arg is CustomAttribute)
+            {
+                var ca = (CustomAttribute)arg;
+                var catype = ca.AttributeType.Resolve();
+
+                InjectMethodCall(injectionPoint, ca.Constructor.Resolve(), ca.ConstructorArguments.Cast<object>().ToArray());
+
+                if (ca.Properties.Any() || ca.Fields.Any())
+                {
+                    var attrvar = new VariableDefinition(RoutableAttributeVariableName, (TypeReference)CreateMemberReference(ca.AttributeType));
+                    TargetMethod.Body.Variables.Add(attrvar);
+                    Processor.Body.InitLocals = true;
+
+                    SetVariableFromStack(injectionPoint, attrvar);
+
+                    foreach (var namedArg in ca.Properties)
+                    {
+                        LoadVariableOntoStack(injectionPoint, attrvar);
+                        InjectMethodCall(injectionPoint, catype.Properties.First(p => p.Name == namedArg.Name).SetMethod, new object[] { namedArg.Argument });
+                    }
+
+                    foreach (var namedArg in ca.Fields)
+                    {
+                        LoadVariableOntoStack(injectionPoint, attrvar);
+
+                        var field = catype.Fields.First(p => p.Name == namedArg.Name);
+                        LoadCallArgument(injectionPoint, namedArg.Argument, field.FieldType);
+
+                        Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Stfld, field));
+                    }
+
+                    LoadVariableOntoStack(injectionPoint, attrvar);
+                }
             }
             else if (arg is CustomAttributeArgument)
             {
@@ -261,6 +286,11 @@ namespace AspectInjector.BuildTask.Contexts
 
         private MemberReference CreateMemberReference(MemberReference member)
         {
+            if (member is TypeReference)
+            {
+                return TargetMethod.Module.Import((TypeReference)member);
+            }
+
             var declaringType = TargetMethod.Module.Import(member.DeclaringType);
             var generic = member.DeclaringType as IGenericParameterProvider;
 
@@ -331,7 +361,7 @@ namespace AspectInjector.BuildTask.Contexts
         private Instruction GetMethodOriginalEntryPoint()
         {
             if (TargetMethod.Body.Instructions.Count == 1) //optimized code            
-                Processor.SafeInsertBefore(TargetMethod.Body.Instructions.First(), Processor.Create(OpCodes.Nop));            
+                Processor.SafeInsertBefore(TargetMethod.Body.Instructions.First(), Processor.Create(OpCodes.Nop));
 
             return TargetMethod.Body.Instructions.First();
         }

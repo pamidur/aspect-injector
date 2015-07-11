@@ -64,9 +64,9 @@ namespace AspectInjector.BuildTask.Injectors
                     default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
                 }
 
-                context.AspectContext.TargetMethodContext.InjectMethodCall(injectionPoint, 
-                    aspectInstanceField,
-                    context.AdviceMethod, 
+                context.AspectContext.TargetMethodContext.LoadFieldOntoStack(injectionPoint, aspectInstanceField);
+                context.AspectContext.TargetMethodContext.InjectMethodCall(injectionPoint,
+                    context.AdviceMethod,
                     argumentValue);
             }
         }
@@ -94,9 +94,9 @@ namespace AspectInjector.BuildTask.Injectors
                 processor.SetLocalVariable(abortFlagVariable, injectionPoint, false);
             }
 
+            context.AspectContext.TargetMethodContext.LoadFieldOntoStack(injectionPoint, sourceMember);
             context.AspectContext.TargetMethodContext.InjectMethodCall(
                 injectionPoint,
-                sourceMember,
                 method,
                 ResolveArgumentsValues(context.AspectContext, context.AdviceArgumentsSources, context.InjectionPoint, abortFlagVariable: abortFlagVariable).ToArray());
 

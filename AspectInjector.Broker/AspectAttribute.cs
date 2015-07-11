@@ -11,7 +11,7 @@ namespace AspectInjector.Broker
 
         public AccessModifiers AccessModifierFilter { get; set; }
 
-        public object[] CustomData { get; set; }
+        public object RoutableData { get; set; }
 
         public AspectAttribute(Type aspectType)
         {

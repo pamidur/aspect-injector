@@ -1,9 +1,10 @@
 ﻿using AspectInjector.Broker;
-using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
+using AspectInjector.BuildTask.Models;
 using Mono.Cecil;
+using Mono.Collections.Generic;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -23,45 +24,45 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         {
             foreach (var @class in module.Types.Where(t => t.IsClass).SelectMany(t => t.GetClassesTree()))
             {
-                var classAspectAttributes = @class.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
+                var classAspectDefinitions = FindAspectDefinitions(@class.CustomAttributes);
 
                 foreach (var method in @class.Methods.Where(m => !m.IsSetter && !m.IsGetter && !m.IsAddOn && !m.IsRemoveOn).ToList())
                 {
-                    var methodAspectAttributes = method.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
-                    var allAspectAttributes = MergeAspectAttributes(classAspectAttributes, methodAspectAttributes).ToList();
+                    var methodAspectDefinitions = FindAspectDefinitions(method.CustomAttributes);
+                    var allAspectDefinitions = MergeAspectDefinitions(classAspectDefinitions, methodAspectDefinitions).ToList();
 
-                    ProcessAspectAttributes(method, method.Name, allAspectAttributes);
+                    ProcessAspectDefinitions(method, method.Name, allAspectDefinitions);
                 }
 
                 foreach (var property in @class.Properties.ToList())
                 {
-                    var propertyAspectAttributes = property.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
-                    var allAspectAttributes = MergeAspectAttributes(classAspectAttributes, propertyAspectAttributes).ToList();
+                    var propertyAspectDefinitions = FindAspectDefinitions(property.CustomAttributes);
+                    var allAspectDefinitions = MergeAspectDefinitions(classAspectDefinitions, propertyAspectDefinitions).ToList();
 
                     if (property.GetMethod != null)
                     {
-                        ProcessAspectAttributes(property.GetMethod, property.Name, allAspectAttributes);
+                        ProcessAspectDefinitions(property.GetMethod, property.Name, allAspectDefinitions);
                     }
 
                     if (property.SetMethod != null)
                     {
-                        ProcessAspectAttributes(property.SetMethod, property.Name, allAspectAttributes);
+                        ProcessAspectDefinitions(property.SetMethod, property.Name, allAspectDefinitions);
                     }
                 }
 
                 foreach (var @event in @class.Events.ToList())
                 {
-                    var eventAspectAttributes = @event.CustomAttributes.GetAttributesOfType<AspectAttribute>().ToList();
-                    var allAspectAttributes = MergeAspectAttributes(classAspectAttributes, eventAspectAttributes).ToList();
+                    var eventAspectDefinitions = FindAspectDefinitions(@event.CustomAttributes);
+                    var allAspectDefinitions = MergeAspectDefinitions(classAspectDefinitions, eventAspectDefinitions).ToList();
 
                     if (@event.AddMethod != null)
                     {
-                        ProcessAspectAttributes(@event.AddMethod, @event.Name, allAspectAttributes);
+                        ProcessAspectDefinitions(@event.AddMethod, @event.Name, allAspectDefinitions);
                     }
 
                     if (@event.RemoveMethod != null)
                     {
-                        ProcessAspectAttributes(@event.RemoveMethod, @event.Name, allAspectAttributes);
+                        ProcessAspectDefinitions(@event.RemoveMethod, @event.Name, allAspectDefinitions);
                     }
                 }
             }
@@ -71,13 +72,12 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         private static bool CheckFilter(MethodDefinition targetMethod,
             string targetName,
-            CustomAttribute aspectAttribute)
+            AspectDefinition aspectDefinition)
         {
             var result = true;
 
-            var nameFilter = (string)aspectAttribute.GetPropertyValue("NameFilter");
-            object accessModifierFilterObject = aspectAttribute.GetPropertyValue("AccessModifierFilter");
-            var accessModifierFilter = (AccessModifiers)(accessModifierFilterObject ?? 0);
+            var nameFilter = aspectDefinition.NameFilter;
+            var accessModifierFilter = aspectDefinition.AccessModifierFilter;
 
             if (!string.IsNullOrEmpty(nameFilter))
             {
@@ -111,82 +111,87 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             return result;
         }
 
-        private static void SetAspectFactoryToContext(AspectInjectionContext context)
+        private List<AspectDefinition> FindAspectDefinitions(Collection<CustomAttribute> collection)
         {
-            var aspectFactories = context.AspectType.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>()).ToList();
+            var result = collection.GetAttributesOfType<AspectAttribute>().Select(ParseAspectAttribute).ToList();
 
-            if (aspectFactories.Count > 1)
-                throw new CompilationException("Only one method can be AspectFactory", aspectFactories.Last());
+            var customAttrs = collection.GroupBy(ca => ca.AttributeType.Resolve().CustomAttributes.GetAttributeOfType<CustomAspectDefinitionAttribute>()).Where(g => g.Key != null);
 
-            if (aspectFactories.Count == 1)
+            result = result.Concat(customAttrs.Select(ca => ParseCustomAspectAttribute(ca.Key, ca.First()))).ToList();
+
+            return result;
+        }
+
+        private AspectDefinition ParseAspectAttribute(CustomAttribute attr)
+        {
+            var routableDataProp = attr.GetProperty("RoutableData");
+
+            return new AspectDefinition()
             {
-                context.AspectFactory = aspectFactories[0];
-            }
+                AdviceClassType = ((TypeReference)attr.ConstructorArguments[0].Value).Resolve(),
+                NameFilter = (string)attr.GetPropertyValue("NameFilter"),
+                AccessModifierFilter = (AccessModifiers)(attr.GetPropertyValue("AccessModifierFilter") ?? 0),
+                RoutableData = routableDataProp != null ? (object)routableDataProp.Value : null
+            };
         }
 
-        private IEnumerable<CustomAttribute> MergeAspectAttributes(IEnumerable<CustomAttribute> classAttributes,
-            IEnumerable<CustomAttribute> memberAttributes)
+        private AspectDefinition ParseCustomAspectAttribute(CustomAttribute attr, CustomAttribute baseAttr)
         {
-            return classAttributes
-                .Except(memberAttributes, new AspectAttributeEqualityComparer())
-                .Union(memberAttributes);
+            return new AspectDefinition()
+            {
+                AdviceClassType = ((TypeReference)attr.ConstructorArguments[0].Value).Resolve(),
+                NameFilter = (string)attr.GetPropertyValue("NameFilter"),
+                AccessModifierFilter = (AccessModifiers)(attr.GetPropertyValue("AccessModifierFilter") ?? 0),
+                RoutableData = baseAttr
+            };
         }
 
-        private void ProcessAspectAttributes(MethodDefinition targetMethod,
+        private IEnumerable<AspectDefinition> MergeAspectDefinitions(IEnumerable<AspectDefinition> classDefinitions,
+            IEnumerable<AspectDefinition> memberDefinitions)
+        {
+            return classDefinitions
+                .Except(memberDefinitions)
+                .Union(memberDefinitions);
+        }
+
+        private void ProcessAspectDefinitions(MethodDefinition targetMethod,
             string targetName,
-            IEnumerable<CustomAttribute> aspectAttributes)
+            IEnumerable<AspectDefinition> aspectDefinitions)
         {
-            var contexts = aspectAttributes
-                .Where(attr => CheckFilter(targetMethod, targetName, attr))
-                .Select(attr =>
+            var contexts = aspectDefinitions
+                .Where(def => CheckFilter(targetMethod, targetName, def))
+                .Select(def =>
                 {
-                    var aspectType = ((TypeReference)attr.ConstructorArguments[0].Value).Resolve();
+                    var adviceClassType = def.AdviceClassType;
 
                     var aspectScope = AspectScope.Instance;
-                    if (aspectType.CustomAttributes.HasAttributeOfType<AspectScopeAttribute>())
-                        aspectScope = (AspectScope)aspectType.CustomAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
+                    if (adviceClassType.CustomAttributes.HasAttributeOfType<AspectScopeAttribute>())
+                        aspectScope = (AspectScope)adviceClassType.CustomAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
 
-                    var aspectContext = new AspectInjectionContext()
+                    var aspectContext = new AspectContext()
                     {
                         TargetName = targetName,
                         TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType),
-                        AspectType = aspectType,
-                        AspectScope = aspectScope,
-                        AspectCustomData = attr.GetProperty("CustomData")
+                        AdviceClassType = adviceClassType,
+                        AdviceClassScope = aspectScope,
+                        AspectRoutableData = def.RoutableData
                     };
-
-                    SetAspectFactoryToContext(aspectContext);
 
                     return aspectContext;
                 })
-                .Where(ctx => _processors.Any(p => p.CanProcess(ctx.AspectType)))
+                .Where(ctx => _processors.Any(p => p.CanProcess(ctx.AdviceClassType)))
                 .ToList();
 
-            if (contexts.Count != 0)
-            {
-                foreach (var context in contexts)
-                {
-                    var targetMethodContext = MethodContextFactory.GetOrCreateContext(targetMethod);
-                    context.TargetMethodContext = targetMethodContext; //setting it here for better performance
+            Validation.ValidateAspectContexts(contexts);
 
-                    foreach (var processor in _processors)
-                        if (processor.CanProcess(context.AspectType))
-                            processor.Process(context);
-                }
-            }
-        }
-
-        internal class AspectAttributeEqualityComparer : IEqualityComparer<CustomAttribute>
-        {
-            public bool Equals(CustomAttribute x, CustomAttribute y)
+            foreach (var context in contexts)
             {
-                return object.Equals(x.ConstructorArguments, y.ConstructorArguments) &&
-                    object.Equals(x.Properties, y.Properties);
-            }
+                var targetMethodContext = MethodContextFactory.GetOrCreateContext(targetMethod);
+                context.TargetMethodContext = targetMethodContext; //setting it here for better performance
 
-            public int GetHashCode(CustomAttribute obj)
-            {
-                return obj.GetHashCode();
+                foreach (var processor in _processors)
+                    if (processor.CanProcess(context.AdviceClassType))
+                        processor.Process(context);
             }
         }
     }

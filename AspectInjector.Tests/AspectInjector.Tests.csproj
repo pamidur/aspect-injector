@@ -49,7 +49,7 @@
     <Otherwise>
       <ItemGroup>
         <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
-          <Private>True</Private>
+          <Private>False</Private>
         </Reference>
       </ItemGroup>
     </Otherwise>
@@ -65,7 +65,9 @@
     <Compile Include="InterfaceInjectionTests.cs" />
     <Compile Include="NestedClassesTests.cs" />
     <Compile Include="PETest.cs" />
+    <Compile Include="RoutableDataTests\RoutableDataTests.cs" />
     <Compile Include="StringBuider.cs" />
+    <Compile Include="CustomAttributesTests\CustomAttributesTests.cs" />
     <Compile Include="Utils\Checker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
