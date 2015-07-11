@@ -61,6 +61,7 @@
     <Compile Include="AdviceOrderedInjectionBeforeTests.cs" />
     <Compile Include="AspectFactoryMethodTests.cs" />
     <Compile Include="AspectScopeTests.cs" />
+    <Compile Include="ImportingTypesTests\Tests.cs" />
     <Compile Include="InterfaceInjectionInheritanceTests.cs" />
     <Compile Include="InterfaceInjectionTests.cs" />
     <Compile Include="NestedClassesTests.cs" />

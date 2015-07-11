@@ -38,7 +38,9 @@ namespace AspectInjector.BuildTask.Injectors
                         argumentValue = ResolveArgumentsValues(
                             context.AspectContext,
                             context.AdviceArgumentsSources,
-                            context.InjectionPoint).ToArray();
+                            context.InjectionPoint,
+                            returnObjectVariable: context.AspectContext.TargetMethodContext.MethodResultVariable)
+                            .ToArray();
                         break;
 
                     case InjectionPoints.After:
@@ -98,7 +100,7 @@ namespace AspectInjector.BuildTask.Injectors
             context.AspectContext.TargetMethodContext.InjectMethodCall(
                 injectionPoint,
                 method,
-                ResolveArgumentsValues(context.AspectContext, context.AdviceArgumentsSources, context.InjectionPoint, abortFlagVariable: abortFlagVariable).ToArray());
+                ResolveArgumentsValues(context.AspectContext, context.AdviceArgumentsSources, context.InjectionPoint, abortFlagVariable: abortFlagVariable, returnObjectVariable: context.AspectContext.TargetMethodContext.MethodResultVariable).ToArray());
 
             if (!method.ReturnType.IsTypeOf(typeof(void)))
             {

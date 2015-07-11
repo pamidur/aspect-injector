@@ -67,10 +67,10 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
                 foreach (var iface in ifaces)
                     classDefinition.TypeDefinition.Interfaces.Add(classDefinition.TypeDefinition.Module.Import(iface));
             }
-            else if (!classDefinition.TypeDefinition.Interfaces.Contains(interfaceDefinition))
+            else if (!classDefinition.TypeDefinition.Interfaces.Any(i => i.IsTypeOf(interfaceDefinition)))
             {
                 //In order to behave the same as csc
-                classDefinition.TypeDefinition.Interfaces.Add(interfaceDefinition);
+                classDefinition.TypeDefinition.Interfaces.Add(classDefinition.TypeDefinition.Module.Import(interfaceDefinition));
             }
 
             context.Methods = interfaceDefinition.GetInterfaceTreeMembers(td => td.Methods)
