@@ -154,7 +154,7 @@ namespace AspectInjector.Test
         [Advice(InjectionPoints.Exception | InjectionPoints.After | InjectionPoints.Before, InjectionTargets.Method)]
         public void InjectionMethod(
             [AdviceArgument(AdviceArgumentSource.TargetException)] Exception ex,
-            [AdviceArgument(AdviceArgumentSource.TargetReturnValue)] object result,
+            [AdviceArgument(AdviceArgumentSource.TargetValue)] object result,
             [AdviceArgument(AdviceArgumentSource.TargetName)] string targetName,
             [AdviceArgument(AdviceArgumentSource.TargetArguments)] object[] args,
             [AdviceArgument(AdviceArgumentSource.Instance)] object target,

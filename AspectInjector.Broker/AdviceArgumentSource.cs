@@ -5,7 +5,7 @@
         Instance,
         TargetName,
         TargetArguments,
-        TargetReturnValue,
+        TargetValue,
         TargetException,
         AbortFlag,
         RoutableData

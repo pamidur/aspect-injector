@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.BuildTask", "AspectInjector.BuildTask\AspectInjector.BuildTask.csproj", "{B711C00C-9E4D-4005-A82F-A78B1F444205}"
 EndProject
@@ -9,10 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Broker", "As
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buildtools", "buildtools", "{C6F13967-CDA3-4CD0-BB8D-CE14DBBA0382}"
 	ProjectSection(SolutionItems) = preProject
-		build\GitNugetTemplate.xaml = build\GitNugetTemplate.xaml
-		build\modify-versions.ps1 = build\modify-versions.ps1
-		build\nuget.exe = build\nuget.exe
-		build\prepare-package.ps1 = build\prepare-package.ps1
+		release.ps1 = release.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{90FC62D4-109D-4FDD-A119-1CAD4717AB7F}"
@@ -21,7 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{90FC
 		packagecontent\AspectInjector.props = packagecontent\AspectInjector.props
 		packagecontent\AspectInjector.targets = packagecontent\AspectInjector.targets
 		packagecontent\install.ps1 = packagecontent\install.ps1
-		packagecontent\Version.txt = packagecontent\Version.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"

@@ -41,7 +41,7 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return exceptionVariable ?? Markers.DefaultMarker;
                         break;
 
-                    case AdviceArgumentSource.TargetReturnValue:
+                    case AdviceArgumentSource.TargetValue:
                         yield return returnObjectVariable ?? Markers.DefaultMarker;
                         break;
 

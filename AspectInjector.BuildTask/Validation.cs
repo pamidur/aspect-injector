@@ -47,7 +47,7 @@ namespace AspectInjector.BuildTask
                 if (!parameter.ParameterType.IsTypeOf(new ByReferenceType(adviceMethod.Module.TypeSystem.Boolean)))
                     throw new CompilationException("Argument should be of type ref System.Boolean to inject AdviceArgumentSource.AbortFlag", adviceMethod);
             }
-            else if (source == AdviceArgumentSource.TargetReturnValue)
+            else if (source == AdviceArgumentSource.TargetValue)
             {
                 if (!parameter.ParameterType.IsTypeOf(typeof(object)))
                     throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.ReturningValue", adviceMethod);

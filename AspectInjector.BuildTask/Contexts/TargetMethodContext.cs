@@ -57,14 +57,29 @@ namespace AspectInjector.BuildTask.Contexts
         {
             get
             {
-                if (TargetMethod.ReturnType.IsTypeOf(typeof(void)))
+                if (TargetMethod.ReturnType.IsTypeOf(typeof(void)) && !TargetMethod.IsSetter)
                     return null;
 
                 if (_resultVar == null)
                 {
-                    _resultVar = new VariableDefinition(MethodResultVariableName, TargetMethod.ReturnType);
-                    Processor.Body.Variables.Add(_resultVar);
-                    Processor.Body.InitLocals = true;
+                    //todo:: optimize for compiller generated
+                    if (TargetMethod.IsSetter)
+                    {
+                        var prop = TargetMethod.DeclaringType.Properties.First(p => p.SetMethod == TargetMethod);
+
+                        _resultVar = new VariableDefinition(MethodResultVariableName, prop.GetMethod.ReturnType);
+                        Processor.Body.Variables.Add(_resultVar);
+                        Processor.Body.InitLocals = true;
+                        LoadSelfOntoStack(OriginalEntryPoint);
+                        InjectMethodCall(OriginalEntryPoint, prop.GetMethod, new object[] { });
+                        SetVariableFromStack(OriginalEntryPoint, _resultVar);
+                    }
+                    else
+                    {
+                        _resultVar = new VariableDefinition(MethodResultVariableName, TargetMethod.ReturnType);
+                        Processor.Body.Variables.Add(_resultVar);
+                        Processor.Body.InitLocals = true;
+                    }
                 }
 
                 return _resultVar;

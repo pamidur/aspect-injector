@@ -66,8 +66,8 @@
     <Compile Include="NestedClassesTests.cs" />
     <Compile Include="PETest.cs" />
     <Compile Include="RoutableDataTests\RoutableDataTests.cs" />
-    <Compile Include="StringBuider.cs" />
     <Compile Include="CustomAttributesTests\CustomAttributesTests.cs" />
+    <Compile Include="SetterReturnValueTest\Tests.cs" />
     <Compile Include="Utils\Checker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
