@@ -71,7 +71,7 @@ Parameters
 |Name |Type |Description  |
 |-----|-----|-------------|
 |Type |Type |Specifies the class of the aspect which should be applied to the target member | 
-|CustomData |object[] |Any custom data which then can be used by the aspect's implementation
+|RoutableData |object |Any custom data which then can be used by the aspect's implementation
 |NameFilter |string | Specifies a string which is used to filter target class members: all members containing the specified string will be processed by this aspect.
 |AccessModifierFilter| AccessModifiers | Allows to filter target class members by their access modifiers: all members having one of the specified modifiers will be processed by this aspect. This attribute can work together with NameFilter. In case both NameFilter and AccessModifierFilter are set, only class members matching both filter conditions are chosen for processing. 
 
@@ -166,7 +166,7 @@ Is used to specify the source from which specific advice parameter should be pop
 |Instance| object | Target class instance.
 |TargetName| string | The name of the target member
 |TargetArguments| object[] | The array of target member arguments.
-|TargetReturnValue| object | The return value of the target member.
+|TargetValue| object | The return value of the target member.
 |TargetException| Exception | An exception occurred in the target.
 |AbortFlag| ref bool | A flag through which an advice can abort execution of the current target. Is appliable only for "Before" injection point and non-constructor targets.
 |CustomData| object | The data specified in CustomData property of the corresponding AspectAttribute
