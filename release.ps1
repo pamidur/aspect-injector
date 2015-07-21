@@ -141,7 +141,7 @@ if($nugetkey -ne ""){
 "Cleanup"
 Remove-Item $nuget -Force | Out-Null
 Remove-Item $packageBuildPlace -Recurse -Force | Out-Null 
-Update-AllAssemblyInfoFiles '0.0.0'
+Update-AllAssemblyInfoFiles '9999.0.0'
 
 "Done."
 
