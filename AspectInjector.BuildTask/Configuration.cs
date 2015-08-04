@@ -16,7 +16,7 @@ namespace AspectInjector.BuildTask
             {
                 _processorsTree = new List<IModuleProcessor>
                 {
-                    new SnippetsProcessor(),
+                    //new SnippetsProcessor(),
 
                     new InjectionProcessor(new List<IAspectProcessor>
                     {

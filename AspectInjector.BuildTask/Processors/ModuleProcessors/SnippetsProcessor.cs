@@ -201,21 +201,27 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 args = args.Concat(new object[] { operand }).ToArray();
 
             var factory = ilp.GetType().GetMethod("Create", argTypes);
-            var ni = (Instruction)(object)factory.Invoke(ilp, args);
+            var ni = (Instruction)factory.Invoke(ilp, args);
 
             return ni;
         }
 
         private GenericParameter CopyGenericParameter(GenericParameter generic)
         {
-            var ngp = new GenericParameter(generic.Position, generic.Type, _module);
-            _refsMap.Add(generic, ngp);
-            ngp.Name = generic.Name;
-            ngp.Attributes = generic.Attributes;
+            //todo:: fix it
+            //need to find another way to copy generic parameter. Probaly cast Owner to member refernce and copy it. 
+            //anyway it requires tests and usage of snippets proceesors. And while we don't use snippets I leave it as not implemented
 
-            generic.Constraints.Select(c => CopyReference(c)).ToList().ForEach(c => ngp.Constraints.Add(c));
+            throw new NotImplementedException();
 
-            return ngp;
+            //var ngp = new GenericParameter(generic.Name generic.Position, generic.Type, _module);
+            //_refsMap.Add(generic, ngp);
+
+            //ngp.Attributes = generic.Attributes;
+
+            //generic.Constraints.Select(c => CopyReference(c)).ToList().ForEach(c => ngp.Constraints.Add(c));
+
+            //return ngp;
         }
 
         private CustomAttribute CopyCustomAttribute(CustomAttribute attribute)
