@@ -64,6 +64,10 @@ $msbuild = join-path (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MSBuild\ToolsVe
 
 $mstest = "C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\mstest.exe"
 
+if( ! (Test-Path $mstest)){
+	$mstest = "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\mstest.exe"
+}
+
 $buildargs = @( $solutionFilename, "/t:Rebuild", "/p:Configuration=Release;DefineConstants=Trace;Platform=Any CPU" )
 & $msbuild $buildargs | out-null
 
