@@ -11,6 +11,7 @@ PM> Install-Package AspectInjector
 ### Features ###
 - Compile-time injection
 - No runtime dependencies
+- User defined attributes
 - Advice debugging
 - Interface injection
 - Injection into Methods, Properties, Events
