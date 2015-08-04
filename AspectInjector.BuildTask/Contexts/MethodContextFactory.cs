@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.BuildTask.Extensions;
+using Mono.Cecil;
 using System.Collections.Generic;
 
 namespace AspectInjector.BuildTask.Contexts
@@ -15,12 +16,18 @@ namespace AspectInjector.BuildTask.Contexts
 
                 if (!Contexts.TryGetValue(md, out result))
                 {
-                    result = new TargetMethodContext(md);
+                    if (md.ReturnType.IsTypeOf(typeof(System.Threading.Tasks.Task)))
+                        result = new TargetAsyncMethodContext(md);
+                    else
+                        result = new TargetMethodContext(md);
+
+                    result.Init();
+
                     Contexts.Add(md, result);
                 }
 
                 return result;
-            }            
+            }
         }
     }
 }

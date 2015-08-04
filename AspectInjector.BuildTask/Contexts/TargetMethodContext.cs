@@ -22,7 +22,10 @@ namespace AspectInjector.BuildTask.Contexts
         {
             TargetMethod = targetMethod;
             Processor = TargetMethod.Body.GetILProcessor();
+        }
 
+        public virtual void Init()
+        {
             SetupEntryPoints();
             SetupReturnPoints();
         }
@@ -86,13 +89,13 @@ namespace AspectInjector.BuildTask.Contexts
             }
         }
 
-        public Instruction OriginalCodeReturnPoint { get; private set; }
+        public Instruction OriginalCodeReturnPoint { get; protected set; }
 
-        public Instruction OriginalEntryPoint { get; private set; }
+        public Instruction OriginalEntryPoint { get; protected set; }
+
+        public Instruction ReturnPoint { get; protected set; }
 
         public ILProcessor Processor { get; private set; }
-
-        public Instruction ReturnPoint { get; private set; }
 
         public MethodDefinition TargetMethod { get; private set; }
 
@@ -299,7 +302,7 @@ namespace AspectInjector.BuildTask.Contexts
             }
         }
 
-        private MemberReference CreateMemberReference(MemberReference member)
+        protected MemberReference CreateMemberReference(MemberReference member)
         {
             if (member is TypeReference)
             {
@@ -342,7 +345,7 @@ namespace AspectInjector.BuildTask.Contexts
             throw new NotSupportedException("Not supported member type " + member.GetType().FullName);
         }
 
-        private void SetupCatchBlock()
+        protected virtual void SetupCatchBlock()
         {
             var exceptionType = TargetMethod.Module.TypeSystem.ResolveType(typeof(Exception));
             _exceptionVar = new VariableDefinition(ExceptionVariableName, exceptionType);
@@ -364,7 +367,7 @@ namespace AspectInjector.BuildTask.Contexts
             });
         }
 
-        private void SetupEntryPoints()
+        protected virtual void SetupEntryPoints()
         {
             OriginalEntryPoint = TargetMethod.IsConstructor && !TargetMethod.IsStatic ?
                 TargetMethod.FindBaseClassCtorCall() :
@@ -373,15 +376,15 @@ namespace AspectInjector.BuildTask.Contexts
             EntryPoint = Processor.SafeInsertBefore(OriginalEntryPoint, Processor.Create(OpCodes.Nop));
         }
 
-        private Instruction GetMethodOriginalEntryPoint()
+        protected Instruction GetMethodOriginalEntryPoint()
         {
-            if (TargetMethod.Body.Instructions.Count == 1) //optimized code            
+            if (TargetMethod.Body.Instructions.Count == 1) //if code is optimized            
                 Processor.SafeInsertBefore(TargetMethod.Body.Instructions.First(), Processor.Create(OpCodes.Nop));
 
             return TargetMethod.Body.Instructions.First();
         }
 
-        private void SetupReturnPoints()
+        protected virtual void SetupReturnPoints()
         {
             ReturnPoint = Processor.Create(OpCodes.Nop);
 
@@ -399,7 +402,7 @@ namespace AspectInjector.BuildTask.Contexts
             }
         }
 
-        private Instruction SetupSingleReturnPoint(Instruction suggestedSingleReturnPoint)
+        protected Instruction SetupSingleReturnPoint(Instruction suggestedSingleReturnPoint)
         {
             var rets = Processor.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList();
 

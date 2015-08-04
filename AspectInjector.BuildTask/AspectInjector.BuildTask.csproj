@@ -68,6 +68,7 @@
     <Compile Include="Contexts\AdviceInjectionContext.cs" />
     <Compile Include="Contexts\AspectContext.cs" />
     <Compile Include="Contexts\InterfaceInjectionContext.cs" />
+    <Compile Include="Contexts\TargetAsyncMethodContext.cs" />
     <Compile Include="Contexts\TypeContextFactory.cs" />
     <Compile Include="Contexts\MethodContextFactory.cs" />
     <Compile Include="Contexts\TargetTypeContext.cs" />
