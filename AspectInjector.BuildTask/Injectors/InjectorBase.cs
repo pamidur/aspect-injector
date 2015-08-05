@@ -22,7 +22,11 @@ namespace AspectInjector.BuildTask.Injectors
                 switch (argumentSource)
                 {
                     case AdviceArgumentSource.Instance:
-                        yield return Markers.InstanceSelfMarker;
+                        yield return context.TargetMethodContext.TargetMethod.IsStatic ? Markers.DefaultMarker : Markers.InstanceSelfMarker;
+                        break;
+
+                    case AdviceArgumentSource.Type:
+                        yield return context.TargetTypeContext.TypeDefinition;
                         break;
 
                     case AdviceArgumentSource.TargetArguments:

@@ -32,6 +32,11 @@ namespace AspectInjector.BuildTask
                 if (!parameter.ParameterType.IsTypeOf(typeof(object)))
                     throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource.Instance", adviceMethod);
             }
+            else if (source == AdviceArgumentSource.Type)
+            {
+                if (!parameter.ParameterType.IsTypeOf(typeof(Type)))
+                    throw new CompilationException("Argument should be of type System.Type to inject AdviceArgumentSource.Type", adviceMethod);
+            }
             else if (source == AdviceArgumentSource.TargetArguments)
             {
                 if (!parameter.ParameterType.IsTypeOf(new ArrayType(adviceMethod.Module.TypeSystem.Object)))

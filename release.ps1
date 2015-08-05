@@ -58,23 +58,23 @@ while ($buildNumber -NotMatch "[0-9]+\.[0-9]+\.[0-9]+") {
 
 
 if(Test-Path $tokens_file){
-	iex (Get-Content -Raw $tokens_file)
+    iex (Get-Content -Raw $tokens_file)
 
-	$yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes","Publish release."
-	$no = New-Object System.Management.Automation.Host.ChoiceDescription "&No","Store package in root."
-	$options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no) 
-	
-	$result = $host.ui.PromptForChoice("","Publish release to github and nuget?", $options, 1)
+    $yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes","Publish release."
+    $no = New-Object System.Management.Automation.Host.ChoiceDescription "&No","Store package in root."
+    $options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no) 
+    
+    $result = $host.ui.PromptForChoice("","Publish release to github and nuget?", $options, 1)
 
-	$publish = $result -eq 0
+    $publish = $result -eq 0
 }
 
 
 "Releasing package"
 $nuget = join-path $env:TEMP "nuget.exe"
 If( -not (test-path $nuget)){
-	"Downloading nuget.exe"
-	(new-object net.webclient).DownloadFile('http://nuget.org/nuget.exe',$nuget)
+    "Downloading nuget.exe"
+    (new-object net.webclient).DownloadFile('http://nuget.org/nuget.exe',$nuget)
 }
 
 "Resolving Dependencies"
@@ -89,7 +89,7 @@ $msbuild = join-path (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\MSBuild\ToolsVe
 $mstest = "C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\mstest.exe"
 
 if( ! (Test-Path $mstest)){
-	$mstest = "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\mstest.exe"
+    $mstest = "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\mstest.exe"
 }
 
 $buildargs = @( $solutionFilename, "/t:Rebuild", "/p:Configuration=Release;DefineConstants=Trace;Platform=Any CPU" )
@@ -97,35 +97,35 @@ $buildargs = @( $solutionFilename, "/t:Rebuild", "/p:Configuration=Release;Defin
 
 if ($LastExitCode -ne 0) {
     throw "MSBuild failed with exit code $LastExitCode."
-	break
+    break
 }
 
 if(test-path $mstest)
 {
-	"Building tests"
-	$buildargs = @( $testsSolutionFilename, "/t:Rebuild", "/p:Configuration=Release;Platform=Any CPU" )
-	& $msbuild $buildargs | out-null
+    "Building tests"
+    $buildargs = @( $testsSolutionFilename, "/t:Rebuild", "/p:Configuration=Release;Platform=Any CPU" )
+    & $msbuild $buildargs | out-null
 
-	if ($LastExitCode -ne 0) {
-		throw "MSBuild failed with exit code $LastExitCode."
-		break
-	}
+    if ($LastExitCode -ne 0) {
+        throw "MSBuild failed with exit code $LastExitCode."
+        break
+    }
 
-	$testargs = @("/noisolation", "/noresults", "/nologo", "/testcontainer:$testsDll" )
-	& $mstest $testargs
+    $testargs = @("/noisolation", "/noresults", "/nologo", "/testcontainer:$testsDll" )
+    & $mstest $testargs
 
-	if ($LastExitCode -ne 0) {
-		throw "MSTest failed with exit code $LastExitCode."
-		break
-	}
+    if ($LastExitCode -ne 0) {
+        throw "MSTest failed with exit code $LastExitCode."
+        break
+    }
 }else{
-	"Could not find MSTest.exe. Skipping tests..."
+    "Could not find MSTest.exe. Skipping tests..."
 }
 
 "Creating folders."
 if(Test-Path $packageBuildPlace ){
-	"Cleaning up package-build-place."
-	Remove-Item $packageBuildPlace -Recurse -Force | Out-Null 
+    "Cleaning up package-build-place."
+    Remove-Item $packageBuildPlace -Recurse -Force | Out-Null 
 }
 
 $targetsDir = Join-Path $packageBuildPlace "build"
@@ -156,45 +156,45 @@ Update-Nuspec (get-item $nuspec) $buildNumber
 & $nuget pack $nuspec | out-null
 if ($LastExitCode -ne 0) {
     throw "Nuget Pack failed with exit code $LastExitCode."
-	break
+    break
 }
 
 
 
 if($publish){
 
-	$pkg = get-item ("AspectInjector." + $buildNumber + ".nupkg")
+    $pkg = get-item ("AspectInjector." + $buildNumber + ".nupkg")
 
-	if($nuget_api_token -ne ""){
-		"Pushing package to nuget"	
-		& $nuget push $pkg $nuget_api_token -s "https://nuget.org/"	
-	}
+    if($nuget_api_token -ne ""){
+        "Pushing package to nuget"	
+        & $nuget push $pkg $nuget_api_token -s "https://nuget.org/"	
+    }
 
-	if($github_api_token -ne ""){
-		"Creating release draft on github"
+    if($github_api_token -ne ""){
+        "Creating release draft on github"
 
-		$hash = iex "git log -1 --format=`"%H`""
+        $hash = iex "git log -1 --format=`"%H`""
 
-		$release_info = @{
-			tag_name=$buildNumber;
-			name=$buildNumber;
-			body='Fixes:
+        $release_info = @{
+            tag_name=$buildNumber;
+            name=$buildNumber;
+            body='Fixes:
 - (fill me in)
 
 ```ps
 PM> Install-Package AspectInjector -Version ' +$buildNumber+'
 ```'
-			target_commitish=$hash;
-			"draft" = $true
-		} | ConvertTo-Json -Compress
+            target_commitish=$hash;
+            "draft" = $true
+        } | ConvertTo-Json -Compress
 
-		($release = ConvertFrom-Json (Invoke-WebRequest "$github_repo_uri/releases" -Method Post -Body $release_info -Headers @{"Authorization"="token $github_api_token";}).Content ) | Out-Null
-	
-		"Uploading package to github"
+        ($release = ConvertFrom-Json (Invoke-WebRequest "$github_repo_uri/releases" -Method Post -Body $release_info -Headers @{"Authorization"="token $github_api_token";}).Content ) | Out-Null
+    
+        "Uploading package to github"
 
-		Invoke-WebRequest ($release.upload_url -replace "{\?name}","?name=$($pkg.Name)" ) -Method Post -InFile $pkg -Headers @{"Authorization"="token $github_api_token";"Content-Type"="application/zip"} | Out-Null
-	}
-	Remove-Item $pkg -Force | Out-Null
+        Invoke-WebRequest ($release.upload_url -replace "{\?name}","?name=$($pkg.Name)" ) -Method Post -InFile $pkg -Headers @{"Authorization"="token $github_api_token";"Content-Type"="application/zip"} | Out-Null
+    }
+    Remove-Item $pkg -Force | Out-Null
 }
 
 
