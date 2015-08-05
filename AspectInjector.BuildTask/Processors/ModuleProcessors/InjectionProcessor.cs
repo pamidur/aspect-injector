@@ -164,7 +164,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 {
                     var adviceClassType = def.AdviceClassType;
 
-                    var aspectScope = AspectScope.Instance;
+                    var aspectScope = targetMethod.IsStatic ? AspectScope.Type : AspectScope.Instance;
                     if (adviceClassType.CustomAttributes.HasAttributeOfType<AspectScopeAttribute>())
                         aspectScope = (AspectScope)adviceClassType.CustomAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
 

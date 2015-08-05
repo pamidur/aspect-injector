@@ -1,8 +1,13 @@
 Param (  
-  [String]$buildNumber = ($( Read-Host "Specify package buildNumber")),
-  [string]$nugetkey = ($( Read-Host "Nuget key (optional)"))
+  [String]$buildNumber = ($( Read-Host "Specify package buildNumber"))  
 )
 
+[bool]$publish = $false
+
+$tokens_file = ".\api.tokens"
+$nuget_api_token = ""
+$github_api_token = ""
+$github_repo_uri = "https://api.github.com/repos/pamidur/aspect-injector"
 $solutionFilename = "AspectInjector.sln"
 $testsSolutionFilename = "AspectInjector.Test.sln"
 $binDir = ".\AspectInjector.BuildTask\bin\Release"
@@ -45,6 +50,25 @@ function Update-Nuspec ( $nuspec, $version )
 
     move-item $TmpFile $nuspec.FullName -force
 }
+
+
+while ($buildNumber -NotMatch "[0-9]+\.[0-9]+\.[0-9]+") {
+    $buildNumber = Read-Host "Please enter valid version [major.minor.build]"
+}
+
+
+if(Test-Path $tokens_file){
+	iex (Get-Content -Raw $tokens_file)
+
+	$yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes","Publish release."
+	$no = New-Object System.Management.Automation.Host.ChoiceDescription "&No","Store package in root."
+	$options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no) 
+	
+	$result = $host.ui.PromptForChoice("","Publish release to github and nuget?", $options, 1)
+
+	$publish = $result -eq 0
+}
+
 
 "Releasing package"
 $nuget = join-path $env:TEMP "nuget.exe"
@@ -135,12 +159,44 @@ if ($LastExitCode -ne 0) {
 	break
 }
 
-if($nugetkey -ne ""){
-	"Pushing package to nuget"
+
+
+if($publish){
+
 	$pkg = get-item ("AspectInjector." + $buildNumber + ".nupkg")
-	& $nuget push $pkg $nugetkey -s "https://nuget.org/"
+
+	if($nuget_api_token -ne ""){
+		"Pushing package to nuget"	
+		& $nuget push $pkg $nuget_api_token -s "https://nuget.org/"	
+	}
+
+	if($github_api_token -ne ""){
+		"Creating release draft on github"
+
+		$hash = iex "git log -1 --format=`"%H`""
+
+		$release_info = @{
+			tag_name=$buildNumber;
+			name=$buildNumber;
+			body='Fixes:
+- (fill me in)
+
+```ps
+PM> Install-Package AspectInjector -Version ' +$buildNumber+'
+```'
+			target_commitish=$hash;
+			"draft" = $true
+		} | ConvertTo-Json -Compress
+
+		($release = ConvertFrom-Json (Invoke-WebRequest "$github_repo_uri/releases" -Method Post -Body $release_info -Headers @{"Authorization"="token $github_api_token";}).Content ) | Out-Null
+	
+		"Uploading package to github"
+
+		Invoke-WebRequest ($release.upload_url -replace "{\?name}","?name=$($pkg.Name)" ) -Method Post -InFile $pkg -Headers @{"Authorization"="token $github_api_token";"Content-Type"="application/zip"} | Out-Null
+	}
 	Remove-Item $pkg -Force | Out-Null
 }
+
 
 "Cleanup"
 Remove-Item $nuget -Force | Out-Null

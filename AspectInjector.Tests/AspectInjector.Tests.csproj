@@ -70,6 +70,7 @@
     <Compile Include="RoutableDataTests\RoutableDataTests.cs" />
     <Compile Include="CustomAttributesTests\CustomAttributesTests.cs" />
     <Compile Include="SetterReturnValueTest\Tests.cs" />
+    <Compile Include="StaticMembersTests.cs" />
     <Compile Include="Utils\Checker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

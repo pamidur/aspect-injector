@@ -6,6 +6,7 @@ using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AspectInjector.BuildTask.Processors.AspectProcessors
 {
@@ -35,7 +36,7 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
         {
             var targetMethod = targetMethodContext.TargetMethod;
 
-            if (targetMethod.IsAbstract || targetMethod.IsStatic)
+            if (targetMethod.IsAbstract)
             {
                 return false;
             }
@@ -65,7 +66,12 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
                 return target == InjectionTargets.EventRemove;
             }
 
-            return target == InjectionTargets.Method;
+            if (!targetMethod.CustomAttributes.HasAttributeOfType<CompilerGeneratedAttribute>())
+            {
+                return target == InjectionTargets.Method;
+            }
+
+            return false;
         }
 
         private static IEnumerable<MethodDefinition> GetAdviceMethods(TypeDefinition adviceClassType)
