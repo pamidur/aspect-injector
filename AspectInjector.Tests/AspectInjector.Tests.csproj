@@ -55,6 +55,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AdviceArguments\Instance\NonStaticMembersTests.cs" />
+    <Compile Include="AdviceArguments\Instance\StaticMembersTests.cs" />
+    <Compile Include="AdviceArguments\Type\Tests.cs" />
     <Compile Include="AdviceInjectionAfterTests.cs" />
     <Compile Include="AdviceInjectionBeforeTests.cs" />
     <Compile Include="AdviceInjectionGenericTests.cs" />

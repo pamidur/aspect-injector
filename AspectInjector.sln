@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.BuildTask", "AspectInjector.BuildTask\AspectInjector.BuildTask.csproj", "{B711C00C-9E4D-4005-A82F-A78B1F444205}"
 EndProject
@@ -9,6 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Broker", "As
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buildtools", "buildtools", "{C6F13967-CDA3-4CD0-BB8D-CE14DBBA0382}"
 	ProjectSection(SolutionItems) = preProject
+		api.tokens = api.tokens
 		release.ps1 = release.ps1
 	EndProjectSection
 EndProject
