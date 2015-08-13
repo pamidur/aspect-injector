@@ -10,11 +10,19 @@ namespace AspectInjector.BuildTask.Models
 {
     public class PointCut
     {
+        #region Private Fields
+
+        private static readonly string RoutableAttributeVariableName = "__a$_routable_attr";
+
+        private readonly ILProcessor _processor;
+
+        #endregion Private Fields
+
         #region Public Constructors
 
         public PointCut(ILProcessor processor, Instruction instruction)
         {
-            Processor = processor;
+            _processor = processor;
             InjectionPoint = instruction;
         }
 
@@ -24,30 +32,28 @@ namespace AspectInjector.BuildTask.Models
 
         public Instruction InjectionPoint { get; private set; }
 
-        public ILProcessor Processor { get; private set; }
-
         #endregion Public Properties
 
         #region Public Methods
 
         public Instruction CreateInstruction(OpCode opCode, int value)
         {
-            return Processor.CreateOptimized(opCode, value);
+            return _processor.CreateOptimized(opCode, value);
         }
 
         public Instruction CreateInstruction(OpCode opCode)
         {
-            return Processor.Create(opCode);
+            return _processor.Create(opCode);
         }
 
         public Instruction CreateInstruction(OpCode opCode, Instruction instruction)
         {
-            return Processor.Create(opCode, instruction);
+            return _processor.Create(opCode, instruction);
         }
 
         public Instruction CreateInstruction(OpCode opCode, PointCut pointCut)
         {
-            return Processor.Create(opCode, pointCut.InjectionPoint);
+            return _processor.Create(opCode, pointCut.InjectionPoint);
         }
 
         public VariableDefinition CreateVariable<T>(TypeReference variableType, T defaultValue, string variableName = null)
@@ -58,13 +64,13 @@ namespace AspectInjector.BuildTask.Models
 
         public VariableDefinition CreateVariable(TypeReference variableType, string variableName = null)
         {
-            if (!Processor.Body.InitLocals)
-                Processor.Body.InitLocals = true;
+            if (!_processor.Body.InitLocals)
+                _processor.Body.InitLocals = true;
 
             var variable = variableName == null
                 ? new VariableDefinition(variableType)
                 : new VariableDefinition(variableName, variableType);
-            Processor.Body.Variables.Add(variable);
+            _processor.Body.Variables.Add(variable);
 
             return variable;
         }
@@ -78,7 +84,7 @@ namespace AspectInjector.BuildTask.Models
 
         public void Goto(Instruction instruction)
         {
-            InsertBefore(Processor.Create(OpCodes.Br, instruction)); //todo:: optimize
+            InsertBefore(_processor.Create(OpCodes.Br, instruction)); //todo:: optimize
         }
 
         public void Goto(PointCut pointCut)
@@ -104,17 +110,17 @@ namespace AspectInjector.BuildTask.Models
                 code = OpCodes.Call;
 
             var methodRef = (MethodReference)CreateMemberReference(method);
-            Processor.InsertBefore(InjectionPoint, Processor.Create(code, methodRef));
+            _processor.InsertBefore(InjectionPoint, _processor.Create(code, methodRef));
         }
 
         public PointCut InsertAfter(Instruction instruction)
         {
-            return new PointCut(Processor, Processor.SafeInsertAfter(InjectionPoint, instruction));
+            return new PointCut(_processor, _processor.SafeInsertAfter(InjectionPoint, instruction));
         }
 
         public PointCut InsertBefore(Instruction instruction)
         {
-            return new PointCut(Processor, Processor.SafeInsertBefore(InjectionPoint, instruction));
+            return new PointCut(_processor, _processor.SafeInsertBefore(InjectionPoint, instruction));
         }
 
         public void LoadFieldOntoStack(FieldReference field)
@@ -123,18 +129,18 @@ namespace AspectInjector.BuildTask.Models
 
             if (field.Resolve().IsStatic)
             {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldsfld, fieldRef));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldsfld, fieldRef));
             }
             else
             {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldfld, fieldRef));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldarg_0));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldfld, fieldRef));
             }
         }
 
         public void LoadSelfOntoStack()
         {
-            Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
+            _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldarg_0));
         }
 
         public void LoadValueOntoStack<T>(T value)
@@ -142,23 +148,23 @@ namespace AspectInjector.BuildTask.Models
             var valueType = typeof(T);
 
             if (valueType == typeof(bool))
-                InsertBefore(Processor.CreateOptimized(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
+                InsertBefore(_processor.CreateOptimized(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
             else if (valueType.IsValueType)
-                InsertBefore(Processor.CreateOptimized(OpCodes.Ldc_I4, (int)(object)value));
+                InsertBefore(_processor.CreateOptimized(OpCodes.Ldc_I4, (int)(object)value));
             else if (valueType.IsClass && value == null)
-                InsertBefore(Processor.Create(OpCodes.Ldnull));
+                InsertBefore(_processor.Create(OpCodes.Ldnull));
             else
                 throw new NotSupportedException();
         }
 
         public void LoadVariableOntoStack(VariableReference var)
         {
-            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, var.Index));
+            _processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, var.Index));
         }
 
         public PointCut Replace(Instruction instruction)
         {
-            return new PointCut(Processor, Processor.SafeReplace(InjectionPoint, instruction));
+            return new PointCut(_processor, _processor.SafeReplace(InjectionPoint, instruction));
         }
 
         public void SetFieldFromStack(FieldReference field)
@@ -167,14 +173,14 @@ namespace AspectInjector.BuildTask.Models
 
             if (field.Resolve().IsStatic)
             {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stsfld, fieldRef));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Stsfld, fieldRef));
             }
             else
             {
                 var locvar = CreateVariableFromStack(field.FieldType);
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldarg_0));
                 LoadVariableOntoStack(locvar);
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stfld, fieldRef));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Stfld, fieldRef));
             }
         }
 
@@ -200,20 +206,20 @@ namespace AspectInjector.BuildTask.Models
             if (doIfTrue == null) doIfTrue = new Action<PointCut>(pc => { });
             InsertBefore(CreateInstruction(OpCodes.Ceq));
 
-            var continuePoint = Processor.Create(OpCodes.Nop);
-            var doIfTruePointCut = new PointCut(Processor, Processor.Create(OpCodes.Nop));
+            var continuePoint = _processor.Create(OpCodes.Nop);
+            var doIfTruePointCut = new PointCut(_processor, _processor.Create(OpCodes.Nop));
 
-            InsertBefore(Processor.Create(OpCodes.Brfalse, continuePoint)); //todo::optimize
+            InsertBefore(_processor.Create(OpCodes.Brfalse, continuePoint)); //todo::optimize
             InsertBefore(doIfTruePointCut.InjectionPoint);
 
             doIfTrue(doIfTruePointCut);
 
             if (doIfFalse != null)
             {
-                var exitPoint = Processor.Create(OpCodes.Nop);
-                var doIfFlasePointCut = new PointCut(Processor, Processor.Create(OpCodes.Nop));
+                var exitPoint = _processor.Create(OpCodes.Nop);
+                var doIfFlasePointCut = new PointCut(_processor, _processor.Create(OpCodes.Nop));
 
-                InsertBefore(Processor.Create(OpCodes.Br, exitPoint)); //todo::optimize
+                InsertBefore(_processor.Create(OpCodes.Br, exitPoint)); //todo::optimize
                 InsertBefore(continuePoint);
                 InsertBefore(doIfFlasePointCut.InjectionPoint);
 
@@ -233,7 +239,7 @@ namespace AspectInjector.BuildTask.Models
 
         protected MemberReference CreateMemberReference(MemberReference member)
         {
-            var module = Processor.Body.Method.Module;
+            var module = _processor.Body.Method.Module;
 
             if (member is TypeReference)
             {
@@ -278,16 +284,16 @@ namespace AspectInjector.BuildTask.Models
 
         protected void LoadCallArgument(object arg, TypeReference expectedType)
         {
-            var module = Processor.Body.Method.Module;
+            var module = _processor.Body.Method.Module;
 
             if (arg is ParameterDefinition)
             {
                 var parameter = (ParameterDefinition)arg;
 
-                Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, parameter.Index + 1));
+                _processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, parameter.Index + 1));
 
                 if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
+                    _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
             }
             else if (arg is VariableDefinition)
             {
@@ -296,10 +302,10 @@ namespace AspectInjector.BuildTask.Models
                 if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.Resolve().IsTypeOf(var.VariableType))
                     throw new ArgumentException("Argument type mismatch");
 
-                Processor.InsertBefore(InjectionPoint, CreateInstruction(expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
+                _processor.InsertBefore(InjectionPoint, CreateInstruction(expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
 
                 if (var.VariableType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(var.VariableType)));
+                    _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Box, module.Import(var.VariableType)));
             }
             else if (arg is string)
             {
@@ -307,7 +313,7 @@ namespace AspectInjector.BuildTask.Models
                     throw new ArgumentException("Argument type mismatch");
 
                 var str = (string)arg;
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldstr, str));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldstr, str));
             }
             else if (arg is CustomAttribute)
             {
@@ -319,8 +325,8 @@ namespace AspectInjector.BuildTask.Models
                 if (ca.Properties.Any() || ca.Fields.Any())
                 {
                     var attrvar = new VariableDefinition(RoutableAttributeVariableName, (TypeReference)CreateMemberReference(ca.AttributeType));
-                    Processor.Body.Variables.Add(attrvar);
-                    Processor.Body.InitLocals = true;
+                    _processor.Body.Variables.Add(attrvar);
+                    _processor.Body.InitLocals = true;
 
                     SetVariableFromStack(attrvar);
 
@@ -337,7 +343,7 @@ namespace AspectInjector.BuildTask.Models
                         var field = catype.Fields.First(p => p.Name == namedArg.Name);
                         LoadCallArgument(namedArg.Argument, field.FieldType);
 
-                        Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stfld, field));
+                        _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Stfld, field));
                     }
 
                     LoadVariableOntoStack(attrvar);
@@ -369,16 +375,16 @@ namespace AspectInjector.BuildTask.Models
                 if (!expectedType.IsTypeOf(module.TypeSystem.Object))
                     throw new ArgumentException("Argument type mismatch");
 
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldarg_0));
             }
             else if (arg == Markers.DefaultMarker)
             {
                 if (!expectedType.IsTypeOf(module.TypeSystem.Void))
                 {
                     if (expectedType.IsValueType)
-                        Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldc_I4_0));
+                        _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldc_I4_0));
                     else
-                        Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldnull));
+                        _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldnull));
                 }
             }
             else if (arg is TypeReference)
@@ -388,8 +394,8 @@ namespace AspectInjector.BuildTask.Models
                 if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(typeOfType))
                     throw new ArgumentException("Argument type mismatch");
 
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldtoken, (TypeReference)arg));
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Call, module.Import(typeOfType.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle"))));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldtoken, (TypeReference)arg));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Call, module.Import(typeOfType.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle"))));
             }
             else if (arg.GetType().IsValueType)
             {
@@ -413,12 +419,6 @@ namespace AspectInjector.BuildTask.Models
 
         #endregion Protected Methods
 
-        #region Private Fields
-
-        private static readonly string RoutableAttributeVariableName = "__a$_routable_attr";
-
-        #endregion Private Fields
-
         #region Private Methods
 
         private byte[] GetRawValueType(object value, int @base = 0)
@@ -434,7 +434,7 @@ namespace AspectInjector.BuildTask.Models
 
         private void LoadArray(object args, TypeReference targetElementType, TypeReference expectedType)
         {
-            var module = Processor.Body.Method.Module;
+            var module = _processor.Body.Method.Module;
 
             if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(new ArrayType(module.TypeSystem.Object)))
                 throw new ArgumentException("Argument type mismatch");
@@ -443,29 +443,29 @@ namespace AspectInjector.BuildTask.Models
 
             var elementType = module.Import(targetElementType.Resolve());
 
-            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, parameters.Length));
-            Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Newarr, elementType));
+            _processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, parameters.Length));
+            _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Newarr, elementType));
 
             if (parameters.Length > 0)
             {
-                Processor.Body.InitLocals = true;
+                _processor.Body.InitLocals = true;
 
                 var paramsArrayVar = new VariableDefinition(new ArrayType(elementType));
-                Processor.Body.Variables.Add(paramsArrayVar);
+                _processor.Body.Variables.Add(paramsArrayVar);
 
-                Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Stloc, paramsArrayVar.Index));
+                _processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Stloc, paramsArrayVar.Index));
 
                 for (var i = 0; i < parameters.Length; i++)
                 {
-                    Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, paramsArrayVar.Index));
-                    Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, i));
+                    _processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, paramsArrayVar.Index));
+                    _processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, i));
 
                     LoadCallArgument(parameters[i], module.TypeSystem.Object);
 
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stelem_Ref));
+                    _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Stelem_Ref));
                 }
 
-                Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, paramsArrayVar.Index));
+                _processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, paramsArrayVar.Index));
             }
         }
 
@@ -474,7 +474,7 @@ namespace AspectInjector.BuildTask.Models
             if (!arg.GetType().IsValueType)
                 throw new NotSupportedException("Only value types are supported.");
 
-            var module = Processor.Body.Method.Module;
+            var module = _processor.Body.Method.Module;
 
             if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(type))
                 throw new ArgumentException("Argument type mismatch");
@@ -484,18 +484,18 @@ namespace AspectInjector.BuildTask.Models
                 var rawData = GetRawValueType(arg, 8);
                 var val = BitConverter.ToInt64(rawData, 0);
 
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldc_I8, val));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Ldc_I8, val));
             }
             else
             {
                 var rawData = GetRawValueType(arg, 4);
                 var val = BitConverter.ToInt32(rawData, 0);
 
-                Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, val));
+                _processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, val));
             }
 
             if (expectedType.IsTypeOf(module.TypeSystem.Object))
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(type)));
+                _processor.InsertBefore(InjectionPoint, _processor.Create(OpCodes.Box, module.Import(type)));
         }
 
         #endregion Private Methods

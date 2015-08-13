@@ -148,11 +148,11 @@ namespace AspectInjector.BuildTask.Contexts
             _exceptionVar = OriginalCodeReturnPoint.CreateVariable(exceptionType, ExceptionVariableName);
 
             var setVarInst = OriginalCodeReturnPoint.InsertAfter(OriginalCodeReturnPoint.CreateInstruction(OpCodes.Stloc, _exceptionVar.Index));
-            _exceptionPoint = setVarInst.InsertAfter(setVarInst.Processor.Create(OpCodes.Rethrow));
+            _exceptionPoint = setVarInst.InsertAfter(_processor.Create(OpCodes.Rethrow));
 
-            OriginalCodeReturnPoint = OriginalCodeReturnPoint.Replace(OriginalCodeReturnPoint.Processor.Create(OpCodes.Leave, ReturnPoint.InjectionPoint)); //todo:: optimize
+            OriginalCodeReturnPoint = OriginalCodeReturnPoint.Replace(_processor.Create(OpCodes.Leave, ReturnPoint.InjectionPoint)); //todo:: optimize
 
-            OriginalCodeReturnPoint.Processor.Body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Catch)
+            _processor.Body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Catch)
             {
                 TryStart = OriginalEntryPoint.InjectionPoint,
                 TryEnd = OriginalCodeReturnPoint.InjectionPoint.Next,
@@ -168,7 +168,7 @@ namespace AspectInjector.BuildTask.Contexts
                 FindBaseClassCtorCall() :
                 GetMethodOriginalEntryPoint();
 
-            EntryPoint = OriginalEntryPoint.InsertBefore(OriginalEntryPoint.Processor.Create(OpCodes.Nop));
+            EntryPoint = OriginalEntryPoint.InsertBefore(_processor.Create(OpCodes.Nop));
         }
 
         protected virtual void SetupReturnPoints()
