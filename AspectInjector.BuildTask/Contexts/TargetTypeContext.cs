@@ -126,22 +126,14 @@ namespace AspectInjector.BuildTask.Contexts
             FieldDefinition field,
             MethodDefinition factoryMethod)
         {
-            var point = initMethod.EntryPoint;
-            var proc = initMethod.EntryPoint.Processor;
+            initMethod.EntryPoint.LoadFieldOntoStack(field);
 
-            var endBlock = proc.Create(OpCodes.Nop);
-
-            point.LoadFieldOntoStack(field);
-            point.InsertBefore(proc.Create(OpCodes.Ldnull));
-            point.InsertBefore(proc.Create(OpCodes.Ceq));
-            point.InsertBefore(proc.Create(OpCodes.Ldc_I4_0));
-            point.InsertBefore(proc.Create(OpCodes.Ceq));
-            point.InsertBefore(proc.Create(OpCodes.Brtrue_S, endBlock));
-
-            point.InjectMethodCall(factoryMethod, new object[] { });
-            point.SetFieldFromStack(field);
-
-            point.InsertBefore(endBlock);
+            initMethod.EntryPoint.TestValueOnStack((object)null,
+                trueBlock =>
+            {
+                trueBlock.InjectMethodCall(factoryMethod, new object[] { });
+                trueBlock.SetFieldFromStack(field);
+            });
         }
     }
 }

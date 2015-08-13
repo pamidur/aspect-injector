@@ -56,7 +56,7 @@ namespace AspectInjector.BuildTask.Models
             return CreateVariableFromStack(variableType, variableName);
         }
 
-        public VariableDefinition CreateVariableFromStack(TypeReference variableType, string variableName = null)
+        public VariableDefinition CreateVariable(TypeReference variableType, string variableName = null)
         {
             if (!Processor.Body.InitLocals)
                 Processor.Body.InitLocals = true;
@@ -66,8 +66,13 @@ namespace AspectInjector.BuildTask.Models
                 : new VariableDefinition(variableName, variableType);
             Processor.Body.Variables.Add(variable);
 
-            SetVariableFromStack(variable);
+            return variable;
+        }
 
+        public VariableDefinition CreateVariableFromStack(TypeReference variableType, string variableName = null)
+        {
+            var variable = CreateVariable(variableType, variableName);
+            SetVariableFromStack(variable);
             return variable;
         }
 
@@ -137,7 +142,6 @@ namespace AspectInjector.BuildTask.Models
             var valueType = typeof(T);
 
             if (valueType == typeof(bool))
-
                 InsertBefore(Processor.CreateOptimized(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
             else if (valueType.IsValueType)
                 InsertBefore(Processor.CreateOptimized(OpCodes.Ldc_I4, (int)(object)value));

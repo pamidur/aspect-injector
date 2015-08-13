@@ -99,7 +99,7 @@ namespace AspectInjector.BuildTask.Injectors
 
             if (!method.ReturnType.IsTypeOf(typeof(void)))
             {
-                injectionPoint.InsertBefore(injectionPoint.Processor.CreateOptimized(OpCodes.Stloc, context.AspectContext.TargetMethodContext.MethodResultVariable.Index));
+                injectionPoint.SetVariableFromStack(context.AspectContext.TargetMethodContext.MethodResultVariable);
             }
 
             injectionPoint.LoadVariableOntoStack(abortFlagVariable);

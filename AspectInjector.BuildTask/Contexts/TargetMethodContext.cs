@@ -73,18 +73,14 @@ namespace AspectInjector.BuildTask.Contexts
                     {
                         var prop = TargetMethod.DeclaringType.Properties.First(p => p.SetMethod == TargetMethod);
 
-                        _resultVar = new VariableDefinition(MethodResultVariableName, prop.GetMethod.ReturnType);
-                        OriginalEntryPoint.Processor.Body.Variables.Add(_resultVar);
-                        OriginalEntryPoint.Processor.Body.InitLocals = true;
                         OriginalEntryPoint.LoadSelfOntoStack();
                         OriginalEntryPoint.InjectMethodCall(prop.GetMethod, new object[] { });
-                        OriginalEntryPoint.SetVariableFromStack(_resultVar);
+
+                        _resultVar = OriginalEntryPoint.CreateVariableFromStack(prop.GetMethod.ReturnType, MethodResultVariableName);
                     }
                     else
                     {
-                        _resultVar = new VariableDefinition(MethodResultVariableName, TargetMethod.ReturnType);
-                        OriginalEntryPoint.Processor.Body.Variables.Add(_resultVar);
-                        OriginalEntryPoint.Processor.Body.InitLocals = true;
+                        _resultVar = OriginalEntryPoint.CreateVariable(TargetMethod.ReturnType, MethodResultVariableName);
                     }
                 }
 
@@ -149,9 +145,7 @@ namespace AspectInjector.BuildTask.Contexts
         protected virtual void SetupCatchBlock()
         {
             var exceptionType = TargetMethod.Module.TypeSystem.ResolveType(typeof(Exception));
-            _exceptionVar = new VariableDefinition(ExceptionVariableName, exceptionType);
-            OriginalCodeReturnPoint.Processor.Body.Variables.Add(_exceptionVar);
-            OriginalCodeReturnPoint.Processor.Body.InitLocals = true;
+            _exceptionVar = OriginalCodeReturnPoint.CreateVariable(exceptionType, ExceptionVariableName);
 
             var setVarInst = OriginalCodeReturnPoint.InsertAfter(OriginalCodeReturnPoint.CreateInstruction(OpCodes.Stloc, _exceptionVar.Index));
             _exceptionPoint = setVarInst.InsertAfter(setVarInst.Processor.Create(OpCodes.Rethrow));
