@@ -1,6 +1,4 @@
-﻿using Mono.Cecil;
-using Mono.Cecil.Cil;
-using System;
+﻿using Mono.Cecil.Cil;
 using System.Linq;
 
 namespace AspectInjector.BuildTask.Extensions
@@ -77,52 +75,6 @@ namespace AspectInjector.BuildTask.Extensions
                 return OptimizeStoreLocal(processor, checked((ushort)value));
 
             return processor.Create(opCode, value);
-        }
-
-        public static VariableDefinition CreateLocalVariable<T>(this ILProcessor processor,
-            Instruction injectionPoint,
-            TypeReference variableType,
-            T defaultValue,
-            string variableName = null)
-        {
-            if (!processor.Body.InitLocals)
-            {
-                processor.Body.InitLocals = true;
-            }
-
-            var variable = variableName == null
-                ? new VariableDefinition(variableType)
-                : new VariableDefinition(variableName, variableType);
-            processor.Body.Variables.Add(variable);
-
-            processor.SetLocalVariable(variable, injectionPoint, defaultValue);
-
-            return variable;
-        }
-
-        public static void SetLocalVariable<T>(this ILProcessor processor, VariableDefinition variable, Instruction injectionPoint, T value)
-        {
-            var valueType = typeof(T);
-
-            if (valueType == typeof(bool))
-            {
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, variable.Index));
-            }
-            else if (valueType.IsValueType)
-            {
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, (int)(object)value));
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, variable.Index));
-            }
-            else if (valueType.IsClass && value == null)
-            {
-                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldnull));
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, variable.Index));
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
         }
 
         private static Instruction OptimizeLoadLocal(ILProcessor processor, ushort localIndex)

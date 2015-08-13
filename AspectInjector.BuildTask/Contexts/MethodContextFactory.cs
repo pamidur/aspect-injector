@@ -1,6 +1,7 @@
 ﻿using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace AspectInjector.BuildTask.Contexts
 {
@@ -16,7 +17,7 @@ namespace AspectInjector.BuildTask.Contexts
 
                 if (!Contexts.TryGetValue(md, out result))
                 {
-                    if (md.ReturnType.IsTypeOf(typeof(System.Threading.Tasks.Task)))
+                    if (md.CustomAttributes.HasAttributeOfType<AsyncStateMachineAttribute>())
                         result = new TargetAsyncMethodContext(md);
                     else
                         result = new TargetMethodContext(md);

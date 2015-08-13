@@ -2,6 +2,7 @@
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
+using AspectInjector.BuildTask.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
@@ -15,7 +16,6 @@ namespace AspectInjector.BuildTask.Injectors
 
         public void Inject(AdviceInjectionContext context)
         {
-            ILProcessor processor = context.AspectContext.TargetMethodContext.Processor;
             FieldReference aspectInstanceField = context.AspectContext.TargetTypeContext.GetOrCreateAspectReference(context.AspectContext);
 
             if (context.IsAbortable)
@@ -29,7 +29,7 @@ namespace AspectInjector.BuildTask.Injectors
             else
             {
                 object[] argumentValue;
-                Instruction injectionPoint;
+                PointCut injectionPoint;
 
                 switch (context.InjectionPoint)
                 {
@@ -66,55 +66,44 @@ namespace AspectInjector.BuildTask.Injectors
                     default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
                 }
 
-                context.AspectContext.TargetMethodContext.LoadFieldOntoStack(injectionPoint, aspectInstanceField);
-                context.AspectContext.TargetMethodContext.InjectMethodCall(injectionPoint,
-                    context.AdviceMethod,
-                    argumentValue);
+                injectionPoint.LoadFieldOntoStack(aspectInstanceField);
+                injectionPoint.InjectMethodCall(context.AdviceMethod, argumentValue);
             }
         }
 
         private void InjectMethodCallWithResultReplacement(AdviceInjectionContext context,
-            Instruction injectionPoint,
-            Instruction returnPoint,
+            PointCut injectionPoint,
+            PointCut returnPoint,
             FieldReference sourceMember)
         {
             MethodDefinition targetMethod = context.AspectContext.TargetMethodContext.TargetMethod;
             MethodDefinition method = context.AdviceMethod;
-            ILProcessor processor = context.AspectContext.TargetMethodContext.Processor;
 
             VariableDefinition abortFlagVariable = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == AbortFlagVariableName);
             if (abortFlagVariable == null)
             {
-                abortFlagVariable = processor.CreateLocalVariable(
-                    injectionPoint,
+                abortFlagVariable = injectionPoint.CreateVariable(
                     context.AspectContext.TargetMethodContext.TargetMethod.Module.TypeSystem.Boolean,
                     false,
                     AbortFlagVariableName);
             }
             else
             {
-                processor.SetLocalVariable(abortFlagVariable, injectionPoint, false);
+                injectionPoint.SetVariable(abortFlagVariable, false);
             }
 
-            context.AspectContext.TargetMethodContext.LoadFieldOntoStack(injectionPoint, sourceMember);
-            context.AspectContext.TargetMethodContext.InjectMethodCall(
-                injectionPoint,
+            injectionPoint.LoadFieldOntoStack(sourceMember);
+            injectionPoint.InjectMethodCall(
                 method,
                 ResolveArgumentsValues(context.AspectContext, context.AdviceArgumentsSources, context.InjectionPoint, abortFlagVariable: abortFlagVariable, returnObjectVariable: context.AspectContext.TargetMethodContext.MethodResultVariable).ToArray());
 
             if (!method.ReturnType.IsTypeOf(typeof(void)))
             {
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, context.AspectContext.TargetMethodContext.MethodResultVariable.Index));
+                injectionPoint.InsertBefore(injectionPoint.Processor.CreateOptimized(OpCodes.Stloc, context.AspectContext.TargetMethodContext.MethodResultVariable.Index));
             }
 
-            processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, abortFlagVariable.Index));
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldc_I4_1));
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ceq));
-
-            Instruction continuePoint = processor.Create(OpCodes.Nop);
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Brfalse, continuePoint)); //todo::optimize
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Br, returnPoint)); //todo::optimize
-            processor.InsertBefore(injectionPoint, continuePoint);
+            injectionPoint.LoadVariableOntoStack(abortFlagVariable);
+            injectionPoint.TestValueOnStack(true, doIfTrue: pc => pc.Goto(returnPoint));
         }
     }
 }

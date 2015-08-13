@@ -77,6 +77,7 @@
     <Compile Include="Injectors\AdviceInjector.cs" />
     <Compile Include="Injectors\InterfaceInjector.cs" />
     <Compile Include="Models\AspectDefinition.cs" />
+    <Compile Include="Models\PointCut.cs" />
     <Compile Include="Processors\AspectProcessors\InterfaceProcessor.cs" />
     <Compile Include="Contracts\IAspectInjector.cs" />
     <Compile Include="Contracts\IAspectProcessor.cs" />

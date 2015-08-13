@@ -41,7 +41,7 @@ namespace AspectInjector.BuildTask.Contexts
                         TypeDefinition.Module.TypeSystem.Void);
 
                     var cctor = _constructors.FirstOrDefault(c => c.TargetMethod.IsStatic) ?? CreateStaticConstructor();
-                    cctor.InjectMethodCall(cctor.EntryPoint, _typeAspectsInitializer.TargetMethod, new object[] { });
+                    cctor.EntryPoint.InjectMethodCall(_typeAspectsInitializer.TargetMethod, new object[] { });
                 }
 
                 return _typeAspectsInitializer;
@@ -62,8 +62,8 @@ namespace AspectInjector.BuildTask.Contexts
 
                     foreach (var ctor in ctors)
                     {
-                        ctor.LoadSelfOntoStack(ctor.EntryPoint);
-                        ctor.InjectMethodCall(ctor.EntryPoint, _instanceAspectsInitializer.TargetMethod, new object[] { });
+                        ctor.EntryPoint.LoadSelfOntoStack();
+                        ctor.EntryPoint.InjectMethodCall(_instanceAspectsInitializer.TargetMethod, new object[] { });
                     }
                 }
 
@@ -126,23 +126,22 @@ namespace AspectInjector.BuildTask.Contexts
             FieldDefinition field,
             MethodDefinition factoryMethod)
         {
-            var proc = initMethod.Processor;
             var point = initMethod.EntryPoint;
+            var proc = initMethod.EntryPoint.Processor;
 
             var endBlock = proc.Create(OpCodes.Nop);
 
-            initMethod.LoadFieldOntoStack(point, field);
-            proc.InsertBefore(point, proc.Create(OpCodes.Ldnull));
-            proc.InsertBefore(point, proc.Create(OpCodes.Ceq));
-            proc.InsertBefore(point, proc.Create(OpCodes.Ldc_I4_0));
-            proc.InsertBefore(point, proc.Create(OpCodes.Ceq));
-            proc.InsertBefore(point, proc.Create(OpCodes.Brtrue_S, endBlock));
+            point.LoadFieldOntoStack(field);
+            point.InsertBefore(proc.Create(OpCodes.Ldnull));
+            point.InsertBefore(proc.Create(OpCodes.Ceq));
+            point.InsertBefore(proc.Create(OpCodes.Ldc_I4_0));
+            point.InsertBefore(proc.Create(OpCodes.Ceq));
+            point.InsertBefore(proc.Create(OpCodes.Brtrue_S, endBlock));
 
-            initMethod.SetFieldFromStack(point,
-                field,
-                () => initMethod.InjectMethodCall(point, factoryMethod, new object[] { }));
+            point.InjectMethodCall(factoryMethod, new object[] { });
+            point.SetFieldFromStack(field);
 
-            proc.InsertBefore(point, endBlock);
+            point.InsertBefore(endBlock);
         }
     }
 }
