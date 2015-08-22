@@ -8,13 +8,13 @@ namespace AspectInjector.Tests.ImportingTypesTests
     [TestClass]
     public class Tests
     {
-
     }
 
     [Notify]
     public class AppViewModel
     {
         public string FirstName { get; set; }
+
         public string LastName { get; set; }
 
         public string FullName
@@ -27,31 +27,30 @@ namespace AspectInjector.Tests.ImportingTypesTests
     }
 
     [CustomAspectDefinition(typeof(NotifyPropertyChangedAspect))]
-    class NotifyAttribute : Attribute
+    internal class NotifyAttribute : Attribute
     {
         public string NotifyAlso { get; set; }
     }
 
-
     [AdviceInterfaceProxy(typeof(INotifyPropertyChanged))]
-    class NotifyPropertyChangedAspect : INotifyPropertyChanged
+    internal class NotifyPropertyChangedAspect : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
 
-        [Advice(InjectionPoints.Before, InjectionTargets.Setter)]
-        public void CheckIfUpdated(
-            [AdviceArgument(AdviceArgumentSource.TargetValue)] object oldvalue,
-            [AdviceArgument(AdviceArgumentSource.TargetArguments)] object[] newvalue,
-            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
-            )
-        {
-            abort = oldvalue.Equals(newvalue[0]);
-        }
+        //[Advice(InjectionPoints.Before, InjectionTargets.Setter)]
+        //public void CheckIfUpdated(
+        //    [AdviceArgument(AdviceArgumentSource.TargetValue)] object oldvalue,
+        //    [AdviceArgument(AdviceArgumentSource.TargetArguments)] object[] newvalue,
+        //    [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
+        //    )
+        //{
+        //    abort = oldvalue.Equals(newvalue[0]);
+        //}
 
-        [Advice(InjectionPoints.After,InjectionTargets.Setter)]
+        [Advice(InjectionPoints.After, InjectionTargets.Setter)]
         public void AfterSetter(
             [AdviceArgument(AdviceArgumentSource.Instance)] object source,
-            [AdviceArgument(AdviceArgumentSource.TargetName)] string propName,
+            [AdviceArgument(AdviceArgumentSource.Name)] string propName,
             [AdviceArgument(AdviceArgumentSource.RoutableData)] object data
             )
         {
@@ -62,7 +61,6 @@ namespace AspectInjector.Tests.ImportingTypesTests
             if (!string.IsNullOrEmpty(additionalPropName))
             {
                 PropertyChanged(source, new PropertyChangedEventArgs(additionalPropName));
-
             }
         }
     }

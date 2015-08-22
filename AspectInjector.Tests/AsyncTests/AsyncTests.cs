@@ -8,6 +8,8 @@ namespace AspectInjector.Tests.AsyncTests
     [TestClass]
     public class TestAsyncMethods
     {
+        public static bool Data = false;
+
         [TestMethod]
         public void Aspect_Can_Be_Injected_Into_Async_Method()
         {
@@ -17,52 +19,44 @@ namespace AspectInjector.Tests.AsyncTests
             a.Do().Wait();
 
             Assert.IsTrue(Checker.Passed);
-
         }
     }
 
     public class TestClass
     {
+        [Aspect(typeof(TestAspectImplementation))]
         public async Task Do()
         {
-            await Task.Run(() => { });
+            await Task.Delay(200);
 
-            Checker.Passed = false;
+            TestAsyncMethods.Data = true;
         }
 
-        public Task DoWrapper()
-        {
-            var beforeTask = Task.Run(Before);
-            var mainTask = beforeTask.ContinueWith(t => Do());
-            mainTask.ContinueWith(Exception, TaskContinuationOptions.OnlyOnFaulted);
-            mainTask.ContinueWith(After, TaskContinuationOptions.OnlyOnRanToCompletion);
+        //[Aspect(typeof(TestAspectImplementation))]
+        //public async Task<string> Do2()
+        //{
+        //    await Task.Delay(200);
 
-            return beforeTask;
-        }
+        //    TestAsyncMethods.Data = true;
 
-        private void Exception(Task obj)
-        {
-            throw new NotImplementedException();
-        }
+        //    return "test";
+        //}
 
-        private Task Before()
-        {
-            throw new NotImplementedException();
-        }
+        //[Aspect(typeof(TestAspectImplementation))]
+        //public async void Do3()
+        //{
+        //    await Task.Delay(200);
 
-        private Task After(Task task)
-        {
-            throw new NotImplementedException();
-        }
+        //    TestAsyncMethods.Data = true;
+        //}
     }
-
 
     public class TestAspectImplementation
     {
         [Advice(InjectionPoints.After, InjectionTargets.Method)]
         public void AfterMethod()
         {
-            Checker.Passed = true;
+            Checker.Passed = TestAsyncMethods.Data;
         }
     }
 }

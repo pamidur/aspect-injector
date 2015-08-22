@@ -73,10 +73,12 @@
     <Compile Include="Contexts\MethodContextFactory.cs" />
     <Compile Include="Contexts\TargetTypeContext.cs" />
     <Compile Include="Contracts\IInjectionContext.cs" />
+    <Compile Include="Contracts\IMethodContext.cs" />
     <Compile Include="Extensions\TypeSystemExtensions.cs" />
     <Compile Include="Injectors\AdviceInjector.cs" />
     <Compile Include="Injectors\InterfaceInjector.cs" />
     <Compile Include="Models\AspectDefinition.cs" />
+    <Compile Include="Models\AsyncPointCut.cs" />
     <Compile Include="Models\PointCut.cs" />
     <Compile Include="Processors\AspectProcessors\InterfaceProcessor.cs" />
     <Compile Include="Contracts\IAspectInjector.cs" />

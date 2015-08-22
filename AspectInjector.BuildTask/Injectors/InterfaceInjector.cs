@@ -88,7 +88,7 @@ namespace AspectInjector.BuildTask.Injectors
 
                 var aspectField = context.AspectContext.TargetTypeContext.GetOrCreateAspectReference(context.AspectContext);
 
-                ctx.EntryPoint.LoadFieldOntoStack(aspectField);
+                ctx.EntryPoint.LoadAspectInstance(aspectField);
                 ctx.EntryPoint.InjectMethodCall(interfaceMethodDefinition, md.Parameters.ToArray());
             }
 

@@ -14,9 +14,9 @@ namespace AspectInjector.Tests.SetterReturnValueTest
             Checker.Passed = false;
 
             var a = new TestClass();
-            a.DataAfter = 2;
+            a.DataBefore = 2;
             Data = 2;
-            a.DataAfter = 4;
+            a.DataBefore = 4;
 
             Assert.IsTrue(Checker.Passed);
         }
@@ -35,7 +35,6 @@ namespace AspectInjector.Tests.SetterReturnValueTest
         }
     }
 
-
     public class TestClass
     {
         [Aspect(typeof(TestAspectAfter))]
@@ -48,7 +47,7 @@ namespace AspectInjector.Tests.SetterReturnValueTest
     public class TestAspectAfter
     {
         [Advice(InjectionPoints.After, InjectionTargets.Setter)]
-        public void AfterMethod([AdviceArgument(AdviceArgumentSource.TargetValue)] object old)
+        public void AfterMethod([AdviceArgument(AdviceArgumentSource.ReturnValue)] object old)
         {
             Checker.Passed = (int)old == Tests.Data;
         }
@@ -58,8 +57,7 @@ namespace AspectInjector.Tests.SetterReturnValueTest
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Setter)]
         public void AfterMethod(
-            [AdviceArgument(AdviceArgumentSource.TargetValue)] object old,
-            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abortFlag
+            [AdviceArgument(AdviceArgumentSource.ReturnValue)] object old
             )
         {
             Checker.Passed = (int)old == Tests.Data;

@@ -4,20 +4,28 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AspectInjector.BuildTask.Contexts
 {
     public class TargetMethodContext
     {
+        #region Protected Fields
+
+        protected static readonly string ExceptionVariableName = "__a$_exception";
+        protected static readonly string MethodResultVariableName = "__a$_methodResult";
+
+        protected readonly ILProcessor Processor;
+
+        #endregion Protected Fields
+
         #region Private Fields
 
-        private static readonly string ExceptionVariableName = "__a$_exception";
-        private static readonly string MethodResultVariableName = "__a$_methodResult";
-
-        private readonly ILProcessor _processor;
-        private PointCut _exceptionPoint;
-        private VariableDefinition _exceptionVar;
+        private PointCut _entryPoint;
+        private PointCut _originalEntryPoint;
+        private PointCut _originalReturnPoint;
         private VariableDefinition _resultVar;
+        private PointCut _returnPoint;
 
         #endregion Private Fields
 
@@ -26,40 +34,25 @@ namespace AspectInjector.BuildTask.Contexts
         public TargetMethodContext(MethodDefinition targetMethod)
         {
             TargetMethod = targetMethod;
-            _processor = targetMethod.Body.GetILProcessor();
+            Processor = targetMethod.Body.GetILProcessor();
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public PointCut EntryPoint { get; protected set; }
-
-        public PointCut ExceptionPoint
+        public virtual PointCut EntryPoint
         {
             get
             {
-                if (_exceptionPoint == null)
-                    SetupCatchBlock();
+                if (_entryPoint == null)
+                    SetupEntryPoints();
 
-                return _exceptionPoint;
+                return _entryPoint;
             }
         }
 
-        public VariableDefinition ExceptionVariable
-        {
-            get
-            {
-                if (_exceptionVar == null)
-                    SetupCatchBlock();
-
-                return _exceptionVar;
-            }
-        }
-
-        public PointCut ExitPoint { get; protected set; }
-
-        public VariableDefinition MethodResultVariable
+        public virtual VariableDefinition MethodResultVariable
         {
             get
             {
@@ -67,40 +60,52 @@ namespace AspectInjector.BuildTask.Contexts
                     return null;
 
                 if (_resultVar == null)
-                {
-                    //todo:: optimize for compiller generated
-                    if (TargetMethod.IsSetter)
-                    {
-                        var prop = TargetMethod.DeclaringType.Properties.First(p => p.SetMethod == TargetMethod);
-
-                        OriginalEntryPoint.LoadSelfOntoStack();
-                        OriginalEntryPoint.InjectMethodCall(prop.GetMethod, new object[] { });
-
-                        _resultVar = OriginalEntryPoint.CreateVariableFromStack(prop.GetMethod.ReturnType, MethodResultVariableName);
-                    }
-                    else
-                    {
-                        _resultVar = OriginalEntryPoint.CreateVariable(TargetMethod.ReturnType, MethodResultVariableName);
-                    }
-                }
+                    SetupReturnPoints();
 
                 return _resultVar;
             }
         }
 
-        public PointCut OriginalCodeReturnPoint { get; protected set; }
+        public virtual PointCut OriginalEntryPoint
+        {
+            get
+            {
+                if (_originalEntryPoint == null)
+                    SetupEntryPoints();
 
-        public PointCut OriginalEntryPoint { get; protected set; }
+                return _originalEntryPoint;
+            }
+        }
 
-        public PointCut ReturnPoint { get; protected set; }
+        public virtual PointCut OriginalReturnPoint
+        {
+            get
+            {
+                if (_originalReturnPoint == null)
+                    SetupReturnPoints();
+
+                return _originalReturnPoint;
+            }
+        }
+
+        public virtual PointCut ReturnPoint
+        {
+            get
+            {
+                if (_returnPoint == null)
+                    SetupReturnPoints();
+
+                return _returnPoint;
+            }
+        }
 
         public MethodDefinition TargetMethod { get; private set; }
 
         #endregion Public Properties
 
-        #region Public Methods
+        #region Protected Methods
 
-        public PointCut FindBaseClassCtorCall()
+        protected PointCut FindBaseClassCtorCall()
         {
             var md = TargetMethod;
             var proc = md.Body.GetILProcessor();
@@ -122,16 +127,6 @@ namespace AspectInjector.BuildTask.Contexts
             return new PointCut(proc, point.Next);
         }
 
-        public virtual void Init()
-        {
-            SetupEntryPoints();
-            SetupReturnPoints();
-        }
-
-        #endregion Public Methods
-
-        #region Protected Methods
-
         protected PointCut GetMethodOriginalEntryPoint()
         {
             var processor = TargetMethod.Body.GetILProcessor();
@@ -142,53 +137,15 @@ namespace AspectInjector.BuildTask.Contexts
             return new PointCut(processor, TargetMethod.Body.Instructions.First());
         }
 
-        protected virtual void SetupCatchBlock()
+        protected void MarkCompilerGenerated(ICustomAttributeProvider member)
         {
-            var exceptionType = TargetMethod.Module.TypeSystem.ResolveType(typeof(Exception));
-            _exceptionVar = OriginalCodeReturnPoint.CreateVariable(exceptionType, ExceptionVariableName);
+            if (member.CustomAttributes.Any(ca => ca.IsAttributeOfType<CompilerGeneratedAttribute>()))
+                return;
 
-            var setVarInst = OriginalCodeReturnPoint.InsertAfter(OriginalCodeReturnPoint.CreateInstruction(OpCodes.Stloc, _exceptionVar.Index));
-            _exceptionPoint = setVarInst.InsertAfter(_processor.Create(OpCodes.Rethrow));
+            var constructor = TargetMethod.Module.Import(typeof(CompilerGeneratedAttribute)).Resolve() //todo:: import to exact member's module
+                .Methods.First(m => m.IsConstructor && !m.IsStatic);
 
-            OriginalCodeReturnPoint = OriginalCodeReturnPoint.Replace(_processor.Create(OpCodes.Leave, ReturnPoint.InjectionPoint)); //todo:: optimize
-
-            _processor.Body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Catch)
-            {
-                TryStart = OriginalEntryPoint.InjectionPoint,
-                TryEnd = OriginalCodeReturnPoint.InjectionPoint.Next,
-                HandlerStart = OriginalCodeReturnPoint.InjectionPoint.Next,
-                HandlerEnd = _exceptionPoint.InjectionPoint.Next,
-                CatchType = exceptionType
-            });
-        }
-
-        protected virtual void SetupEntryPoints()
-        {
-            OriginalEntryPoint = TargetMethod.IsConstructor && !TargetMethod.IsStatic ?
-                FindBaseClassCtorCall() :
-                GetMethodOriginalEntryPoint();
-
-            EntryPoint = OriginalEntryPoint.InsertBefore(_processor.Create(OpCodes.Nop));
-        }
-
-        protected virtual void SetupReturnPoints()
-        {
-            var proc = TargetMethod.Body.GetILProcessor();
-
-            ReturnPoint = new PointCut(proc, proc.Create(OpCodes.Nop));
-
-            OriginalCodeReturnPoint = new PointCut(proc, SetupSingleReturnPoint(proc.Create(OpCodes.Br, ReturnPoint.InjectionPoint))); //todo:: optimize
-            proc.SafeAppend(ReturnPoint.InjectionPoint);
-
-            if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
-            {
-                ExitPoint = new PointCut(proc, proc.SafeAppend(proc.CreateOptimized(OpCodes.Ldloc, MethodResultVariable.Index)));
-                proc.SafeAppend(proc.Create(OpCodes.Ret));
-            }
-            else
-            {
-                ExitPoint = new PointCut(proc, proc.SafeAppend(proc.Create(OpCodes.Ret)));
-            }
+            member.CustomAttributes.Add(new CustomAttribute(TargetMethod.Module.Import(constructor)));
         }
 
         protected Instruction SetupSingleReturnPoint(Instruction suggestedSingleReturnPoint)
@@ -219,5 +176,67 @@ namespace AspectInjector.BuildTask.Contexts
         }
 
         #endregion Protected Methods
+
+        #region Private Methods
+
+        private void SetupEntryPoints()
+        {
+            if (_originalEntryPoint != null || _entryPoint != null)
+                throw new InvalidOperationException("Something went wrong");
+
+            _originalEntryPoint = TargetMethod.IsConstructor && !TargetMethod.IsStatic ?
+                FindBaseClassCtorCall() :
+                GetMethodOriginalEntryPoint();
+
+            _entryPoint = OriginalEntryPoint.InsertBefore(Processor.Create(OpCodes.Nop));
+        }
+
+        private void SetupReturnPoints()
+        {
+            if (_returnPoint != null || _originalReturnPoint != null)
+                throw new InvalidOperationException("Something went wrong");
+
+            SetupReturnVariable();
+
+            var singleReturnPoint = Processor.Create(OpCodes.Nop);
+            _originalReturnPoint = new PointCut(Processor, SetupSingleReturnPoint(Processor.Create(OpCodes.Br, singleReturnPoint))); //todo:: optimize
+            Processor.SafeAppend(singleReturnPoint);
+
+            if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
+            {
+                _returnPoint = new PointCut(Processor, Processor.SafeAppend(Processor.CreateOptimized(OpCodes.Ldloc, MethodResultVariable.Index)));
+                Processor.SafeAppend(Processor.Create(OpCodes.Ret));
+            }
+            else
+            {
+                _returnPoint = new PointCut(Processor, Processor.SafeAppend(Processor.Create(OpCodes.Ret)));
+            }
+        }
+
+        private void SetupReturnVariable()
+        {
+            if (_resultVar != null)
+                throw new InvalidOperationException("Something went wrong");
+
+            if (TargetMethod.ReturnType.IsTypeOf(typeof(void)) && !TargetMethod.IsSetter)
+                return;
+
+            //todo:: optimize for compiller generated (get backing field)
+            if (TargetMethod.IsSetter)
+            {
+                var prop = TargetMethod.DeclaringType.Properties.First(p => p.SetMethod == TargetMethod);
+
+                EntryPoint.LoadSelfOntoStack();
+                EntryPoint.InjectMethodCall(prop.GetMethod, new object[] { });
+
+                _resultVar = EntryPoint.CreateVariableFromStack(prop.GetMethod.ReturnType, MethodResultVariableName);
+            }
+            else
+            {
+                _resultVar = OriginalEntryPoint.CreateVariable(TargetMethod.ReturnType, MethodResultVariableName);
+            }
+        }
+
+        #endregion Private Methods
     }
 }

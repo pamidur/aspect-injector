@@ -29,23 +29,23 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return context.TargetTypeContext.TypeDefinition;
                         break;
 
-                    case AdviceArgumentSource.TargetArguments:
+                    case AdviceArgumentSource.Method:
+                        yield return context.TargetMethodContext.TargetMethod;
+                        break;
+
+                    case AdviceArgumentSource.Arguments:
                         yield return context.TargetMethodContext.TargetMethod.Parameters.ToArray();
                         break;
 
-                    case AdviceArgumentSource.TargetName:
+                    case AdviceArgumentSource.Name:
                         yield return context.TargetName;
                         break;
 
-                    case AdviceArgumentSource.AbortFlag:
-                        yield return abortFlagVariable ?? Markers.DefaultMarker;
+                    case AdviceArgumentSource.ReturnType:
+                        yield return context.TargetMethodContext.TargetMethod.ReturnType;
                         break;
 
-                    case AdviceArgumentSource.TargetException:
-                        yield return exceptionVariable ?? Markers.DefaultMarker;
-                        break;
-
-                    case AdviceArgumentSource.TargetValue:
+                    case AdviceArgumentSource.ReturnValue:
                         yield return returnObjectVariable ?? Markers.DefaultMarker;
                         break;
 

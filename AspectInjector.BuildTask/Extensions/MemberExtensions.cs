@@ -6,6 +6,25 @@ namespace AspectInjector.BuildTask.Extensions
 {
     internal static class MemberExtensions
     {
+        public static MethodReference MakeGeneric(this MethodReference self, TypeReference owner, params TypeReference[] arguments)
+        {
+            var reference = new MethodReference(self.Name, self.ReturnType)
+            {
+                DeclaringType = owner,
+                HasThis = self.HasThis,
+                ExplicitThis = self.ExplicitThis,
+                CallingConvention = self.CallingConvention,
+            };
+
+            foreach (var parameter in self.Parameters)
+                reference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType));
+
+            foreach (var generic_parameter in self.GenericParameters)
+                reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
+
+            return reference;
+        }
+
         public static bool IsInterfaceImplementation(this MethodDefinition method, MethodReference overridden)
         {
             if (method.IsExplicitInterfaceImplementation(overridden))

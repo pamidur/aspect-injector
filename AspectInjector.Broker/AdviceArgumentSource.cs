@@ -4,11 +4,15 @@
     {
         Instance,
         Type,
-        TargetName,
-        TargetArguments,
-        TargetValue,
-        TargetException,
-        AbortFlag,
+        Method,
+
+        Target,
+
+        Name,
+        Arguments,
+        ReturnType,
+        ReturnValue,
+
         RoutableData
     }
 }

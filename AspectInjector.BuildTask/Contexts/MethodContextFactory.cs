@@ -22,8 +22,6 @@ namespace AspectInjector.BuildTask.Contexts
                     else
                         result = new TargetMethodContext(md);
 
-                    result.Init();
-
                     Contexts.Add(md, result);
                 }
 
