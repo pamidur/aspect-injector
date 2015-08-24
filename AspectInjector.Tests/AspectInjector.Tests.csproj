@@ -60,10 +60,11 @@
     <Compile Include="AdviceArguments\Type\Tests.cs" />
     <Compile Include="AdviceInjectionAfterTests.cs" />
     <Compile Include="AdviceInjectionBeforeTests.cs" />
-    <Compile Include="AdviceInjectionGenericTests.cs" />
     <Compile Include="AdviceOrderedInjectionBeforeTests.cs" />
     <Compile Include="AspectFactoryMethodTests.cs" />
     <Compile Include="AspectScopeTests.cs" />
+    <Compile Include="Generics\AdviceInjectionGenericTests.cs" />
+    <Compile Include="Generics\AdviceInjectionOpenGenericTests.cs" />
     <Compile Include="ImportingTypesTests.cs" />
     <Compile Include="InterfaceInjectionInheritanceTests.cs" />
     <Compile Include="InterfaceInjectionTests.cs" />
@@ -82,9 +83,7 @@
       <Name>AspectInjector.Broker</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ImportingTypesTests\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
