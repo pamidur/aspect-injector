@@ -2,52 +2,51 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AspectInjector.Tests.CustomAttributesTests
+namespace AspectInjector.Tests
 {
     [TestClass]
-    public class TestCustomAttributes
+    public class CustomAttributesTests
     {
         [TestMethod]
         public void Custom_Attributes_Pass_Routable_Values()
         {
             Checker.Passed = false;
 
-            var a = new TestClass();
+            var a = new CustomAttributesTests_Target();
             a.Do();
 
             Assert.IsTrue(Checker.Passed);
 
-            var b = new TestAspectAttribute("111") { Value = "olo" };
+            var b = new CustomAttributesTests_AspectAttribute("111") { Value = "olo" };
         }
     }
 
-    [TestAspect("TestHeader", Value = "ololo",data=43)]
-    public class TestClass
+    [CustomAttributesTests_Aspect("TestHeader", Value = "ololo", data = 43)]
+    public class CustomAttributesTests_Target
     {
         public void Do() { }
     }
 
-
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = true)]
-    [CustomAspectDefinition(typeof(TestAspectImplementation))]
-    public class TestAspectAttribute : Attribute
+    [CustomAspectDefinition(typeof(CustomAttributesTests_Aspect))]
+    public class CustomAttributesTests_AspectAttribute : Attribute
     {
         public string Header { get; private set; }
         public string Value { get; set; }
         public int data = 42;
 
-        public TestAspectAttribute(string header)
+        public CustomAttributesTests_AspectAttribute(string header)
         {
             Header = header;
         }
     }
 
-    public class TestAspectImplementation
+    public class CustomAttributesTests_Aspect
     {
         [Advice(InjectionPoints.After, InjectionTargets.Method)]
         public void AfterMethod([AdviceArgument(AdviceArgumentSource.RoutableData)] object data)
         {
-            var a = (data as TestAspectAttribute);
+            var a = (data as CustomAttributesTests_AspectAttribute);
 
             Checker.Passed = a.Header == "TestHeader" && a.Value == "ololo" && a.data == 43;
         }

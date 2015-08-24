@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AspectInjector.Tests.RoutableDataTests
+namespace AspectInjector.Tests
 {
     [TestClass]
     public class RoutableDataTests
@@ -12,19 +12,19 @@ namespace AspectInjector.Tests.RoutableDataTests
         {
             Checker.Passed = false;
 
-            new TestClass().Do();
+            new RoutableDataTests_Target().Do();
 
             Assert.IsTrue(Checker.Passed);
         }
     }
 
-    [Aspect(typeof(TestAspect), RoutableData = new object[] { StringSplitOptions.None, (short)12, true, new object[] { new string[] { "fgf" }, new int[] { } }, new int[] { } })]
-    public class TestClass
+    [Aspect(typeof(RoutableDataTests_Aspect), RoutableData = new object[] { StringSplitOptions.None, (short)12, true, new object[] { new string[] { "fgf" }, new int[] { } }, new int[] { } })]
+    public class RoutableDataTests_Target
     {
         public void Do() { }
     }
 
-    public class TestAspect
+    public class RoutableDataTests_Aspect
     {
         [Advice(InjectionPoints.After, InjectionTargets.Method)]
         public void AfterMethod([AdviceArgument(AdviceArgumentSource.RoutableData)] object data)

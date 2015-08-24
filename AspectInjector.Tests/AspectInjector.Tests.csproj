@@ -64,14 +64,14 @@
     <Compile Include="AdviceOrderedInjectionBeforeTests.cs" />
     <Compile Include="AspectFactoryMethodTests.cs" />
     <Compile Include="AspectScopeTests.cs" />
-    <Compile Include="ImportingTypesTests\Tests.cs" />
+    <Compile Include="ImportingTypesTests.cs" />
     <Compile Include="InterfaceInjectionInheritanceTests.cs" />
     <Compile Include="InterfaceInjectionTests.cs" />
     <Compile Include="NestedClassesTests.cs" />
     <Compile Include="PETest.cs" />
-    <Compile Include="RoutableDataTests\RoutableDataTests.cs" />
-    <Compile Include="CustomAttributesTests\CustomAttributesTests.cs" />
-    <Compile Include="SetterReturnValueTest\Tests.cs" />
+    <Compile Include="RoutableDataTests.cs" />
+    <Compile Include="CustomAttributesTests.cs" />
+    <Compile Include="SetterReturnValueTests.cs" />
     <Compile Include="StaticMembersTests.cs" />
     <Compile Include="Utils\Checker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -81,6 +81,9 @@
       <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
       <Name>AspectInjector.Broker</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ImportingTypesTests\" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

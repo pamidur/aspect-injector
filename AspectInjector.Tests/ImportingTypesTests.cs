@@ -3,10 +3,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.ComponentModel;
 
-namespace AspectInjector.Tests.ImportingTypesTests
+namespace AspectInjector.Tests
 {
     [TestClass]
-    public class Tests
+    public class ImportingTypesTests
     {
 
     }
@@ -62,7 +62,6 @@ namespace AspectInjector.Tests.ImportingTypesTests
             if (!string.IsNullOrEmpty(additionalPropName))
             {
                 PropertyChanged(source, new PropertyChangedEventArgs(additionalPropName));
-
             }
         }
     }

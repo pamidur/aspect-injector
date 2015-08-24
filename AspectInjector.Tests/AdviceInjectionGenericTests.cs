@@ -21,12 +21,25 @@ namespace AspectInjector.Tests
             _target.TestMethod();
             Assert.IsTrue(Checker.Passed);
         }
+
+        [TestMethod]
+        public void Inject_Advice_Before_GenericMethod()
+        {
+            Checker.Passed = false;
+            _target.TestGenericMethod<object>();
+            Assert.IsTrue(Checker.Passed);
+        }
     }
 
     [Aspect(typeof(AdviceInjectionGenericTests_Aspect))]
     internal class AdviceInjectionGenericTests_Target<T>
     {
         public void TestMethod()
+        {
+
+        }
+
+        public void TestGenericMethod<U>()
         {
 
         }
