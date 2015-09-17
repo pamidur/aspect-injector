@@ -21,15 +21,16 @@ namespace AspectInjector.Tests.CustomAttributesTests
         }
     }
 
-    [TestAspect("TestHeader", Value = "ololo",data=43)]
+    [TestAspect("TestHeader", Value = "ololo", data = 43)]
     public class TestClass
     {
-        public void Do() { }
+        public void Do()
+        {
+        }
     }
 
-
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = true)]
-    [CustomAspectDefinition(typeof(TestAspectImplementation))]
+    [AspectDefinition(typeof(TestAspectImplementation))]
     public class TestAspectAttribute : Attribute
     {
         public string Header { get; private set; }
@@ -45,9 +46,9 @@ namespace AspectInjector.Tests.CustomAttributesTests
     public class TestAspectImplementation
     {
         [Advice(InjectionPoints.After, InjectionTargets.Method)]
-        public void AfterMethod([AdviceArgument(AdviceArgumentSource.RoutableData)] object data)
+        public void AfterMethod([AdviceArgument(AdviceArgumentSource.RoutableData)] object[] data)
         {
-            var a = (data as TestAspectAttribute);
+            var a = (data[0] as TestAspectAttribute);
 
             Checker.Passed = a.Header == "TestHeader" && a.Value == "ololo" && a.data == 43;
         }

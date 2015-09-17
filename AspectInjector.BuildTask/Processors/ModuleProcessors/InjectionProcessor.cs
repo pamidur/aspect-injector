@@ -29,15 +29,13 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 foreach (var method in @class.Methods.Where(m => !m.IsSetter && !m.IsGetter && !m.IsAddOn && !m.IsRemoveOn).ToList())
                 {
                     var methodAspectDefinitions = FindAspectDefinitions(method.CustomAttributes);
-                    var allAspectDefinitions = MergeAspectDefinitions(classAspectDefinitions, methodAspectDefinitions).ToList();
-
-                    ProcessAspectDefinitions(method, method.Name, allAspectDefinitions);
+                    ProcessAspectDefinitions(method, method.Name, classAspectDefinitions.Concat(methodAspectDefinitions));
                 }
 
                 foreach (var property in @class.Properties.ToList())
                 {
                     var propertyAspectDefinitions = FindAspectDefinitions(property.CustomAttributes);
-                    var allAspectDefinitions = MergeAspectDefinitions(classAspectDefinitions, propertyAspectDefinitions).ToList();
+                    var allAspectDefinitions = classAspectDefinitions.Concat(propertyAspectDefinitions);
 
                     if (property.GetMethod != null)
                     {
@@ -53,7 +51,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 foreach (var @event in @class.Events.ToList())
                 {
                     var eventAspectDefinitions = FindAspectDefinitions(@event.CustomAttributes);
-                    var allAspectDefinitions = MergeAspectDefinitions(classAspectDefinitions, eventAspectDefinitions).ToList();
+                    var allAspectDefinitions = classAspectDefinitions.Concat(eventAspectDefinitions);
 
                     if (@event.AddMethod != null)
                     {
@@ -115,7 +113,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         {
             var result = collection.GetAttributesOfType<AspectAttribute>().Select(ParseAspectAttribute).ToList();
 
-            var customAttrs = collection.GroupBy(ca => ca.AttributeType.Resolve().CustomAttributes.GetAttributeOfType<CustomAspectDefinitionAttribute>()).Where(g => g.Key != null);
+            var customAttrs = collection.GroupBy(ca => ca.AttributeType.Resolve().CustomAttributes.GetAttributeOfType<AspectDefinitionAttribute>()).Where(g => g.Key != null);
 
             result = result.Concat(customAttrs.Select(ca => ParseCustomAspectAttribute(ca.Key, ca.First()))).ToList();
 
@@ -124,14 +122,12 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         private AspectDefinition ParseAspectAttribute(CustomAttribute attr)
         {
-            var routableDataProp = attr.GetProperty("RoutableData");
-
             return new AspectDefinition()
             {
                 AdviceClassType = ((TypeReference)attr.ConstructorArguments[0].Value).Resolve(),
                 NameFilter = (string)attr.GetPropertyValue("NameFilter"),
                 AccessModifierFilter = (AccessModifiers)(attr.GetPropertyValue("AccessModifierFilter") ?? 0),
-                RoutableData = routableDataProp != null ? (object)routableDataProp.Value : null
+                RoutableData = new List<object>()
             };
         }
 
@@ -142,24 +138,34 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 AdviceClassType = ((TypeReference)attr.ConstructorArguments[0].Value).Resolve(),
                 NameFilter = (string)attr.GetPropertyValue("NameFilter"),
                 AccessModifierFilter = (AccessModifiers)(attr.GetPropertyValue("AccessModifierFilter") ?? 0),
-                RoutableData = baseAttr
+                RoutableData = new List<object> { baseAttr }
             };
         }
 
-        private IEnumerable<AspectDefinition> MergeAspectDefinitions(IEnumerable<AspectDefinition> classDefinitions,
-            IEnumerable<AspectDefinition> memberDefinitions)
+        private IEnumerable<AspectDefinition> MergeAspectDefinitions(IEnumerable<AspectDefinition> definitions)
         {
-            return classDefinitions
-                .Except(memberDefinitions)
-                .Union(memberDefinitions);
+            var result = new List<AspectDefinition>();
+
+            foreach (var cd in definitions)
+            {
+                var match = result.FirstOrDefault(ad => ad.AdviceClassType.Equals(cd.AdviceClassType));
+                if (match == null)
+                    result.Add(cd);
+                else
+                    match.RoutableData = match.RoutableData.Concat(cd.RoutableData);
+            }
+
+            return result;
         }
 
         private void ProcessAspectDefinitions(MethodDefinition targetMethod,
             string targetName,
             IEnumerable<AspectDefinition> aspectDefinitions)
         {
-            var contexts = aspectDefinitions
-                .Where(def => CheckFilter(targetMethod, targetName, def))
+            var filteredDefinitions = aspectDefinitions.Where(def => CheckFilter(targetMethod, targetName, def));
+            var mergedDefinitions = MergeAspectDefinitions(filteredDefinitions);
+
+            var contexts = mergedDefinitions
                 .Select(def =>
                 {
                     var adviceClassType = def.AdviceClassType;
@@ -174,7 +180,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                         TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType),
                         AdviceClassType = adviceClassType,
                         AdviceClassScope = aspectScope,
-                        AspectRoutableData = def.RoutableData
+                        AspectRoutableData = def.RoutableData == null ? new object[] { } : def.RoutableData.ToArray()
                     };
 
                     return aspectContext;

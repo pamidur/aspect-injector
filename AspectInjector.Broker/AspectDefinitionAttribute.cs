@@ -3,7 +3,7 @@
 namespace AspectInjector.Broker
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public sealed class CustomAspectDefinitionAttribute : Attribute
+    public sealed class AspectDefinitionAttribute : Attribute
     {
         public Type Type { get; private set; }
 
@@ -11,7 +11,7 @@ namespace AspectInjector.Broker
 
         public AccessModifiers AccessModifierFilter { get; set; }
 
-        public CustomAspectDefinitionAttribute(Type aspectType)
+        public AspectDefinitionAttribute(Type aspectType)
         {
             Type = aspectType;
         }

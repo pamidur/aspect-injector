@@ -63,8 +63,8 @@ namespace AspectInjector.BuildTask
             }
             else if (source == AdviceArgumentSource.RoutableData)
             {
-                if (!parameter.ParameterType.IsTypeOf(adviceMethod.Module.TypeSystem.Object))
-                    throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
+                if (!parameter.ParameterType.IsTypeOf(new ArrayType(adviceMethod.Module.TypeSystem.Object)))
+                    throw new CompilationException("Argument should be of type System.Object[] to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
             }
         }
 

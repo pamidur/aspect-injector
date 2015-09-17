@@ -65,12 +65,13 @@
     <Compile Include="AspectFactoryMethodTests.cs" />
     <Compile Include="AspectScopeTests.cs" />
     <Compile Include="AsyncTests\AsyncTests.cs" />
+    <Compile Include="CustomAttributesTests\MultipleCustomAttributesTests.cs" />
+    <Compile Include="FiltersTests\GeneralTests.cs" />
     <Compile Include="ImportingTypesTests\Tests.cs" />
     <Compile Include="InterfaceInjectionInheritanceTests.cs" />
     <Compile Include="InterfaceInjectionTests.cs" />
     <Compile Include="NestedClassesTests.cs" />
     <Compile Include="PETest.cs" />
-    <Compile Include="RoutableDataTests\RoutableDataTests.cs" />
     <Compile Include="CustomAttributesTests\CustomAttributesTests.cs" />
     <Compile Include="SetterReturnValueTest\Tests.cs" />
     <Compile Include="StaticMembersTests.cs" />

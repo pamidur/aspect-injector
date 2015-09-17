@@ -26,7 +26,7 @@ namespace AspectInjector.Tests.ImportingTypesTests
         }
     }
 
-    [CustomAspectDefinition(typeof(NotifyPropertyChangedAspect))]
+    [AspectDefinition(typeof(NotifyPropertyChangedAspect))]
     internal class NotifyAttribute : Attribute
     {
         public string NotifyAlso { get; set; }
@@ -51,12 +51,12 @@ namespace AspectInjector.Tests.ImportingTypesTests
         public void AfterSetter(
             [AdviceArgument(AdviceArgumentSource.Instance)] object source,
             [AdviceArgument(AdviceArgumentSource.Name)] string propName,
-            [AdviceArgument(AdviceArgumentSource.RoutableData)] object data
+            [AdviceArgument(AdviceArgumentSource.RoutableData)] object[] data
             )
         {
             PropertyChanged(source, new PropertyChangedEventArgs(propName));
 
-            var additionalPropName = (data as NotifyAttribute).NotifyAlso;
+            var additionalPropName = (data[0] as NotifyAttribute).NotifyAlso;
 
             if (!string.IsNullOrEmpty(additionalPropName))
             {
