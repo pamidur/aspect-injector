@@ -32,29 +32,29 @@ namespace AspectInjector.Tests.AsyncTests
             TestAsyncMethods.Data = true;
         }
 
-        //[Aspect(typeof(TestAspectImplementation))]
-        //public async Task<string> Do2()
-        //{
-        //    await Task.Delay(200);
+        [Aspect(typeof(TestAspectImplementation))]
+        public async Task<string> Do2()
+        {
+            await Task.Delay(200);
 
-        //    TestAsyncMethods.Data = true;
+            TestAsyncMethods.Data = true;
 
-        //    return "test";
-        //}
+            return "test";
+        }
 
-        //[Aspect(typeof(TestAspectImplementation))]
-        //public async void Do3()
-        //{
-        //    await Task.Delay(200);
+        [Aspect(typeof(TestAspectImplementation))]
+        public async void Do3()
+        {
+            await Task.Delay(200);
 
-        //    TestAsyncMethods.Data = true;
-        //}
+            TestAsyncMethods.Data = true;
+        }
     }
 
     public class TestAspectImplementation
     {
         [Advice(InjectionPoints.After, InjectionTargets.Method)]
-        public void AfterMethod()
+        public void AfterMethod([AdviceArgument(AdviceArgumentSource.ReturnValue)] object value)
         {
             Checker.Passed = TestAsyncMethods.Data;
         }

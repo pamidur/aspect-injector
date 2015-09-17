@@ -7,10 +7,10 @@
         Method,
 
         Target,
+        TargetReturnType,
 
         Name,
         Arguments,
-        ReturnType,
         ReturnValue,
 
         RoutableData

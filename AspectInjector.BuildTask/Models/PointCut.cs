@@ -11,13 +11,13 @@ namespace AspectInjector.BuildTask.Models
 {
     public class PointCut
     {
-        #region Private Fields
+        #region Protected Fields
 
         protected static readonly string RoutableAttributeVariableName = "__a$_routable_attr";
 
         protected readonly ILProcessor Processor;
 
-        #endregion Private Fields
+        #endregion Protected Fields
 
         #region Public Constructors
 
@@ -42,6 +42,11 @@ namespace AspectInjector.BuildTask.Models
             return Processor.CreateOptimized(opCode, value);
         }
 
+        public Instruction CreateInstruction(OpCode opCode, FieldReference value)
+        {
+            return Processor.Create(opCode, value);
+        }
+
         public Instruction CreateInstruction(OpCode opCode)
         {
             return Processor.Create(opCode);
@@ -55,6 +60,11 @@ namespace AspectInjector.BuildTask.Models
         public Instruction CreateInstruction(OpCode opCode, PointCut pointCut)
         {
             return Processor.Create(opCode, pointCut.InjectionPoint);
+        }
+
+        public virtual PointCut CreatePointCut(Instruction instruction)
+        {
+            return new PointCut(Processor, instruction);
         }
 
         public VariableDefinition CreateVariable<T>(TypeReference variableType, T defaultValue, string variableName = null)
@@ -133,176 +143,7 @@ namespace AspectInjector.BuildTask.Models
             LoadFieldOntoStack(field);
         }
 
-        public virtual PointCut CreatePointCut(Instruction instruction)
-        {
-            return new PointCut(Processor, instruction);
-        }
-
-        public void LoadFieldOntoStack(FieldReference field)
-        {
-            var fieldRef = (FieldReference)CreateMemberReference(field);
-
-            if (field.Resolve().IsStatic)
-            {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldsfld, fieldRef));
-            }
-            else
-            {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldfld, fieldRef));
-            }
-        }
-
-        public void LoadSelfOntoStack()
-        {
-            Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
-        }
-
-        public void LoadValueOntoStack<T>(T value)
-        {
-            var valueType = typeof(T);
-
-            if (valueType == typeof(bool))
-                InsertBefore(Processor.CreateOptimized(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
-            else if (valueType.IsValueType)
-                InsertBefore(Processor.CreateOptimized(OpCodes.Ldc_I4, (int)(object)value));
-            else if (valueType.IsClass && value == null)
-                InsertBefore(Processor.Create(OpCodes.Ldnull));
-            else
-                throw new NotSupportedException();
-        }
-
-        public void LoadVariableOntoStack(VariableReference var)
-        {
-            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, var.Index));
-        }
-
-        public void LoadParameterOntoStack(ParameterDefinition par)
-        {
-            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, par.Index + 1));
-        }
-
-        public PointCut Replace(Instruction instruction)
-        {
-            return CreatePointCut(Processor.SafeReplace(InjectionPoint, instruction));
-        }
-
-        public void SetFieldFromStack(FieldReference field)
-        {
-            var fieldRef = (FieldReference)CreateMemberReference(field);
-
-            if (field.Resolve().IsStatic)
-            {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stsfld, fieldRef));
-            }
-            else
-            {
-                var locvar = CreateVariableFromStack(field.FieldType);
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
-                LoadVariableOntoStack(locvar);
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stfld, fieldRef));
-            }
-        }
-
-        public void SetVariable<T>(VariableDefinition variable, T value)
-        {
-            LoadValueOntoStack(value);
-            SetVariableFromStack(variable);
-        }
-
-        public void SetVariableFromStack(VariableReference var)
-        {
-            InsertBefore(CreateInstruction(OpCodes.Stloc, var.Index));
-        }
-
-        public void TestValueOnStack<T>(T value, Action<PointCut> doIfTrue = null, Action<PointCut> doIfFalse = null)
-        {
-            LoadValueOntoStack(value);
-            TestValuesOnStack(doIfTrue, doIfFalse);
-        }
-
-        public void TestValuesOnStack(Action<PointCut> doIfTrue = null, Action<PointCut> doIfFalse = null)
-        {
-            if (doIfTrue == null) doIfTrue = new Action<PointCut>(pc => { });
-            InsertBefore(CreateInstruction(OpCodes.Ceq));
-
-            var continuePoint = Processor.Create(OpCodes.Nop);
-            var doIfTruePointCut = CreatePointCut(Processor.Create(OpCodes.Nop));
-
-            InsertBefore(Processor.Create(OpCodes.Brfalse, continuePoint)); //todo::optimize
-            InsertBefore(doIfTruePointCut.InjectionPoint);
-
-            doIfTrue(doIfTruePointCut);
-
-            if (doIfFalse != null)
-            {
-                var exitPoint = Processor.Create(OpCodes.Nop);
-                var doIfFlasePointCut = CreatePointCut(Processor.Create(OpCodes.Nop));
-
-                InsertBefore(Processor.Create(OpCodes.Br, exitPoint)); //todo::optimize
-                InsertBefore(continuePoint);
-                InsertBefore(doIfFlasePointCut.InjectionPoint);
-
-                doIfFalse(doIfFlasePointCut);
-
-                InsertBefore(exitPoint);
-            }
-            else
-            {
-                InsertBefore(continuePoint);
-            }
-        }
-
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        protected MemberReference CreateMemberReference(MemberReference member)
-        {
-            var module = Processor.Body.Method.Module;
-
-            if (member is TypeReference)
-            {
-                return module.Import((TypeReference)member);
-            }
-
-            var declaringType = module.Import(member.DeclaringType);
-            var generic = member.DeclaringType as IGenericParameterProvider;
-
-            if (generic != null && generic.HasGenericParameters)
-            {
-                declaringType = new GenericInstanceType(module.Import(member.DeclaringType));
-                generic.GenericParameters.ToList()
-                    .ForEach(tr => ((IGenericInstance)declaringType).GenericArguments.Add(module.Import(tr)));
-            }
-
-            var fieldReference = member as FieldReference;
-            if (fieldReference != null)
-                return new FieldReference(member.Name, module.Import(fieldReference.FieldType), declaringType);
-
-            var methodReference = member as MethodReference;
-            if (methodReference != null)
-            {
-                //TODO: more fields may need to be copied
-                var methodReferenceCopy = new MethodReference(member.Name, module.Import(methodReference.ReturnType), declaringType)
-                {
-                    HasThis = methodReference.HasThis,
-                    ExplicitThis = methodReference.ExplicitThis,
-                    CallingConvention = methodReference.CallingConvention
-                };
-
-                foreach (var parameter in methodReference.Parameters)
-                {
-                    methodReferenceCopy.Parameters.Add(new ParameterDefinition(module.Import(parameter.ParameterType)));
-                }
-
-                return methodReferenceCopy;
-            }
-
-            throw new NotSupportedException("Not supported member type " + member.GetType().FullName);
-        }
-
-        protected void LoadCallArgument(object arg, TypeReference expectedType)
+        public void LoadCallArgument(object arg, TypeReference expectedType)
         {
             var module = Processor.Body.Method.Module;
 
@@ -446,6 +287,170 @@ namespace AspectInjector.BuildTask.Models
             {
                 throw new NotSupportedException("Argument type of " + arg.GetType().ToString() + " is not supported");
             }
+        }
+
+        public void LoadFieldOntoStack(FieldReference field)
+        {
+            var fieldRef = (FieldReference)CreateMemberReference(field);
+
+            if (field.Resolve().IsStatic)
+            {
+                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldsfld, fieldRef));
+            }
+            else
+            {
+                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
+                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldfld, fieldRef));
+            }
+        }
+
+        public void LoadParameterOntoStack(ParameterDefinition par)
+        {
+            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, par.Index + 1));
+        }
+
+        public void LoadSelfOntoStack()
+        {
+            Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
+        }
+
+        public void LoadValueOntoStack<T>(T value)
+        {
+            var valueType = typeof(T);
+
+            if (valueType == typeof(bool))
+                InsertBefore(Processor.CreateOptimized(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
+            else if (valueType.IsValueType)
+                InsertBefore(Processor.CreateOptimized(OpCodes.Ldc_I4, (int)(object)value));
+            else if (valueType.IsClass && value == null)
+                InsertBefore(Processor.Create(OpCodes.Ldnull));
+            else
+                throw new NotSupportedException();
+        }
+
+        public void LoadVariableOntoStack(VariableReference var)
+        {
+            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, var.Index));
+        }
+
+        public PointCut Replace(Instruction instruction)
+        {
+            return CreatePointCut(Processor.SafeReplace(InjectionPoint, instruction));
+        }
+
+        public void SetFieldFromStack(FieldReference field)
+        {
+            var fieldRef = (FieldReference)CreateMemberReference(field);
+
+            if (field.Resolve().IsStatic)
+            {
+                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stsfld, fieldRef));
+            }
+            else
+            {
+                var locvar = CreateVariableFromStack(field.FieldType);
+                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
+                LoadVariableOntoStack(locvar);
+                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stfld, fieldRef));
+            }
+        }
+
+        public void SetVariable<T>(VariableDefinition variable, T value)
+        {
+            LoadValueOntoStack(value);
+            SetVariableFromStack(variable);
+        }
+
+        public void SetVariableFromStack(VariableReference var)
+        {
+            InsertBefore(CreateInstruction(OpCodes.Stloc, var.Index));
+        }
+
+        public void TestValueOnStack<T>(T value, Action<PointCut> doIfTrue = null, Action<PointCut> doIfFalse = null)
+        {
+            LoadValueOntoStack(value);
+            TestValuesOnStack(doIfTrue, doIfFalse);
+        }
+
+        public void TestValuesOnStack(Action<PointCut> doIfTrue = null, Action<PointCut> doIfFalse = null)
+        {
+            if (doIfTrue == null) doIfTrue = new Action<PointCut>(pc => { });
+            InsertBefore(CreateInstruction(OpCodes.Ceq));
+
+            var continuePoint = Processor.Create(OpCodes.Nop);
+            var doIfTruePointCut = CreatePointCut(Processor.Create(OpCodes.Nop));
+
+            InsertBefore(Processor.Create(OpCodes.Brfalse, continuePoint)); //todo::optimize
+            InsertBefore(doIfTruePointCut.InjectionPoint);
+
+            doIfTrue(doIfTruePointCut);
+
+            if (doIfFalse != null)
+            {
+                var exitPoint = Processor.Create(OpCodes.Nop);
+                var doIfFlasePointCut = CreatePointCut(Processor.Create(OpCodes.Nop));
+
+                InsertBefore(Processor.Create(OpCodes.Br, exitPoint)); //todo::optimize
+                InsertBefore(continuePoint);
+                InsertBefore(doIfFlasePointCut.InjectionPoint);
+
+                doIfFalse(doIfFlasePointCut);
+
+                InsertBefore(exitPoint);
+            }
+            else
+            {
+                InsertBefore(continuePoint);
+            }
+        }
+
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected MemberReference CreateMemberReference(MemberReference member)
+        {
+            var module = Processor.Body.Method.Module;
+
+            if (member is TypeReference)
+            {
+                return module.Import((TypeReference)member);
+            }
+
+            var declaringType = module.Import(member.DeclaringType);
+            var generic = member.DeclaringType as IGenericParameterProvider;
+
+            if (generic != null && generic.HasGenericParameters)
+            {
+                declaringType = new GenericInstanceType(module.Import(member.DeclaringType));
+                generic.GenericParameters.ToList()
+                    .ForEach(tr => ((IGenericInstance)declaringType).GenericArguments.Add(module.Import(tr)));
+            }
+
+            var fieldReference = member as FieldReference;
+            if (fieldReference != null)
+                return new FieldReference(member.Name, module.Import(fieldReference.FieldType), declaringType);
+
+            var methodReference = member as MethodReference;
+            if (methodReference != null)
+            {
+                //TODO: more fields may need to be copied
+                var methodReferenceCopy = new MethodReference(member.Name, module.Import(methodReference.ReturnType), declaringType)
+                {
+                    HasThis = methodReference.HasThis,
+                    ExplicitThis = methodReference.ExplicitThis,
+                    CallingConvention = methodReference.CallingConvention
+                };
+
+                foreach (var parameter in methodReference.Parameters)
+                {
+                    methodReferenceCopy.Parameters.Add(new ParameterDefinition(module.Import(parameter.ParameterType)));
+                }
+
+                return methodReferenceCopy;
+            }
+
+            throw new NotSupportedException("Not supported member type " + member.GetType().FullName);
         }
 
         #endregion Protected Methods

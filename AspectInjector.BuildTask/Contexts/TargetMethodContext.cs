@@ -148,7 +148,7 @@ namespace AspectInjector.BuildTask.Contexts
             member.CustomAttributes.Add(new CustomAttribute(TargetMethod.Module.Import(constructor)));
         }
 
-        protected Instruction SetupSingleReturnPoint(Instruction suggestedSingleReturnPoint)
+        protected Instruction SetupSingleReturnPoint(Instruction suggestedSingleReturnPoint, VariableReference resultVar)
         {
             var proc = TargetMethod.Body.GetILProcessor();
 
@@ -157,7 +157,7 @@ namespace AspectInjector.BuildTask.Contexts
             if (rets.Count == 1)
             {
                 if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
-                    proc.SafeInsertBefore(rets.First(), proc.CreateOptimized(OpCodes.Stloc, MethodResultVariable.Index));
+                    proc.SafeInsertBefore(rets.First(), proc.CreateOptimized(OpCodes.Stloc, resultVar.Index));
 
                 return proc.SafeReplace(rets.First(), suggestedSingleReturnPoint);
             }
@@ -165,7 +165,7 @@ namespace AspectInjector.BuildTask.Contexts
             foreach (var i in rets)
             {
                 if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
-                    proc.SafeInsertBefore(i, proc.CreateOptimized(OpCodes.Stloc, MethodResultVariable.Index));
+                    proc.SafeInsertBefore(i, proc.CreateOptimized(OpCodes.Stloc, resultVar.Index));
 
                 proc.SafeReplace(i, proc.Create(OpCodes.Br, suggestedSingleReturnPoint)); //todo:: optimize
             }
@@ -199,7 +199,7 @@ namespace AspectInjector.BuildTask.Contexts
             SetupReturnVariable();
 
             var singleReturnPoint = Processor.Create(OpCodes.Nop);
-            _originalReturnPoint = new PointCut(Processor, SetupSingleReturnPoint(Processor.Create(OpCodes.Br, singleReturnPoint))); //todo:: optimize
+            _originalReturnPoint = new PointCut(Processor, SetupSingleReturnPoint(Processor.Create(OpCodes.Br, singleReturnPoint), MethodResultVariable)); //todo:: optimize
             Processor.SafeAppend(singleReturnPoint);
 
             if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))

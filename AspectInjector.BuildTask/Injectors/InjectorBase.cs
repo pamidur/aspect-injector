@@ -41,7 +41,7 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return context.TargetName;
                         break;
 
-                    case AdviceArgumentSource.ReturnType:
+                    case AdviceArgumentSource.TargetReturnType:
                         yield return context.TargetMethodContext.TargetMethod.ReturnType;
                         break;
 
