@@ -17,7 +17,7 @@ namespace AspectInjector.BuildTask.Contexts
         private static readonly string ContinuationFieldName = "__$a_{0}_tcs";
         private static readonly string HelperClassName = "__$a_async_continuation";
         private static readonly string HelperClassOriginRefName = "__$a_this_ref";
-        private static readonly string HelperClassArgumentsRefName = "__$a_args";
+        private static readonly string HelperClassArgumentsRefName = "__$a_arguments";
 
         private readonly TypeReference _completionResultType;
         private readonly bool _hasResult;
@@ -183,6 +183,7 @@ namespace AspectInjector.BuildTask.Contexts
 
                            var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType, _completionResultType);
 
+                           pct.LoadSelfOntoStack();
                            pct.LoadFieldOntoStack(tcsParameter);
                            pct.InjectMethodCall(setresultMethod, new object[] { _resultVar ?? Markers.DefaultMarker });
                        });
@@ -191,7 +192,7 @@ namespace AspectInjector.BuildTask.Contexts
             VariableDefinition taskResult = null;
 
             if (!TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void))
-                taskResult = OriginalEntryPoint.CreateVariable(TargetMethod.ReturnType, "__$a_task");
+                taskResult = OriginalEntryPoint.CreateVariable(TargetMethod.ReturnType);
 
             var singleReturnPoint = Processor.Create(OpCodes.Nop);
             _originalReturnPoint = new PointCut(Processor, SetupSingleReturnPoint(Processor.Create(OpCodes.Br, singleReturnPoint), taskResult)); //todo:: optimize
@@ -210,11 +211,15 @@ namespace AspectInjector.BuildTask.Contexts
             }
 
             continuationPoint.InjectMethodCall(helper.Methods.First(m => m.IsConstructor && !m.IsStatic), new object[] { });
-            var helperVar = continuationPoint.CreateVariableFromStack(helper, "__$a_continuation");
+            var helperVar = continuationPoint.CreateVariableFromStack(helper);
+
+            continuationPoint.LoadCallArgument(TargetMethod.Parameters.ToArray(), new ArrayType(TargetMethod.Module.TypeSystem.Object));
+            var argsvar = continuationPoint.CreateVariableFromStack(new ArrayType(TargetMethod.Module.TypeSystem.Object));
 
             continuationPoint.LoadVariableOntoStack(helperVar);
-            continuationPoint.LoadCallArgument(TargetMethod.Parameters.ToArray(), new ArrayType(TargetMethod.Module.TypeSystem.Object));
-            continuationPoint.InsertBefore(continuationPoint.CreateInstruction(OpCodes.Stfld, _helperArgumentsFiled));
+            continuationPoint.LoadVariableOntoStack(argsvar);
+
+            continuationPoint.SetFieldFromStack(_helperArgumentsFiled);
         }
 
         #endregion Private Methods

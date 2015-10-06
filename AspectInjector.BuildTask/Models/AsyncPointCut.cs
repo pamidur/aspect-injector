@@ -31,30 +31,22 @@ namespace AspectInjector.BuildTask.Models
             return new AsyncPointCut(_originalTypeRef, _methodArgsRef, Processor, instruction);
         }
 
-        public override void LoadFieldOntoStack(FieldReference field)
+        public override void LoadSelfOntoStack()
         {
-            base.LoadFieldOntoStack(_originalTypeRef);
-
-            var fieldRef = (FieldReference)CreateMemberReference(field);
-
-            if (field.Resolve().IsStatic)
-            {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldsfld, fieldRef));
-            }
-            else
-            {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldfld, fieldRef));
-            }
+            base.LoadSelfOntoStack();
+            LoadFieldOntoStack(_originalTypeRef);
         }
 
-        public override void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType)
+        //todo:: optimize for full args load as object[]
+        public override void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType = null)
         {
-            base.LoadFieldOntoStack(_methodArgsRef);
-
-            var module = Processor.Body.Method.Module;
+            base.LoadSelfOntoStack();
+            LoadFieldOntoStack(_methodArgsRef);
 
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, parameter.Index));
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldelem_Ref));
+
+            var module = Processor.Body.Method.Module;
 
             //if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
             //    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));

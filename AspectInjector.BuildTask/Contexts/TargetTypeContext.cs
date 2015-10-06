@@ -126,11 +126,17 @@ namespace AspectInjector.BuildTask.Contexts
             FieldDefinition field,
             MethodDefinition factoryMethod)
         {
+            if (!field.IsStatic)
+                initMethod.EntryPoint.LoadSelfOntoStack();
+
             initMethod.EntryPoint.LoadFieldOntoStack(field);
 
             initMethod.EntryPoint.TestValueOnStack((object)null,
                 trueBlock =>
             {
+                if (!field.IsStatic)
+                    trueBlock.LoadSelfOntoStack();
+
                 trueBlock.InjectMethodCall(factoryMethod, new object[] { });
                 trueBlock.SetFieldFromStack(field);
             });

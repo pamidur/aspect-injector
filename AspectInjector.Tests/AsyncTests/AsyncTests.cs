@@ -21,18 +21,41 @@ namespace AspectInjector.Tests.AsyncTests
 
             Assert.IsTrue(Checker.Passed);
         }
+
+        [TestMethod]
+        public void Aspect_Injected_Into_Async_Method_Can_Access_Args()
+        {
+            Checker.Passed = false;
+
+            var a = new TestClass();
+            a.Do4("args_test").Wait();
+
+            Assert.IsTrue(Checker.Passed);
+        }
     }
 
     public class TestClass
     {
-        private object[] sb = new object[] { };
-
-        public void TestMethod()
+        private class Test1
         {
-            var a = sb[1];
+            public int[] a;
         }
 
-        [Aspect(typeof(TestAspectImplementation))]
+        public void TestMethod(int data)
+        {
+            var a = new Test1();
+
+            int[] args = new int[]
+            {
+                data
+            };
+
+            int[] b = args;
+
+            a.a = b;
+        }
+
+        [Aspect(typeof(TestAspectImplementationSimple))]
         public async Task Do()
         {
             await Task.Delay(200);
@@ -40,7 +63,7 @@ namespace AspectInjector.Tests.AsyncTests
             TestAsyncMethods.Data = true;
         }
 
-        [Aspect(typeof(TestAspectImplementation))]
+        [Aspect(typeof(TestAspectImplementationSimple))]
         public async Task<string> Do2()
         {
             await Task.Delay(200);
@@ -50,7 +73,7 @@ namespace AspectInjector.Tests.AsyncTests
             return "test";
         }
 
-        [Aspect(typeof(TestAspectImplementation))]
+        [Aspect(typeof(TestAspectImplementationSimple))]
         public async void Do3()
         {
             await Task.Delay(200);
@@ -67,16 +90,27 @@ namespace AspectInjector.Tests.AsyncTests
 
             return testData;
         }
-    }
 
-    public class TestAspectImplementation
-    {
-        [Advice(InjectionPoints.After, InjectionTargets.Method)]
-        public void AfterMethod([AdviceArgument(AdviceArgumentSource.ReturnValue)] object value,
-            [AdviceArgument(AdviceArgumentSource.Arguments)] object[] args
-            )
+        public class TestAspectImplementation
         {
-            Checker.Passed = TestAsyncMethods.Data;
+            [Advice(InjectionPoints.After, InjectionTargets.Method)]
+            public void AfterMethod([AdviceArgument(AdviceArgumentSource.ReturnValue)] object value,
+                [AdviceArgument(AdviceArgumentSource.Arguments)] object[] args
+                )
+            {
+                Checker.Passed = args[0].ToString() == "args_test";
+            }
+        }
+
+        public class TestAspectImplementationSimple
+        {
+            [Advice(InjectionPoints.After, InjectionTargets.Method)]
+            public void AfterMethod([AdviceArgument(AdviceArgumentSource.ReturnValue)] object value,
+                [AdviceArgument(AdviceArgumentSource.Arguments)] object[] args
+                )
+            {
+                Checker.Passed = TestAsyncMethods.Data;
+            }
         }
     }
 }

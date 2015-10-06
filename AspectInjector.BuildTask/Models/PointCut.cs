@@ -88,7 +88,7 @@ namespace AspectInjector.BuildTask.Models
 
         public VariableDefinition CreateVariableFromStack(TypeReference variableType, string variableName = null)
         {
-            var variable = CreateVariable(variableType, variableName);
+            var variable = CreateVariable(variableType, variableName: variableName);
             SetVariableFromStack(variable);
             return variable;
         }
@@ -226,7 +226,7 @@ namespace AspectInjector.BuildTask.Models
                 if (!expectedType.IsTypeOf(module.TypeSystem.Object))
                     throw new ArgumentException("Argument type mismatch");
 
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
+                LoadSelfOntoStack();
             }
             else if (arg is MethodReference)
             {
@@ -279,22 +279,15 @@ namespace AspectInjector.BuildTask.Models
             }
         }
 
-        public virtual void LoadFieldOntoStack(FieldReference field)
+        public void LoadFieldOntoStack(FieldReference field)
         {
             var fieldRef = (FieldReference)CreateMemberReference(field);
+            var fieldDef = field.Resolve();
 
-            if (field.Resolve().IsStatic)
-            {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldsfld, fieldRef));
-            }
-            else
-            {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldfld, fieldRef));
-            }
+            InsertBefore(CreateInstruction(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, fieldRef));
         }
 
-        public void LoadSelfOntoStack()
+        public virtual void LoadSelfOntoStack()
         {
             Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
         }
@@ -326,18 +319,17 @@ namespace AspectInjector.BuildTask.Models
         public void SetFieldFromStack(FieldReference field)
         {
             var fieldRef = (FieldReference)CreateMemberReference(field);
+            var fieldDef = field.Resolve();
 
-            if (field.Resolve().IsStatic)
-            {
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stsfld, fieldRef));
-            }
-            else
-            {
-                var locvar = CreateVariableFromStack(field.FieldType);
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
-                LoadVariableOntoStack(locvar);
-                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stfld, fieldRef));
-            }
+            InsertBefore(CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
+        }
+
+        public void SetField(FieldReference field, Action<PointCut> loadData)
+        {
+            var fieldRef = (FieldReference)CreateMemberReference(field);
+            var fieldDef = field.Resolve();
+
+            InsertBefore(CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
         }
 
         public void SetVariable<T>(VariableDefinition variable, T value)

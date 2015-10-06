@@ -88,6 +88,7 @@ namespace AspectInjector.BuildTask.Injectors
 
                 var aspectField = context.AspectContext.TargetTypeContext.GetOrCreateAspectReference(context.AspectContext);
 
+                if (!aspectField.Resolve().IsStatic) ctx.EntryPoint.LoadSelfOntoStack();
                 ctx.EntryPoint.LoadFieldOntoStack(aspectField);
                 ctx.EntryPoint.InjectMethodCall(interfaceMethodDefinition, md.Parameters.ToArray());
             }

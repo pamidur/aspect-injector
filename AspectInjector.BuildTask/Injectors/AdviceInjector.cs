@@ -44,6 +44,7 @@ namespace AspectInjector.BuildTask.Injectors
                 default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
             }
 
+            if (!aspectInstanceField.Resolve().IsStatic) injectionPoint.LoadSelfOntoStack();
             injectionPoint.LoadFieldOntoStack(aspectInstanceField);
             injectionPoint.InjectMethodCall(context.AdviceMethod, argumentValue);
         }
