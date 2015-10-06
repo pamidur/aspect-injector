@@ -138,23 +138,13 @@ namespace AspectInjector.BuildTask.Models
             return CreatePointCut(Processor.SafeInsertBefore(InjectionPoint, instruction));
         }
 
-        public virtual void LoadAspectInstance(FieldReference field)
-        {
-            LoadFieldOntoStack(field);
-        }
-
         public void LoadCallArgument(object arg, TypeReference expectedType)
         {
             var module = Processor.Body.Method.Module;
 
             if (arg is ParameterDefinition)
             {
-                var parameter = (ParameterDefinition)arg;
-
-                Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, parameter.Index + 1));
-
-                if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
+                LoadParameterOntoStack((ParameterDefinition)arg, expectedType);
             }
             else if (arg is VariableDefinition)
             {
@@ -289,7 +279,7 @@ namespace AspectInjector.BuildTask.Models
             }
         }
 
-        public void LoadFieldOntoStack(FieldReference field)
+        public virtual void LoadFieldOntoStack(FieldReference field)
         {
             var fieldRef = (FieldReference)CreateMemberReference(field);
 
@@ -302,11 +292,6 @@ namespace AspectInjector.BuildTask.Models
                 Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
                 Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldfld, fieldRef));
             }
-        }
-
-        public void LoadParameterOntoStack(ParameterDefinition par)
-        {
-            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, par.Index + 1));
         }
 
         public void LoadSelfOntoStack()
@@ -401,6 +386,18 @@ namespace AspectInjector.BuildTask.Models
             else
             {
                 InsertBefore(continuePoint);
+            }
+        }
+
+        public virtual void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType = null)
+        {
+            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, parameter.Index + 1));
+
+            if (expectedType != null)
+            {
+                var module = Processor.Body.Method.Module;
+                if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
+                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
             }
         }
 

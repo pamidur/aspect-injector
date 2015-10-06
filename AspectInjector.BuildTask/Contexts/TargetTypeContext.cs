@@ -126,7 +126,7 @@ namespace AspectInjector.BuildTask.Contexts
             FieldDefinition field,
             MethodDefinition factoryMethod)
         {
-            initMethod.EntryPoint.LoadAspectInstance(field);
+            initMethod.EntryPoint.LoadFieldOntoStack(field);
 
             initMethod.EntryPoint.TestValueOnStack((object)null,
                 trueBlock =>

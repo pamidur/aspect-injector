@@ -18,7 +18,6 @@ namespace AspectInjector.BuildTask.Contexts
         private static readonly string HelperClassName = "__$a_async_continuation";
         private static readonly string HelperClassOriginRefName = "__$a_this_ref";
         private static readonly string HelperClassArgumentsRefName = "__$a_args";
-        private static readonly string HelperClassRoutableDataRefName = "__$a_rd";
 
         private readonly TypeReference _completionResultType;
         private readonly bool _hasResult;
@@ -31,7 +30,6 @@ namespace AspectInjector.BuildTask.Contexts
         private VariableDefinition _resultVar = null;
         private PointCut _returnPoint = null;
         private FieldDefinition _helperArgumentsFiled;
-        private FieldDefinition _helperRoutableDataFiled;
 
         #endregion Private Fields
 
@@ -129,13 +127,6 @@ namespace AspectInjector.BuildTask.Contexts
                 helperClass.Fields.Add(_helperArgumentsFiled);
             }
 
-            _helperRoutableDataFiled = helperClass.Fields.FirstOrDefault(f => f.Name == HelperClassRoutableDataRefName);
-            if (_helperRoutableDataFiled == null)
-            {
-                _helperRoutableDataFiled = new FieldDefinition(HelperClassRoutableDataRefName, FieldAttributes.Public, new ArrayType(TargetMethod.Module.TypeSystem.Object));
-                helperClass.Fields.Add(_helperRoutableDataFiled);
-            }
-
             return helperClass;
         }
 
@@ -167,7 +158,7 @@ namespace AspectInjector.BuildTask.Contexts
 
             proc.Append(ret);
 
-            var pointcut = new AsyncPointCut(_helperThisRefFiled, proc, ret);
+            var pointcut = new PointCut(proc, ret);
 
             pointcut.LoadParameterOntoStack(taskParameter);
             pointcut.InjectMethodCall(_taskTr.Resolve().Properties.First(p => p.Name == "IsCompleted").GetMethod, new object[] { });
@@ -177,7 +168,7 @@ namespace AspectInjector.BuildTask.Contexts
                 {
                     pc.LoadParameterOntoStack(taskParameter);
                     pc.InjectMethodCall(_taskTr.Resolve().Properties.First(p => p.Name == "IsFaulted").GetMethod, new object[] { });
-                    pointcut.TestValueOnStack(false,
+                    pc.TestValueOnStack(false,
                        doIfTrue: pct =>
                        {
                            if (_hasResult)
@@ -187,7 +178,8 @@ namespace AspectInjector.BuildTask.Contexts
                                _resultVar = pct.CreateVariableFromStack(_completionResultType);
                            }
 
-                           _returnPoint = pct.InsertBefore(pct.CreateInstruction(OpCodes.Nop));
+                           var syncReturnPc = pct.InsertBefore(pct.CreateInstruction(OpCodes.Nop));
+                           _returnPoint = new AsyncPointCut(_helperThisRefFiled, _helperArgumentsFiled, proc, syncReturnPc.InjectionPoint);
 
                            var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType, _completionResultType);
 

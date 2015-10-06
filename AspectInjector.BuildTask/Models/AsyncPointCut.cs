@@ -1,22 +1,39 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.BuildTask.Extensions;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace AspectInjector.BuildTask.Models
 {
     internal class AsyncPointCut : PointCut
     {
-        private FieldReference _originalTypeRef;
+        #region Fields
 
-        public AsyncPointCut(FieldReference originalTypeRef, ILProcessor processor, Instruction instruction)
+        private readonly FieldReference _methodArgsRef;
+        private readonly FieldReference _originalTypeRef;
+
+        #endregion Fields
+
+        #region Constructors
+
+        public AsyncPointCut(FieldReference originalTypeRef, FieldReference methodArgsRef, ILProcessor processor, Instruction instruction)
             : base(processor, instruction)
         {
             _originalTypeRef = (FieldReference)CreateMemberReference(originalTypeRef);
+            _methodArgsRef = (FieldReference)CreateMemberReference(methodArgsRef);
         }
 
-        public override void LoadAspectInstance(FieldReference field)
+        #endregion Constructors
+
+        #region Methods
+
+        public override PointCut CreatePointCut(Instruction instruction)
         {
-            Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
-            Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldfld, _originalTypeRef));
+            return new AsyncPointCut(_originalTypeRef, _methodArgsRef, Processor, instruction);
+        }
+
+        public override void LoadFieldOntoStack(FieldReference field)
+        {
+            base.LoadFieldOntoStack(_originalTypeRef);
 
             var fieldRef = (FieldReference)CreateMemberReference(field);
 
@@ -30,9 +47,19 @@ namespace AspectInjector.BuildTask.Models
             }
         }
 
-        public override PointCut CreatePointCut(Instruction instruction)
+        public override void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType)
         {
-            return new AsyncPointCut(_originalTypeRef, Processor, instruction);
+            base.LoadFieldOntoStack(_methodArgsRef);
+
+            var module = Processor.Body.Method.Module;
+
+            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, parameter.Index));
+            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldelem_Ref));
+
+            //if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
+            //    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
         }
+
+        #endregion Methods
     }
 }
