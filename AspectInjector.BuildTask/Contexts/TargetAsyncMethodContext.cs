@@ -253,6 +253,11 @@ namespace AspectInjector.BuildTask.Contexts
             continuationPoint.LoadCallArgument(TargetMethod.Parameters.ToArray(), new ArrayType(TargetMethod.Module.TypeSystem.Object));
             var argsvar = continuationPoint.CreateVariableFromStack(new ArrayType(TargetMethod.Module.TypeSystem.Object));
 
+            //helper.this_ref = this
+            continuationPoint.LoadVariableOntoStack(helperVar);
+            continuationPoint.LoadSelfOntoStack();
+            continuationPoint.SetFieldFromStack(_helperThisRefFiled);
+
             // helper.args = args
             continuationPoint.LoadVariableOntoStack(helperVar);
             continuationPoint.LoadVariableOntoStack(argsvar);

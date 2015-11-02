@@ -23,6 +23,29 @@ namespace AspectInjector.Tests.AsyncTests
         }
 
         [TestMethod]
+        public void Aspect_Can_Be_Injected_Into_Async_Method_With_Result()
+        {
+            Checker.Passed = false;
+
+            var a = new TestClass();
+            var result = a.Do2().Result;
+
+            Assert.AreEqual(result, "test");
+        }
+
+        [TestMethod]
+        public void Aspect_Can_Be_Injected_Into_Async_Void_Method()
+        {
+            Checker.Passed = false;
+
+            var a = new TestClass();
+            a.Do3();
+            Task.Delay(200).Wait();
+
+            Assert.IsTrue(Checker.Passed);
+        }
+
+        [TestMethod]
         public void Aspect_Injected_Into_Async_Method_Can_Access_Args()
         {
             Checker.Passed = false;
@@ -58,7 +81,7 @@ namespace AspectInjector.Tests.AsyncTests
         [Aspect(typeof(TestAspectImplementationSimple))]
         public async Task Do()
         {
-            await Task.Delay(200);
+            await Task.Delay(1);
 
             TestAsyncMethods.Data = true;
         }
@@ -66,7 +89,7 @@ namespace AspectInjector.Tests.AsyncTests
         [Aspect(typeof(TestAspectImplementationSimple))]
         public async Task<string> Do2()
         {
-            await Task.Delay(200);
+            await Task.Delay(1);
 
             TestAsyncMethods.Data = true;
 
@@ -76,7 +99,7 @@ namespace AspectInjector.Tests.AsyncTests
         [Aspect(typeof(TestAspectImplementationSimple))]
         public async void Do3()
         {
-            await Task.Delay(200);
+            await Task.Delay(1);
 
             TestAsyncMethods.Data = true;
         }
@@ -84,7 +107,7 @@ namespace AspectInjector.Tests.AsyncTests
         [Aspect(typeof(TestAspectImplementation))]
         public async Task<string> Do4(string testData)
         {
-            await Task.Delay(200);
+            await Task.Delay(1);
 
             TestAsyncMethods.Data = true;
 
@@ -98,7 +121,7 @@ namespace AspectInjector.Tests.AsyncTests
                 [AdviceArgument(AdviceArgumentSource.Arguments)] object[] args
                 )
             {
-                //Checker.Passed = args[0].ToString() == "args_test";
+                Checker.Passed = args[0].ToString() == "args_test";
             }
         }
 
