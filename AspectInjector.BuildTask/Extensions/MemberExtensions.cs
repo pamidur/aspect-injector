@@ -8,7 +8,9 @@ namespace AspectInjector.BuildTask.Extensions
     {
         public static MethodReference MakeGeneric(this MethodReference self, TypeReference owner, params TypeReference[] arguments)
         {
-            var reference = new MethodReference(self.Name, self.ReturnType)
+            var returnType = self.ReturnType;
+
+            var reference = new MethodReference(self.Name, returnType)
             {
                 DeclaringType = owner,
                 HasThis = self.HasThis,
@@ -17,7 +19,7 @@ namespace AspectInjector.BuildTask.Extensions
             };
 
             foreach (var parameter in self.Parameters)
-                reference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType));
+                reference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType)); //may need add args to params
 
             foreach (var generic_parameter in self.GenericParameters)
                 reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));

@@ -47,6 +47,11 @@ namespace AspectInjector.BuildTask.Models
             return Processor.Create(opCode, value);
         }
 
+        public Instruction CreateInstruction(OpCode opCode, MethodReference value)
+        {
+            return Processor.Create(opCode, value);
+        }
+
         public Instruction CreateInstruction(OpCode opCode)
         {
             return Processor.Create(opCode);
@@ -122,8 +127,8 @@ namespace AspectInjector.BuildTask.Models
 
             var methodRef = method;
 
-            if (methodRef.Module != Processor.Body.Method.Module || method is MethodDefinition)
-                methodRef = (MethodReference)CreateMemberReference(method);
+            //if (methodRef.Module != Processor.Body.Method.Module || method is MethodDefinition)
+            methodRef = (MethodReference)CreateMemberReference(method);
 
             Processor.InsertBefore(InjectionPoint, Processor.Create(code, methodRef));
         }
@@ -287,6 +292,18 @@ namespace AspectInjector.BuildTask.Models
             InsertBefore(CreateInstruction(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, fieldRef));
         }
 
+        public virtual void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType = null)
+        {
+            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, parameter.Index + 1));
+
+            if (expectedType != null)
+            {
+                var module = Processor.Body.Method.Module;
+                if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
+                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
+            }
+        }
+
         public virtual void LoadSelfOntoStack()
         {
             Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
@@ -316,7 +333,7 @@ namespace AspectInjector.BuildTask.Models
             return CreatePointCut(Processor.SafeReplace(InjectionPoint, instruction));
         }
 
-        public void SetFieldFromStack(FieldReference field)
+        public void SetField(FieldReference field, Action<PointCut> loadData)
         {
             var fieldRef = (FieldReference)CreateMemberReference(field);
             var fieldDef = field.Resolve();
@@ -324,7 +341,7 @@ namespace AspectInjector.BuildTask.Models
             InsertBefore(CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
         }
 
-        public void SetField(FieldReference field, Action<PointCut> loadData)
+        public void SetFieldFromStack(FieldReference field)
         {
             var fieldRef = (FieldReference)CreateMemberReference(field);
             var fieldDef = field.Resolve();
@@ -381,50 +398,46 @@ namespace AspectInjector.BuildTask.Models
             }
         }
 
-        public virtual void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType = null)
-        {
-            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, parameter.Index + 1));
-
-            if (expectedType != null)
-            {
-                var module = Processor.Body.Method.Module;
-                if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
-            }
-        }
-
         #endregion Public Methods
 
         #region Protected Methods
 
-        protected MemberReference CreateMemberReference(MemberReference member)
+        public MemberReference CreateMemberReference(MemberReference member)
         {
             var module = Processor.Body.Method.Module;
 
             if (member is TypeReference)
             {
+                if (member is IGenericParameterProvider)
+                {
+                    ((IGenericParameterProvider)member).GenericParameters.ToList().ForEach(tr => CreateMemberReference(tr));
+                }
+
+                if (member.Module == module || ((TypeReference)member).IsGenericParameter)
+                    return member;
+
                 return module.Import((TypeReference)member);
             }
 
-            var declaringType = module.Import(member.DeclaringType);
+            var declaringType = (TypeReference)CreateMemberReference(member.DeclaringType);
             var generic = member.DeclaringType as IGenericParameterProvider;
 
             if (generic != null && generic.HasGenericParameters)
             {
-                declaringType = new GenericInstanceType(module.Import(member.DeclaringType));
+                declaringType = new GenericInstanceType((TypeReference)CreateMemberReference(member.DeclaringType));
                 generic.GenericParameters.ToList()
-                    .ForEach(tr => ((IGenericInstance)declaringType).GenericArguments.Add(module.Import(tr)));
+                    .ForEach(tr => ((IGenericInstance)declaringType).GenericArguments.Add((TypeReference)CreateMemberReference(tr)));
             }
 
             var fieldReference = member as FieldReference;
             if (fieldReference != null)
-                return new FieldReference(member.Name, module.Import(fieldReference.FieldType), declaringType);
+                return new FieldReference(member.Name, (TypeReference)CreateMemberReference(fieldReference.FieldType), declaringType);
 
             var methodReference = member as MethodReference;
             if (methodReference != null)
             {
                 //TODO: more fields may need to be copied
-                var methodReferenceCopy = new MethodReference(member.Name, module.Import(methodReference.ReturnType), declaringType)
+                var methodReferenceCopy = new MethodReference(member.Name, (TypeReference)CreateMemberReference(methodReference.ReturnType), declaringType)
                 {
                     HasThis = methodReference.HasThis,
                     ExplicitThis = methodReference.ExplicitThis,
@@ -433,7 +446,7 @@ namespace AspectInjector.BuildTask.Models
 
                 foreach (var parameter in methodReference.Parameters)
                 {
-                    methodReferenceCopy.Parameters.Add(new ParameterDefinition(module.Import(parameter.ParameterType)));
+                    methodReferenceCopy.Parameters.Add(new ParameterDefinition((TypeReference)CreateMemberReference(parameter.ParameterType)));
                 }
 
                 return methodReferenceCopy;

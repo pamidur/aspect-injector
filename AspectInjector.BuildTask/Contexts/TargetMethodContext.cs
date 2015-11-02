@@ -103,6 +103,11 @@ namespace AspectInjector.BuildTask.Contexts
 
         #endregion Public Properties
 
+        public PointCut GetAroundPoint()
+        {
+            throw new NotImplementedException();
+        }
+
         #region Protected Methods
 
         protected PointCut FindBaseClassCtorCall()

@@ -98,7 +98,7 @@ namespace AspectInjector.Tests.AsyncTests
                 [AdviceArgument(AdviceArgumentSource.Arguments)] object[] args
                 )
             {
-                Checker.Passed = args[0].ToString() == "args_test";
+                //Checker.Passed = args[0].ToString() == "args_test";
             }
         }
 

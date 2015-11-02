@@ -5,6 +5,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace AspectInjector.BuildTask.Contexts
@@ -13,23 +14,24 @@ namespace AspectInjector.BuildTask.Contexts
     {
         #region Private Fields
 
-        private static readonly string ContinuationMethodName = "__$a_{0}_continuation";
         private static readonly string ContinuationFieldName = "__$a_{0}_tcs";
+        private static readonly string ContinuationMethodName = "__$a_{0}_continuation";
+        private static readonly string HelperClassArgumentsRefName = "__$a_arguments";
         private static readonly string HelperClassName = "__$a_async_continuation";
         private static readonly string HelperClassOriginRefName = "__$a_this_ref";
-        private static readonly string HelperClassArgumentsRefName = "__$a_arguments";
-
+        private readonly TypeReference _actionGenTr;
         private readonly TypeReference _completionResultType;
         private readonly bool _hasResult;
+        private readonly bool _isVoid;
         private readonly TypeReference _taskCompletionTr;
         private readonly TypeReference _taskGenTr;
         private readonly TypeReference _taskTr;
 
+        private FieldDefinition _helperArgumentsFiled;
         private FieldDefinition _helperThisRefFiled;
         private PointCut _originalReturnPoint = null;
         private VariableDefinition _resultVar = null;
         private PointCut _returnPoint = null;
-        private FieldDefinition _helperArgumentsFiled;
 
         #endregion Private Fields
 
@@ -40,8 +42,11 @@ namespace AspectInjector.BuildTask.Contexts
             _taskTr = targetMethod.Module.Import(typeof(Task));
             _taskGenTr = targetMethod.Module.Import(typeof(Task<>));
             _taskCompletionTr = targetMethod.Module.Import(typeof(TaskCompletionSource<>));
+            _actionGenTr = targetMethod.Module.Import(typeof(Action<>));
 
-            _hasResult = !TargetMethod.ReturnType.IsTypeOf(_taskTr) && !TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void);
+            _isVoid = TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void);
+
+            _hasResult = !TargetMethod.ReturnType.IsTypeOf(_taskTr) && !_isVoid;
 
             _completionResultType = _hasResult ? ((IGenericInstance)TargetMethod.ReturnType).GenericArguments.First() : TargetMethod.Module.TypeSystem.Object;
         }
@@ -150,8 +155,8 @@ namespace AspectInjector.BuildTask.Contexts
             var taskParameter = new ParameterDefinition(null, ParameterAttributes.None, taskTypedType);
             continuation.Parameters.Add(taskParameter);
 
-            var tcsParameter = new FieldDefinition(string.Format(ContinuationFieldName, TargetMethod.Name), FieldAttributes.Public, tcsType);
-            helper.Fields.Add(tcsParameter);
+            var tcsField = new FieldDefinition(string.Format(ContinuationFieldName, TargetMethod.Name), FieldAttributes.Public, tcsType);
+            helper.Fields.Add(tcsField);
 
             var proc = continuation.Body.GetILProcessor();
             var ret = proc.Create(OpCodes.Ret);
@@ -184,15 +189,40 @@ namespace AspectInjector.BuildTask.Contexts
                            var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType, _completionResultType);
 
                            pct.LoadSelfOntoStack();
-                           pct.LoadFieldOntoStack(tcsParameter);
+                           pct.LoadFieldOntoStack(tcsField);
                            pct.InjectMethodCall(setresultMethod, new object[] { _resultVar ?? Markers.DefaultMarker });
                        });
+                },
+                doIfFalse: pc =>
+                {
+                    var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType, _completionResultType);
+
+                    pc.LoadSelfOntoStack();
+                    pc.LoadFieldOntoStack(tcsField);
+                    pc.InjectMethodCall(setresultMethod, new object[] { Markers.DefaultMarker });
                 });
 
             VariableDefinition taskResult = null;
 
-            if (!TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void))
+            if (_isVoid)
+            {
+                //todo::replace with Task!!
+                //var asyncVoidMBType = TargetMethod.Module.Import(typeof(AsyncVoidMethodBuilder));
+                //var asyncTaskMBType = TargetMethod.Module.Import(typeof(AsyncTaskMethodBuilder));
+
+                //TargetMethod.Body.Variables.First(v => v.VariableType.IsTypeOf(asyncVoidMBType)).VariableType = asyncTaskMBType;
+
+                //foreach (var inst in TargetMethod.Body.Instructions)
+                //{
+                //    if (inst.Operand is MethodReference && ((MethodReference)inst.Operand).DeclaringType.IsTypeOf(asyncVoidMBType))
+                //       ((MethodReference)inst.Operand).DeclaringType = asyncTaskMBType;
+                //}
+                taskResult = OriginalEntryPoint.CreateVariable<Task>(_taskTr, null);
+            }
+            else
+            {
                 taskResult = OriginalEntryPoint.CreateVariable(TargetMethod.ReturnType);
+            }
 
             var singleReturnPoint = Processor.Create(OpCodes.Nop);
             _originalReturnPoint = new PointCut(Processor, SetupSingleReturnPoint(Processor.Create(OpCodes.Br, singleReturnPoint), taskResult)); //todo:: optimize
@@ -200,7 +230,7 @@ namespace AspectInjector.BuildTask.Contexts
 
             PointCut continuationPoint = null;
 
-            if (!TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void))
+            if (!_isVoid)
             {
                 continuationPoint = new PointCut(Processor, Processor.SafeAppend(Processor.CreateOptimized(OpCodes.Ldloc, taskResult.Index)));
                 Processor.SafeAppend(Processor.Create(OpCodes.Ret));
@@ -210,16 +240,59 @@ namespace AspectInjector.BuildTask.Contexts
                 continuationPoint = new PointCut(Processor, Processor.SafeAppend(Processor.Create(OpCodes.Ret)));
             }
 
+            // var tcs = new TaskContinuationSource<TResult>();
+            var tcsctor = tcsType.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic).MakeGeneric(tcsType, _completionResultType);
+            continuationPoint.InjectMethodCall(tcsctor, new object[] { });
+            var tcsVar = continuationPoint.CreateVariableFromStack(tcsType);
+
+            // var helper = new Helper();
             continuationPoint.InjectMethodCall(helper.Methods.First(m => m.IsConstructor && !m.IsStatic), new object[] { });
             var helperVar = continuationPoint.CreateVariableFromStack(helper);
 
+            // var args = new object[] { param1, param2 ... };
             continuationPoint.LoadCallArgument(TargetMethod.Parameters.ToArray(), new ArrayType(TargetMethod.Module.TypeSystem.Object));
             var argsvar = continuationPoint.CreateVariableFromStack(new ArrayType(TargetMethod.Module.TypeSystem.Object));
 
+            // helper.args = args
             continuationPoint.LoadVariableOntoStack(helperVar);
             continuationPoint.LoadVariableOntoStack(argsvar);
-
             continuationPoint.SetFieldFromStack(_helperArgumentsFiled);
+
+            // helper.continuationSource = tcs
+            continuationPoint.LoadVariableOntoStack(helperVar);
+            continuationPoint.LoadVariableOntoStack(tcsVar);
+            continuationPoint.SetFieldFromStack(tcsField);
+
+            // task.ContinueWith(new Action<TResult>(helper.Continuation))
+            continuationPoint.LoadVariableOntoStack(helperVar);
+            continuationPoint.InsertBefore(continuationPoint.CreateInstruction(OpCodes.Ldftn, continuation));
+
+            var actionTr = continuation.Module.Import(_actionGenTr.MakeGenericType(taskTypedType));
+
+            var contActionCtor = continuation.Module.Import(actionTr.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic))
+                .MakeGeneric(actionTr, taskTypedType);
+            continuationPoint.InsertBefore(continuationPoint.CreateInstruction(OpCodes.Newobj, (MethodReference)continuationPoint.CreateMemberReference(contActionCtor)));
+
+            var actionVar = continuationPoint.CreateVariableFromStack(actionTr);
+
+            MethodReference contWithMethod = continuation.Module.Import(taskTypedType.Resolve().Methods.First(m => m.Name == "ContinueWith" && m.Parameters.Count == 1));
+            if (_hasResult)
+                contWithMethod = contWithMethod.MakeGeneric(taskTypedType, _completionResultType);
+
+            continuationPoint.LoadVariableOntoStack(taskResult);
+            continuationPoint.InjectMethodCall(contWithMethod, new object[] { actionVar });
+            continuationPoint.InsertBefore(continuationPoint.CreateInstruction(OpCodes.Pop));
+
+            // task = tcs.Task
+            if (!_isVoid)
+            {
+                var getTask = continuation.Module.Import(tcsType.Resolve().Properties.First(p => p.Name == "Task").GetMethod)
+                    .MakeGeneric(tcsType, _completionResultType);
+
+                continuationPoint.LoadVariableOntoStack(tcsVar);
+                continuationPoint.InjectMethodCall(getTask, new object[] { });
+                continuationPoint.SetVariableFromStack(taskResult);
+            }
         }
 
         #endregion Private Methods
