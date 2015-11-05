@@ -14,6 +14,7 @@ namespace AspectInjector.Tests.AsyncTests
         [TestMethod]
         public void Aspect_Can_Be_Injected_Into_Async_Method()
         {
+            TestAsyncMethods.Data = false;
             Checker.Passed = false;
 
             var a = new TestClass();
@@ -25,6 +26,7 @@ namespace AspectInjector.Tests.AsyncTests
         [TestMethod]
         public void Aspect_Can_Be_Injected_Into_Async_Method_With_Result()
         {
+            TestAsyncMethods.Data = false;
             Checker.Passed = false;
 
             var a = new TestClass();
@@ -36,6 +38,7 @@ namespace AspectInjector.Tests.AsyncTests
         [TestMethod]
         public void Aspect_Can_Be_Injected_Into_Async_Void_Method()
         {
+            TestAsyncMethods.Data = false;
             Checker.Passed = false;
 
             var a = new TestClass();
@@ -48,6 +51,7 @@ namespace AspectInjector.Tests.AsyncTests
         [TestMethod]
         public void Aspect_Injected_Into_Async_Method_Can_Access_Args()
         {
+            TestAsyncMethods.Data = false;
             Checker.Passed = false;
 
             var a = new TestClass();

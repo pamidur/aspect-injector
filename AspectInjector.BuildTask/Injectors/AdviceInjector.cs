@@ -16,33 +16,31 @@ namespace AspectInjector.BuildTask.Injectors
         {
             FieldReference aspectInstanceField = context.AspectContext.TargetTypeContext.GetOrCreateAspectReference(context.AspectContext);
 
-            object[] argumentValue;
             PointCut injectionPoint;
 
             switch (context.InjectionPoint)
             {
                 case InjectionPoints.Before:
                     injectionPoint = context.AspectContext.TargetMethodContext.EntryPoint;
-                    argumentValue = ResolveArgumentsValues(
-                        context.AspectContext,
-                        context.AdviceArgumentsSources,
-                        context.InjectionPoint,
-                        returnObjectVariable: context.AspectContext.TargetMethodContext.MethodResultVariable)
-                        .ToArray();
                     break;
 
                 case InjectionPoints.After:
                     injectionPoint = context.AspectContext.TargetMethodContext.ReturnPoint;
-                    argumentValue = ResolveArgumentsValues(
+                    break;
+
+                case InjectionPoints.Around:
+                    injectionPoint = context.AspectContext.TargetMethodContext.CreateNewAroundPoint();
+                    break;
+
+                default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
+            }
+
+            var argumentValue = ResolveArgumentsValues(
                         context.AspectContext,
                         context.AdviceArgumentsSources,
                         context.InjectionPoint,
                         returnObjectVariable: context.AspectContext.TargetMethodContext.MethodResultVariable)
                         .ToArray();
-                    break;
-
-                default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
-            }
 
             if (!aspectInstanceField.Resolve().IsStatic) injectionPoint.LoadSelfOntoStack();
             injectionPoint.LoadFieldOntoStack(aspectInstanceField);

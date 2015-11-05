@@ -37,12 +37,28 @@ namespace AspectInjector.BuildTask.Models
 
         #region Public Methods
 
+        public static PointCut FromEmptyBody(Mono.Cecil.Cil.MethodBody body, OpCode exitCode)
+        {
+            if (body.Instructions.Any())
+                throw new NotSupportedException("Can work only with empty bodies");
+
+            var proc = body.GetILProcessor();
+            var exit = proc.Create(exitCode);
+            proc.Append(exit);
+            return new PointCut(proc, exit);
+        }
+
         public Instruction CreateInstruction(OpCode opCode, int value)
         {
             return Processor.CreateOptimized(opCode, value);
         }
 
         public Instruction CreateInstruction(OpCode opCode, FieldReference value)
+        {
+            return Processor.Create(opCode, value);
+        }
+
+        public Instruction CreateInstruction(OpCode opCode, TypeReference value)
         {
             return Processor.Create(opCode, value);
         }

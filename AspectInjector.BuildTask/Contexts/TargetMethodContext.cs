@@ -21,7 +21,9 @@ namespace AspectInjector.BuildTask.Contexts
 
         #region Private Fields
 
+        private MethodDefinition _wrapperMethod;
         private PointCut _entryPoint;
+        private bool _isAroundSetup = false;
         private PointCut _originalEntryPoint;
         private PointCut _originalReturnPoint;
         private VariableDefinition _resultVar;
@@ -103,10 +105,19 @@ namespace AspectInjector.BuildTask.Contexts
 
         #endregion Public Properties
 
-        public PointCut GetAroundPoint()
+        #region Methods
+
+        public PointCut CreateNewAroundPoint()
         {
-            throw new NotImplementedException();
+            if (!_isAroundSetup)
+                SetupAroundInfrastructure();
+
+            var aproc = _wrapperMethod.Body.GetILProcessor();
+
+            return new PointCut(aproc, _wrapperMethod.Body.Instructions.First());
         }
+
+        #endregion Methods
 
         #region Protected Methods
 
@@ -183,6 +194,79 @@ namespace AspectInjector.BuildTask.Contexts
         #endregion Protected Methods
 
         #region Private Methods
+
+        private MethodDefinition CreateUnwrapMethod(MethodDefinition originalMethod, ModuleDefinition module)
+        {
+            var unwrapMethod = new MethodDefinition("__a$u_" + originalMethod.Name, originalMethod.Attributes, module.TypeSystem.Object);
+            MarkCompilerGenerated(unwrapMethod);
+
+            var argsParam = new ParameterDefinition(new ArrayType(module.TypeSystem.Object));
+            unwrapMethod.Parameters.Add(argsParam);
+
+            var unwrapPoint = PointCut.FromEmptyBody(unwrapMethod.Body, OpCodes.Ret);
+
+            unwrapPoint.LoadSelfOntoStack();
+
+            foreach (var parameter in originalMethod.Parameters)
+            {
+                unwrapPoint.LoadParameterOntoStack(argsParam);
+                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldc_I4, parameter.Index));
+                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldelem_Ref));
+
+                if (parameter.ParameterType.IsValueType)
+                    unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Unbox_Any, module.Import(parameter.ParameterType)));
+                else if (parameter.ParameterType != module.TypeSystem.Object)
+                    unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Castclass, module.Import(parameter.ParameterType)));
+            }
+
+            unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Call, module.Import(originalMethod)));
+
+            if (originalMethod.ReturnType == module.TypeSystem.Void)
+                unwrapPoint.LoadValueOntoStack<object>(null);
+            else if (originalMethod.ReturnType.IsValueType)
+                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Box, module.Import(originalMethod.ReturnType)));
+
+            return unwrapMethod;
+        }
+
+        private void SetupAroundInfrastructure()
+        {
+            var type = TargetMethod.DeclaringType;
+            var module = type.Module;
+
+            var originalMethod = new MethodDefinition("__a$o_" + TargetMethod.Name, TargetMethod.Attributes, TargetMethod.ReturnType);
+            originalMethod.Body = TargetMethod.Body;
+
+            foreach (var parameter in TargetMethod.Parameters)
+                originalMethod.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, type.Module.Import(parameter.ParameterType)));
+
+            type.Methods.Add(originalMethod);
+
+            TargetMethod.Body = new MethodBody(TargetMethod);
+            var wrapper = PointCut.FromEmptyBody(TargetMethod.Body, OpCodes.Ret);
+
+            wrapper.LoadCallArgument(TargetMethod.Parameters.ToArray(), new ArrayType(TargetMethod.Module.TypeSystem.Object));
+            var argsvar = wrapper.CreateVariableFromStack(new ArrayType(TargetMethod.Module.TypeSystem.Object));
+
+            var unwrapMethod = CreateUnwrapMethod(TargetMethod, type.Module);
+            type.Methods.Add(unwrapMethod);
+
+            wrapper.LoadSelfOntoStack();
+            wrapper.InjectMethodCall(unwrapMethod, new object[] { argsvar });
+
+            if (TargetMethod.ReturnType == module.TypeSystem.Void)
+                wrapper.CreateVariableFromStack(module.TypeSystem.Object);
+            else if (TargetMethod.ReturnType.IsValueType)
+                wrapper.InsertBefore(wrapper.CreateInstruction(OpCodes.Unbox_Any, module.Import(TargetMethod.ReturnType)));
+            else if (TargetMethod.ReturnType != module.TypeSystem.Object)
+                wrapper.InsertBefore(wrapper.CreateInstruction(OpCodes.Castclass, module.Import(TargetMethod.ReturnType)));
+
+            //todo:: more infrastructure - args and delegate
+
+            _wrapperMethod = TargetMethod;
+            TargetMethod = originalMethod;
+            _isAroundSetup = true;
+        }
 
         private void SetupEntryPoints()
         {
