@@ -261,7 +261,7 @@ namespace AspectInjector.BuildTask.Contexts
             else if (TargetMethod.ReturnType != module.TypeSystem.Object)
                 wrapper.InsertBefore(wrapper.CreateInstruction(OpCodes.Castclass, module.Import(TargetMethod.ReturnType)));
 
-            //todo:: more infrastructure - args and delegate
+            //todo:: more infrastructure - delegate
 
             _wrapperMethod = TargetMethod;
             TargetMethod = originalMethod;

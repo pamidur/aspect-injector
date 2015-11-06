@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace AspectInjector.BuildTask.Injectors
 {
-    internal class InterfaceInjector : InjectorBase, IAspectInjector<InterfaceInjectionContext>
+    internal class InterfaceInjector : IAspectInjector<InterfaceInjectionContext>
     {
         public void Inject(InterfaceInjectionContext context)
         {

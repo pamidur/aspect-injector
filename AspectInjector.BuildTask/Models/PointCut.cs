@@ -169,15 +169,7 @@ namespace AspectInjector.BuildTask.Models
             }
             else if (arg is VariableDefinition)
             {
-                var var = (VariableDefinition)arg;
-
-                //if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(var.VariableType))
-                //    throw new ArgumentException("Argument type mismatch");
-
-                Processor.InsertBefore(InjectionPoint, CreateInstruction(expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
-
-                if (var.VariableType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(var.VariableType)));
+                LoadVariableOntoStack((VariableDefinition)arg, expectedType);
             }
             else if (arg is string)
             {
@@ -311,13 +303,7 @@ namespace AspectInjector.BuildTask.Models
         public virtual void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType = null)
         {
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, parameter.Index + 1));
-
-            if (expectedType != null)
-            {
-                var module = Processor.Body.Method.Module;
-                if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
-            }
+            BoxUnboxIfNeeded(parameter.ParameterType, expectedType);
         }
 
         public virtual void LoadSelfOntoStack()
@@ -339,9 +325,22 @@ namespace AspectInjector.BuildTask.Models
                 throw new NotSupportedException();
         }
 
-        public void LoadVariableOntoStack(VariableReference var)
+        public void LoadVariableOntoStack(VariableReference var, TypeReference expectedType = null)
         {
-            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, var.Index));
+            Processor.InsertBefore(InjectionPoint, CreateInstruction(expectedType != null && expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
+            BoxUnboxIfNeeded(var.VariableType, expectedType);
+        }
+
+        public void BoxUnboxIfNeeded(TypeReference typeOnStack, TypeReference expectedType)
+        {
+            if (expectedType != null)
+            {
+                if (typeOnStack.IsValueType && !expectedType.IsValueType)
+                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, expectedType.Module.Import(typeOnStack)));
+
+                if (!typeOnStack.IsValueType && expectedType.IsValueType)
+                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Unbox_Any, expectedType.Module.Import(typeOnStack)));
+            }
         }
 
         public PointCut Replace(Instruction instruction)

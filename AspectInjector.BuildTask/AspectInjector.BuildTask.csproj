@@ -78,6 +78,7 @@
     <Compile Include="Injectors\AdviceInjector.cs" />
     <Compile Include="Injectors\InterfaceInjector.cs" />
     <Compile Include="Models\AspectDefinition.cs" />
+    <Compile Include="Models\WrapperPointCut.cs" />
     <Compile Include="Models\AsyncPointCut.cs" />
     <Compile Include="Models\PointCut.cs" />
     <Compile Include="Processors\AspectProcessors\InterfaceProcessor.cs" />
@@ -93,7 +94,6 @@
     <Compile Include="Extensions\ModuleExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Contracts\IModuleProcessor.cs" />
-    <Compile Include="Injectors\InjectorBase.cs" />
     <Compile Include="Processors\ModuleProcessors\Janitor.cs" />
     <Compile Include="Common\Markers.cs" />
     <Compile Include="Processors\ModuleProcessors\SnippetsProcessor.cs" />
