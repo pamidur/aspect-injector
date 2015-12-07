@@ -19,13 +19,10 @@ namespace AspectInjector.BuildTask.Contexts
         private static readonly string HelperClassArgumentsRefName = "__$a_arguments";
         private static readonly string HelperClassName = "__$a_async_continuation";
         private static readonly string HelperClassOriginRefName = "__$a_this_ref";
-        private readonly TypeReference _actionGenTr;
-        private readonly TypeReference _completionResultType;
+
         private readonly bool _hasResult;
         private readonly bool _isVoid;
-        private readonly TypeReference _taskCompletionTr;
-        private readonly TypeReference _taskGenTr;
-        private readonly TypeReference _taskTr;
+        private readonly TypeReference _completionResultType;
 
         private FieldDefinition _helperArgumentsFiled;
         private FieldDefinition _helperThisRefFiled;
@@ -37,16 +34,11 @@ namespace AspectInjector.BuildTask.Contexts
 
         #region Public Constructors
 
-        public TargetAsyncMethodContext(MethodDefinition targetMethod) : base(targetMethod)
+        public TargetAsyncMethodContext(MethodDefinition targetMethod, ModuleContext mc) : base(targetMethod, mc)
         {
-            _taskTr = targetMethod.Module.Import(typeof(Task));
-            _taskGenTr = targetMethod.Module.Import(typeof(Task<>));
-            _taskCompletionTr = targetMethod.Module.Import(typeof(TaskCompletionSource<>));
-            _actionGenTr = targetMethod.Module.Import(typeof(Action<>));
-
             _isVoid = TargetMethod.ReturnType.IsTypeOf(TargetMethod.Module.TypeSystem.Void);
 
-            _hasResult = !TargetMethod.ReturnType.IsTypeOf(_taskTr) && !_isVoid;
+            _hasResult = !TargetMethod.ReturnType.IsTypeOf(ModuleContext.TypeSystem.Task) && !_isVoid;
 
             _completionResultType = _hasResult ? ((IGenericInstance)TargetMethod.ReturnType).GenericArguments.First() : TargetMethod.Module.TypeSystem.Object;
         }
@@ -149,8 +141,8 @@ namespace AspectInjector.BuildTask.Contexts
 
             helper.Methods.Add(continuation);
 
-            var tcsType = _taskCompletionTr.MakeGenericType(_completionResultType);
-            var taskTypedType = continuation.Module.Import(_hasResult ? TargetMethod.ReturnType : _taskTr);
+            var tcsType = ModuleContext.TypeSystem.TaskCompletionGeneric.MakeGenericType(_completionResultType);
+            var taskTypedType = continuation.Module.Import(_hasResult ? TargetMethod.ReturnType : ModuleContext.TypeSystem.Task);
 
             var taskParameter = new ParameterDefinition(null, ParameterAttributes.None, taskTypedType);
             continuation.Parameters.Add(taskParameter);
@@ -166,13 +158,13 @@ namespace AspectInjector.BuildTask.Contexts
             var pointcut = new PointCut(proc, ret);
 
             pointcut.LoadParameterOntoStack(taskParameter);
-            pointcut.InjectMethodCall(_taskTr.Resolve().Properties.First(p => p.Name == "IsCompleted").GetMethod, new object[] { });
+            pointcut.InjectMethodCall(ModuleContext.TypeSystem.Task.Resolve().Properties.First(p => p.Name == "IsCompleted").GetMethod, new object[] { });
 
             pointcut.TestValueOnStack(true,
                 doIfTrue: pc =>
                 {
                     pc.LoadParameterOntoStack(taskParameter);
-                    pc.InjectMethodCall(_taskTr.Resolve().Properties.First(p => p.Name == "IsFaulted").GetMethod, new object[] { });
+                    pc.InjectMethodCall(ModuleContext.TypeSystem.Task.Resolve().Properties.First(p => p.Name == "IsFaulted").GetMethod, new object[] { });
                     pc.TestValueOnStack(false,
                        doIfTrue: pct =>
                        {
@@ -217,7 +209,7 @@ namespace AspectInjector.BuildTask.Contexts
                 //    if (inst.Operand is MethodReference && ((MethodReference)inst.Operand).DeclaringType.IsTypeOf(asyncVoidMBType))
                 //       ((MethodReference)inst.Operand).DeclaringType = asyncTaskMBType;
                 //}
-                taskResult = OriginalEntryPoint.CreateVariable<Task>(_taskTr, null);
+                taskResult = OriginalEntryPoint.CreateVariable<Task>(ModuleContext.TypeSystem.Task, null);
             }
             else
             {
@@ -272,7 +264,7 @@ namespace AspectInjector.BuildTask.Contexts
             continuationPoint.LoadVariableOntoStack(helperVar);
             continuationPoint.InsertBefore(continuationPoint.CreateInstruction(OpCodes.Ldftn, continuation));
 
-            var actionTr = continuation.Module.Import(_actionGenTr.MakeGenericType(taskTypedType));
+            var actionTr = continuation.Module.Import(ModuleContext.TypeSystem.ActionGeneric.MakeGenericType(taskTypedType));
 
             var contActionCtor = continuation.Module.Import(actionTr.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic))
                 .MakeGeneric(actionTr, taskTypedType);

@@ -87,6 +87,10 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return context.AspectRoutableData ?? Markers.DefaultMarker;
                         break;
 
+                    //case AdviceArgumentSource.Target:
+                    //    yield return context.TargetMethodContext
+                    //    break;
+
                     default:
                         throw new NotSupportedException(argumentSource.ToString() + " is not supported (yet?)");
                 }
