@@ -34,7 +34,6 @@ namespace AspectInjector.BuildTask.Models
             return new WrapperPointCut(_assembledArgsParam, _nextWrapper, Processor, instruction);
         }
 
-        //todo:: optimize for full args load as object[]
         public override void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType = null)
         {
             LoadSelfOntoStack();

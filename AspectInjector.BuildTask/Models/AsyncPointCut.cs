@@ -37,7 +37,6 @@ namespace AspectInjector.BuildTask.Models
             LoadFieldOntoStack(_originalTypeRef);
         }
 
-        //todo:: optimize for full args load as object[]
         public override void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType = null)
         {
             base.LoadSelfOntoStack();

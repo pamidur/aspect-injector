@@ -181,7 +181,7 @@ namespace AspectInjector.BuildTask.Contexts
             if (member.CustomAttributes.Any(ca => ca.IsAttributeOfType<CompilerGeneratedAttribute>()))
                 return;
 
-            var constructor = TargetMethod.Module.Import(typeof(CompilerGeneratedAttribute)).Resolve() //todo:: import to exact member's module
+            var constructor = TargetMethod.Module.Import(typeof(CompilerGeneratedAttribute)).Resolve()
                 .Methods.First(m => m.IsConstructor && !m.IsStatic);
 
             member.CustomAttributes.Add(new CustomAttribute(TargetMethod.Module.Import(constructor)));

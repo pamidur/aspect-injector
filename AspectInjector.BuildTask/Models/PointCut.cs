@@ -462,20 +462,20 @@ namespace AspectInjector.BuildTask.Models
             if (doIfTrue == null) doIfTrue = new Action<PointCut>(pc => { });
             InsertBefore(CreateInstruction(OpCodes.Ceq));
 
-            var continuePoint = Processor.Create(OpCodes.Nop);
-            var doIfTruePointCut = CreatePointCut(Processor.Create(OpCodes.Nop));
+            var continuePoint = CreateInstruction(OpCodes.Nop);
+            var doIfTruePointCut = CreatePointCut(CreateInstruction(OpCodes.Nop));
 
-            InsertBefore(Processor.Create(OpCodes.Brfalse, continuePoint)); //todo::optimize
+            InsertBefore(CreateInstruction(OpCodes.Brfalse, continuePoint));
             InsertBefore(doIfTruePointCut.InjectionPoint);
 
             doIfTrue(doIfTruePointCut);
 
             if (doIfFalse != null)
             {
-                var exitPoint = Processor.Create(OpCodes.Nop);
-                var doIfFlasePointCut = CreatePointCut(Processor.Create(OpCodes.Nop));
+                var exitPoint = CreateInstruction(OpCodes.Nop);
+                var doIfFlasePointCut = CreatePointCut(CreateInstruction(OpCodes.Nop));
 
-                InsertBefore(Processor.Create(OpCodes.Br, exitPoint)); //todo::optimize
+                InsertBefore(CreateInstruction(OpCodes.Br, exitPoint));
                 InsertBefore(continuePoint);
                 InsertBefore(doIfFlasePointCut.InjectionPoint);
 
