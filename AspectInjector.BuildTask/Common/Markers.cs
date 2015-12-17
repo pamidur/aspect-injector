@@ -5,5 +5,6 @@
         public static readonly object InstanceSelfMarker = new object();
         public static readonly object DefaultMarker = new object();
         public static readonly object TargetFuncMarker = new object();
+        public static readonly object AllArgsMarker = new object();
     }
 }

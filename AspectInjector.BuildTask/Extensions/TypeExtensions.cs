@@ -94,7 +94,7 @@ namespace AspectInjector.BuildTask.Extensions
 
         public static bool IsTypeOf(this TypeReference typeReference, Type type)
         {
-            var resolvedType = typeReference.Module.TypeSystem.ResolveType(type);
+            var resolvedType = typeReference.Module.Import(type);
             return typeReference.IsTypeOf(resolvedType);
         }
 

@@ -68,7 +68,7 @@ namespace AspectInjector.BuildTask.Injectors
                         break;
 
                     case AdviceArgumentSource.Arguments:
-                        yield return context.TargetMethodContext.TargetMethod.Parameters.ToArray();
+                        yield return Markers.AllArgsMarker;
                         break;
 
                     case AdviceArgumentSource.Name:
@@ -87,9 +87,9 @@ namespace AspectInjector.BuildTask.Injectors
                         yield return context.AspectRoutableData ?? Markers.DefaultMarker;
                         break;
 
-                    //case AdviceArgumentSource.Target:
-                    //    yield return context.TargetMethodContext
-                    //    break;
+                    case AdviceArgumentSource.Target:
+                        yield return Markers.TargetFuncMarker;
+                        break;
 
                     default:
                         throw new NotSupportedException(argumentSource.ToString() + " is not supported (yet?)");

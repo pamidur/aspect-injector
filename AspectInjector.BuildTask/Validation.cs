@@ -31,6 +31,11 @@ namespace AspectInjector.BuildTask
                 if (!parameter.ParameterType.IsTypeOf(typeof(object)))
                     throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
             }
+            if (source == AdviceArgumentSource.Target)
+            {
+                if (!parameter.ParameterType.IsTypeOf(typeof(Func<object[], object>)))
+                    throw new CompilationException("Argument should be of type Func<object[],object> to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
+            }
             else if (source == AdviceArgumentSource.Type)
             {
                 if (!parameter.ParameterType.IsTypeOf(typeof(Type)))
@@ -86,6 +91,12 @@ namespace AspectInjector.BuildTask
             {
                 if (!context.AdviceMethod.ReturnType.IsTypeOf(typeof(void)))
                     throw new CompilationException("Advice of InjectionPoints." + context.InjectionPoint.ToString() + " can be System.Void only", context.AdviceMethod);
+            }
+
+            if (context.InjectionPoint == InjectionPoints.Around)
+            {
+                if (!context.AdviceMethod.ReturnType.IsTypeOf(typeof(object)))
+                    throw new CompilationException("Advice of InjectionPoints." + context.InjectionPoint.ToString() + " should return System.Object", context.AdviceMethod);
             }
         }
 

@@ -80,7 +80,6 @@
     <Compile Include="Injectors\InterfaceInjector.cs" />
     <Compile Include="Models\AspectDefinition.cs" />
     <Compile Include="Models\ExtendedTypeSystem.cs" />
-    <Compile Include="Models\WrapperFunc.cs" />
     <Compile Include="Models\WrapperPointCut.cs" />
     <Compile Include="Models\AsyncPointCut.cs" />
     <Compile Include="Models\PointCut.cs" />

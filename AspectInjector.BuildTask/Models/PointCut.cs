@@ -1,4 +1,5 @@
 ﻿using AspectInjector.BuildTask.Common;
+using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -11,31 +12,36 @@ namespace AspectInjector.BuildTask.Models
 {
     public class PointCut
     {
-        #region Protected Fields
+        #region Fields
 
         protected static readonly string RoutableAttributeVariableName = "__a$_routable_attr";
 
         protected readonly ILProcessor Processor;
 
-        #endregion Protected Fields
+        #endregion Fields
 
-        #region Public Constructors
+        #region Constructors
 
         public PointCut(ILProcessor processor, Instruction instruction)
         {
             Processor = processor;
             InjectionPoint = instruction;
+
+            ModuleContext = ModuleContext.GetOrCreateContext(processor.Body.Method.Module);
+            TypeSystem = ModuleContext.TypeSystem;
         }
 
-        #endregion Public Constructors
+        #endregion Constructors
 
-        #region Public Properties
+        #region Properties
 
         public Instruction InjectionPoint { get; private set; }
+        protected ModuleContext ModuleContext { get; private set; }
+        protected ExtendedTypeSystem TypeSystem { get; private set; }
 
-        #endregion Public Properties
+        #endregion Properties
 
-        #region Public Methods
+        #region Methods
 
         public static PointCut FromEmptyBody(Mono.Cecil.Cil.MethodBody body, OpCode exitCode)
         {
@@ -46,6 +52,18 @@ namespace AspectInjector.BuildTask.Models
             var exit = proc.Create(exitCode);
             proc.Append(exit);
             return new PointCut(proc, exit);
+        }
+
+        public void BoxUnboxIfNeeded(TypeReference typeOnStack, TypeReference expectedType)
+        {
+            if (expectedType != null)
+            {
+                if (typeOnStack.IsValueType && !expectedType.IsValueType)
+                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, expectedType.Module.Import(typeOnStack)));
+
+                if (!typeOnStack.IsValueType && expectedType.IsValueType)
+                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Unbox_Any, expectedType.Module.Import(typeOnStack)));
+            }
         }
 
         public Instruction CreateInstruction(OpCode opCode, int value)
@@ -81,6 +99,59 @@ namespace AspectInjector.BuildTask.Models
         public Instruction CreateInstruction(OpCode opCode, PointCut pointCut)
         {
             return Processor.Create(opCode, pointCut.InjectionPoint);
+        }
+
+        public MemberReference CreateMemberReference(MemberReference member)
+        {
+            var module = Processor.Body.Method.Module;
+
+            if (member is TypeReference)
+            {
+                if (member is IGenericParameterProvider)
+                {
+                    ((IGenericParameterProvider)member).GenericParameters.ToList().ForEach(tr => CreateMemberReference(tr));
+                }
+
+                if (member.Module == module || ((TypeReference)member).IsGenericParameter)
+                    return member;
+
+                return module.Import((TypeReference)member);
+            }
+
+            var declaringType = (TypeReference)CreateMemberReference(member.DeclaringType);
+            var generic = member.DeclaringType as IGenericParameterProvider;
+
+            if (generic != null && generic.HasGenericParameters)
+            {
+                declaringType = new GenericInstanceType((TypeReference)CreateMemberReference(member.DeclaringType));
+                generic.GenericParameters.ToList()
+                    .ForEach(tr => ((IGenericInstance)declaringType).GenericArguments.Add((TypeReference)CreateMemberReference(tr)));
+            }
+
+            var fieldReference = member as FieldReference;
+            if (fieldReference != null)
+                return new FieldReference(member.Name, (TypeReference)CreateMemberReference(fieldReference.FieldType), declaringType);
+
+            var methodReference = member as MethodReference;
+            if (methodReference != null)
+            {
+                //TODO: more fields may need to be copied
+                var methodReferenceCopy = new MethodReference(member.Name, (TypeReference)CreateMemberReference(methodReference.ReturnType), declaringType)
+                {
+                    HasThis = methodReference.HasThis,
+                    ExplicitThis = methodReference.ExplicitThis,
+                    CallingConvention = methodReference.CallingConvention
+                };
+
+                foreach (var parameter in methodReference.Parameters)
+                {
+                    methodReferenceCopy.Parameters.Add(new ParameterDefinition((TypeReference)CreateMemberReference(parameter.ParameterType)));
+                }
+
+                return methodReferenceCopy;
+            }
+
+            throw new NotSupportedException("Not supported member type " + member.GetType().FullName);
         }
 
         public virtual PointCut CreatePointCut(Instruction instruction)
@@ -124,7 +195,7 @@ namespace AspectInjector.BuildTask.Models
             Goto(pointCut.InjectionPoint);
         }
 
-        public void InjectMethodCall(MethodReference method, object[] arguments)
+        public PointCut InjectMethodCall(MethodReference method, object[] arguments)
         {
             if (method.Parameters.Count != arguments.Length)
                 throw new ArgumentException("Arguments count mismatch", "arguments");
@@ -146,7 +217,11 @@ namespace AspectInjector.BuildTask.Models
             //if (methodRef.Module != Processor.Body.Method.Module || method is MethodDefinition)
             methodRef = (MethodReference)CreateMemberReference(method);
 
-            Processor.InsertBefore(InjectionPoint, Processor.Create(code, methodRef));
+            var inst = Processor.Create(code, methodRef);
+
+            Processor.InsertBefore(InjectionPoint, inst);
+
+            return CreatePointCut(inst);
         }
 
         public PointCut InsertAfter(Instruction instruction)
@@ -163,7 +238,11 @@ namespace AspectInjector.BuildTask.Models
         {
             var module = Processor.Body.Method.Module;
 
-            if (arg is ParameterDefinition)
+            if (arg == Markers.AllArgsMarker)
+            {
+                LoadAllArgumentsOntoStack();
+            }
+            else if (arg is ParameterDefinition)
             {
                 LoadParameterOntoStack((ParameterDefinition)arg, expectedType);
             }
@@ -213,7 +292,7 @@ namespace AspectInjector.BuildTask.Models
                     LoadVariableOntoStack(attrvar);
                 }
             }
-            else if (arg is CustomAttributeArgument)
+            else if (arg is CustomAttributeArgument) //todo:: check if still needed
             {
                 var caa = (CustomAttributeArgument)arg;
 
@@ -262,6 +341,10 @@ namespace AspectInjector.BuildTask.Models
                         Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldnull));
                 }
             }
+            else if (arg == Markers.TargetFuncMarker)
+            {
+                LoadTargetFunc();
+            }
             else if (arg is TypeReference)
             {
                 var typeOfType = module.TypeSystem.ResolveType(typeof(Type));
@@ -277,7 +360,7 @@ namespace AspectInjector.BuildTask.Models
                 var type = module.TypeSystem.ResolveType(arg.GetType());
                 LoadValueTypedArgument(arg, type, expectedType);
             }
-            else if (arg is Array)
+            else if (arg is Array) //todo:: check if still needed
             {
                 var elementType = arg.GetType().GetElementType();
 
@@ -306,6 +389,11 @@ namespace AspectInjector.BuildTask.Models
             BoxUnboxIfNeeded(parameter.ParameterType, expectedType);
         }
 
+        public virtual void LoadAllArgumentsOntoStack()
+        {
+            LoadArray(Processor.Body.Method.Parameters.ToArray(), TypeSystem.Object, TypeSystem.ObjectArray);
+        }
+
         public virtual void LoadSelfOntoStack()
         {
             Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
@@ -329,18 +417,6 @@ namespace AspectInjector.BuildTask.Models
         {
             Processor.InsertBefore(InjectionPoint, CreateInstruction(expectedType != null && expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
             BoxUnboxIfNeeded(var.VariableType, expectedType);
-        }
-
-        public void BoxUnboxIfNeeded(TypeReference typeOnStack, TypeReference expectedType)
-        {
-            if (expectedType != null)
-            {
-                if (typeOnStack.IsValueType && !expectedType.IsValueType)
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, expectedType.Module.Import(typeOnStack)));
-
-                if (!typeOnStack.IsValueType && expectedType.IsValueType)
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Unbox_Any, expectedType.Module.Import(typeOnStack)));
-            }
         }
 
         public PointCut Replace(Instruction instruction)
@@ -413,66 +489,10 @@ namespace AspectInjector.BuildTask.Models
             }
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        public MemberReference CreateMemberReference(MemberReference member)
+        protected virtual void LoadTargetFunc()
         {
-            var module = Processor.Body.Method.Module;
-
-            if (member is TypeReference)
-            {
-                if (member is IGenericParameterProvider)
-                {
-                    ((IGenericParameterProvider)member).GenericParameters.ToList().ForEach(tr => CreateMemberReference(tr));
-                }
-
-                if (member.Module == module || ((TypeReference)member).IsGenericParameter)
-                    return member;
-
-                return module.Import((TypeReference)member);
-            }
-
-            var declaringType = (TypeReference)CreateMemberReference(member.DeclaringType);
-            var generic = member.DeclaringType as IGenericParameterProvider;
-
-            if (generic != null && generic.HasGenericParameters)
-            {
-                declaringType = new GenericInstanceType((TypeReference)CreateMemberReference(member.DeclaringType));
-                generic.GenericParameters.ToList()
-                    .ForEach(tr => ((IGenericInstance)declaringType).GenericArguments.Add((TypeReference)CreateMemberReference(tr)));
-            }
-
-            var fieldReference = member as FieldReference;
-            if (fieldReference != null)
-                return new FieldReference(member.Name, (TypeReference)CreateMemberReference(fieldReference.FieldType), declaringType);
-
-            var methodReference = member as MethodReference;
-            if (methodReference != null)
-            {
-                //TODO: more fields may need to be copied
-                var methodReferenceCopy = new MethodReference(member.Name, (TypeReference)CreateMemberReference(methodReference.ReturnType), declaringType)
-                {
-                    HasThis = methodReference.HasThis,
-                    ExplicitThis = methodReference.ExplicitThis,
-                    CallingConvention = methodReference.CallingConvention
-                };
-
-                foreach (var parameter in methodReference.Parameters)
-                {
-                    methodReferenceCopy.Parameters.Add(new ParameterDefinition((TypeReference)CreateMemberReference(parameter.ParameterType)));
-                }
-
-                return methodReferenceCopy;
-            }
-
-            throw new NotSupportedException("Not supported member type " + member.GetType().FullName);
+            Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldnull));
         }
-
-        #endregion Protected Methods
-
-        #region Private Methods
 
         private byte[] GetRawValueType(object value, int @base = 0)
         {
@@ -551,6 +571,6 @@ namespace AspectInjector.BuildTask.Models
                 Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, module.Import(type)));
         }
 
-        #endregion Private Methods
+        #endregion Methods
     }
 }

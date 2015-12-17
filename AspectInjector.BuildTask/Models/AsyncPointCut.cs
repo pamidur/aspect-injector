@@ -49,6 +49,12 @@ namespace AspectInjector.BuildTask.Models
             BoxUnboxIfNeeded(parameter.ParameterType, expectedType);
         }
 
+        public override void LoadAllArgumentsOntoStack()
+        {
+            base.LoadSelfOntoStack();
+            LoadFieldOntoStack(_methodArgsRef);
+        }
+
         #endregion Methods
     }
 }
