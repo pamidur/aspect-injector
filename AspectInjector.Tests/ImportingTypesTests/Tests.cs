@@ -37,16 +37,6 @@ namespace AspectInjector.Tests.ImportingTypesTests
     {
         public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
 
-        //[Advice(InjectionPoints.Before, InjectionTargets.Setter)]
-        //public void CheckIfUpdated(
-        //    [AdviceArgument(AdviceArgumentSource.TargetValue)] object oldvalue,
-        //    [AdviceArgument(AdviceArgumentSource.TargetArguments)] object[] newvalue,
-        //    [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
-        //    )
-        //{
-        //    abort = oldvalue.Equals(newvalue[0]);
-        //}
-
         [Advice(InjectionPoints.After, InjectionTargets.Setter)]
         public void AfterSetter(
             [AdviceArgument(AdviceArgumentSource.Instance)] object source,

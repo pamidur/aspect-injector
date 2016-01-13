@@ -1,5 +1,6 @@
 Param (  
-  [String]$buildNumber = ($( Read-Host "Specify package buildNumber"))  
+  [String] $buildNumber = ($( Read-Host "Specify package buildNumber")),
+  [switch] $skiptests
 )
 
 [bool]$publish = $false
@@ -14,11 +15,18 @@ $binDir = ".\AspectInjector.BuildTask\bin\Release"
 $testsDll = ".\AspectInjector.Tests\bin\Release\AspectInjector.Tests.dll"
 $packageBuildPlace = ".\packagebuildplace"
 
-function Update-SourceVersion
+function Update-SourceVersion ([string]$semver)
 {
-  Param ([string]$Version)
+	if($semver -like "*-*")	{
+		$Version = ($semver -split "-") | select -First 1;
+	}
+	else{
+		$Version = $semver;
+	}
+
   $NewVersion = 'AssemblyVersion("' + $Version + '")';
-  $NewFileVersion = 'AssemblyFileVersion("' + $Version + '")';
+  $NewFileVersion = 'AssemblyFileVersion("' + $Version + '")';	
+  $NewFileInfoVersion = 'AssemblyInformationalVersion("' + $semver + '")';	
 
   foreach ($o in $input) 
   {
@@ -26,8 +34,9 @@ function Update-SourceVersion
     $TmpFile = $o.FullName + ".tmp"
 
      get-content $o.FullName | 
-        %{$_ -replace 'AssemblyVersion\("[0-9]+(\.([0-9]+|\*)){1,3}"\)', $NewVersion } |
-        %{$_ -replace 'AssemblyFileVersion\("[0-9]+(\.([0-9]+|\*)){1,3}"\)', $NewFileVersion }  > $TmpFile
+        %{$_ -replace 'AssemblyVersion\("[^"]+"\)', $NewVersion } |
+        %{$_ -replace 'AssemblyInformationalVersion\("[^"]+"\)', $NewFileInfoVersion } |
+        %{$_ -replace 'AssemblyFileVersion\("[^"]+"\)', $NewFileVersion }  > $TmpFile
 
      move-item $TmpFile $o.FullName -force
   }
@@ -52,22 +61,26 @@ function Update-Nuspec ( $nuspec, $version )
 }
 
 
-while ($buildNumber -NotMatch "[0-9]+\.[0-9]+\.[0-9]+") {
-    $buildNumber = Read-Host "Please enter valid version [major.minor.build]"
+while (($buildNumber -NotMatch "^[0-9]+\.[0-9]+\.[0-9]+$") -and ($buildNumber -NotMatch "^[0-9]+\.[0-9]+\.[0-9]+-[^-]+$")) {
+    $buildNumber = Read-Host "Please enter valid version [major.minor.build(-suffix)]"
 }
 
 
 if(Test-Path $tokens_file){
-    iex (Get-Content -Raw $tokens_file)
+	iex (Get-Content -Raw $tokens_file)
 
-    $yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes","Publish release."
-    $no = New-Object System.Management.Automation.Host.ChoiceDescription "&No","Store package in root."
-    $options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no) 
+	"API keys are found."
+
+	$yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes","Publish release."
+	$no = New-Object System.Management.Automation.Host.ChoiceDescription "&No","Store package in root."
+	$options = [System.Management.Automation.Host.ChoiceDescription[]]($yes, $no) 
     
-    $result = $host.ui.PromptForChoice("","Publish release to github and nuget?", $options, 1)
+	$result = $host.ui.PromptForChoice("","Publish release to github and nuget?", $options, 1)
 
-    $publish = $result -eq 0
-}
+	$publish = $result -eq 0
+}else{
+	"API keys missing. Skipping publish..."
+} 
 
 
 "Releasing package"
@@ -100,7 +113,7 @@ if ($LastExitCode -ne 0) {
     break
 }
 
-if(test-path $mstest)
+if((test-path $mstest) -and -not $skiptests)
 {
     "Building tests"
     $buildargs = @( $testsSolutionFilename, "/t:Rebuild", "/p:Configuration=Release;Platform=Any CPU" )
@@ -119,7 +132,7 @@ if(test-path $mstest)
         break
     }
 }else{
-    "Could not find MSTest.exe. Skipping tests..."
+    "Skipping tests..."
 }
 
 "Creating folders."
