@@ -1,24 +1,23 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AspectInjector.Tests.AdviceArguments.Instance
+namespace AspectInjector.Tests.AdviceParameters.Arguments
 {
     [TestClass]
-    public class NonStaticMembersTests
+    public class NotStaticMembersBasicTests
     {
         [TestMethod]
-        public void AdviceArguments_Instance_Not_Null_on_NonStaticMethod()
+        public void AdviceArguments_Arguments_InjectedCorrectly_on_StaticMethod()
         {
             Checker.Passed = false;
-            new TargetClass().TestMethod();
+            new TargetClass().TestMethod(1, "2");
             Assert.IsTrue(Checker.Passed);
         }
-
 
         internal class TargetClass
         {
             [Aspect(typeof(AspectImplementation))]
-            public void TestMethod()
+            public void TestMethod(int a, string b)
             {
             }
         }
@@ -26,9 +25,9 @@ namespace AspectInjector.Tests.AdviceArguments.Instance
         internal class AspectImplementation
         {
             [Advice(InjectionPoints.Before, InjectionTargets.Method)]
-            public void BeforeMethod([AdviceArgument(AdviceArgumentSource.Instance)] object instance)
+            public void BeforeMethod([AdviceArgument(AdviceArgumentSource.Arguments)] object[] args)
             {
-                Checker.Passed = instance != null;
+                Checker.Passed = (int)args[0] == 1 && (string)args[1] == "2";
             }
         }
     }

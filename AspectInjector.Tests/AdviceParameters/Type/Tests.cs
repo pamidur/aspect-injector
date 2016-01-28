@@ -1,7 +1,7 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AspectInjector.Tests.AdviceArguments.Type
+namespace AspectInjector.Tests.AdviceParameters.Type
 {
     [TestClass]
     public class Tests
@@ -22,8 +22,6 @@ namespace AspectInjector.Tests.AdviceArguments.Type
         {
         }
     }
-
-
 
     internal class AspectImplementation
     {

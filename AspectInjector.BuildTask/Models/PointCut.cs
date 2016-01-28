@@ -385,7 +385,9 @@ namespace AspectInjector.BuildTask.Models
 
         public virtual void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType = null)
         {
-            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, parameter.Index + 1));
+            var argIndex = this.Processor.Body.Method.HasThis ? parameter.Index + 1 : parameter.Index;
+
+            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, argIndex));
             BoxUnboxIfNeeded(parameter.ParameterType, expectedType);
         }
 
