@@ -203,9 +203,9 @@ PM> Install-Package AspectInjector -Version ' +$buildNumber+'
 
         ($release = ConvertFrom-Json (Invoke-WebRequest "$github_repo_uri/releases" -Method Post -Body $release_info -Headers @{"Authorization"="token $github_api_token";}).Content ) | Out-Null
     
-        "Uploading package to github"
+        #"Uploading package to github"
 
-        Invoke-WebRequest ($release.upload_url -replace "{\?name}","?name=$($pkg.Name)" ) -Method Post -InFile $pkg -Headers @{"Authorization"="token $github_api_token";"Content-Type"="application/zip"} | Out-Null
+        #Invoke-WebRequest ($release.upload_url -replace "{\?name}","?name=$($pkg.Name)" ) -Method Post -InFile $pkg -Headers @{"Authorization"="token $github_api_token";"Content-Type"="application/zip"} | Out-Null
     }
     Remove-Item $pkg -Force | Out-Null
 }
