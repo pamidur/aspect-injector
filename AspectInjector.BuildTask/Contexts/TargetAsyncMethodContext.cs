@@ -5,7 +5,6 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace AspectInjector.BuildTask.Contexts
@@ -171,14 +170,14 @@ namespace AspectInjector.BuildTask.Contexts
                            if (_hasResult)
                            {
                                pct.LoadParameterOntoStack(taskParameter);
-                               pct.InjectMethodCall(taskTypedType.Resolve().Properties.First(p => p.Name == "Result").GetMethod.MakeGeneric(taskTypedType, _completionResultType), new object[] { });
+                               pct.InjectMethodCall(taskTypedType.Resolve().Properties.First(p => p.Name == "Result").GetMethod.MakeGeneric(taskTypedType), new object[] { });
                                _resultVar = pct.CreateVariableFromStack(_completionResultType);
                            }
 
                            var syncReturnPc = pct.InsertBefore(pct.CreateInstruction(OpCodes.Nop));
                            _returnPoint = new AsyncPointCut(_helperThisRefFiled, _helperArgumentsFiled, proc, syncReturnPc.InjectionPoint);
 
-                           var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType, _completionResultType);
+                           var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType);
 
                            pct.LoadSelfOntoStack();
                            pct.LoadFieldOntoStack(tcsField);
@@ -187,7 +186,7 @@ namespace AspectInjector.BuildTask.Contexts
                 },
                 doIfFalse: pc =>
                 {
-                    var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType, _completionResultType);
+                    var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType);
 
                     pc.LoadSelfOntoStack();
                     pc.LoadFieldOntoStack(tcsField);
@@ -198,18 +197,7 @@ namespace AspectInjector.BuildTask.Contexts
 
             if (_isVoid)
             {
-                //todo::replace with Task!!
-                //var asyncVoidMBType = TargetMethod.Module.Import(typeof(AsyncVoidMethodBuilder));
-                //var asyncTaskMBType = TargetMethod.Module.Import(typeof(AsyncTaskMethodBuilder));
-
-                //TargetMethod.Body.Variables.First(v => v.VariableType.IsTypeOf(asyncVoidMBType)).VariableType = asyncTaskMBType;
-
-                //foreach (var inst in TargetMethod.Body.Instructions)
-                //{
-                //    if (inst.Operand is MethodReference && ((MethodReference)inst.Operand).DeclaringType.IsTypeOf(asyncVoidMBType))
-                //       ((MethodReference)inst.Operand).DeclaringType = asyncTaskMBType;
-                //}
-                taskResult = OriginalEntryPoint.CreateVariable<Task>(ModuleContext.TypeSystem.Task, null);
+                taskResult = OriginalEntryPoint.CreateVariable(ModuleContext.TypeSystem.Task);
             }
             else
             {
@@ -218,6 +206,10 @@ namespace AspectInjector.BuildTask.Contexts
 
             var singleReturnPoint = Processor.Create(OpCodes.Nop);
             _originalReturnPoint = new PointCut(Processor, SetupSingleReturnPoint(Processor.Create(OpCodes.Br, singleReturnPoint), taskResult)); //todo:: optimize
+
+            if (_isVoid)
+                AsyncVoidRewriter.Rewrite(_originalReturnPoint, TargetMethod, taskResult);
+
             Processor.SafeAppend(singleReturnPoint);
 
             PointCut continuationPoint = null;
@@ -233,7 +225,7 @@ namespace AspectInjector.BuildTask.Contexts
             }
 
             // var tcs = new TaskContinuationSource<TResult>();
-            var tcsctor = tcsType.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic).MakeGeneric(tcsType, _completionResultType);
+            var tcsctor = tcsType.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic).MakeGeneric(tcsType);
             continuationPoint.InjectMethodCall(tcsctor, new object[] { });
             var tcsVar = continuationPoint.CreateVariableFromStack(tcsType);
 
@@ -267,14 +259,14 @@ namespace AspectInjector.BuildTask.Contexts
             var actionTr = continuation.Module.Import(ModuleContext.TypeSystem.ActionGeneric.MakeGenericType(taskTypedType));
 
             var contActionCtor = continuation.Module.Import(actionTr.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic))
-                .MakeGeneric(actionTr, taskTypedType);
+                .MakeGeneric(actionTr);
             continuationPoint.InsertBefore(continuationPoint.CreateInstruction(OpCodes.Newobj, (MethodReference)continuationPoint.CreateMemberReference(contActionCtor)));
 
             var actionVar = continuationPoint.CreateVariableFromStack(actionTr);
 
             MethodReference contWithMethod = continuation.Module.Import(taskTypedType.Resolve().Methods.First(m => m.Name == "ContinueWith" && m.Parameters.Count == 1));
             if (_hasResult)
-                contWithMethod = contWithMethod.MakeGeneric(taskTypedType, _completionResultType);
+                contWithMethod = contWithMethod.MakeGeneric(taskTypedType);
 
             continuationPoint.LoadVariableOntoStack(taskResult);
             continuationPoint.InjectMethodCall(contWithMethod, new object[] { actionVar });
@@ -284,7 +276,7 @@ namespace AspectInjector.BuildTask.Contexts
             if (!_isVoid)
             {
                 var getTask = continuation.Module.Import(tcsType.Resolve().Properties.First(p => p.Name == "Task").GetMethod)
-                    .MakeGeneric(tcsType, _completionResultType);
+                    .MakeGeneric(tcsType);
 
                 continuationPoint.LoadVariableOntoStack(tcsVar);
                 continuationPoint.InjectMethodCall(getTask, new object[] { });

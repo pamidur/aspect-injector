@@ -17,7 +17,7 @@ namespace AspectInjector.BuildTask.Contexts
 
                 if (!Contexts.TryGetValue(md, out result))
                 {
-                    if (md.CustomAttributes.HasAttributeOfType<AsyncStateMachineAttribute>() && md.ReturnType != md.Module.TypeSystem.Void)
+                    if (md.CustomAttributes.HasAttributeOfType<AsyncStateMachineAttribute>() /* && md.ReturnType != md.Module.TypeSystem.Void*/)
                         result = new TargetAsyncMethodContext(md, ModuleContext.GetOrCreateContext(md.Module));
                     else
                         result = new TargetMethodContext(md, ModuleContext.GetOrCreateContext(md.Module));

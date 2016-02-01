@@ -67,6 +67,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Contexts\AdviceInjectionContext.cs" />
     <Compile Include="Contexts\AspectContext.cs" />
+    <Compile Include="Contexts\AsyncVoidRewriter.cs" />
     <Compile Include="Contexts\InterfaceInjectionContext.cs" />
     <Compile Include="Contexts\ModuleContext.cs" />
     <Compile Include="Contexts\TargetAsyncMethodContext.cs" />

@@ -2,7 +2,6 @@
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using System;
 using System.Linq;
 
 namespace AspectInjector.BuildTask.Models
@@ -59,7 +58,7 @@ namespace AspectInjector.BuildTask.Models
                 TypeSystem.Object);
 
             var targetFuncCtor = ModuleContext.ModuleDefinition.Import(targetFuncType.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic))
-               .MakeGeneric(targetFuncType, TypeSystem.MakeArrayType(TypeSystem.Object), TypeSystem.Object);
+               .MakeGeneric(targetFuncType);
 
             LoadSelfOntoStack();
             InsertBefore(CreateInstruction(OpCodes.Ldftn, _nextWrapper));

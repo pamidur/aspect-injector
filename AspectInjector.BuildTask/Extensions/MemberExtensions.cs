@@ -8,21 +8,36 @@ namespace AspectInjector.BuildTask.Extensions
     {
         public static MethodReference MakeGeneric(this MethodReference self, TypeReference owner, params TypeReference[] arguments)
         {
-            var returnType = self.ReturnType;
+            MethodReference reference = null;
 
-            var reference = new MethodReference(self.Name, returnType)
+            if (arguments != null && arguments.Length > 0)
             {
-                DeclaringType = owner,
-                HasThis = self.HasThis,
-                ExplicitThis = self.ExplicitThis,
-                CallingConvention = self.CallingConvention,
-            };
+                if (self.GenericParameters.Count != arguments.Length)
+                    throw new ArgumentException("Generic arguments number mismatch", "arguments");
 
-            foreach (var parameter in self.Parameters)
-                reference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType)); //may need add args to params
+                var generic = new GenericInstanceMethod(self);
 
-            foreach (var generic_parameter in self.GenericParameters)
-                reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
+                foreach (var arg in arguments)
+                    generic.GenericArguments.Add(arg);
+
+                reference = generic;
+            }
+            else
+            {
+                reference = new MethodReference(self.Name, self.ReturnType)
+                {
+                    DeclaringType = owner,
+                    HasThis = self.HasThis,
+                    ExplicitThis = self.ExplicitThis,
+                    CallingConvention = self.CallingConvention,
+                };
+
+                foreach (var parameter in self.Parameters)
+                    reference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType)); //may need add args to params
+            }
+
+            //foreach (var generic_parameter in self.GenericParameters)
+            //    reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
 
             return reference;
         }
@@ -52,6 +67,10 @@ namespace AspectInjector.BuildTask.Extensions
 
         public static bool SignatureMatches(this MethodReference methodReference1, MethodReference methodReference2)
         {
+            if (methodReference1.IsGenericInstance && methodReference2.HasGenericParameters)
+            {
+            }
+
             if (!methodReference1.MethodReturnType.ReturnType.IsTypeOf(methodReference2.MethodReturnType.ReturnType))
                 return false;
 
