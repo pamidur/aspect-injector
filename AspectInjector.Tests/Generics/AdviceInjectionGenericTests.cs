@@ -1,7 +1,7 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AspectInjector.Tests
+namespace AspectInjector.Tests.Generics
 {
     [TestClass]
     public class AdviceInjectionGenericTests
@@ -21,6 +21,14 @@ namespace AspectInjector.Tests
             _target.TestMethod();
             Assert.IsTrue(Checker.Passed);
         }
+
+        [TestMethod]
+        public void Inject_Advice_Before_GenericMethod()
+        {
+            Checker.Passed = false;
+            _target.TestGenericMethod<object>();
+            Assert.IsTrue(Checker.Passed);
+        }
     }
 
     [Aspect(typeof(AdviceInjectionGenericTests_Aspect))]
@@ -28,7 +36,10 @@ namespace AspectInjector.Tests
     {
         public void TestMethod()
         {
+        }
 
+        public void TestGenericMethod<U>()
+        {
         }
     }
 

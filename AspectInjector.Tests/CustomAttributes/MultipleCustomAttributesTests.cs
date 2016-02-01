@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AspectInjector.Tests.CustomAttributesTests
+namespace AspectInjector.Tests.CustomAttributes
 {
     [TestClass]
     public class TestMultipleCustomAttributes

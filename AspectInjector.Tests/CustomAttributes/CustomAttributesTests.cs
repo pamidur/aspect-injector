@@ -34,7 +34,9 @@ namespace AspectInjector.Tests.CustomAttributesTests
     public class TestAspectAttribute : Attribute
     {
         public string Header { get; private set; }
+
         public string Value { get; set; }
+
         public int data = 42;
 
         public TestAspectAttribute(string header)

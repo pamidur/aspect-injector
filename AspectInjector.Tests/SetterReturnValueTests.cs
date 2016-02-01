@@ -1,10 +1,10 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AspectInjector.Tests.SetterReturnValueTest
+namespace AspectInjector.Tests
 {
     [TestClass]
-    public class Tests
+    public class SetterValueTests
     {
         public static int Data = 0;
 
@@ -13,7 +13,7 @@ namespace AspectInjector.Tests.SetterReturnValueTest
         {
             Checker.Passed = false;
 
-            var a = new TestClass();
+            var a = new SetterValueTests_Target();
             a.DataBefore = 2;
             Data = 2;
             a.DataBefore = 4;
@@ -26,7 +26,7 @@ namespace AspectInjector.Tests.SetterReturnValueTest
         {
             Checker.Passed = false;
 
-            var a = new TestClass();
+            var a = new SetterValueTests_Target();
             a.DataBefore = 2;
             Data = 2;
             a.DataBefore = 4;
@@ -35,32 +35,32 @@ namespace AspectInjector.Tests.SetterReturnValueTest
         }
     }
 
-    public class TestClass
+    public class SetterValueTests_Target
     {
-        [Aspect(typeof(TestAspectAfter))]
+        [Aspect(typeof(SetterValueTests_AfterAspect))]
         public int DataAfter { get; set; }
 
-        [Aspect(typeof(TestAspectBefore))]
+        [Aspect(typeof(SetterValueTests_BeforeAspect))]
         public int DataBefore { get; set; }
     }
 
-    public class TestAspectAfter
+    public class SetterValueTests_AfterAspect
     {
         [Advice(InjectionPoints.After, InjectionTargets.Setter)]
         public void AfterMethod([AdviceArgument(AdviceArgumentSource.ReturnValue)] object old)
         {
-            Checker.Passed = (int)old == Tests.Data;
+            Checker.Passed = (int)old == SetterValueTests.Data;
         }
     }
 
-    public class TestAspectBefore
+    public class SetterValueTests_BeforeAspect
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Setter)]
         public void AfterMethod(
             [AdviceArgument(AdviceArgumentSource.ReturnValue)] object old
             )
         {
-            Checker.Passed = (int)old == Tests.Data;
+            Checker.Passed = (int)old == SetterValueTests.Data;
         }
     }
 }

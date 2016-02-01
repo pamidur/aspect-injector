@@ -3,10 +3,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.ComponentModel;
 
-namespace AspectInjector.Tests.ImportingTypesTests
+namespace AspectInjector.Tests
 {
     [TestClass]
-    public class Tests
+    public class ImportingTypesTests
     {
     }
 
