@@ -21,9 +21,8 @@ namespace AspectInjector.Tests
             Checker.Passed = false;
             _beforeTestClass.TestMethod();
             Assert.IsTrue(Checker.Passed);
-        }       
+        }
     }
-
 
     [Aspect(typeof(AdviceOrderedInjectionBeforeTests_Aspect1))]
     [Aspect(typeof(AdviceOrderedInjectionBeforeTests_Aspect2))]
@@ -36,25 +35,24 @@ namespace AspectInjector.Tests
     }
 
     internal class AdviceOrderedInjectionBeforeTests_Aspect1
-    {       
+    {
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public void BeforeMethod()
         {
-
         }
     }
 
     internal class AdviceOrderedInjectionBeforeTests_Aspect2
     {
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
-        public void BeforeMethod([AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort)
+        public void BeforeMethod()
         {
-            abort = true;
+            Checker.Passed = false;
         }
     }
 
     internal class AdviceOrderedInjectionBeforeTests_Aspect3
-    {       
+    {
         [Advice(InjectionPoints.Before, InjectionTargets.Method)]
         public void BeforeMethod()
         {

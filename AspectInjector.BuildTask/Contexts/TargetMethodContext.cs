@@ -1,59 +1,61 @@
-﻿using AspectInjector.BuildTask.Common;
-using AspectInjector.BuildTask.Extensions;
+﻿using AspectInjector.BuildTask.Extensions;
+using AspectInjector.BuildTask.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace AspectInjector.BuildTask.Contexts
 {
     public class TargetMethodContext
     {
-        private static readonly string ExceptionVariableName = "__a$_exception";
-        private static readonly string MethodResultVariableName = "__a$_methodResult";
-        private static readonly string RoutableAttributeVariableName = "__a$_routable_attr";
+        #region Fields
 
-        private Instruction _exceptionPoint;
-        private VariableDefinition _exceptionVar;
+        protected static readonly string ExceptionVariableName = "__a$_exception";
+        protected static readonly string MethodResultVariableName = "__a$_methodResult";
+
+        protected readonly ILProcessor Processor;
+
+        private PointCut _entryPoint;
+        private PointCut _originalEntryPoint;
+        private PointCut _originalReturnPoint;
         private VariableDefinition _resultVar;
+        private PointCut _returnPoint;
 
-        public TargetMethodContext(MethodDefinition targetMethod)
+        private PointCut _topWrapperCallSite;
+        private MethodDefinition _topWrapper;
+        private int _wrapperNo;
+        private MethodDefinition _lastWrapper;
+
+        #endregion Fields
+
+        #region Constructors
+
+        public TargetMethodContext(MethodDefinition targetMethod, ModuleContext moduleContext)
         {
+            ModuleContext = moduleContext;
+
             TargetMethod = targetMethod;
-            Processor = TargetMethod.Body.GetILProcessor();
-
-            SetupEntryPoints();
-            SetupReturnPoints();
+            Processor = targetMethod.Body.GetILProcessor();
         }
 
-        public Instruction EntryPoint { get; private set; }
+        #endregion Constructors
 
-        public Instruction ExceptionPoint
+        #region Properties
+
+        public virtual PointCut EntryPoint
         {
             get
             {
-                if (_exceptionPoint == null)
-                    SetupCatchBlock();
+                if (_entryPoint == null)
+                    SetupEntryPoints();
 
-                return _exceptionPoint;
+                return _entryPoint;
             }
         }
 
-        public VariableDefinition ExceptionVariable
-        {
-            get
-            {
-                if (_exceptionVar == null)
-                    SetupCatchBlock();
-
-                return _exceptionVar;
-            }
-        }
-
-        public Instruction ExitPoint { get; private set; }
-
-        public VariableDefinition MethodResultVariable
+        public virtual VariableDefinition MethodResultVariable
         {
             get
             {
@@ -61,444 +63,296 @@ namespace AspectInjector.BuildTask.Contexts
                     return null;
 
                 if (_resultVar == null)
-                {
-                    //todo:: optimize for compiller generated
-                    if (TargetMethod.IsSetter)
-                    {
-                        var prop = TargetMethod.DeclaringType.Properties.First(p => p.SetMethod == TargetMethod);
-
-                        _resultVar = new VariableDefinition(MethodResultVariableName, prop.GetMethod.ReturnType);
-                        Processor.Body.Variables.Add(_resultVar);
-                        Processor.Body.InitLocals = true;
-                        LoadSelfOntoStack(OriginalEntryPoint);
-                        InjectMethodCall(OriginalEntryPoint, prop.GetMethod, new object[] { });
-                        SetVariableFromStack(OriginalEntryPoint, _resultVar);
-                    }
-                    else
-                    {
-                        _resultVar = new VariableDefinition(MethodResultVariableName, TargetMethod.ReturnType);
-                        Processor.Body.Variables.Add(_resultVar);
-                        Processor.Body.InitLocals = true;
-                    }
-                }
+                    SetupReturnPoints();
 
                 return _resultVar;
             }
         }
 
-        public Instruction OriginalCodeReturnPoint { get; private set; }
+        public virtual PointCut OriginalEntryPoint
+        {
+            get
+            {
+                if (_originalEntryPoint == null)
+                    SetupEntryPoints();
 
-        public Instruction OriginalEntryPoint { get; private set; }
+                return _originalEntryPoint;
+            }
+        }
 
-        public ILProcessor Processor { get; private set; }
+        public virtual PointCut OriginalReturnPoint
+        {
+            get
+            {
+                if (_originalReturnPoint == null)
+                    SetupReturnPoints();
 
-        public Instruction ReturnPoint { get; private set; }
+                return _originalReturnPoint;
+            }
+        }
+
+        public virtual PointCut ReturnPoint
+        {
+            get
+            {
+                if (_returnPoint == null)
+                    SetupReturnPoints();
+
+                return _returnPoint;
+            }
+        }
 
         public MethodDefinition TargetMethod { get; private set; }
+        protected ModuleContext ModuleContext { get; private set; }
+        protected ExtendedTypeSystem TypeSystem { get { return ModuleContext.TypeSystem; } }
 
-        public void LoadVariableOntoStack(Instruction injectionPoint, VariableReference var)
+        #endregion Properties
+
+        #region Methods
+
+        public PointCut CreateNewAroundPoint()
         {
-            Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(OpCodes.Ldloc, var.Index));
+            if (_topWrapperCallSite == null)
+                SetupAroundInfrastructure();
+
+            var newWapper = new MethodDefinition("__a$w" + _wrapperNo + "_" + _topWrapper.Name, TargetMethod.Attributes, TypeSystem.Object);
+
+            TargetMethod.DeclaringType.Methods.Add(newWapper);
+            MarkCompilerGenerated(newWapper);
+
+            var argsParam = new ParameterDefinition(TypeSystem.ObjectArray);
+            newWapper.Parameters.Add(argsParam);
+
+            var tempPc = PointCut.FromEmptyBody(newWapper.Body, OpCodes.Ret);
+
+            //if (_topWrapper.ReturnType == TypeSystem.Void)
+            //    tempPc.CreateVariableFromStack(TypeSystem.Object);
+            //else if (_topWrapper.ReturnType.IsValueType)
+            //    tempPc.InsertBefore(tempPc.CreateInstruction(OpCodes.Box, TargetMethod.Module.Import(_topWrapper.ReturnType)));
+
+            var newWapperPoint = new WrapperPointCut(argsParam, _lastWrapper, newWapper.Body.GetILProcessor(), newWapper.Body.Instructions.First());
+
+            _lastWrapper = newWapper;
+            _wrapperNo++;
+
+            _topWrapperCallSite.InjectionPoint.Operand = newWapper;
+
+            return newWapperPoint;
         }
 
-        public void SetVariableFromStack(Instruction injectionPoint, VariableReference var)
+        #endregion Methods
+
+        #region Protected Methods
+
+        protected PointCut FindBaseClassCtorCall()
         {
-            Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(OpCodes.Stloc, var.Index));
+            var md = TargetMethod;
+            var proc = md.Body.GetILProcessor();
+
+            if (!md.IsConstructor)
+                throw new Exception(md.ToString() + " is not ctor.");
+
+            if (md.DeclaringType.IsValueType)
+                return new PointCut(proc, md.Body.Instructions.First());
+
+            var point = md.Body.Instructions.FirstOrDefault(
+                i => i != null && i.OpCode == OpCodes.Call && i.Operand is MethodReference
+                    && ((MethodReference)i.Operand).Resolve().IsConstructor
+                    && ((MethodReference)i.Operand).DeclaringType.IsTypeOf(md.DeclaringType.BaseType));
+
+            if (point == null)
+                throw new Exception("Cannot find base class ctor call");
+
+            return new PointCut(proc, point.Next);
         }
 
-        public void LoadFieldOntoStack(Instruction injectionPoint, FieldReference field)
+        protected PointCut GetMethodOriginalEntryPoint()
         {
-            var fieldRef = (FieldReference)CreateMemberReference(field);
+            var processor = TargetMethod.Body.GetILProcessor();
 
-            if (field.Resolve().IsStatic)
-            {
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldsfld, fieldRef));
-            }
-            else
-            {
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldarg_0));
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldfld, fieldRef));
-            }
+            if (TargetMethod.Body.Instructions.Count == 1) //if code is optimized
+                processor.InsertBefore(TargetMethod.Body.Instructions.First(), processor.Create(OpCodes.Nop));
+
+            return new PointCut(processor, TargetMethod.Body.Instructions.First());
         }
 
-        public void SetFieldFromStack(Instruction injectionPoint, FieldReference field, Action loadValueToStack)
+        protected void MarkCompilerGenerated(ICustomAttributeProvider member)
         {
-            var fieldRef = (FieldReference)CreateMemberReference(field);
+            if (member.CustomAttributes.Any(ca => ca.IsAttributeOfType<CompilerGeneratedAttribute>()))
+                return;
 
-            if (field.Resolve().IsStatic)
-            {
-                loadValueToStack();
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Stsfld, fieldRef));
-            }
-            else
-            {
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldarg_0));
-                loadValueToStack();
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Stfld, fieldRef));
-            }
+            var constructor = TargetMethod.Module.Import(typeof(CompilerGeneratedAttribute)).Resolve()
+                .Methods.First(m => m.IsConstructor && !m.IsStatic);
+
+            member.CustomAttributes.Add(new CustomAttribute(TargetMethod.Module.Import(constructor)));
         }
 
-        public void LoadSelfOntoStack(Instruction injectionPoint)
+        protected Instruction SetupSingleReturnPoint(Instruction suggestedSingleReturnPoint, VariableReference resultVar)
         {
-            Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldarg_0));
-        }
+            var proc = TargetMethod.Body.GetILProcessor();
 
-        public void InjectMethodCall(Instruction injectionPoint, MethodDefinition method, object[] arguments)
-        {
-            if (method.Parameters.Count != arguments.Length)
-                throw new ArgumentException("Arguments count mismatch", "arguments");
-
-            for (int i = 0; i < method.Parameters.Count; i++)
-                LoadCallArgument(injectionPoint, arguments[i], method.Parameters[i].ParameterType);
-
-            OpCode code;
-
-            if (method.IsConstructor)
-                code = OpCodes.Newobj;
-            else if (method.IsVirtual)
-                code = OpCodes.Callvirt;
-            else
-                code = OpCodes.Call;
-
-            var methodRef = (MethodReference)CreateMemberReference(method);
-            Processor.InsertBefore(injectionPoint, Processor.Create(code, methodRef));
-        }
-
-        protected void LoadCallArgument(Instruction injectionPoint, object arg, TypeReference expectedType)
-        {
-            var module = Processor.Body.Method.Module;
-
-            if (arg is ParameterDefinition)
-            {
-                var parameter = (ParameterDefinition)arg;
-
-                Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(OpCodes.Ldarg, parameter.Index + 1));
-
-                if (parameter.ParameterType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
-                    Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Box, module.Import(parameter.ParameterType)));
-            }
-            else if (arg is VariableDefinition)
-            {
-                var var = (VariableDefinition)arg;
-
-                if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.Resolve().IsTypeOf(var.VariableType))
-                    throw new ArgumentException("Argument type mismatch");
-
-                Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
-
-                if (var.VariableType.IsValueType && expectedType.IsTypeOf(module.TypeSystem.Object))
-                    Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Box, module.Import(var.VariableType)));
-            }
-            else if (arg is string)
-            {
-                if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(module.TypeSystem.String))
-                    throw new ArgumentException("Argument type mismatch");
-
-                var str = (string)arg;
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldstr, str));
-            }
-            else if (arg is CustomAttribute)
-            {
-                var ca = (CustomAttribute)arg;
-                var catype = ca.AttributeType.Resolve();
-
-                InjectMethodCall(injectionPoint, ca.Constructor.Resolve(), ca.ConstructorArguments.Cast<object>().ToArray());
-
-                if (ca.Properties.Any() || ca.Fields.Any())
-                {
-                    var attrvar = new VariableDefinition(RoutableAttributeVariableName, (TypeReference)CreateMemberReference(ca.AttributeType));
-                    TargetMethod.Body.Variables.Add(attrvar);
-                    Processor.Body.InitLocals = true;
-
-                    SetVariableFromStack(injectionPoint, attrvar);
-
-                    foreach (var namedArg in ca.Properties)
-                    {
-                        LoadVariableOntoStack(injectionPoint, attrvar);
-                        InjectMethodCall(injectionPoint, catype.Properties.First(p => p.Name == namedArg.Name).SetMethod, new object[] { namedArg.Argument });
-                    }
-
-                    foreach (var namedArg in ca.Fields)
-                    {
-                        LoadVariableOntoStack(injectionPoint, attrvar);
-
-                        var field = catype.Fields.First(p => p.Name == namedArg.Name);
-                        LoadCallArgument(injectionPoint, namedArg.Argument, field.FieldType);
-
-                        Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Stfld, field));
-                    }
-
-                    LoadVariableOntoStack(injectionPoint, attrvar);
-                }
-            }
-            else if (arg is CustomAttributeArgument)
-            {
-                var caa = (CustomAttributeArgument)arg;
-
-                if (caa.Type.IsArray)
-                {
-                    if (!expectedType.IsTypeOf(module.TypeSystem.Object) &&
-                        !expectedType.IsTypeOf(new ArrayType(module.TypeSystem.Object)))
-                        throw new ArgumentException("Argument type mismatch");
-
-                    LoadArray(injectionPoint, caa.Value, caa.Type.GetElementType(), expectedType);
-                }
-                else if (caa.Value is CustomAttributeArgument || caa.Type.IsTypeOf(module.TypeSystem.String))
-                {
-                    LoadCallArgument(injectionPoint, caa.Value, expectedType);
-                }
-                else
-                {
-                    LoadValueTypedArgument(injectionPoint, Processor, caa.Value, caa.Type, expectedType);
-                }
-            }
-            else if (arg == Markers.InstanceSelfMarker)
-            {
-                if (!expectedType.IsTypeOf(module.TypeSystem.Object))
-                    throw new ArgumentException("Argument type mismatch");
-
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldarg_0));
-            }
-            else if (arg == Markers.DefaultMarker)
-            {
-                if (!expectedType.IsTypeOf(module.TypeSystem.Void))
-                {
-                    if (expectedType.IsValueType)
-                        Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldc_I4_0));
-                    else
-                        Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldnull));
-                }
-            }
-            else if (arg is TypeReference)
-            {
-                var typeOfType = module.TypeSystem.ResolveType(typeof(Type));
-
-                if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(typeOfType))
-                    throw new ArgumentException("Argument type mismatch");
-
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Ldtoken, (TypeReference)arg));
-                Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Call, module.Import(typeOfType.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle"))));
-            }
-            else if (arg.GetType().IsValueType)
-            {
-                var type = module.TypeSystem.ResolveType(arg.GetType());
-                LoadValueTypedArgument(injectionPoint, Processor, arg, type, expectedType);
-            }
-            else if (arg is Array)
-            {
-                var elementType = arg.GetType().GetElementType();
-
-                if (elementType == typeof(ParameterDefinition))
-                    elementType = typeof(object);
-
-                LoadArray(injectionPoint, arg, module.TypeSystem.ResolveType(elementType), expectedType);
-            }
-            else
-            {
-                throw new NotSupportedException("Argument type of " + arg.GetType().ToString() + " is not supported");
-            }
-        }
-
-        private MemberReference CreateMemberReference(MemberReference member)
-        {
-            if (member is TypeReference)
-            {
-                return TargetMethod.Module.Import((TypeReference)member);
-            }
-
-            var declaringType = TargetMethod.Module.Import(member.DeclaringType);
-            var generic = member.DeclaringType as IGenericParameterProvider;
-
-            if (generic != null && generic.HasGenericParameters)
-            {
-                declaringType = new GenericInstanceType(TargetMethod.Module.Import(member.DeclaringType));
-                generic.GenericParameters.ToList()
-                    .ForEach(tr => ((IGenericInstance)declaringType).GenericArguments.Add(TargetMethod.Module.Import(tr)));
-            }
-
-            var fieldReference = member as FieldReference;
-            if (fieldReference != null)
-                return new FieldReference(member.Name, TargetMethod.Module.Import(fieldReference.FieldType), declaringType);
-
-            var methodReference = member as MethodReference;
-            if (methodReference != null)
-            {
-                //TODO: more fields may need to be copied 
-                var methodReferenceCopy = new MethodReference(member.Name, TargetMethod.Module.Import(methodReference.ReturnType), declaringType)
-                {
-                    HasThis = methodReference.HasThis,
-                    ExplicitThis = methodReference.ExplicitThis,
-                    CallingConvention = methodReference.CallingConvention
-                };
-
-                foreach (var parameter in methodReference.Parameters)
-                {
-                    methodReferenceCopy.Parameters.Add(new ParameterDefinition(TargetMethod.Module.Import(parameter.ParameterType)));
-                }
-
-                return methodReferenceCopy;
-            }
-
-            throw new NotSupportedException("Not supported member type " + member.GetType().FullName);
-        }
-
-        private void SetupCatchBlock()
-        {
-            var exceptionType = TargetMethod.Module.TypeSystem.ResolveType(typeof(Exception));
-            _exceptionVar = new VariableDefinition(ExceptionVariableName, exceptionType);
-            Processor.Body.Variables.Add(_exceptionVar);
-            Processor.Body.InitLocals = true;
-
-            var setVarInst = Processor.SafeInsertAfter(OriginalCodeReturnPoint, Processor.CreateOptimized(OpCodes.Stloc, _exceptionVar.Index));
-            _exceptionPoint = Processor.SafeInsertAfter(setVarInst, Processor.Create(OpCodes.Rethrow));
-
-            OriginalCodeReturnPoint = Processor.SafeReplace(OriginalCodeReturnPoint, Processor.Create(OpCodes.Leave, ReturnPoint)); //todo:: optimize
-
-            Processor.Body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Catch)
-            {
-                TryStart = OriginalEntryPoint,
-                TryEnd = OriginalCodeReturnPoint.Next,
-                HandlerStart = OriginalCodeReturnPoint.Next,
-                HandlerEnd = _exceptionPoint.Next,
-                CatchType = exceptionType
-            });
-        }
-
-        private void SetupEntryPoints()
-        {
-            OriginalEntryPoint = TargetMethod.IsConstructor && !TargetMethod.IsStatic ?
-                TargetMethod.FindBaseClassCtorCall() :
-                GetMethodOriginalEntryPoint();
-
-            EntryPoint = Processor.SafeInsertBefore(OriginalEntryPoint, Processor.Create(OpCodes.Nop));
-        }
-
-        private Instruction GetMethodOriginalEntryPoint()
-        {
-            if (TargetMethod.Body.Instructions.Count == 1) //optimized code            
-                Processor.SafeInsertBefore(TargetMethod.Body.Instructions.First(), Processor.Create(OpCodes.Nop));
-
-            return TargetMethod.Body.Instructions.First();
-        }
-
-        private void SetupReturnPoints()
-        {
-            ReturnPoint = Processor.Create(OpCodes.Nop);
-
-            OriginalCodeReturnPoint = SetupSingleReturnPoint(Processor.Create(OpCodes.Br, ReturnPoint)); //todo:: optimize
-            Processor.SafeAppend(ReturnPoint);
-
-            if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
-            {
-                ExitPoint = Processor.SafeAppend(Processor.CreateOptimized(OpCodes.Ldloc, MethodResultVariable.Index));
-                Processor.SafeAppend(Processor.Create(OpCodes.Ret));
-            }
-            else
-            {
-                ExitPoint = Processor.SafeAppend(Processor.Create(OpCodes.Ret));
-            }
-        }
-
-        private Instruction SetupSingleReturnPoint(Instruction suggestedSingleReturnPoint)
-        {
-            var rets = Processor.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList();
+            var rets = proc.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList();
 
             if (rets.Count == 1)
             {
                 if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
-                    Processor.SafeInsertBefore(rets.First(), Processor.CreateOptimized(OpCodes.Stloc, MethodResultVariable.Index));
+                    proc.SafeInsertBefore(rets.First(), proc.CreateOptimized(OpCodes.Stloc, resultVar.Index));
 
-                return Processor.SafeReplace(rets.First(), suggestedSingleReturnPoint);
+                return proc.SafeReplace(rets.First(), suggestedSingleReturnPoint);
             }
 
             foreach (var i in rets)
             {
                 if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
-                    Processor.SafeInsertBefore(i, Processor.CreateOptimized(OpCodes.Stloc, MethodResultVariable.Index));
+                    proc.SafeInsertBefore(i, proc.CreateOptimized(OpCodes.Stloc, resultVar.Index));
 
-                Processor.SafeReplace(i, Processor.Create(OpCodes.Br, suggestedSingleReturnPoint)); //todo:: optimize
+                proc.SafeReplace(i, proc.Create(OpCodes.Br, suggestedSingleReturnPoint)); //todo:: optimize
             }
 
-            Processor.SafeAppend(suggestedSingleReturnPoint);
+            proc.SafeAppend(suggestedSingleReturnPoint);
 
             return suggestedSingleReturnPoint;
         }
 
-        private void LoadArray(Instruction injectionPoint, object args, TypeReference targetElementType, TypeReference expectedType)
+        #endregion Protected Methods
+
+        #region Private Methods
+
+        private MethodDefinition CreateUnwrapMethod(MethodDefinition originalMethod)
         {
-            var module = Processor.Body.Method.Module;
+            var unwrapMethod = new MethodDefinition("__a$u_" + originalMethod.Name, originalMethod.Attributes, TypeSystem.Object);
+            originalMethod.DeclaringType.Methods.Add(unwrapMethod);
+            MarkCompilerGenerated(unwrapMethod);
 
-            if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(new ArrayType(module.TypeSystem.Object)))
-                throw new ArgumentException("Argument type mismatch");
+            var argsParam = new ParameterDefinition(TypeSystem.MakeArrayType(TypeSystem.Object));
+            unwrapMethod.Parameters.Add(argsParam);
 
-            var parameters = ((Array)args).Cast<object>().ToArray();
+            var unwrapPoint = PointCut.FromEmptyBody(unwrapMethod.Body, OpCodes.Ret);
 
-            var elementType = module.Import(targetElementType.Resolve());
+            unwrapPoint.LoadSelfOntoStack();
 
-            Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(OpCodes.Ldc_I4, parameters.Length));
-            Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Newarr, elementType));
-
-            if (parameters.Length > 0)
+            foreach (var parameter in originalMethod.Parameters)
             {
-                Processor.Body.InitLocals = true;
+                unwrapPoint.LoadParameterOntoStack(argsParam);
+                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldc_I4, parameter.Index));
+                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldelem_Ref));
 
-                var paramsArrayVar = new VariableDefinition(new ArrayType(elementType));
-                Processor.Body.Variables.Add(paramsArrayVar);
-
-                Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(OpCodes.Stloc, paramsArrayVar.Index));
-
-                for (var i = 0; i < parameters.Length; i++)
-                {
-                    Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
-                    Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(OpCodes.Ldc_I4, i));
-
-                    LoadCallArgument(injectionPoint, parameters[i], module.TypeSystem.Object);
-
-                    Processor.InsertBefore(injectionPoint, Processor.Create(OpCodes.Stelem_Ref));
-                }
-
-                Processor.InsertBefore(injectionPoint, Processor.CreateOptimized(OpCodes.Ldloc, paramsArrayVar.Index));
+                if (parameter.ParameterType.IsValueType)
+                    unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Unbox_Any, TargetMethod.Module.Import(parameter.ParameterType)));
+                else if (parameter.ParameterType != TypeSystem.Object)
+                    unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Castclass, TargetMethod.Module.Import(parameter.ParameterType)));
             }
+
+            unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Call, TargetMethod.Module.Import(originalMethod)));
+
+            if (originalMethod.ReturnType == TypeSystem.Void)
+                unwrapPoint.LoadValueOntoStack<object>(null);
+            else if (originalMethod.ReturnType.IsValueType)
+                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Box, TargetMethod.Module.Import(originalMethod.ReturnType)));
+
+            return unwrapMethod;
         }
 
-        private void LoadValueTypedArgument(Instruction injectionPoint, ILProcessor processor, object arg, TypeReference type, TypeReference expectedType)
+        private MethodDefinition WrapOriginalMethod()
         {
-            if (!arg.GetType().IsValueType)
-                throw new NotSupportedException("Only value types are supported.");
+            var originalMethod = new MethodDefinition("__a$o_" + TargetMethod.Name, TargetMethod.Attributes, TargetMethod.ReturnType);
+            originalMethod.Body = TargetMethod.Body;
 
-            var module = processor.Body.Method.Module;
+            foreach (var parameter in TargetMethod.Parameters)
+                originalMethod.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, TargetMethod.Module.Import(parameter.ParameterType)));
 
-            if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(type))
-                throw new ArgumentException("Argument type mismatch");
+            TargetMethod.DeclaringType.Methods.Add(originalMethod);
 
-            if (arg is long || arg is ulong || arg is double)
+            //erase old body
+            TargetMethod.Body = new MethodBody(TargetMethod);
+
+            var wapper = TargetMethod;
+            TargetMethod = originalMethod;
+
+            return wapper;
+        }
+
+        private void SetupAroundInfrastructure()
+        {
+            _topWrapper = WrapOriginalMethod();
+            _lastWrapper = CreateUnwrapMethod(_topWrapper);
+
+            var topWrapperCut = PointCut.FromEmptyBody(_topWrapper.Body, OpCodes.Ret);
+
+            //var args = new object[]{ arg1, agr2 }
+            topWrapperCut.LoadCallArgument(_topWrapper.Parameters.ToArray(), TypeSystem.ObjectArray);
+            var argsvar = topWrapperCut.CreateVariableFromStack(TypeSystem.ObjectArray);
+
+            // ExecExternalWrapper
+            topWrapperCut.LoadSelfOntoStack();
+            _topWrapperCallSite = topWrapperCut.InjectMethodCall(_lastWrapper, new object[] { argsvar });
+
+            if (_topWrapper.ReturnType == TypeSystem.Void)
+                topWrapperCut.CreateVariableFromStack(TypeSystem.Object);
+            else if (_topWrapper.ReturnType.IsValueType)
+                topWrapperCut.InsertBefore(topWrapperCut.CreateInstruction(OpCodes.Unbox_Any, TargetMethod.Module.Import(TargetMethod.ReturnType)));
+            else if (_topWrapper.ReturnType != TypeSystem.Object)
+                topWrapperCut.InsertBefore(topWrapperCut.CreateInstruction(OpCodes.Castclass, TargetMethod.Module.Import(TargetMethod.ReturnType)));
+        }
+
+        private void SetupEntryPoints()
+        {
+            if (_originalEntryPoint != null || _entryPoint != null)
+                throw new InvalidOperationException("Something went wrong");
+
+            _originalEntryPoint = TargetMethod.IsConstructor && !TargetMethod.IsStatic ?
+                FindBaseClassCtorCall() :
+                GetMethodOriginalEntryPoint();
+
+            _entryPoint = OriginalEntryPoint.InsertBefore(Processor.Create(OpCodes.Nop));
+        }
+
+        private void SetupReturnPoints()
+        {
+            if (_returnPoint != null || _originalReturnPoint != null)
+                throw new InvalidOperationException("Something went wrong");
+
+            SetupReturnVariable();
+
+            var singleReturnPoint = Processor.Create(OpCodes.Nop);
+            _originalReturnPoint = new PointCut(Processor, SetupSingleReturnPoint(Processor.Create(OpCodes.Br, singleReturnPoint), MethodResultVariable)); //todo:: optimize
+            Processor.SafeAppend(singleReturnPoint);
+
+            if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
             {
-                var rawData = GetRawValueType(arg, 8);
-                var val = BitConverter.ToInt64(rawData, 0);
-
-                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldc_I8, val));
+                _returnPoint = new PointCut(Processor, Processor.SafeAppend(Processor.CreateOptimized(OpCodes.Ldloc, MethodResultVariable.Index)));
+                Processor.SafeAppend(Processor.Create(OpCodes.Ret));
             }
             else
             {
-                var rawData = GetRawValueType(arg, 4);
-                var val = BitConverter.ToInt32(rawData, 0);
-
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldc_I4, val));
+                _returnPoint = new PointCut(Processor, Processor.SafeAppend(Processor.Create(OpCodes.Ret)));
             }
-
-            if (expectedType.IsTypeOf(module.TypeSystem.Object))
-                processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Box, module.Import(type)));
         }
 
-        private byte[] GetRawValueType(object value, int @base = 0)
+        private void SetupReturnVariable()
         {
-            byte[] rawData = new byte[@base == 0 ? Marshal.SizeOf(value) : @base];
+            if (_resultVar != null)
+                throw new InvalidOperationException("Something went wrong");
 
-            GCHandle handle = GCHandle.Alloc(rawData, GCHandleType.Pinned);
-            Marshal.StructureToPtr(value, handle.AddrOfPinnedObject(), false);
-            handle.Free();
+            if (TargetMethod.ReturnType.IsTypeOf(typeof(void)) && !TargetMethod.IsSetter)
+                return;
 
-            return rawData;
+            //todo:: optimize for compiller generated (get backing field)
+            if (TargetMethod.IsSetter)
+            {
+                var prop = TargetMethod.DeclaringType.Properties.First(p => p.SetMethod == TargetMethod);
+
+                EntryPoint.LoadSelfOntoStack();
+                EntryPoint.InjectMethodCall(prop.GetMethod, new object[] { });
+
+                _resultVar = EntryPoint.CreateVariableFromStack(prop.GetMethod.ReturnType, MethodResultVariableName);
+            }
+            else
+            {
+                _resultVar = OriginalEntryPoint.CreateVariable(TargetMethod.ReturnType, MethodResultVariableName);
+            }
         }
+
+        #endregion Private Methods
     }
 }

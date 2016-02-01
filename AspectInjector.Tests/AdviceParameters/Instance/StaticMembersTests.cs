@@ -1,7 +1,7 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AspectInjector.Tests.AdviceArguments.Instance
+namespace AspectInjector.Tests.AdviceParameters.Instance
 {
     [TestClass]
     public class StaticMembersTests
@@ -13,7 +13,6 @@ namespace AspectInjector.Tests.AdviceArguments.Instance
             TargetClass.TestMethod();
             Assert.IsTrue(Checker.Passed);
         }
-
 
         internal static class TargetClass
         {

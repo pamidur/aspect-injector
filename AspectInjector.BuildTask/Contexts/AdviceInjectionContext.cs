@@ -16,10 +16,5 @@ namespace AspectInjector.BuildTask.Contexts
         public InjectionPoints InjectionPoint { get; set; }
 
         public AspectContext AspectContext { get; set; }
-
-        public bool IsAbortable
-        {
-            get { return AdviceArgumentsSources != null && AdviceArgumentsSources.Any(s => s == AdviceArgumentSource.AbortFlag); }
-        }
     }
 }

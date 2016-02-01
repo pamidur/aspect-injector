@@ -1,5 +1,4 @@
 ﻿using Mono.Cecil;
-using Mono.Cecil.Cil;
 using System;
 using System.Linq;
 
@@ -7,23 +6,40 @@ namespace AspectInjector.BuildTask.Extensions
 {
     internal static class MemberExtensions
     {
-        public static Instruction FindBaseClassCtorCall(this MethodDefinition md)
+        public static MethodReference MakeGeneric(this MethodReference self, TypeReference owner, params TypeReference[] arguments)
         {
-            if (!md.IsConstructor)
-                throw new Exception(md.ToString() + " is not ctor.");
+            MethodReference reference = null;
 
-            if (md.DeclaringType.IsValueType)
-                return md.Body.Instructions.First();
+            if (arguments != null && arguments.Length > 0)
+            {
+                if (self.GenericParameters.Count != arguments.Length)
+                    throw new ArgumentException("Generic arguments number mismatch", "arguments");
 
-            var point = md.Body.Instructions.FirstOrDefault(
-                i => i != null && i.OpCode == OpCodes.Call && i.Operand is MethodReference
-                    && ((MethodReference)i.Operand).Resolve().IsConstructor
-                    && ((MethodReference)i.Operand).DeclaringType.IsTypeOf(md.DeclaringType.BaseType));
+                var generic = new GenericInstanceMethod(self);
 
-            if (point == null)
-                throw new Exception("Cannot find base class ctor call");
+                foreach (var arg in arguments)
+                    generic.GenericArguments.Add(arg);
 
-            return point.Next;
+                reference = generic;
+            }
+            else
+            {
+                reference = new MethodReference(self.Name, self.ReturnType)
+                {
+                    DeclaringType = owner,
+                    HasThis = self.HasThis,
+                    ExplicitThis = self.ExplicitThis,
+                    CallingConvention = self.CallingConvention,
+                };
+
+                foreach (var parameter in self.Parameters)
+                    reference.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType)); //may need add args to params
+            }
+
+            //foreach (var generic_parameter in self.GenericParameters)
+            //    reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
+
+            return reference;
         }
 
         public static bool IsInterfaceImplementation(this MethodDefinition method, MethodReference overridden)
@@ -51,6 +67,10 @@ namespace AspectInjector.BuildTask.Extensions
 
         public static bool SignatureMatches(this MethodReference methodReference1, MethodReference methodReference2)
         {
+            if (methodReference1.IsGenericInstance && methodReference2.HasGenericParameters)
+            {
+            }
+
             if (!methodReference1.MethodReturnType.ReturnType.IsTypeOf(methodReference2.MethodReturnType.ReturnType))
                 return false;
 

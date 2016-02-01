@@ -2,51 +2,55 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AspectInjector.Tests
+namespace AspectInjector.Tests.CustomAttributesTests
 {
     [TestClass]
-    public class CustomAttributesTests
+    public class TestCustomAttributes
     {
         [TestMethod]
         public void Custom_Attributes_Pass_Routable_Values()
         {
             Checker.Passed = false;
 
-            var a = new CustomAttributesTests_Target();
+            var a = new TestClass();
             a.Do();
 
             Assert.IsTrue(Checker.Passed);
 
-            var b = new CustomAttributesTests_AspectAttribute("111") { Value = "olo" };
+            var b = new TestAspectAttribute("111") { Value = "olo" };
         }
     }
 
-    [CustomAttributesTests_Aspect("TestHeader", Value = "ololo", data = 43)]
-    public class CustomAttributesTests_Target
+    [TestAspect("TestHeader", Value = "ololo", data = 43)]
+    public class TestClass
     {
-        public void Do() { }
+        public void Do()
+        {
+        }
     }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = true)]
-    [CustomAspectDefinition(typeof(CustomAttributesTests_Aspect))]
-    public class CustomAttributesTests_AspectAttribute : Attribute
+    [AspectDefinition(typeof(TestAspectImplementation))]
+    public class TestAspectAttribute : Attribute
     {
         public string Header { get; private set; }
+
         public string Value { get; set; }
+
         public int data = 42;
 
-        public CustomAttributesTests_AspectAttribute(string header)
+        public TestAspectAttribute(string header)
         {
             Header = header;
         }
     }
 
-    public class CustomAttributesTests_Aspect
+    public class TestAspectImplementation
     {
         [Advice(InjectionPoints.After, InjectionTargets.Method)]
-        public void AfterMethod([AdviceArgument(AdviceArgumentSource.RoutableData)] object data)
+        public void AfterMethod([AdviceArgument(AdviceArgumentSource.RoutableData)] object[] data)
         {
-            var a = (data as CustomAttributesTests_AspectAttribute);
+            var a = (data[0] as TestAspectAttribute);
 
             Checker.Passed = a.Header == "TestHeader" && a.Value == "ololo" && a.data == 43;
         }

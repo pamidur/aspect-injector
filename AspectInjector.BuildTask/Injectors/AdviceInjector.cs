@@ -1,120 +1,100 @@
 ﻿using AspectInjector.Broker;
+using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
+using AspectInjector.BuildTask.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.BuildTask.Injectors
 {
-    internal class AdviceInjector : InjectorBase, IAspectInjector<AdviceInjectionContext>
+    internal class AdviceInjector : IAspectInjector<AdviceInjectionContext>
     {
-        private static readonly string AbortFlagVariableName = "__a$_doAbortMethod";
-
         public void Inject(AdviceInjectionContext context)
         {
-            ILProcessor processor = context.AspectContext.TargetMethodContext.Processor;
             FieldReference aspectInstanceField = context.AspectContext.TargetTypeContext.GetOrCreateAspectReference(context.AspectContext);
 
-            if (context.IsAbortable)
+            PointCut injectionPoint;
+
+            switch (context.InjectionPoint)
             {
-                InjectMethodCallWithResultReplacement(
-                    context,
-                    context.AspectContext.TargetMethodContext.OriginalEntryPoint,
-                    context.AspectContext.TargetMethodContext.ReturnPoint,
-                    aspectInstanceField);
+                case InjectionPoints.Before:
+                    injectionPoint = context.AspectContext.TargetMethodContext.EntryPoint;
+                    break;
+
+                case InjectionPoints.After:
+                    injectionPoint = context.AspectContext.TargetMethodContext.ReturnPoint;
+                    break;
+
+                case InjectionPoints.Around:
+                    injectionPoint = context.AspectContext.TargetMethodContext.CreateNewAroundPoint();
+                    break;
+
+                default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
             }
-            else
-            {
-                object[] argumentValue;
-                Instruction injectionPoint;
 
-                switch (context.InjectionPoint)
-                {
-                    case InjectionPoints.Before:
-                        injectionPoint = context.AspectContext.TargetMethodContext.EntryPoint;
-                        argumentValue = ResolveArgumentsValues(
-                            context.AspectContext,
-                            context.AdviceArgumentsSources,
-                            context.InjectionPoint,
-                            returnObjectVariable: context.AspectContext.TargetMethodContext.MethodResultVariable)
-                            .ToArray();
-                        break;
+            var argumentValue = ResolveArgumentsValues(
+                        context.AspectContext,
+                        context.AdviceArgumentsSources)
+                        .ToArray();
 
-                    case InjectionPoints.After:
-                        injectionPoint = context.AspectContext.TargetMethodContext.ExitPoint;
-                        argumentValue = ResolveArgumentsValues(
-                            context.AspectContext,
-                            context.AdviceArgumentsSources,
-                            context.InjectionPoint,
-                            returnObjectVariable: context.AspectContext.TargetMethodContext.MethodResultVariable)
-                            .ToArray();
-                        break;
-
-                    case InjectionPoints.Exception:
-                        injectionPoint = context.AspectContext.TargetMethodContext.ExceptionPoint;
-                        argumentValue = ResolveArgumentsValues(
-                            context.AspectContext,
-                            context.AdviceArgumentsSources,
-                            context.InjectionPoint,
-                            exceptionVariable: context.AspectContext.TargetMethodContext.ExceptionVariable)
-                            .ToArray();
-                        break;
-
-                    default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
-                }
-
-                context.AspectContext.TargetMethodContext.LoadFieldOntoStack(injectionPoint, aspectInstanceField);
-                context.AspectContext.TargetMethodContext.InjectMethodCall(injectionPoint,
-                    context.AdviceMethod,
-                    argumentValue);
-            }
+            if (!aspectInstanceField.Resolve().IsStatic) injectionPoint.LoadSelfOntoStack();
+            injectionPoint.LoadFieldOntoStack(aspectInstanceField);
+            injectionPoint.InjectMethodCall(context.AdviceMethod, argumentValue);
         }
 
-        private void InjectMethodCallWithResultReplacement(AdviceInjectionContext context,
-            Instruction injectionPoint,
-            Instruction returnPoint,
-            FieldReference sourceMember)
+        protected IEnumerable<object> ResolveArgumentsValues(
+           AspectContext context,
+           List<AdviceArgumentSource> sources)
         {
-            MethodDefinition targetMethod = context.AspectContext.TargetMethodContext.TargetMethod;
-            MethodDefinition method = context.AdviceMethod;
-            ILProcessor processor = context.AspectContext.TargetMethodContext.Processor;
-
-            VariableDefinition abortFlagVariable = targetMethod.Body.Variables.SingleOrDefault(v => v.Name == AbortFlagVariableName);
-            if (abortFlagVariable == null)
+            foreach (var argumentSource in sources)
             {
-                abortFlagVariable = processor.CreateLocalVariable(
-                    injectionPoint,
-                    context.AspectContext.TargetMethodContext.TargetMethod.Module.TypeSystem.Boolean,
-                    false,
-                    AbortFlagVariableName);
+                switch (argumentSource)
+                {
+                    case AdviceArgumentSource.Instance:
+                        yield return context.TargetMethodContext.TargetMethod.IsStatic ? Markers.DefaultMarker : Markers.InstanceSelfMarker;
+                        break;
+
+                    case AdviceArgumentSource.Type:
+                        yield return context.TargetTypeContext.TypeDefinition;
+                        break;
+
+                    case AdviceArgumentSource.Method:
+                        yield return context.TargetMethodContext.TargetMethod;
+                        break;
+
+                    case AdviceArgumentSource.Arguments:
+                        yield return Markers.AllArgsMarker;
+                        break;
+
+                    case AdviceArgumentSource.Name:
+                        yield return context.TargetName;
+                        break;
+
+                    case AdviceArgumentSource.TargetReturnType:
+                        yield return context.TargetMethodContext.TargetMethod.ReturnType;
+                        break;
+
+                    case AdviceArgumentSource.ReturnValue:
+                        yield return context.TargetMethodContext.MethodResultVariable ?? Markers.DefaultMarker;
+                        break;
+
+                    case AdviceArgumentSource.RoutableData:
+                        yield return context.AspectRoutableData ?? Markers.DefaultMarker;
+                        break;
+
+                    case AdviceArgumentSource.Target:
+                        yield return Markers.TargetFuncMarker;
+                        break;
+
+                    default:
+                        throw new NotSupportedException(argumentSource.ToString() + " is not supported (yet?)");
+                }
             }
-            else
-            {
-                processor.SetLocalVariable(abortFlagVariable, injectionPoint, false);
-            }
-
-            context.AspectContext.TargetMethodContext.LoadFieldOntoStack(injectionPoint, sourceMember);
-            context.AspectContext.TargetMethodContext.InjectMethodCall(
-                injectionPoint,
-                method,
-                ResolveArgumentsValues(context.AspectContext, context.AdviceArgumentsSources, context.InjectionPoint, abortFlagVariable: abortFlagVariable, returnObjectVariable: context.AspectContext.TargetMethodContext.MethodResultVariable).ToArray());
-
-            if (!method.ReturnType.IsTypeOf(typeof(void)))
-            {
-                processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Stloc, context.AspectContext.TargetMethodContext.MethodResultVariable.Index));
-            }
-
-            processor.InsertBefore(injectionPoint, processor.CreateOptimized(OpCodes.Ldloc, abortFlagVariable.Index));
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ldc_I4_1));
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Ceq));
-
-            Instruction continuePoint = processor.Create(OpCodes.Nop);
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Brfalse, continuePoint)); //todo::optimize
-            processor.InsertBefore(injectionPoint, processor.Create(OpCodes.Br, returnPoint)); //todo::optimize
-            processor.InsertBefore(injectionPoint, continuePoint);
         }
     }
 }

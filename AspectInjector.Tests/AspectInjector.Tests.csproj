@@ -55,23 +55,28 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="AdviceArguments\Instance\NonStaticMembersTests.cs" />
-    <Compile Include="AdviceArguments\Instance\StaticMembersTests.cs" />
-    <Compile Include="AdviceArguments\Type\Tests.cs" />
+    <Compile Include="AdviceParameters\Arguments\NotStaticMembersBasicTests.cs" />
+    <Compile Include="AdviceParameters\Arguments\StaticMembersBasicTests.cs" />
+    <Compile Include="AdviceParameters\Instance\NonStaticMembersTests.cs" />
+    <Compile Include="AdviceParameters\Instance\StaticMembersTests.cs" />
+    <Compile Include="AdviceParameters\Type\Tests.cs" />
     <Compile Include="AdviceInjectionAfterTests.cs" />
     <Compile Include="AdviceInjectionBeforeTests.cs" />
     <Compile Include="AdviceOrderedInjectionBeforeTests.cs" />
+    <Compile Include="AroundTests\BasicAroundTests.cs" />
     <Compile Include="AspectFactoryMethodTests.cs" />
     <Compile Include="AspectScopeTests.cs" />
     <Compile Include="Generics\AdviceInjectionGenericTests.cs" />
     <Compile Include="Generics\AdviceInjectionOpenGenericTests.cs" />
     <Compile Include="ImportingTypesTests.cs" />
+    <Compile Include="AsyncTests\AsyncTests.cs" />
+    <Compile Include="CustomAttributes\MultipleCustomAttributesTests.cs" />
+    <Compile Include="FiltersTests\GeneralTests.cs" />
     <Compile Include="InterfaceInjectionInheritanceTests.cs" />
     <Compile Include="InterfaceInjectionTests.cs" />
     <Compile Include="NestedClassesTests.cs" />
     <Compile Include="PETest.cs" />
-    <Compile Include="RoutableDataTests.cs" />
-    <Compile Include="CustomAttributesTests.cs" />
+    <Compile Include="CustomAttributes\CustomAttributesTests.cs" />
     <Compile Include="SetterReturnValueTests.cs" />
     <Compile Include="StaticMembersTests.cs" />
     <Compile Include="Utils\Checker.cs" />

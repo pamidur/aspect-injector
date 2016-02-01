@@ -7,6 +7,18 @@ namespace AspectInjector.BuildTask.Extensions
 {
     internal static class TypeExtensions
     {
+        public static TypeReference MakeGenericType(this TypeReference self, params TypeReference[] arguments)
+        {
+            if (self.GenericParameters.Count != arguments.Length)
+                throw new ArgumentException();
+
+            var instance = new GenericInstanceType(self);
+            foreach (var argument in arguments)
+                instance.GenericArguments.Add(argument);
+
+            return instance;
+        }
+
         public static bool BelongsToAssembly(this TypeReference tr, string publicKey)
         {
             var td = tr.Resolve();
@@ -82,7 +94,7 @@ namespace AspectInjector.BuildTask.Extensions
 
         public static bool IsTypeOf(this TypeReference typeReference, Type type)
         {
-            var resolvedType = typeReference.Module.TypeSystem.ResolveType(type);
+            var resolvedType = typeReference.Module.Import(type);
             return typeReference.IsTypeOf(resolvedType);
         }
 
@@ -93,7 +105,7 @@ namespace AspectInjector.BuildTask.Extensions
             //todo: find out correct way to compare generic params
 
             if (typeReference1.IsGenericParameter && typeReference2.IsGenericParameter)
-                return typeReference1 == typeReference2; 
+                return typeReference1 == typeReference2;
 
             if (typeReference1.IsGenericParameter || typeReference2.IsGenericParameter)
                 return false;

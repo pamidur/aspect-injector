@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace AspectInjector.BuildTask.Injectors
 {
-    internal class InterfaceInjector : InjectorBase, IAspectInjector<InterfaceInjectionContext>
+    internal class InterfaceInjector : IAspectInjector<InterfaceInjectionContext>
     {
         public void Inject(InterfaceInjectionContext context)
         {
@@ -88,8 +88,9 @@ namespace AspectInjector.BuildTask.Injectors
 
                 var aspectField = context.AspectContext.TargetTypeContext.GetOrCreateAspectReference(context.AspectContext);
 
-                ctx.LoadFieldOntoStack(ctx.EntryPoint, aspectField);
-                ctx.InjectMethodCall(ctx.EntryPoint, interfaceMethodDefinition, md.Parameters.ToArray());
+                if (!aspectField.Resolve().IsStatic) ctx.EntryPoint.LoadSelfOntoStack();
+                ctx.EntryPoint.LoadFieldOntoStack(aspectField);
+                ctx.EntryPoint.InjectMethodCall(interfaceMethodDefinition, md.Parameters.ToArray());
             }
 
             return md;

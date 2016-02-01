@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.BuildTask.Contexts
@@ -13,7 +14,7 @@ namespace AspectInjector.BuildTask.Contexts
         {
         }
 
-        public object AspectRoutableData { get; set; }
+        public object[] AspectRoutableData { get; set; }
 
         public MethodDefinition AdviceClassFactory
         {

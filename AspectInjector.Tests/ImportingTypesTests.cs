@@ -8,13 +8,13 @@ namespace AspectInjector.Tests
     [TestClass]
     public class ImportingTypesTests
     {
-
     }
 
     [Notify]
     public class AppViewModel
     {
         public string FirstName { get; set; }
+
         public string LastName { get; set; }
 
         public string FullName
@@ -26,38 +26,27 @@ namespace AspectInjector.Tests
         }
     }
 
-    [CustomAspectDefinition(typeof(NotifyPropertyChangedAspect))]
-    class NotifyAttribute : Attribute
+    [AspectDefinition(typeof(NotifyPropertyChangedAspect))]
+    internal class NotifyAttribute : Attribute
     {
         public string NotifyAlso { get; set; }
     }
 
-
     [AdviceInterfaceProxy(typeof(INotifyPropertyChanged))]
-    class NotifyPropertyChangedAspect : INotifyPropertyChanged
+    internal class NotifyPropertyChangedAspect : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
 
-        [Advice(InjectionPoints.Before, InjectionTargets.Setter)]
-        public void CheckIfUpdated(
-            [AdviceArgument(AdviceArgumentSource.TargetValue)] object oldvalue,
-            [AdviceArgument(AdviceArgumentSource.TargetArguments)] object[] newvalue,
-            [AdviceArgument(AdviceArgumentSource.AbortFlag)] ref bool abort
-            )
-        {
-            abort = oldvalue.Equals(newvalue[0]);
-        }
-
-        [Advice(InjectionPoints.After,InjectionTargets.Setter)]
+        [Advice(InjectionPoints.After, InjectionTargets.Setter)]
         public void AfterSetter(
             [AdviceArgument(AdviceArgumentSource.Instance)] object source,
-            [AdviceArgument(AdviceArgumentSource.TargetName)] string propName,
-            [AdviceArgument(AdviceArgumentSource.RoutableData)] object data
+            [AdviceArgument(AdviceArgumentSource.Name)] string propName,
+            [AdviceArgument(AdviceArgumentSource.RoutableData)] object[] data
             )
         {
             PropertyChanged(source, new PropertyChangedEventArgs(propName));
 
-            var additionalPropName = (data as NotifyAttribute).NotifyAlso;
+            var additionalPropName = (data[0] as NotifyAttribute).NotifyAlso;
 
             if (!string.IsNullOrEmpty(additionalPropName))
             {

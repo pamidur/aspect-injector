@@ -7,7 +7,7 @@ namespace AspectInjector.BuildTask.Extensions
     {
         public static TypeReference ResolveType(this TypeSystem ts, Type type)
         {
-            if (type.Namespace != "System")
+            if (type.Namespace != "System" && type.Namespace != "System.Threading.Tasks")
                 throw new NotSupportedException("Cannot resolve type of " + type);
 
             if (type == typeof(object))
