@@ -103,7 +103,9 @@ namespace AspectInjector.BuildTask.Contexts
         }
 
         public MethodDefinition TargetMethod { get; private set; }
+
         protected ModuleContext ModuleContext { get; private set; }
+
         protected ExtendedTypeSystem TypeSystem { get { return ModuleContext.TypeSystem; } }
 
         #endregion Properties
@@ -243,7 +245,7 @@ namespace AspectInjector.BuildTask.Contexts
                     unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Castclass, TargetMethod.Module.Import(parameter.ParameterType)));
             }
 
-            unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Call, TargetMethod.Module.Import(originalMethod)));
+            unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Call, TargetMethod.Module.Import(TargetMethod)));
 
             if (originalMethod.ReturnType == TypeSystem.Void)
                 unwrapPoint.LoadValueOntoStack<object>(null);

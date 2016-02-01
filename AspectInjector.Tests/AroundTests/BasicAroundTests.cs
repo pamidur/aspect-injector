@@ -1,15 +1,12 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.Tests.AroundTests
 {
     [TestClass]
-    internal class BasicAroundTests
+    public class BasicAroundTests
     {
         [TestMethod]
         public void Aspect_Can_Wrap_Method_Around()
