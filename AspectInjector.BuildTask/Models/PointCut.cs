@@ -36,7 +36,9 @@ namespace AspectInjector.BuildTask.Models
         #region Properties
 
         public Instruction InjectionPoint { get; private set; }
+
         protected ModuleContext ModuleContext { get; private set; }
+
         protected ExtendedTypeSystem TypeSystem { get; private set; }
 
         #endregion Properties
@@ -72,6 +74,11 @@ namespace AspectInjector.BuildTask.Models
         }
 
         public Instruction CreateInstruction(OpCode opCode, FieldReference value)
+        {
+            return Processor.Create(opCode, value);
+        }
+
+        public Instruction CreateInstruction(OpCode opCode, VariableDefinition value)
         {
             return Processor.Create(opCode, value);
         }

@@ -2,6 +2,8 @@
 using AspectInjector.BuildTask.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
+using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -11,12 +13,14 @@ namespace AspectInjector.BuildTask.Contexts
     {
         public static void Rewrite(PointCut asyncVoidPc, MethodDefinition asyncVoidMethod, VariableDefinition taskVar)
         {
+            asyncVoidMethod.Body.SimplifyMacros();
+
             var asyncVoidMBType = asyncVoidMethod.Module.Import(typeof(AsyncVoidMethodBuilder));
             var asyncTaskMBType = asyncVoidMethod.Module.Import(typeof(AsyncTaskMethodBuilder));
 
             asyncVoidMethod.Body.Variables.First(v => v.VariableType.IsTypeOf(asyncVoidMBType)).VariableType = asyncTaskMBType;
 
-            OpCode? loadStateMachineCode = null;
+            Instruction loadStateMachineInst = null;
             FieldReference builderField = null;
 
             foreach (var inst in asyncVoidMethod.Body.Instructions)
@@ -36,7 +40,7 @@ namespace AspectInjector.BuildTask.Contexts
 
                     if (method.Name == "Create")
                     {
-                        loadStateMachineCode = inst.Previous.OpCode;
+                        loadStateMachineInst = inst.Previous;
                         builderField = (FieldReference)inst.Next.Operand;
                     }
                 }
@@ -46,31 +50,44 @@ namespace AspectInjector.BuildTask.Contexts
 
             stateMachine.Fields.First(v => v.FieldType.IsTypeOf(asyncVoidMBType)).FieldType = asyncTaskMBType;
 
-            foreach (var inst in stateMachine.Methods.First(m => m.Name == "MoveNext").Body.Instructions)
+            foreach (var md in stateMachine.Methods)
+                RewriteMethod(md);
+
+            var getTask = asyncTaskMBType.Resolve().Properties.First(p => p.Name == "Task").GetMethod;
+
+            if (loadStateMachineInst == null || builderField == null)
+                throw new NotSupportedException("Unsupported state machine implementation");
+
+            asyncVoidPc.InsertBefore(asyncVoidPc.CreateInstruction(loadStateMachineInst.OpCode, (VariableDefinition)loadStateMachineInst.Operand));
+            asyncVoidPc.InsertBefore(asyncVoidPc.CreateInstruction(OpCodes.Ldflda, builderField));
+
+            asyncVoidPc.InjectMethodCall(getTask, new object[] { });
+            asyncVoidPc.SetVariableFromStack(taskVar);
+
+            asyncVoidMethod.Body.OptimizeMacros();
+        }
+
+        private static void RewriteMethod(MethodDefinition method)
+        {
+            var asyncVoidMBType = method.Module.Import(typeof(AsyncVoidMethodBuilder));
+            var asyncTaskMBType = method.Module.Import(typeof(AsyncTaskMethodBuilder));
+
+            foreach (var inst in method.Body.Instructions)
             {
-                var method = inst.Operand as MethodReference;
+                var methodRef = inst.Operand as MethodReference;
 
-                if (method != null && method.DeclaringType.IsTypeOf(asyncVoidMBType))
+                if (methodRef != null && methodRef.DeclaringType.IsTypeOf(asyncVoidMBType))
                 {
-                    var newMethod = asyncVoidMethod.Module.Import(asyncTaskMBType.Resolve().Methods.First(m => m.Name == method.Name));
+                    var newMethod = method.Module.Import(asyncTaskMBType.Resolve().Methods.First(m => m.Name == methodRef.Name));
 
-                    if (method.IsGenericInstance)
+                    if (methodRef.IsGenericInstance)
                     {
-                        newMethod = newMethod.MakeGeneric(newMethod.DeclaringType, ((IGenericInstance)method).GenericArguments.ToArray());
+                        newMethod = newMethod.MakeGeneric(newMethod.DeclaringType, ((IGenericInstance)methodRef).GenericArguments.ToArray());
                     }
 
                     inst.Operand = newMethod;
                 }
             }
-
-            var getTask = asyncTaskMBType.Resolve().Properties.First(p => p.Name == "Task").GetMethod;
-
-            //should look into attribute for state machine type
-            asyncVoidPc.InsertBefore(asyncVoidPc.CreateInstruction(loadStateMachineCode.Value)); //replace with state machine var
-            asyncVoidPc.InsertBefore(asyncVoidPc.CreateInstruction(OpCodes.Ldflda, builderField));
-
-            asyncVoidPc.InjectMethodCall(getTask, new object[] { });
-            asyncVoidPc.SetVariableFromStack(taskVar);
         }
     }
 }
