@@ -3,6 +3,7 @@ using AspectInjector.BuildTask.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -119,8 +120,12 @@ namespace AspectInjector.BuildTask.Contexts
 
             var newWapper = new MethodDefinition("__a$w" + _wrapperNo + "_" + _topWrapper.Name, TargetMethod.Attributes, TypeSystem.Object);
 
-            TargetMethod.DeclaringType.Methods.Add(newWapper);
+            newWapper.NoInlining = false;
+
+            MarkDebuggerHidden(newWapper);
             MarkCompilerGenerated(newWapper);
+
+            TargetMethod.DeclaringType.Methods.Add(newWapper);
 
             var argsParam = new ParameterDefinition(TypeSystem.ObjectArray);
             newWapper.Parameters.Add(argsParam);
@@ -183,7 +188,29 @@ namespace AspectInjector.BuildTask.Contexts
             if (member.CustomAttributes.Any(ca => ca.IsAttributeOfType<CompilerGeneratedAttribute>()))
                 return;
 
-            var constructor = TargetMethod.Module.Import(typeof(CompilerGeneratedAttribute)).Resolve()
+            var constructor = TypeSystem.CompilerGeneratedAttribute.Resolve()
+                .Methods.First(m => m.IsConstructor && !m.IsStatic);
+
+            member.CustomAttributes.Add(new CustomAttribute(TargetMethod.Module.Import(constructor)));
+        }
+
+        protected void MarkDebuggerStepThrough(ICustomAttributeProvider member)
+        {
+            if (member.CustomAttributes.Any(ca => ca.IsAttributeOfType<DebuggerStepThroughAttribute>()))
+                return;
+
+            var constructor = TypeSystem.DebuggerStepThroughAttribute.Resolve()
+                .Methods.First(m => m.IsConstructor && !m.IsStatic);
+
+            member.CustomAttributes.Add(new CustomAttribute(TargetMethod.Module.Import(constructor)));
+        }
+
+        protected void MarkDebuggerHidden(ICustomAttributeProvider member)
+        {
+            if (member.CustomAttributes.Any(ca => ca.IsAttributeOfType<DebuggerHiddenAttribute>()))
+                return;
+
+            var constructor = TypeSystem.DebuggerHiddenAttribute.Resolve()
                 .Methods.First(m => m.IsConstructor && !m.IsStatic);
 
             member.CustomAttributes.Add(new CustomAttribute(TargetMethod.Module.Import(constructor)));
@@ -223,8 +250,13 @@ namespace AspectInjector.BuildTask.Contexts
         private MethodDefinition CreateUnwrapMethod(MethodDefinition originalMethod)
         {
             var unwrapMethod = new MethodDefinition("__a$u_" + originalMethod.Name, originalMethod.Attributes, TypeSystem.Object);
-            originalMethod.DeclaringType.Methods.Add(unwrapMethod);
+
+            unwrapMethod.NoInlining = false;
+
+            MarkDebuggerHidden(unwrapMethod);
             MarkCompilerGenerated(unwrapMethod);
+
+            originalMethod.DeclaringType.Methods.Add(unwrapMethod);
 
             var argsParam = new ParameterDefinition(TypeSystem.MakeArrayType(TypeSystem.Object));
             unwrapMethod.Parameters.Add(argsParam);
@@ -255,7 +287,21 @@ namespace AspectInjector.BuildTask.Contexts
         private MethodDefinition WrapOriginalMethod()
         {
             var originalMethod = new MethodDefinition("__a$o_" + TargetMethod.Name, TargetMethod.Attributes, TargetMethod.ReturnType);
-            originalMethod.Body = TargetMethod.Body;
+
+            //MarkDebuggerStepThrough(originalMethod);
+            ///MarkCompilerGenerated(originalMethod);
+
+            foreach (var inst in TargetMethod.Body.Instructions)
+                originalMethod.Body.Instructions.Add(inst);
+
+            foreach (var var in TargetMethod.Body.Variables)
+                originalMethod.Body.Variables.Add(new VariableDefinition(var.Name, var.VariableType));
+
+            if (originalMethod.Body.HasVariables)
+                originalMethod.Body.InitLocals = true;
+
+            foreach (var handler in TargetMethod.Body.ExceptionHandlers)
+                originalMethod.Body.ExceptionHandlers.Add(handler);
 
             foreach (var parameter in TargetMethod.Parameters)
                 originalMethod.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, TargetMethod.Module.Import(parameter.ParameterType)));
@@ -263,6 +309,7 @@ namespace AspectInjector.BuildTask.Contexts
             TargetMethod.DeclaringType.Methods.Add(originalMethod);
 
             //erase old body
+            TargetMethod.Body.Instructions.Clear();
             TargetMethod.Body = new MethodBody(TargetMethod);
 
             var wapper = TargetMethod;

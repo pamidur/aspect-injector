@@ -1,19 +1,21 @@
 ﻿using Mono.Cecil;
 using System;
+using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace AspectInjector.BuildTask.Models
 {
     public class ExtendedTypeSystem
     {
-        #region Fields
+        #region Private Fields
 
         private readonly ModuleDefinition _module;
 
-        #endregion Fields
+        #endregion Private Fields
 
-        #region Constructors
+        #region Public Constructors
 
         public ExtendedTypeSystem(ModuleDefinition md)
         {
@@ -49,11 +51,15 @@ namespace AspectInjector.BuildTask.Models
 
             MethodBase = md.Import(typeof(MethodBase));
             Type = md.Import(typeof(Type));
+
+            DebuggerHiddenAttribute = md.Import(typeof(DebuggerHiddenAttribute));
+            DebuggerStepThroughAttribute = md.Import(typeof(DebuggerStepThroughAttribute));
+            CompilerGeneratedAttribute = md.Import(typeof(CompilerGeneratedAttribute));
         }
 
-        #endregion Constructors
+        #endregion Public Constructors
 
-        #region Properties
+        #region Public Properties
 
         public TypeReference ActionGeneric { get; private set; }
 
@@ -62,6 +68,12 @@ namespace AspectInjector.BuildTask.Models
         public TypeReference Byte { get; private set; }
 
         public TypeReference Char { get; private set; }
+
+        public TypeReference CompilerGeneratedAttribute { get; private set; }
+
+        public TypeReference DebuggerHiddenAttribute { get; internal set; }
+
+        public TypeReference DebuggerStepThroughAttribute { get; private set; }
 
         public TypeReference Double { get; private set; }
 
@@ -91,11 +103,11 @@ namespace AspectInjector.BuildTask.Models
 
         public TypeReference Task { get; private set; }
 
-        public TypeReference Type { get; private set; }
-
         public TypeReference TaskCompletionGeneric { get; private set; }
 
         public TypeReference TaskGeneric { get; private set; }
+
+        public TypeReference Type { get; private set; }
 
         public TypeReference TypedReference { get; private set; }
 
@@ -109,9 +121,9 @@ namespace AspectInjector.BuildTask.Models
 
         public TypeReference Void { get; private set; }
 
-        #endregion Properties
+        #endregion Public Properties
 
-        #region Methods
+        #region Public Methods
 
         public TypeReference MakeArrayType(TypeReference argument)
         {
@@ -130,6 +142,6 @@ namespace AspectInjector.BuildTask.Models
             return _module.Import(instance);
         }
 
-        #endregion Methods
+        #endregion Public Methods
     }
 }
