@@ -2,6 +2,7 @@
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
+using AspectInjector.BuildTask.Validation;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
@@ -76,7 +77,7 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
 
         private static IEnumerable<MethodDefinition> GetAdviceMethods(TypeDefinition adviceClassType)
         {
-            Validation.ValidateAdviceClassType(adviceClassType);
+            Validator.ValidateAdviceClassType(adviceClassType);
 
             return adviceClassType.Methods.Where(m => m.CustomAttributes.HasAttributeOfType<AdviceAttribute>());
         }
@@ -85,7 +86,7 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
         {
             foreach (var parameter in adviceMethod.Parameters)
             {
-                Validation.ValidateAdviceMethodParameter(parameter, adviceMethod);
+                Validator.ValidateAdviceMethodParameter(parameter, adviceMethod);
 
                 var argumentAttribute = parameter.CustomAttributes.GetAttributeOfType<AdviceArgumentAttribute>();
                 var source = (AdviceArgumentSource)argumentAttribute.ConstructorArguments[0].Value;
@@ -96,7 +97,7 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
         private static IEnumerable<AdviceInjectionContext> ProcessAdvice(MethodDefinition adviceMethod,
             AspectContext parentContext)
         {
-            Validation.ValidateAdviceMethod(adviceMethod);
+            Validator.ValidateAdviceMethod(adviceMethod);
 
             var adviceAttribute = adviceMethod.CustomAttributes.GetAttributeOfType<AdviceAttribute>();
 
@@ -115,7 +116,7 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
                         context.AdviceArgumentsSources = GetAdviceArgumentsSources(adviceMethod).ToList();
                         context.InjectionPoint = point;
 
-                        Validation.ValidateAdviceInjectionContext(context, target);
+                        Validator.ValidateAdviceInjectionContext(context, target);
 
                         yield return context;
                     }

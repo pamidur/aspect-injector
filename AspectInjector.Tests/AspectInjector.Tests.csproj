@@ -59,6 +59,8 @@
     <Compile Include="AdviceParameters\Arguments\StaticMembersBasicTests.cs" />
     <Compile Include="AdviceParameters\Instance\NonStaticMembersTests.cs" />
     <Compile Include="AdviceParameters\Instance\StaticMembersTests.cs" />
+    <Compile Include="AdviceParameters\Method\NonStaticMembersTests.cs" />
+    <Compile Include="AdviceParameters\Method\StaticMembersTests.cs" />
     <Compile Include="AdviceParameters\Type\Tests.cs" />
     <Compile Include="AdviceInjectionAfterTests.cs" />
     <Compile Include="AdviceInjectionBeforeTests.cs" />

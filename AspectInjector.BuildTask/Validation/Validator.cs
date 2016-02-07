@@ -8,12 +8,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace AspectInjector.BuildTask
+namespace AspectInjector.BuildTask.Validation
 {
     //TODO: Fire all compilation exceptions at once
 
-    public static class Validation
+    public static class Validator
     {
+        private static List<ValidationRule> _rules = new List<ValidationRule>();
+
+        static Validator()
+        {
+            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Instance, ShouldBeOfType = typeof(object) });
+            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Target, ShouldBeOfType = typeof(Func<object[], object>) });
+            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Type, ShouldBeOfType = typeof(Type) });
+            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.TargetReturnType, ShouldBeOfType = typeof(Type) });
+            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Method, ShouldBeOfType = typeof(MethodBase) });
+            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Arguments, ShouldBeOfType = typeof(object[]) });
+            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.RoutableData, ShouldBeOfType = typeof(Attribute[]) });
+            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Name, ShouldBeOfType = typeof(string) });
+            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.ReturnValue, ShouldBeOfType = typeof(object) });
+        }
+
         public static void ValidateCustomAspectDefinition(CustomAttribute attribute)
         {
             attribute.AttributeType.Resolve().CustomAttributes.GetAttributeOfType<AttributeUsageAttribute>();
@@ -26,50 +41,12 @@ namespace AspectInjector.BuildTask
                 throw new CompilationException("Unbound advice arguments are not supported", adviceMethod);
 
             var source = (AdviceArgumentSource)argumentAttribute.ConstructorArguments[0].Value;
-            if (source == AdviceArgumentSource.Instance)
+
+            var rule = _rules.FirstOrDefault(r => r.Source == source);
+            if (rule != null)
             {
-                if (!parameter.ParameterType.IsTypeOf(typeof(object)))
-                    throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
-            }
-            if (source == AdviceArgumentSource.Target)
-            {
-                if (!parameter.ParameterType.IsTypeOf(typeof(Func<object[], object>)))
-                    throw new CompilationException("Argument should be of type Func<object[],object> to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
-            }
-            else if (source == AdviceArgumentSource.Type)
-            {
-                if (!parameter.ParameterType.IsTypeOf(typeof(Type)))
-                    throw new CompilationException("Argument should be of type System.Type to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
-            }
-            else if (source == AdviceArgumentSource.TargetReturnType)
-            {
-                if (!parameter.ParameterType.IsTypeOf(typeof(Type)))
-                    throw new CompilationException("Argument should be of type System.Type to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
-            }
-            else if (source == AdviceArgumentSource.Method)
-            {
-                if (!parameter.ParameterType.IsTypeOf(typeof(MethodInfo)))
-                    throw new CompilationException("Argument should be of type System.Reflection.MethodInfo to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
-            }
-            else if (source == AdviceArgumentSource.Arguments)
-            {
-                if (!parameter.ParameterType.IsTypeOf(new ArrayType(adviceMethod.Module.TypeSystem.Object)))
-                    throw new CompilationException("Argument should be of type System.Array<System.Object> to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
-            }
-            else if (source == AdviceArgumentSource.Name)
-            {
-                if (!parameter.ParameterType.IsTypeOf(typeof(string)))
-                    throw new CompilationException("Argument should be of type System.String to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
-            }
-            else if (source == AdviceArgumentSource.ReturnValue)
-            {
-                if (!parameter.ParameterType.IsTypeOf(typeof(object)))
-                    throw new CompilationException("Argument should be of type System.Object to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
-            }
-            else if (source == AdviceArgumentSource.RoutableData)
-            {
-                if (!parameter.ParameterType.IsTypeOf(new ArrayType(adviceMethod.Module.TypeSystem.Object)))
-                    throw new CompilationException("Argument should be of type System.Object[] to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
+                if (!parameter.ParameterType.IsTypeOf(rule.ShouldBeOfType))
+                    throw new CompilationException("Argument should be of type " + rule.ShouldBeOfType.Namespace + "." + rule.ShouldBeOfType.Name + " to inject AdviceArgumentSource." + source.ToString(), adviceMethod);
             }
         }
 

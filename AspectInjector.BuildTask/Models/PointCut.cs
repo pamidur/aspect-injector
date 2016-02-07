@@ -329,7 +329,7 @@ namespace AspectInjector.BuildTask.Models
             }
             else if (arg is MethodReference)
             {
-                var methodInfo = module.TypeSystem.ResolveType(typeof(MethodInfo));
+                var methodInfo = TypeSystem.MethodBase;
 
                 if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(methodInfo))
                     throw new ArgumentException("Argument type mismatch");
@@ -354,7 +354,7 @@ namespace AspectInjector.BuildTask.Models
             }
             else if (arg is TypeReference)
             {
-                var typeOfType = module.TypeSystem.ResolveType(typeof(Type));
+                var typeOfType = TypeSystem.Type;
 
                 if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(typeOfType))
                     throw new ArgumentException("Argument type mismatch");
@@ -373,6 +373,9 @@ namespace AspectInjector.BuildTask.Models
 
                 if (elementType == typeof(ParameterDefinition))
                     elementType = typeof(object);
+
+                if (elementType == typeof(CustomAttribute))
+                    elementType = typeof(Attribute);
 
                 LoadArray(arg, module.TypeSystem.ResolveType(elementType), expectedType);
             }
@@ -518,8 +521,8 @@ namespace AspectInjector.BuildTask.Models
         {
             var module = Processor.Body.Method.Module;
 
-            if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(new ArrayType(module.TypeSystem.Object)))
-                throw new ArgumentException("Argument type mismatch");
+            //if (!expectedType.IsTypeOf(module.TypeSystem.Object) && !expectedType.IsTypeOf(new ArrayType(module.TypeSystem.Object)))
+            //    throw new ArgumentException("Argument type mismatch");
 
             var parameters = ((Array)args).Cast<object>().ToArray();
 

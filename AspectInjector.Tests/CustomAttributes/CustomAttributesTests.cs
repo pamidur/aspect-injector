@@ -48,7 +48,7 @@ namespace AspectInjector.Tests.CustomAttributesTests
     public class TestAspectImplementation
     {
         [Advice(InjectionPoints.After, InjectionTargets.Method)]
-        public void AfterMethod([AdviceArgument(AdviceArgumentSource.RoutableData)] object[] data)
+        public void AfterMethod([AdviceArgument(AdviceArgumentSource.RoutableData)] Attribute[] data)
         {
             var a = (data[0] as TestAspectAttribute);
 

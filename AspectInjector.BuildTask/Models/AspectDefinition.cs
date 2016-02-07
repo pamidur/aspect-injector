@@ -1,6 +1,5 @@
 ﻿using AspectInjector.Broker;
 using Mono.Cecil;
-using System;
 using System.Collections.Generic;
 
 namespace AspectInjector.BuildTask.Models
@@ -13,6 +12,6 @@ namespace AspectInjector.BuildTask.Models
 
         public AccessModifiers AccessModifierFilter { get; set; }
 
-        public IEnumerable<object> RoutableData { get; set; }
+        public IEnumerable<CustomAttribute> RoutableData { get; set; }
     }
 }

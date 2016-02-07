@@ -1,6 +1,6 @@
 ﻿using Mono.Cecil;
 using System;
-using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace AspectInjector.BuildTask.Models
@@ -46,6 +46,9 @@ namespace AspectInjector.BuildTask.Models
             ActionGeneric = md.Import(typeof(Action<>));
             FuncGeneric = md.Import(typeof(Func<>));
             FuncGeneric2 = md.Import(typeof(Func<,>));
+
+            MethodBase = md.Import(typeof(MethodBase));
+            Type = md.Import(typeof(Type));
         }
 
         #endregion Constructors
@@ -53,29 +56,57 @@ namespace AspectInjector.BuildTask.Models
         #region Properties
 
         public TypeReference ActionGeneric { get; private set; }
+
         public TypeReference Boolean { get; private set; }
+
         public TypeReference Byte { get; private set; }
+
         public TypeReference Char { get; private set; }
+
         public TypeReference Double { get; private set; }
+
         public TypeReference FuncGeneric { get; private set; }
+
         public TypeReference FuncGeneric2 { get; private set; }
+
         public TypeReference Int16 { get; private set; }
+
         public TypeReference Int32 { get; private set; }
+
         public TypeReference Int64 { get; private set; }
+
         public TypeReference IntPtr { get; private set; }
+
+        public TypeReference MethodBase { get; private set; }
+
         public TypeReference Object { get; private set; }
+
         public TypeReference ObjectArray { get; private set; }
+
         public TypeReference SByte { get; private set; }
+
         public TypeReference Single { get; private set; }
+
         public TypeReference String { get; private set; }
+
         public TypeReference Task { get; private set; }
+
+        public TypeReference Type { get; private set; }
+
         public TypeReference TaskCompletionGeneric { get; private set; }
+
         public TypeReference TaskGeneric { get; private set; }
+
         public TypeReference TypedReference { get; private set; }
+
         public TypeReference UInt16 { get; private set; }
+
         public TypeReference UInt32 { get; private set; }
+
         public TypeReference UInt64 { get; private set; }
+
         public TypeReference UIntPtr { get; private set; }
+
         public TypeReference Void { get; private set; }
 
         #endregion Properties

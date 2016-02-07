@@ -3,6 +3,7 @@ using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
 using AspectInjector.BuildTask.Models;
+using AspectInjector.BuildTask.Validation;
 using Mono.Cecil;
 using Mono.Collections.Generic;
 using System.Collections.Generic;
@@ -127,7 +128,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 AdviceClassType = ((TypeReference)attr.ConstructorArguments[0].Value).Resolve(),
                 NameFilter = (string)attr.GetPropertyValue("NameFilter"),
                 AccessModifierFilter = (AccessModifiers)(attr.GetPropertyValue("AccessModifierFilter") ?? 0),
-                RoutableData = new List<object>()
+                RoutableData = new List<CustomAttribute>()
             };
         }
 
@@ -138,7 +139,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 AdviceClassType = ((TypeReference)attr.ConstructorArguments[0].Value).Resolve(),
                 NameFilter = (string)attr.GetPropertyValue("NameFilter"),
                 AccessModifierFilter = (AccessModifiers)(attr.GetPropertyValue("AccessModifierFilter") ?? 0),
-                RoutableData = new List<object> { baseAttr }
+                RoutableData = new List<CustomAttribute> { baseAttr }
             };
         }
 
@@ -180,7 +181,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                         TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType),
                         AdviceClassType = adviceClassType,
                         AdviceClassScope = aspectScope,
-                        AspectRoutableData = def.RoutableData == null ? new object[] { } : def.RoutableData.ToArray()
+                        AspectRoutableData = def.RoutableData == null ? new CustomAttribute[] { } : def.RoutableData.ToArray()
                     };
 
                     return aspectContext;
@@ -188,7 +189,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 .Where(ctx => _processors.Any(p => p.CanProcess(ctx.AdviceClassType)))
                 .ToList();
 
-            Validation.ValidateAspectContexts(contexts);
+            Validator.ValidateAspectContexts(contexts);
 
             foreach (var context in contexts)
             {

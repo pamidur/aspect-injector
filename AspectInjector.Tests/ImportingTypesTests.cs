@@ -41,7 +41,7 @@ namespace AspectInjector.Tests
         public void AfterSetter(
             [AdviceArgument(AdviceArgumentSource.Instance)] object source,
             [AdviceArgument(AdviceArgumentSource.Name)] string propName,
-            [AdviceArgument(AdviceArgumentSource.RoutableData)] object[] data
+            [AdviceArgument(AdviceArgumentSource.RoutableData)] Attribute[] data
             )
         {
             PropertyChanged(source, new PropertyChangedEventArgs(propName));

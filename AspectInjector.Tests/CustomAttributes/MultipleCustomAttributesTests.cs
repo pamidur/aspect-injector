@@ -42,7 +42,7 @@ namespace AspectInjector.Tests.CustomAttributes
         public class TestAspectImplementation
         {
             [Advice(InjectionPoints.After, InjectionTargets.Method)]
-            public void AfterMethod([AdviceArgument(AdviceArgumentSource.RoutableData)] object[] data)
+            public void AfterMethod([AdviceArgument(AdviceArgumentSource.RoutableData)] Attribute[] data)
             {
                 Checker.Passed = data.Length == 2 && data[0] is TestAspectAttribute && data[1] is TestAspect2Attribute;
             }
