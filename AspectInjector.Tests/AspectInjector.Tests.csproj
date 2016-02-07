@@ -65,6 +65,7 @@
     <Compile Include="AdviceInjectionAfterTests.cs" />
     <Compile Include="AdviceInjectionBeforeTests.cs" />
     <Compile Include="AdviceOrderedInjectionBeforeTests.cs" />
+    <Compile Include="AroundTests\StaticAroundTests.cs" />
     <Compile Include="AroundTests\BasicAroundTests.cs" />
     <Compile Include="AspectFactoryMethodTests.cs" />
     <Compile Include="AspectScopeTests.cs" />

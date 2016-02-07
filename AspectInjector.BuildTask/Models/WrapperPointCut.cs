@@ -41,7 +41,7 @@ namespace AspectInjector.BuildTask.Models
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, parameter.Index));
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldelem_Ref));
 
-            BoxUnboxIfNeeded(parameter.ParameterType, expectedType);
+            BoxUnboxTryCastIfNeeded(parameter.ParameterType, expectedType);
         }
 
         public override void LoadAllArgumentsOntoStack()
@@ -60,7 +60,11 @@ namespace AspectInjector.BuildTask.Models
             var targetFuncCtor = ModuleContext.ModuleDefinition.Import(targetFuncType.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic))
                .MakeGeneric(targetFuncType);
 
-            LoadSelfOntoStack();
+            if (!Processor.Body.Method.IsStatic)
+                LoadSelfOntoStack();
+            else
+                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldnull));
+
             InsertBefore(CreateInstruction(OpCodes.Ldftn, _nextWrapper));
             InsertBefore(CreateInstruction(OpCodes.Newobj, (MethodReference)CreateMemberReference(targetFuncCtor)));
         }

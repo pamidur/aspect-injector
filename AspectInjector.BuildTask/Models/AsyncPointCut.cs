@@ -45,7 +45,7 @@ namespace AspectInjector.BuildTask.Models
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, parameter.Index));
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldelem_Ref));
 
-            BoxUnboxIfNeeded(parameter.ParameterType, expectedType);
+            BoxUnboxTryCastIfNeeded(parameter.ParameterType, expectedType);
         }
 
         public override void LoadAllArgumentsOntoStack()

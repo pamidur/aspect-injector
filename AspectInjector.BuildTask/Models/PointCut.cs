@@ -5,7 +5,6 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace AspectInjector.BuildTask.Models
@@ -56,15 +55,28 @@ namespace AspectInjector.BuildTask.Models
             return new PointCut(proc, exit);
         }
 
-        public void BoxUnboxIfNeeded(TypeReference typeOnStack, TypeReference expectedType)
+        public void BoxUnboxTryCastIfNeeded(TypeReference typeOnStack, TypeReference expectedType)
         {
-            if (expectedType != null)
-            {
-                if (typeOnStack.IsValueType && !expectedType.IsValueType)
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, expectedType.Module.Import(typeOnStack)));
+            if (typeOnStack == null) throw new ArgumentNullException("typeOnStack");
+            if (expectedType == null) throw new ArgumentNullException("expectedType");
 
-                if (!typeOnStack.IsValueType && expectedType.IsValueType)
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Unbox_Any, expectedType.Module.Import(typeOnStack)));
+            if (expectedType.IsGenericParameter || expectedType.ContainsGenericParameter)
+                return; //todo:: check generics
+
+            if (typeOnStack.IsTypeOf(expectedType))
+                return;
+
+            if (expectedType.IsValueType)
+            {
+                if (!typeOnStack.IsValueType)
+                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Unbox_Any, ModuleContext.ModuleDefinition.Import(expectedType)));
+            }
+            else
+            {
+                if (typeOnStack.IsValueType)
+                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Box, ModuleContext.ModuleDefinition.Import(typeOnStack)));
+                else if (!expectedType.IsTypeOf(TypeSystem.Object))
+                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Castclass, ModuleContext.ModuleDefinition.Import(expectedType)));
             }
         }
 
@@ -398,7 +410,9 @@ namespace AspectInjector.BuildTask.Models
             var argIndex = this.Processor.Body.Method.HasThis ? parameter.Index + 1 : parameter.Index;
 
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, argIndex));
-            BoxUnboxIfNeeded(parameter.ParameterType, expectedType);
+
+            if (expectedType != null)
+                BoxUnboxTryCastIfNeeded(parameter.ParameterType, expectedType);
         }
 
         public virtual void LoadAllArgumentsOntoStack()
@@ -408,7 +422,8 @@ namespace AspectInjector.BuildTask.Models
 
         public virtual void LoadSelfOntoStack()
         {
-            Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
+            if (!Processor.Body.Method.IsStatic)
+                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Ldarg_0));
         }
 
         public void LoadValueOntoStack<T>(T value)
@@ -428,7 +443,9 @@ namespace AspectInjector.BuildTask.Models
         public void LoadVariableOntoStack(VariableReference var, TypeReference expectedType = null)
         {
             Processor.InsertBefore(InjectionPoint, CreateInstruction(expectedType != null && expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
-            BoxUnboxIfNeeded(var.VariableType, expectedType);
+
+            if (expectedType != null)
+                BoxUnboxTryCastIfNeeded(var.VariableType, expectedType);
         }
 
         public PointCut Replace(Instruction instruction)

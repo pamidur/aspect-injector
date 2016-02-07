@@ -6,34 +6,17 @@ using System.Text;
 namespace AspectInjector.Tests.AroundTests
 {
     [TestClass]
-    public class BasicAroundTests
+    public class StaticAroundTests
     {
         [TestMethod]
-        public void Aspect_Can_Wrap_Method_With_Struct_Result_Around()
+        public void Aspect_Can_Wrap_Static_Method_Around()
         {
             Checker.Passed = false;
 
-            var a = new TestClass();
-
-            Int32 v = 2;
+            int v = 2;
             object vv = v;
 
-            a.Do1((System.Int32)vv, new StringBuilder(), new object(), false, false);
-
-            Assert.IsTrue(Checker.Passed);
-        }
-
-        [TestMethod]
-        public void Aspect_Can_Wrap_Method_Around()
-        {
-            Checker.Passed = false;
-
-            var a = new TestClass();
-
-            Int32 v = 2;
-            object vv = v;
-
-            a.Do2((System.Int32)vv, new StringBuilder(), new object(), false, false);
+            TestClass.Do123((System.Int32)vv, new StringBuilder(), new object(), false, false);
 
             Assert.IsTrue(Checker.Passed);
         }
@@ -42,18 +25,7 @@ namespace AspectInjector.Tests.AroundTests
         {
             [Aspect(typeof(TestAspectImplementation))]
             [Aspect(typeof(TestAspectImplementation2))] //fire first
-            public StringBuilder Do2(int data, StringBuilder sb, object to, bool passed, bool passed2)
-            {
-                Checker.Passed = passed && passed2;
-
-                var a = 1;
-                var b = a + data;
-                return sb;
-            }
-
-            [Aspect(typeof(TestAspectImplementation))]
-            [Aspect(typeof(TestAspectImplementation2))] //fire first
-            public int Do1(int data, StringBuilder sb, object to, bool passed, bool passed2)
+            public static int Do123(int data, StringBuilder sb, object to, bool passed, bool passed2)
             {
                 Checker.Passed = passed && passed2;
 

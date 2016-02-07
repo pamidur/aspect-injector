@@ -239,10 +239,7 @@ namespace AspectInjector.BuildTask.Contexts
                 unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldc_I4, parameter.Index));
                 unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldelem_Ref));
 
-                if (parameter.ParameterType.IsValueType)
-                    unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Unbox_Any, TargetMethod.Module.Import(parameter.ParameterType)));
-                else if (parameter.ParameterType != TypeSystem.Object)
-                    unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Castclass, TargetMethod.Module.Import(parameter.ParameterType)));
+                unwrapPoint.BoxUnboxTryCastIfNeeded(TypeSystem.Object, parameter.ParameterType);
             }
 
             unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Call, TargetMethod.Module.Import(TargetMethod)));
@@ -291,10 +288,8 @@ namespace AspectInjector.BuildTask.Contexts
 
             if (_topWrapper.ReturnType == TypeSystem.Void)
                 topWrapperCut.CreateVariableFromStack(TypeSystem.Object);
-            else if (_topWrapper.ReturnType.IsValueType)
-                topWrapperCut.InsertBefore(topWrapperCut.CreateInstruction(OpCodes.Unbox_Any, TargetMethod.Module.Import(TargetMethod.ReturnType)));
-            else if (_topWrapper.ReturnType != TypeSystem.Object)
-                topWrapperCut.InsertBefore(topWrapperCut.CreateInstruction(OpCodes.Castclass, TargetMethod.Module.Import(TargetMethod.ReturnType)));
+            else
+                topWrapperCut.BoxUnboxTryCastIfNeeded(TypeSystem.Object, TargetMethod.ReturnType);
         }
 
         private void SetupEntryPoints()
