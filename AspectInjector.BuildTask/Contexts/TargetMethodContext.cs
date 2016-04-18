@@ -15,6 +15,9 @@ namespace AspectInjector.BuildTask.Contexts
 
         protected static readonly string ExceptionVariableName = "__a$_exception";
         protected static readonly string MethodResultVariableName = "__a$_methodResult";
+        protected static readonly string AroundWrappedMethodPrefix = "__a$w";
+        protected static readonly string AroundOriginalMethodPrefix = "__a$o_";
+        protected static readonly string AroundUnwrappedMethodPrefix = "__a$u_";
 
         protected readonly ILProcessor Processor;
 
@@ -118,7 +121,9 @@ namespace AspectInjector.BuildTask.Contexts
             if (_topWrapperCallSite == null)
                 SetupAroundInfrastructure();
 
-            var newWapper = new MethodDefinition("__a$w" + _wrapperNo + "_" + _topWrapper.Name, TargetMethod.Attributes, TypeSystem.Object);
+            var newWapper = new MethodDefinition(AroundWrappedMethodPrefix + _wrapperNo + "_" + _topWrapper.Name, 
+                TargetMethod.Attributes, 
+                TypeSystem.Object);
 
             newWapper.NoInlining = false;
 
@@ -249,7 +254,9 @@ namespace AspectInjector.BuildTask.Contexts
 
         private MethodDefinition CreateUnwrapMethod(MethodDefinition originalMethod)
         {
-            var unwrapMethod = new MethodDefinition("__a$u_" + originalMethod.Name, originalMethod.Attributes, TypeSystem.Object);
+            var unwrapMethod = new MethodDefinition(AroundUnwrappedMethodPrefix + originalMethod.Name, 
+                originalMethod.Attributes, 
+                TypeSystem.Object);
 
             unwrapMethod.NoInlining = false;
 
@@ -286,7 +293,9 @@ namespace AspectInjector.BuildTask.Contexts
 
         private MethodDefinition WrapOriginalMethod()
         {
-            var originalMethod = new MethodDefinition("__a$o_" + TargetMethod.Name, TargetMethod.Attributes, TargetMethod.ReturnType);
+            var originalMethod = new MethodDefinition(AroundOriginalMethodPrefix + TargetMethod.Name, 
+                TargetMethod.Attributes, 
+                TargetMethod.ReturnType);
 
             //MarkDebuggerStepThrough(originalMethod);
             ///MarkCompilerGenerated(originalMethod);

@@ -72,6 +72,9 @@ namespace AspectInjector.BuildTask.Validation
 
             if (context.InjectionPoint == InjectionPoints.Around)
             {
+                if ((target & InjectionTargets.Constructor) == InjectionTargets.Constructor)
+                    throw new CompilationException("Advice of InjectionPoints." + context.InjectionPoint.ToString() + " can't be applied to constructors", context.AdviceMethod);
+
                 if (!context.AdviceMethod.ReturnType.IsTypeOf(typeof(object)))
                     throw new CompilationException("Advice of InjectionPoints." + context.InjectionPoint.ToString() + " should return System.Object", context.AdviceMethod);
             }
