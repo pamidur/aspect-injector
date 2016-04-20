@@ -10,15 +10,19 @@ namespace AspectInjector.Tests
         public void Inject_Before_StaticMethod()
         {
             Checker.Passed = false;
-            StaticMembersTests_Target.TestMethod();
+            StaticMembersTests_Target.TestStaticMethod();
             Assert.IsTrue(Checker.Passed);
         }
     }
 
     [Aspect(typeof(StaticMembersTests_BeforeMethodAspect))]
-    internal static class StaticMembersTests_Target
+    internal class StaticMembersTests_Target
     {
-        public static void TestMethod()
+        public static void TestStaticMethod()
+        {
+        }
+
+        public void TestInstanceMethod()
         {
         }
     }

@@ -15,7 +15,8 @@ namespace AspectInjector.BuildTask.Contexts
     {
         private static readonly string InstanceAspectsInitializerMethodName = "__a$_initializeInstanceAspects";
         private static readonly string TypeAspectsInitializerMethodName = "__a$_initializeTypeAspects";
-        private static readonly string AspectPropertyNamePrefix = "__a$_";
+        private static readonly string AspectStaticPropertyNamePrefix = "__a$t_";
+        private static readonly string AspectInstancePropertyNamePrefix = "__a$i_";
 
         public TypeDefinition TypeDefinition { get; private set; }
 
@@ -86,26 +87,27 @@ namespace AspectInjector.BuildTask.Contexts
             if (info.TargetTypeContext != this)
                 throw new NotSupportedException("Aspect info mismatch.");
 
-            var aspectPropertyName = AspectPropertyNamePrefix + info.AdviceClassType.Name;
-
-            var existingField = TypeDefinition.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(info.AdviceClassType));
-            if (existingField != null)
-                return existingField;
-
             TargetMethodContext initMethod = null;
             FieldAttributes fieldAttrs;
+            string aspectPropertyName = null;
 
             if (info.AdviceClassScope == AspectScope.Instance)
             {
                 fieldAttrs = FieldAttributes.Private;
                 initMethod = InstanсeAspectsInitializer;
+                aspectPropertyName = AspectInstancePropertyNamePrefix + info.AdviceClassType.Name;
             }
             else if (info.AdviceClassScope == AspectScope.Type)
             {
                 fieldAttrs = FieldAttributes.Private | FieldAttributes.Static;
                 initMethod = TypeAspectsInitializer;
+                aspectPropertyName = AspectStaticPropertyNamePrefix + info.AdviceClassType.Name;
             }
             else throw new NotSupportedException("Scope " + info.AdviceClassScope.ToString() + " is not supported (yet).");
+
+            var existingField = TypeDefinition.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(info.AdviceClassType));
+            if (existingField != null)
+                return existingField;
 
             var field = new FieldDefinition(aspectPropertyName, fieldAttrs, TypeDefinition.Module.Import(info.AdviceClassType));
             TypeDefinition.Fields.Add(field);
