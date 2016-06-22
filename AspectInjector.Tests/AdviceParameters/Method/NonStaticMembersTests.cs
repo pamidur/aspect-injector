@@ -23,8 +23,40 @@ namespace AspectInjector.Tests.AdviceParameters.Method
             Assert.IsTrue(Checker.Passed);
         }
 
+        [TestMethod]
+        public void AdviceArguments_Method_Can_Be_Injected_With_Conctructors_Chain()
+        {
+            Checker.Passed = false;
+            new TargetClass1().TestMethod();
+            Assert.IsTrue(Checker.Passed);
+        }
+
         internal class TargetClass
         {
+            [Aspect(typeof(AspectImplementation))]
+            public void TestMethod()
+            {
+            }
+        }
+
+        internal class TargetClass1
+        {
+            public TargetClass1()
+            {
+                
+            }
+
+            public TargetClass1(int a) :this()
+            {
+                
+            }
+
+            public TargetClass1(int a, int b) : this(a)
+            {
+
+            }
+
+
             [Aspect(typeof(AspectImplementation))]
             public void TestMethod()
             {
