@@ -14,8 +14,8 @@ namespace AspectInjector.Tests
             _beforeTestClass = new AdviceOrderedInjectionBeforeTests_Target();
         }
 
-        [TestMethod, Ignore]
-        public void Inject_Abortable_BeforeAspect_Latest()
+        [TestMethod, Ignore]//in release the order may be changed by compiller :(
+        public void Injected_Advices_Executed_In_Order_Stated()
         {
             Checker.Passed = false;
             _beforeTestClass.TestMethod();
