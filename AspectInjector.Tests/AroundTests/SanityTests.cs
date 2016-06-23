@@ -11,7 +11,7 @@ namespace AspectInjector.Tests.AroundTests
     [TestClass]
     public class SanityTests
     {
-        [TestMethod]
+        [TestMethod, Ignore]
         public void Aspect_Around_Wrapper_Does_Not_Show_In_StackTrace()
         {
             var passed = false;

@@ -64,7 +64,7 @@ namespace AspectInjector.BuildTask.Injectors
                         break;
 
                     case AdviceArgumentSource.Method:
-                        yield return context.TargetMethodContext.TargetMethod;
+                        yield return context.TargetMethodContext.TopWrapper ?? context.TargetMethodContext.TargetMethod;
                         break;
 
                     case AdviceArgumentSource.Arguments:

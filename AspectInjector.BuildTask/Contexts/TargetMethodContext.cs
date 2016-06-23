@@ -28,7 +28,7 @@ namespace AspectInjector.BuildTask.Contexts
         private PointCut _returnPoint;
 
         private PointCut _topWrapperCallSite;
-        private MethodDefinition _topWrapper;
+
         private int _wrapperNo;
         private MethodDefinition _lastWrapper;
 
@@ -58,6 +58,8 @@ namespace AspectInjector.BuildTask.Contexts
                 return _entryPoint;
             }
         }
+
+        public MethodDefinition TopWrapper { get; private set; }
 
         public virtual VariableDefinition MethodResultVariable
         {
@@ -121,8 +123,8 @@ namespace AspectInjector.BuildTask.Contexts
             if (_topWrapperCallSite == null)
                 SetupAroundInfrastructure();
 
-            var newWapper = new MethodDefinition(AroundWrappedMethodPrefix + _wrapperNo + "_" + _topWrapper.Name, 
-                TargetMethod.Attributes, 
+            var newWapper = new MethodDefinition(AroundWrappedMethodPrefix + _wrapperNo + "_" + TopWrapper.Name,
+                TargetMethod.Attributes,
                 TypeSystem.Object);
 
             newWapper.NoInlining = false;
@@ -255,8 +257,8 @@ namespace AspectInjector.BuildTask.Contexts
 
         private MethodDefinition CreateUnwrapMethod(MethodDefinition originalMethod)
         {
-            var unwrapMethod = new MethodDefinition(AroundUnwrappedMethodPrefix + originalMethod.Name, 
-                originalMethod.Attributes, 
+            var unwrapMethod = new MethodDefinition(AroundUnwrappedMethodPrefix + originalMethod.Name,
+                originalMethod.Attributes,
                 TypeSystem.Object);
 
             unwrapMethod.NoInlining = false;
@@ -294,8 +296,8 @@ namespace AspectInjector.BuildTask.Contexts
 
         private MethodDefinition WrapOriginalMethod()
         {
-            var originalMethod = new MethodDefinition(AroundOriginalMethodPrefix + TargetMethod.Name, 
-                TargetMethod.Attributes, 
+            var originalMethod = new MethodDefinition(AroundOriginalMethodPrefix + TargetMethod.Name,
+                TargetMethod.Attributes,
                 TargetMethod.ReturnType);
 
             //MarkDebuggerStepThrough(originalMethod);
@@ -330,20 +332,20 @@ namespace AspectInjector.BuildTask.Contexts
 
         private void SetupAroundInfrastructure()
         {
-            _topWrapper = WrapOriginalMethod();
-            _lastWrapper = CreateUnwrapMethod(_topWrapper);
+            TopWrapper = WrapOriginalMethod();
+            _lastWrapper = CreateUnwrapMethod(TopWrapper);
 
-            var topWrapperCut = PointCut.FromEmptyBody(_topWrapper.Body, OpCodes.Ret);
+            var topWrapperCut = PointCut.FromEmptyBody(TopWrapper.Body, OpCodes.Ret);
 
             //var args = new object[]{ arg1, agr2 }
-            topWrapperCut.LoadCallArgument(_topWrapper.Parameters.ToArray(), TypeSystem.ObjectArray);
+            topWrapperCut.LoadCallArgument(TopWrapper.Parameters.ToArray(), TypeSystem.ObjectArray);
             var argsvar = topWrapperCut.CreateVariableFromStack(TypeSystem.ObjectArray);
 
             // ExecExternalWrapper
             topWrapperCut.LoadSelfOntoStack();
             _topWrapperCallSite = topWrapperCut.InjectMethodCall(_lastWrapper, new object[] { argsvar });
 
-            if (_topWrapper.ReturnType == TypeSystem.Void)
+            if (TopWrapper.ReturnType == TypeSystem.Void)
                 topWrapperCut.CreateVariableFromStack(TypeSystem.Object);
             else
                 topWrapperCut.BoxUnboxTryCastIfNeeded(TypeSystem.Object, TargetMethod.ReturnType);
