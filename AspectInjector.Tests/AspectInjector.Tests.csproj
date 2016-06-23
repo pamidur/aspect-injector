@@ -77,8 +77,8 @@
     <Compile Include="AsyncTests\AsyncTests.cs" />
     <Compile Include="CustomAttributes\MultipleCustomAttributesTests.cs" />
     <Compile Include="FiltersTests\GeneralTests.cs" />
-    <Compile Include="InterfaceInjectionInheritanceTests.cs" />
-    <Compile Include="InterfaceInjectionTests.cs" />
+    <Compile Include="InterfaceInjection\InheritanceTests.cs" />
+    <Compile Include="InterfaceInjection\BasicTests.cs" />
     <Compile Include="NestedClassesTests.cs" />
     <Compile Include="PETest.cs" />
     <Compile Include="CustomAttributes\CustomAttributesTests.cs" />

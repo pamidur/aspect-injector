@@ -15,10 +15,12 @@ namespace AspectInjector.Tests.AroundTests
 
             var a = new TestClass();
 
-            Int32 v = 2;
-            object vv = v;
+            object ref1 = new object();
+            object out1;
+            int ref2 = 2;
+            int out2;
 
-            a.Do1((System.Int32)vv, new StringBuilder(), new object(), false, false);
+            a.Do1(new object(), 1, ref ref1, out out1, ref ref2, out out2, false, false);
 
             Assert.IsTrue(Checker.Passed);
         }
@@ -30,10 +32,12 @@ namespace AspectInjector.Tests.AroundTests
 
             var a = new TestClass();
 
-            Int32 v = 2;
-            object vv = v;
+            object ref1 = new object();
+            object out1;
+            int ref2 = 2;
+            int out2;
 
-            a.Do2((System.Int32)vv, new StringBuilder(), new object(), false, false);
+            a.Do2(new object(), 1, ref ref1, out out1, ref ref2, out out2, false, false);
 
             Assert.IsTrue(Checker.Passed);
         }
@@ -42,24 +46,26 @@ namespace AspectInjector.Tests.AroundTests
         {
             [Aspect(typeof(TestAspectImplementation))]
             [Aspect(typeof(TestAspectImplementation2))] //fire first
-            public StringBuilder Do2(int data, StringBuilder sb, object to, bool passed, bool passed2)
+            public object Do2(object data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
             {
                 Checker.Passed = passed && passed2;
 
-                var a = 1;
-                var b = a + data;
-                return sb;
+                testOut = new object();
+                testOutValue = 1;
+
+                return new object();
             }
 
             [Aspect(typeof(TestAspectImplementation))]
             [Aspect(typeof(TestAspectImplementation2))] //fire first
-            public int Do1(int data, StringBuilder sb, object to, bool passed, bool passed2)
+            public int Do1(object data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
             {
                 Checker.Passed = passed && passed2;
 
-                var a = 1;
-                var b = a + data;
-                return b;
+                testOut = new object();
+                testOutValue = 1;
+
+                return 1;
             }
         }
 
