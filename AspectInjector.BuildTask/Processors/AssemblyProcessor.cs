@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using AspectInjector.BuildTask.Contracts;
+﻿using AspectInjector.BuildTask.Contracts;
 using Mono.Cecil;
+using System.Collections.Generic;
 
 namespace AspectInjector.BuildTask.Processors
 {
-    internal class AssemblyProcessor
+    public class AssemblyProcessor
     {
         private readonly IEnumerable<IModuleProcessor> _processors;
 

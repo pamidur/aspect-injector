@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace AspectInjector.BuildTask
 {
-    internal class Configuration
+    public class Configuration
     {
         private static List<IModuleProcessor> _processorsTree;
 
