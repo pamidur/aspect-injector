@@ -27,6 +27,7 @@ namespace AspectInjector.BuildTask.Models
             InjectionPoint = instruction;
 
             ModuleContext = ModuleContext.GetOrCreateContext(processor.Body.Method.Module);
+            MethodContext = MethodContextFactory.GetOrCreateContext(processor.Body.Method);
             TypeSystem = ModuleContext.TypeSystem;
         }
 
@@ -39,6 +40,7 @@ namespace AspectInjector.BuildTask.Models
         protected ModuleContext ModuleContext { get; private set; }
 
         protected ExtendedTypeSystem TypeSystem { get; private set; }
+        protected TargetMethodContext MethodContext { get; private set; }
 
         #endregion Properties
 
@@ -408,16 +410,23 @@ namespace AspectInjector.BuildTask.Models
         public virtual void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType = null)
         {
             var argIndex = this.Processor.Body.Method.HasThis ? parameter.Index + 1 : parameter.Index;
+            var argType = parameter.ParameterType;
 
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldarg, argIndex));
 
+            if (expectedType != null && !expectedType.IsByReference && argType.IsByReference)
+            {
+                argType = ((ByReferenceType)argType).ElementType;
+                LoadIndirect(argType);
+            }
+
             if (expectedType != null)
-                BoxUnboxTryCastIfNeeded(parameter.ParameterType, expectedType);
+                BoxUnboxTryCastIfNeeded(argType, expectedType);
         }
 
         public virtual void LoadAllArgumentsOntoStack()
         {
-            LoadArray(Processor.Body.Method.Parameters.ToArray(), TypeSystem.Object, TypeSystem.ObjectArray);
+            LoadVariableOntoStack(MethodContext.ArgsVariable);
         }
 
         public virtual void LoadSelfOntoStack()
@@ -516,6 +525,28 @@ namespace AspectInjector.BuildTask.Models
             {
                 InsertBefore(continuePoint);
             }
+        }
+
+        public void LoadIndirect(TypeReference argType)
+        {
+            if (argType.IsValueType)
+            {
+                var opcode = TypeSystem.LoadIndirectMap.First(kv => argType.IsTypeOf(kv.Key)).Value;
+                Processor.InsertBefore(InjectionPoint, CreateInstruction(opcode));
+            }
+            else
+                Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldind_Ref));
+        }
+
+        public void SaveIndirect(TypeReference argType)
+        {
+            if (argType.IsValueType)
+            {
+                var opcode = TypeSystem.SaveIndirectMap.First(kv => argType.IsTypeOf(kv.Key)).Value;
+                Processor.InsertBefore(InjectionPoint, CreateInstruction(opcode));
+            }
+            else
+                Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Stind_Ref));
         }
 
         protected virtual void LoadTargetFunc()

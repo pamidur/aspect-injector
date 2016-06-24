@@ -1,5 +1,7 @@
 ﻿using Mono.Cecil;
+using Mono.Cecil.Cil;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -55,6 +57,46 @@ namespace AspectInjector.BuildTask.Models
             DebuggerHiddenAttribute = md.Import(typeof(DebuggerHiddenAttribute));
             DebuggerStepThroughAttribute = md.Import(typeof(DebuggerStepThroughAttribute));
             CompilerGeneratedAttribute = md.Import(typeof(CompilerGeneratedAttribute));
+
+            LoadIndirectMap = new Dictionary<TypeReference, OpCode>
+            {
+                { UIntPtr, OpCodes.Ldind_I },
+                { IntPtr, OpCodes.Ldind_I },
+                { SByte, OpCodes.Ldind_I1 },
+                { Int16, OpCodes.Ldind_I2 },
+                { Int32, OpCodes.Ldind_I4 },
+                { Int64, OpCodes.Ldind_I8 },
+                { UInt64, OpCodes.Ldind_I8 },
+
+                { Boolean, OpCodes.Ldind_U1 },
+                { Byte, OpCodes.Ldind_U1 },
+                { Char, OpCodes.Ldind_U2 },
+                { UInt16, OpCodes.Ldind_U2 },
+                { UInt32, OpCodes.Ldind_U4 },
+
+                { Single, OpCodes.Ldind_R4 },
+                { Double, OpCodes.Ldind_R8 },
+            };
+
+            SaveIndirectMap = new Dictionary<TypeReference, OpCode>
+            {
+                { UIntPtr, OpCodes.Stind_I },
+                { IntPtr, OpCodes.Stind_I },
+                { SByte, OpCodes.Stind_I1 },
+                { Int16, OpCodes.Stind_I2 },
+                { Int32, OpCodes.Stind_I4 },
+                { Int64, OpCodes.Stind_I8 },
+                { UInt64, OpCodes.Stind_I8 },
+
+                { Boolean, OpCodes.Stind_I1 },
+                { Byte, OpCodes.Stind_I1 },
+                { Char, OpCodes.Stind_I2 },
+                { UInt16, OpCodes.Stind_I2 },
+                { UInt32, OpCodes.Stind_I4 },
+
+                { Single, OpCodes.Stind_R4 },
+                { Double, OpCodes.Stind_R8 },
+            };
         }
 
         #endregion Public Constructors
@@ -88,13 +130,13 @@ namespace AspectInjector.BuildTask.Models
         public TypeReference Int64 { get; private set; }
 
         public TypeReference IntPtr { get; private set; }
-
+        public IReadOnlyDictionary<TypeReference, OpCode> LoadIndirectMap { get; private set; }
         public TypeReference MethodBase { get; private set; }
 
         public TypeReference Object { get; private set; }
 
         public TypeReference ObjectArray { get; private set; }
-
+        public Dictionary<TypeReference, OpCode> SaveIndirectMap { get; private set; }
         public TypeReference SByte { get; private set; }
 
         public TypeReference Single { get; private set; }

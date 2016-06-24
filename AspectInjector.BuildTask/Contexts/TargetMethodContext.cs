@@ -13,8 +13,8 @@ namespace AspectInjector.BuildTask.Contexts
     {
         #region Fields
 
-        protected static readonly string ExceptionVariableName = "__a$_exception";
         protected static readonly string MethodResultVariableName = "__a$_methodResult";
+        protected static readonly string MethodArgsVariableName = "__a$_methodArgs";
         protected static readonly string AroundWrappedMethodPrefix = "__a$w";
         protected static readonly string AroundOriginalMethodPrefix = "__a$o_";
         protected static readonly string AroundUnwrappedMethodPrefix = "__a$u_";
@@ -22,10 +22,12 @@ namespace AspectInjector.BuildTask.Contexts
         protected readonly ILProcessor Processor;
 
         private PointCut _entryPoint;
-        private PointCut _originalEntryPoint;
-        private PointCut _originalReturnPoint;
-        private VariableDefinition _resultVar;
+        private PointCut _originalEntryPoint;  //<-- original method starts here
+        private PointCut _originalReturnPoint; //<-- original method ends here
         private PointCut _returnPoint;
+
+        private VariableDefinition _resultVar;
+        private VariableDefinition _argsVar;
 
         private PointCut _topWrapperCallSite;
 
@@ -72,6 +74,46 @@ namespace AspectInjector.BuildTask.Contexts
                     SetupReturnPoints();
 
                 return _resultVar;
+            }
+        }
+
+        public virtual VariableDefinition ArgsVariable
+        {
+            get
+            {
+                if (_argsVar == null)
+                {
+                    EntryPoint.LoadCallArgument(Processor.Body.Method.Parameters.ToArray(), TypeSystem.ObjectArray);
+                    _argsVar = EntryPoint.CreateVariableFromStack(TypeSystem.ObjectArray, MethodArgsVariableName);
+
+                    foreach (var param in TargetMethod.Parameters)
+                    {
+                        // todo:: optimize and move to some syntax helper
+                        if (param.ParameterType.IsByReference)
+                        {
+                            OriginalEntryPoint.LoadParameterOntoStack(param, param.ParameterType);
+
+                            OriginalEntryPoint.LoadVariableOntoStack(_argsVar);
+                            OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldc_I4, param.Index));
+                            OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldelem_Ref));
+
+                            var elementType = ((ByReferenceType)param.ParameterType).ElementType;
+                            OriginalEntryPoint.BoxUnboxTryCastIfNeeded(TypeSystem.Object, elementType);
+                            OriginalEntryPoint.SaveIndirect(elementType);
+                        }
+                        else
+                        {
+                            OriginalEntryPoint.LoadVariableOntoStack(_argsVar);
+                            OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldc_I4, param.Index));
+                            OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldelem_Ref));
+
+                            OriginalEntryPoint.BoxUnboxTryCastIfNeeded(TypeSystem.Object, param.ParameterType);
+                            OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Starg, TargetMethod.HasThis ? param.Index + 1 : param.Index));
+                        }
+                    }
+                }
+
+                return _argsVar;
             }
         }
 
@@ -345,10 +387,15 @@ namespace AspectInjector.BuildTask.Contexts
             topWrapperCut.LoadSelfOntoStack();
             _topWrapperCallSite = topWrapperCut.InjectMethodCall(_lastWrapper, new object[] { argsvar });
 
-            if (TopWrapper.ReturnType == TypeSystem.Void)
-                topWrapperCut.CreateVariableFromStack(TypeSystem.Object);
-            else
+            var resultVar = topWrapperCut.CreateVariableFromStack(TypeSystem.Object);
+
+            //todo:: fill ref and out
+
+            if (TopWrapper.ReturnType != TypeSystem.Void)
+            {
+                topWrapperCut.LoadVariableOntoStack(resultVar);
                 topWrapperCut.BoxUnboxTryCastIfNeeded(TypeSystem.Object, TargetMethod.ReturnType);
+            }
         }
 
         private void SetupEntryPoints()

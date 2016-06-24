@@ -58,9 +58,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Test.cs" />
+    <Compile Include="RefOutTests.cs" />
+    <Compile Include="Infrastructure\CompileTimeTestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestAssemblyGenerator.cs" />
+    <Compile Include="Infrastructure\TestAssemblyGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

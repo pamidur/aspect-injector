@@ -7,18 +7,25 @@ namespace AspectInjector.Tests.AdviceParameters.Arguments
     public class NotStaticMembersBasicTests
     {
         [TestMethod]
-        public void AdviceArguments_Arguments_InjectedCorrectly_on_StaticMethod()
+        public void AdviceArguments_Arguments_InjectedCorrectly()
         {
+            var obj = new object();
+            object outObj;
+            var val = 1;
+            int outVal;
+
             Checker.Passed = false;
-            new TargetClass().TestMethod(1, "2");
+            new TargetClass().TestMethod(obj, ref obj, out outObj, val, ref val, out outVal);
             Assert.IsTrue(Checker.Passed);
         }
 
         internal class TargetClass
         {
             [Aspect(typeof(AspectImplementation))]
-            public void TestMethod(int a, string b)
+            public void TestMethod(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut)
             {
+                valueOut = 1;
+                objOut = new object();
             }
         }
 
@@ -27,7 +34,9 @@ namespace AspectInjector.Tests.AdviceParameters.Arguments
             [Advice(InjectionPoints.Before, InjectionTargets.Method)]
             public void BeforeMethod([AdviceArgument(AdviceArgumentSource.Arguments)] object[] args)
             {
-                Checker.Passed = (int)args[0] == 1 && (string)args[1] == "2";
+                Checker.Passed =
+                    args[0] != null && args[1] != null && args[2] == null &&
+                    (int)args[3] == 1 && (int)args[4] == 1 && (int)args[5] == 0;
             }
         }
     }

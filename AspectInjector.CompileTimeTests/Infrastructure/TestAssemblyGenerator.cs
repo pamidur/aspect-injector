@@ -38,17 +38,6 @@ namespace AspectInjector.CompileTimeTests
             var types = _snippetsAssembly.MainModule.Types.FirstOrDefault(t => t.FullName == _source.FullName).NestedTypes;
 
             foreach (var type in types)
-            {
-                type.DeclaringType = null;
-                type.Namespace = _source.Namespace;
-
-                if (type.Attributes.HasFlag(Mono.Cecil.TypeAttributes.NestedPublic))
-                {
-                    type.Attributes &= ~Mono.Cecil.TypeAttributes.NestedPublic;
-                    type.Attributes |= Mono.Cecil.TypeAttributes.Public;
-                }
-            }
-            foreach (var type in types)
                 ProcessType(type);
 
             return assembly;
@@ -75,7 +64,30 @@ namespace AspectInjector.CompileTimeTests
 
         public TypeDefinition CopyType(TypeDefinition destination, TypeDefinition type)
         {
-            var newtype = new TypeDefinition(type.Namespace, type.Name, type.Attributes, CopyReference(type.BaseType));
+            if (type.FullName == _source.FullName)
+            {
+                _refsMap.Add(type, null);
+                return null;
+            }
+
+            var attrs = type.Attributes;
+            var ns = type.Namespace;
+
+            if (type.DeclaringType != null && type.DeclaringType.FullName == _source.FullName)
+            {
+                ns = _source.Namespace;
+
+                destination = null;
+
+                if (attrs.HasFlag(Mono.Cecil.TypeAttributes.NestedPublic))
+                {
+                    attrs &= ~Mono.Cecil.TypeAttributes.NestedPublic;
+                    attrs |= Mono.Cecil.TypeAttributes.Public;
+                }
+            }
+
+            var newtype = new TypeDefinition(ns, type.Name, attrs, CopyReference(type.BaseType));
+
             _refsMap.Add(type, newtype);
 
             if (destination == null)
@@ -278,6 +290,8 @@ namespace AspectInjector.CompileTimeTests
                 result = new GenericInstanceType(CopyReference(typeSpec.ElementType));
             else if (typeSpec is ArrayType)
                 result = new ArrayType(CopyReference(typeSpec.ElementType), ((ArrayType)typeSpec).Rank);
+            else if (typeSpec is ByReferenceType)
+                result = new ByReferenceType(CopyReference(typeSpec.ElementType));
             else throw new NotSupportedException();
 
             return result;
@@ -311,7 +325,8 @@ namespace AspectInjector.CompileTimeTests
                 result = CopyParameterDefinition((ParameterDefinition)(object)reference);
             else throw new NotSupportedException();
 
-            CopyCommonStuff(reference, result);
+            if (result != null)
+                CopyCommonStuff(reference, result);
 
             return (T)result;
         }
