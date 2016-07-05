@@ -34,13 +34,13 @@ namespace AspectInjector.BuildTask.Models
         public override void LoadSelfOntoStack()
         {
             base.LoadSelfOntoStack();
-            LoadFieldOntoStack(_originalTypeRef);
+            LoadField(_originalTypeRef);
         }
 
         public override void LoadParameterOntoStack(ParameterDefinition parameter, TypeReference expectedType = null)
         {
             base.LoadSelfOntoStack();
-            LoadFieldOntoStack(_methodArgsRef);
+            LoadField(_methodArgsRef);
 
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, parameter.Index));
             Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldelem_Ref));
@@ -51,7 +51,7 @@ namespace AspectInjector.BuildTask.Models
         public override void LoadAllArgumentsOntoStack()
         {
             base.LoadSelfOntoStack();
-            LoadFieldOntoStack(_methodArgsRef);
+            LoadField(_methodArgsRef);
         }
 
         #endregion Methods

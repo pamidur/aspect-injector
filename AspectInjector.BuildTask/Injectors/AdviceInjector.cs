@@ -43,7 +43,7 @@ namespace AspectInjector.BuildTask.Injectors
                         .ToArray();
 
             if (!aspectInstanceField.Resolve().IsStatic) injectionPoint.LoadSelfOntoStack();
-            injectionPoint.LoadFieldOntoStack(aspectInstanceField);
+            injectionPoint.LoadField(aspectInstanceField);
             injectionPoint.InjectMethodCall(context.AdviceMethod, argumentValue);
         }
 

@@ -131,7 +131,7 @@ namespace AspectInjector.BuildTask.Contexts
             if (!field.IsStatic)
                 initMethod.EntryPoint.LoadSelfOntoStack();
 
-            initMethod.EntryPoint.LoadFieldOntoStack(field);
+            initMethod.EntryPoint.LoadField(field);
 
             initMethod.EntryPoint.TestValueOnStack((object)null,
                 trueBlock =>
@@ -139,8 +139,11 @@ namespace AspectInjector.BuildTask.Contexts
                 if (!field.IsStatic)
                     trueBlock.LoadSelfOntoStack();
 
-                trueBlock.InjectMethodCall(factoryMethod, new object[] { });
-                trueBlock.SetFieldFromStack(field);
+                trueBlock.SetField(field,
+                    c =>
+                    {
+                        c.InjectMethodCall(factoryMethod, new object[] { });
+                    });
             });
         }
     }

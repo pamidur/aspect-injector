@@ -54,15 +54,16 @@ namespace AspectInjector.BuildTask.Contexts
                 RewriteMethod(md);
 
             var getTask = asyncTaskMBType.Resolve().Properties.First(p => p.Name == "Task").GetMethod;
-
             if (loadStateMachineInst == null || builderField == null)
                 throw new NotSupportedException("Unsupported state machine implementation");
 
-            asyncVoidPc.InsertBefore(asyncVoidPc.CreateInstruction(loadStateMachineInst.OpCode, (VariableDefinition)loadStateMachineInst.Operand));
-            asyncVoidPc.InsertBefore(asyncVoidPc.CreateInstruction(OpCodes.Ldflda, builderField));
-
-            asyncVoidPc.InjectMethodCall(getTask, new object[] { });
-            asyncVoidPc.SetVariableFromStack(taskVar);
+            asyncVoidPc.SetVariable(taskVar,
+                c =>
+                {
+                    c.InsertBefore(c.CreateInstruction(loadStateMachineInst.OpCode, (VariableDefinition)loadStateMachineInst.Operand));
+                    c.InsertBefore(c.CreateInstruction(OpCodes.Ldflda, builderField));
+                    c.InjectMethodCall(getTask);
+                });
 
             asyncVoidMethod.Body.OptimizeMacros();
         }

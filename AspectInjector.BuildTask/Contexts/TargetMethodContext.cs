@@ -84,8 +84,7 @@ namespace AspectInjector.BuildTask.Contexts
             {
                 if (_argsVar == null)
                 {
-                    EntryPoint.LoadCallArgument(Processor.Body.Method.Parameters.ToArray(), TypeSystem.ObjectArray);
-                    _argsVar = EntryPoint.CreateVariableFromStack(TypeSystem.ObjectArray, MethodArgsVariableName);
+                    _argsVar = EntryPoint.CreateVariable(TypeSystem.ObjectArray, MethodArgsVariableName, c => c.LoadCallArgument(Processor.Body.Method.Parameters.ToArray(), TypeSystem.ObjectArray));
 
                     //foreach (var param in TargetMethod.Parameters)
                     //{
@@ -322,22 +321,25 @@ namespace AspectInjector.BuildTask.Contexts
 
             foreach (var parameter in originalMethod.Parameters)
             {
-                unwrapPoint.LoadParameterOntoStack(argsParam);
-                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldc_I4, originalMethod.Parameters.IndexOf(parameter)));
-                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldelem_Ref));
-
                 var varType = parameter.ParameterType;
 
                 if (varType.IsByReference)
                     varType = ((ByReferenceType)varType).ElementType;
 
-                unwrapPoint.BoxUnboxTryCastIfNeeded(TypeSystem.Object, varType);
-
-                vars.Add(unwrapPoint.CreateVariableFromStack(varType));
+                vars.Add(
+                    unwrapPoint.CreateVariable(varType,
+                    null,
+                    c =>
+                    {
+                        c.LoadParameterOntoStack(argsParam);
+                        c.InsertBefore(c.CreateInstruction(OpCodes.Ldc_I4, originalMethod.Parameters.IndexOf(parameter)));
+                        c.InsertBefore(c.CreateInstruction(OpCodes.Ldelem_Ref));
+                        c.BoxUnboxTryCastIfNeeded(TypeSystem.Object, varType);
+                    }));
             }
 
             foreach (var parameter in originalMethod.Parameters)
-                unwrapPoint.LoadVariableOntoStack(vars[originalMethod.Parameters.IndexOf(parameter)], parameter.ParameterType);
+                unwrapPoint.LoadVariable(vars[originalMethod.Parameters.IndexOf(parameter)], parameter.ParameterType);
 
             unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Call, TargetMethod.Module.Import(TargetMethod)));
 
@@ -352,7 +354,7 @@ namespace AspectInjector.BuildTask.Contexts
 
                 unwrapPoint.LoadParameterOntoStack(argsParam);
                 unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldc_I4, index));
-                unwrapPoint.LoadVariableOntoStack(vars[index], TypeSystem.Object);
+                unwrapPoint.LoadVariable(vars[index], TypeSystem.Object);
                 unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Stelem_Ref));
             }
 
@@ -403,14 +405,17 @@ namespace AspectInjector.BuildTask.Contexts
             var topWrapperCut = PointCut.FromEmptyBody(TopWrapper.Body, OpCodes.Ret);
 
             //var args = new object[]{ arg1, agr2 }
-            topWrapperCut.LoadCallArgument(TopWrapper.Parameters.ToArray(), TypeSystem.ObjectArray);
-            var argsvar = topWrapperCut.CreateVariableFromStack(TypeSystem.ObjectArray);
+
+            var argsvar = topWrapperCut.CreateVariable(TypeSystem.ObjectArray, null, c => c.LoadCallArgument(TopWrapper.Parameters.ToArray(), TypeSystem.ObjectArray));
 
             // ExecExternalWrapper
-            topWrapperCut.LoadSelfOntoStack();
-            _topWrapperCallSite = topWrapperCut.InjectMethodCall(_lastWrapper, new object[] { argsvar });
-
-            var resultVar = topWrapperCut.CreateVariableFromStack(TypeSystem.Object);
+            var resultVar = topWrapperCut.CreateVariable(TypeSystem.Object,
+                null,
+                c =>
+                {
+                    c.LoadSelfOntoStack();
+                    _topWrapperCallSite = c.InjectMethodCall(_lastWrapper, new object[] { argsvar });
+                });
 
             //fill ref and out
             foreach (var param in TopWrapper.Parameters)
@@ -422,7 +427,7 @@ namespace AspectInjector.BuildTask.Contexts
                 {
                     topWrapperCut.LoadParameterOntoStack(param, param.ParameterType);
 
-                    topWrapperCut.LoadVariableOntoStack(argsvar);
+                    topWrapperCut.LoadVariable(argsvar);
                     topWrapperCut.InsertBefore(topWrapperCut.CreateInstruction(OpCodes.Ldc_I4, index));
                     topWrapperCut.InsertBefore(topWrapperCut.CreateInstruction(OpCodes.Ldelem_Ref));
 
@@ -434,7 +439,7 @@ namespace AspectInjector.BuildTask.Contexts
 
             if (TopWrapper.ReturnType != TypeSystem.Void)
             {
-                topWrapperCut.LoadVariableOntoStack(resultVar);
+                topWrapperCut.LoadVariable(resultVar);
                 topWrapperCut.BoxUnboxTryCastIfNeeded(TypeSystem.Object, TargetMethod.ReturnType);
             }
         }
@@ -486,10 +491,13 @@ namespace AspectInjector.BuildTask.Contexts
             {
                 var prop = TargetMethod.DeclaringType.Properties.First(p => p.SetMethod == TargetMethod);
 
-                EntryPoint.LoadSelfOntoStack();
-                EntryPoint.InjectMethodCall(prop.GetMethod, new object[] { });
-
-                _resultVar = EntryPoint.CreateVariableFromStack(prop.GetMethod.ReturnType, MethodResultVariableName);
+                _resultVar = EntryPoint.CreateVariable(prop.GetMethod.ReturnType,
+                    MethodResultVariableName,
+                    c =>
+                    {
+                        c.LoadSelfOntoStack();
+                        c.InjectMethodCall(prop.GetMethod);
+                    });
             }
             else
             {

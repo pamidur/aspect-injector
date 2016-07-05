@@ -169,9 +169,12 @@ namespace AspectInjector.BuildTask.Contexts
                        {
                            if (_hasResult)
                            {
-                               pct.LoadParameterOntoStack(taskParameter);
-                               pct.InjectMethodCall(taskTypedType.Resolve().Properties.First(p => p.Name == "Result").GetMethod.MakeGeneric(taskTypedType), new object[] { });
-                               _resultVar = pct.CreateVariableFromStack(_completionResultType);
+                               _resultVar = pct.CreateVariable(_completionResultType,
+                                   loadData: c =>
+                                    {
+                                        c.LoadParameterOntoStack(taskParameter);
+                                        c.InjectMethodCall(taskTypedType.Resolve().Properties.First(p => p.Name == "Result").GetMethod.MakeGeneric(taskTypedType), new object[] { });
+                                    });
                            }
 
                            var syncReturnPc = pct.InsertBefore(pct.CreateInstruction(OpCodes.Nop));
@@ -180,7 +183,7 @@ namespace AspectInjector.BuildTask.Contexts
                            var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType);
 
                            pct.LoadSelfOntoStack();
-                           pct.LoadFieldOntoStack(tcsField);
+                           pct.LoadField(tcsField);
                            pct.InjectMethodCall(setresultMethod, new object[] { _resultVar ?? Markers.DefaultMarker });
                        });
                 },
@@ -189,7 +192,7 @@ namespace AspectInjector.BuildTask.Contexts
                     var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType);
 
                     pc.LoadSelfOntoStack();
-                    pc.LoadFieldOntoStack(tcsField);
+                    pc.LoadField(tcsField);
                     pc.InjectMethodCall(setresultMethod, new object[] { Markers.DefaultMarker });
                 });
 
@@ -226,49 +229,41 @@ namespace AspectInjector.BuildTask.Contexts
 
             // var tcs = new TaskContinuationSource<TResult>();
             var tcsctor = tcsType.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic).MakeGeneric(tcsType);
-            continuationPoint.InjectMethodCall(tcsctor, new object[] { });
-            var tcsVar = continuationPoint.CreateVariableFromStack(tcsType);
+            var tcsVar = continuationPoint.CreateVariable(tcsType, null, c => c.InjectMethodCall(tcsctor));
 
             // var helper = new Helper();
-            continuationPoint.InjectMethodCall(helper.Methods.First(m => m.IsConstructor && !m.IsStatic), new object[] { });
-            var helperVar = continuationPoint.CreateVariableFromStack(helper);
+            var helperVar = continuationPoint.CreateVariable(helper, null, c => c.InjectMethodCall(helper.Methods.First(m => m.IsConstructor && !m.IsStatic)));
 
             // var args = new object[] { param1, param2 ... };
-            continuationPoint.LoadCallArgument(TargetMethod.Parameters.ToArray(), new ArrayType(TargetMethod.Module.TypeSystem.Object));
-            var argsvar = continuationPoint.CreateVariableFromStack(new ArrayType(TargetMethod.Module.TypeSystem.Object));
+            var argsvar = continuationPoint.CreateVariable(new ArrayType(TargetMethod.Module.TypeSystem.Object), null, c => c.LoadCallArgument(TargetMethod.Parameters.ToArray(), new ArrayType(TargetMethod.Module.TypeSystem.Object)));
 
             //helper.this_ref = this
-            continuationPoint.LoadVariableOntoStack(helperVar);
-            continuationPoint.LoadSelfOntoStack();
-            continuationPoint.SetFieldFromStack(_helperThisRefFiled);
+            continuationPoint.LoadVariable(helperVar);
+            continuationPoint.SetField(_helperThisRefFiled, c => c.LoadSelfOntoStack());
 
             // helper.args = args
-            continuationPoint.LoadVariableOntoStack(helperVar);
-            continuationPoint.LoadVariableOntoStack(argsvar);
-            continuationPoint.SetFieldFromStack(_helperArgumentsFiled);
+            continuationPoint.LoadVariable(helperVar);
+            continuationPoint.SetField(_helperArgumentsFiled, c => c.LoadVariable(argsvar));
 
             // helper.continuationSource = tcs
-            continuationPoint.LoadVariableOntoStack(helperVar);
-            continuationPoint.LoadVariableOntoStack(tcsVar);
-            continuationPoint.SetFieldFromStack(tcsField);
+            continuationPoint.LoadVariable(helperVar);
+            continuationPoint.SetField(tcsField, c => c.LoadVariable(tcsVar));
 
             // task.ContinueWith(new Action<TResult>(helper.Continuation))
-            continuationPoint.LoadVariableOntoStack(helperVar);
+            continuationPoint.LoadVariable(helperVar);
             continuationPoint.InsertBefore(continuationPoint.CreateInstruction(OpCodes.Ldftn, continuation));
 
             var actionTr = continuation.Module.Import(ModuleContext.TypeSystem.ActionGeneric.MakeGenericType(taskTypedType));
-
             var contActionCtor = continuation.Module.Import(actionTr.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic))
                 .MakeGeneric(actionTr);
-            continuationPoint.InsertBefore(continuationPoint.CreateInstruction(OpCodes.Newobj, (MethodReference)continuationPoint.CreateMemberReference(contActionCtor)));
 
-            var actionVar = continuationPoint.CreateVariableFromStack(actionTr);
+            var actionVar = continuationPoint.CreateVariable(actionTr, null, c => c.InsertBefore(continuationPoint.CreateInstruction(OpCodes.Newobj, (MethodReference)c.CreateMemberReference(contActionCtor))));
 
             MethodReference contWithMethod = continuation.Module.Import(taskTypedType.Resolve().Methods.First(m => m.Name == "ContinueWith" && m.Parameters.Count == 1));
             if (_hasResult)
                 contWithMethod = contWithMethod.MakeGeneric(taskTypedType);
 
-            continuationPoint.LoadVariableOntoStack(taskResult);
+            continuationPoint.LoadVariable(taskResult);
             continuationPoint.InjectMethodCall(contWithMethod, new object[] { actionVar });
             continuationPoint.InsertBefore(continuationPoint.CreateInstruction(OpCodes.Pop));
 
@@ -278,9 +273,12 @@ namespace AspectInjector.BuildTask.Contexts
                 var getTask = continuation.Module.Import(tcsType.Resolve().Properties.First(p => p.Name == "Task").GetMethod)
                     .MakeGeneric(tcsType);
 
-                continuationPoint.LoadVariableOntoStack(tcsVar);
-                continuationPoint.InjectMethodCall(getTask, new object[] { });
-                continuationPoint.SetVariableFromStack(taskResult);
+                continuationPoint.SetVariable(taskResult,
+                    c =>
+                    {
+                        c.LoadVariable(tcsVar);
+                        c.InjectMethodCall(getTask);
+                    });
             }
         }
 

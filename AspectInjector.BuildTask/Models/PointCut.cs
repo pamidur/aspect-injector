@@ -180,13 +180,7 @@ namespace AspectInjector.BuildTask.Models
             return new PointCut(Processor, instruction);
         }
 
-        public VariableDefinition CreateVariable<T>(TypeReference variableType, T defaultValue, string variableName = null)
-        {
-            LoadValueOntoStack(defaultValue);
-            return CreateVariableFromStack(variableType, variableName);
-        }
-
-        public VariableDefinition CreateVariable(TypeReference variableType, string variableName = null)
+        public VariableDefinition CreateVariable(TypeReference variableType, string variableName = null, Action<PointCut> loadData = null)
         {
             if (!Processor.Body.InitLocals)
                 Processor.Body.InitLocals = true;
@@ -196,13 +190,9 @@ namespace AspectInjector.BuildTask.Models
                 : new VariableDefinition(variableName, variableType);
             Processor.Body.Variables.Add(variable);
 
-            return variable;
-        }
+            if (loadData != null)
+                SetVariable(variable, loadData);
 
-        public VariableDefinition CreateVariableFromStack(TypeReference variableType, string variableName = null)
-        {
-            var variable = CreateVariable(variableType, variableName: variableName);
-            SetVariableFromStack(variable);
             return variable;
         }
 
@@ -216,8 +206,11 @@ namespace AspectInjector.BuildTask.Models
             Goto(pointCut.InjectionPoint);
         }
 
-        public PointCut InjectMethodCall(MethodReference method, object[] arguments)
+        public PointCut InjectMethodCall(MethodReference method, object[] arguments = null)
         {
+            if (arguments == null)
+                arguments = new object[] { };
+
             if (method.Parameters.Count != arguments.Length)
                 throw new ArgumentException("Arguments count mismatch", "arguments");
 
@@ -269,7 +262,7 @@ namespace AspectInjector.BuildTask.Models
             }
             else if (arg is VariableDefinition)
             {
-                LoadVariableOntoStack((VariableDefinition)arg, expectedType);
+                LoadVariable((VariableDefinition)arg, expectedType);
             }
             else if (arg is string)
             {
@@ -284,34 +277,23 @@ namespace AspectInjector.BuildTask.Models
                 var ca = (CustomAttribute)arg;
                 var catype = ca.AttributeType.Resolve();
 
-                InjectMethodCall(ca.Constructor.Resolve(), ca.ConstructorArguments.Cast<object>().ToArray());
+                var attrvar = CreateVariable((TypeReference)CreateMemberReference(ca.AttributeType), RoutableAttributeVariableName, c => c.InjectMethodCall(ca.Constructor.Resolve(), ca.ConstructorArguments.Cast<object>().ToArray()));
 
-                if (ca.Properties.Any() || ca.Fields.Any())
+                foreach (var namedArg in ca.Properties)
                 {
-                    var attrvar = new VariableDefinition(RoutableAttributeVariableName, (TypeReference)CreateMemberReference(ca.AttributeType));
-                    Processor.Body.Variables.Add(attrvar);
-                    Processor.Body.InitLocals = true;
-
-                    SetVariableFromStack(attrvar);
-
-                    foreach (var namedArg in ca.Properties)
-                    {
-                        LoadVariableOntoStack(attrvar);
-                        InjectMethodCall(catype.Properties.First(p => p.Name == namedArg.Name).SetMethod, new object[] { namedArg.Argument });
-                    }
-
-                    foreach (var namedArg in ca.Fields)
-                    {
-                        LoadVariableOntoStack(attrvar);
-
-                        var field = catype.Fields.First(p => p.Name == namedArg.Name);
-                        LoadCallArgument(namedArg.Argument, field.FieldType);
-
-                        Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stfld, field));
-                    }
-
-                    LoadVariableOntoStack(attrvar);
+                    LoadVariable(attrvar);
+                    InjectMethodCall(catype.Properties.First(p => p.Name == namedArg.Name).SetMethod, new object[] { namedArg.Argument });
                 }
+
+                foreach (var namedArg in ca.Fields)
+                {
+                    LoadVariable(attrvar);
+
+                    var field = catype.Fields.First(p => p.Name == namedArg.Name);
+                    SetField(field, c => c.LoadCallArgument(namedArg.Argument, field.FieldType));
+                }
+
+                LoadVariable(attrvar);
             }
             else if (arg is CustomAttributeArgument) //todo:: check if still needed
             {
@@ -399,7 +381,7 @@ namespace AspectInjector.BuildTask.Models
             }
         }
 
-        public void LoadFieldOntoStack(FieldReference field)
+        public void LoadField(FieldReference field)
         {
             var fieldRef = (FieldReference)CreateMemberReference(field);
             var fieldDef = field.Resolve();
@@ -426,7 +408,7 @@ namespace AspectInjector.BuildTask.Models
 
         public virtual void LoadAllArgumentsOntoStack()
         {
-            LoadVariableOntoStack(MethodContext.ArgsVariable);
+            LoadVariable(MethodContext.ArgsVariable);
         }
 
         public virtual void LoadSelfOntoStack()
@@ -449,7 +431,7 @@ namespace AspectInjector.BuildTask.Models
                 throw new NotSupportedException();
         }
 
-        public void LoadVariableOntoStack(VariableReference var, TypeReference expectedType = null)
+        public void LoadVariable(VariableReference var, TypeReference expectedType = null)
         {
             Processor.InsertBefore(InjectionPoint, CreateInstruction(expectedType != null && expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
 
@@ -464,28 +446,17 @@ namespace AspectInjector.BuildTask.Models
 
         public void SetField(FieldReference field, Action<PointCut> loadData)
         {
+            loadData(this);
+
             var fieldRef = (FieldReference)CreateMemberReference(field);
             var fieldDef = field.Resolve();
 
             InsertBefore(CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
         }
 
-        public void SetFieldFromStack(FieldReference field)
+        public void SetVariable(VariableReference var, Action<PointCut> loadData)
         {
-            var fieldRef = (FieldReference)CreateMemberReference(field);
-            var fieldDef = field.Resolve();
-
-            InsertBefore(CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
-        }
-
-        public void SetVariable<T>(VariableDefinition variable, T value)
-        {
-            LoadValueOntoStack(value);
-            SetVariableFromStack(variable);
-        }
-
-        public void SetVariableFromStack(VariableReference var)
-        {
+            loadData(this);
             InsertBefore(CreateInstruction(OpCodes.Stloc, var.Index));
         }
 
@@ -576,30 +547,24 @@ namespace AspectInjector.BuildTask.Models
 
             var elementType = module.Import(targetElementType.Resolve());
 
-            Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, parameters.Length));
-            Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Newarr, elementType));
-
-            if (parameters.Length > 0)
-            {
-                Processor.Body.InitLocals = true;
-
-                var paramsArrayVar = new VariableDefinition(new ArrayType(elementType));
-                Processor.Body.Variables.Add(paramsArrayVar);
-
-                Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Stloc, paramsArrayVar.Index));
-
-                for (var i = 0; i < parameters.Length; i++)
+            var paramsArrayVar = CreateVariable(new ArrayType(elementType),
+                loadData: c =>
                 {
-                    Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, paramsArrayVar.Index));
-                    Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, i));
+                    c.InsertBefore(c.CreateInstruction(OpCodes.Ldc_I4, parameters.Length));
+                    c.InsertBefore(c.CreateInstruction(OpCodes.Newarr, elementType));
+                });
 
-                    LoadCallArgument(parameters[i], module.TypeSystem.Object);
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                LoadVariable(paramsArrayVar);
+                Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldc_I4, i));
 
-                    Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stelem_Ref));
-                }
+                LoadCallArgument(parameters[i], module.TypeSystem.Object);
 
-                Processor.InsertBefore(InjectionPoint, CreateInstruction(OpCodes.Ldloc, paramsArrayVar.Index));
+                Processor.InsertBefore(InjectionPoint, Processor.Create(OpCodes.Stelem_Ref));
             }
+
+            LoadVariable(paramsArrayVar);
         }
 
         private void LoadValueTypedArgument(object arg, TypeReference type, TypeReference expectedType)
