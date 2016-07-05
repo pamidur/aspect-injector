@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AroundRefOutTests.cs" />
     <Compile Include="RefOutTests.cs" />
     <Compile Include="Infrastructure\CompileTimeTestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

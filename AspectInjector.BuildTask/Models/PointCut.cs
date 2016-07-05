@@ -453,7 +453,7 @@ namespace AspectInjector.BuildTask.Models
         {
             Processor.InsertBefore(InjectionPoint, CreateInstruction(expectedType != null && expectedType.IsByReference ? OpCodes.Ldloca : OpCodes.Ldloc, var.Index));
 
-            if (expectedType != null)
+            if (expectedType != null && !expectedType.IsByReference)
                 BoxUnboxTryCastIfNeeded(var.VariableType, expectedType);
         }
 

@@ -75,7 +75,7 @@ namespace AspectInjector.Tests.AroundTests
             public object AroundMethod([AdviceArgument(AdviceArgumentSource.Target)] Func<object[], object> target,
                 [AdviceArgument(AdviceArgumentSource.Arguments)] object[] arguments)
             {
-                return target(new object[] { arguments[0], arguments[1], arguments[2], true, arguments[4] });
+                return target(new object[] { arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], true, arguments[7] });
             }
         }
 
@@ -85,7 +85,7 @@ namespace AspectInjector.Tests.AroundTests
             public object AroundMethod([AdviceArgument(AdviceArgumentSource.Target)] Func<object[], object> target,
                 [AdviceArgument(AdviceArgumentSource.Arguments)] object[] arguments)
             {
-                return target(new object[] { arguments[0], arguments[1], arguments[2], arguments[3], true });
+                return target(new object[] { arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], arguments[6], true });
             }
         }
     }

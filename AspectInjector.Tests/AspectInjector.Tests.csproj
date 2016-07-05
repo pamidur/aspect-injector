@@ -55,6 +55,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AdviceParameters\Arguments\ArgumentsModificationTests.cs" />
     <Compile Include="AdviceParameters\Arguments\NotStaticMembersBasicTests.cs" />
     <Compile Include="AdviceParameters\Arguments\StaticMembersBasicTests.cs" />
     <Compile Include="AdviceParameters\Instance\NonStaticMembersTests.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="AdviceInjectionAfterTests.cs" />
     <Compile Include="AdviceInjectionBeforeTests.cs" />
     <Compile Include="AdviceOrderedInjectionBeforeTests.cs" />
+    <Compile Include="AroundTests\Arguments\ArgumentsModificationTests.cs" />
     <Compile Include="AroundTests\Arguments\MethodParameterTests.cs" />
     <Compile Include="AroundTests\SanityTests.cs" />
     <Compile Include="AroundTests\StaticAroundTests.cs" />

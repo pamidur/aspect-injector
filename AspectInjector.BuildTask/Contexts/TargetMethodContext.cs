@@ -3,6 +3,7 @@ using AspectInjector.BuildTask.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -86,31 +87,31 @@ namespace AspectInjector.BuildTask.Contexts
                     EntryPoint.LoadCallArgument(Processor.Body.Method.Parameters.ToArray(), TypeSystem.ObjectArray);
                     _argsVar = EntryPoint.CreateVariableFromStack(TypeSystem.ObjectArray, MethodArgsVariableName);
 
-                    foreach (var param in TargetMethod.Parameters)
-                    {
-                        // todo:: optimize and move to some syntax helper
-                        if (param.ParameterType.IsByReference)
-                        {
-                            OriginalEntryPoint.LoadParameterOntoStack(param, param.ParameterType);
+                    //foreach (var param in TargetMethod.Parameters)
+                    //{
+                    //    // todo:: optimize and move to some syntax helper
+                    //    if (param.ParameterType.IsByReference)
+                    //    {
+                    //        OriginalEntryPoint.LoadParameterOntoStack(param, param.ParameterType);
 
-                            OriginalEntryPoint.LoadVariableOntoStack(_argsVar);
-                            OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldc_I4, param.Index));
-                            OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldelem_Ref));
+                    //        OriginalEntryPoint.LoadVariableOntoStack(_argsVar);
+                    //        OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldc_I4, param.Index));
+                    //        OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldelem_Ref));
 
-                            var elementType = ((ByReferenceType)param.ParameterType).ElementType;
-                            OriginalEntryPoint.BoxUnboxTryCastIfNeeded(TypeSystem.Object, elementType);
-                            OriginalEntryPoint.SaveIndirect(elementType);
-                        }
-                        else
-                        {
-                            OriginalEntryPoint.LoadVariableOntoStack(_argsVar);
-                            OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldc_I4, param.Index));
-                            OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldelem_Ref));
+                    //        var elementType = ((ByReferenceType)param.ParameterType).ElementType;
+                    //        OriginalEntryPoint.BoxUnboxTryCastIfNeeded(TypeSystem.Object, elementType);
+                    //        OriginalEntryPoint.SaveIndirect(elementType);
+                    //    }
+                    //    else
+                    //    {
+                    //        OriginalEntryPoint.LoadVariableOntoStack(_argsVar);
+                    //        OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldc_I4, param.Index));
+                    //        OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Ldelem_Ref));
 
-                            OriginalEntryPoint.BoxUnboxTryCastIfNeeded(TypeSystem.Object, param.ParameterType);
-                            OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Starg, TargetMethod.HasThis ? param.Index + 1 : param.Index));
-                        }
-                    }
+                    //        OriginalEntryPoint.BoxUnboxTryCastIfNeeded(TypeSystem.Object, param.ParameterType);
+                    //        OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Starg, TargetMethod.HasThis ? param.Index + 1 : param.Index));
+                    //    }
+                    //}
                 }
 
                 return _argsVar;
@@ -317,14 +318,26 @@ namespace AspectInjector.BuildTask.Contexts
 
             unwrapPoint.LoadSelfOntoStack();
 
+            var vars = new List<VariableDefinition>();
+
             foreach (var parameter in originalMethod.Parameters)
             {
                 unwrapPoint.LoadParameterOntoStack(argsParam);
-                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldc_I4, parameter.Index));
+                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldc_I4, originalMethod.Parameters.IndexOf(parameter)));
                 unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldelem_Ref));
 
-                unwrapPoint.BoxUnboxTryCastIfNeeded(TypeSystem.Object, parameter.ParameterType);
+                var varType = parameter.ParameterType;
+
+                if (varType.IsByReference)
+                    varType = ((ByReferenceType)varType).ElementType;
+
+                unwrapPoint.BoxUnboxTryCastIfNeeded(TypeSystem.Object, varType);
+
+                vars.Add(unwrapPoint.CreateVariableFromStack(varType));
             }
+
+            foreach (var parameter in originalMethod.Parameters)
+                unwrapPoint.LoadVariableOntoStack(vars[originalMethod.Parameters.IndexOf(parameter)], parameter.ParameterType);
 
             unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Call, TargetMethod.Module.Import(TargetMethod)));
 
@@ -332,6 +345,16 @@ namespace AspectInjector.BuildTask.Contexts
                 unwrapPoint.LoadValueOntoStack<object>(null);
             else if (originalMethod.ReturnType.IsValueType)
                 unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Box, TargetMethod.Module.Import(originalMethod.ReturnType)));
+
+            foreach (var parameter in originalMethod.Parameters)
+            {
+                var index = originalMethod.Parameters.IndexOf(parameter);
+
+                unwrapPoint.LoadParameterOntoStack(argsParam);
+                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Ldc_I4, index));
+                unwrapPoint.LoadVariableOntoStack(vars[index], TypeSystem.Object);
+                unwrapPoint.InsertBefore(unwrapPoint.CreateInstruction(OpCodes.Stelem_Ref));
+            }
 
             return unwrapMethod;
         }
@@ -389,7 +412,25 @@ namespace AspectInjector.BuildTask.Contexts
 
             var resultVar = topWrapperCut.CreateVariableFromStack(TypeSystem.Object);
 
-            //todo:: fill ref and out
+            //fill ref and out
+            foreach (var param in TopWrapper.Parameters)
+            {
+                var index = TopWrapper.Parameters.IndexOf(param);
+
+                // todo:: optimize and move to some syntax helper
+                if (param.ParameterType.IsByReference)
+                {
+                    topWrapperCut.LoadParameterOntoStack(param, param.ParameterType);
+
+                    topWrapperCut.LoadVariableOntoStack(argsvar);
+                    topWrapperCut.InsertBefore(topWrapperCut.CreateInstruction(OpCodes.Ldc_I4, index));
+                    topWrapperCut.InsertBefore(topWrapperCut.CreateInstruction(OpCodes.Ldelem_Ref));
+
+                    var elementType = ((ByReferenceType)param.ParameterType).ElementType;
+                    topWrapperCut.BoxUnboxTryCastIfNeeded(TypeSystem.Object, elementType);
+                    topWrapperCut.SaveIndirect(elementType);
+                }
+            }
 
             if (TopWrapper.ReturnType != TypeSystem.Void)
             {
