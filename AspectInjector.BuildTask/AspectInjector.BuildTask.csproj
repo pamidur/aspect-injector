@@ -68,11 +68,12 @@
     <Compile Include="Contexts\AdviceInjectionContext.cs" />
     <Compile Include="Contexts\AspectContext.cs" />
     <Compile Include="Contexts\AsyncVoidRewriter.cs" />
+    <Compile Include="Contexts\Factories\ILProcessorFactory.cs" />
     <Compile Include="Contexts\InterfaceInjectionContext.cs" />
     <Compile Include="Contexts\ModuleContext.cs" />
     <Compile Include="Contexts\TargetAsyncMethodContext.cs" />
-    <Compile Include="Contexts\TypeContextFactory.cs" />
-    <Compile Include="Contexts\MethodContextFactory.cs" />
+    <Compile Include="Contexts\Factories\TypeContextFactory.cs" />
+    <Compile Include="Contexts\Factories\MethodContextFactory.cs" />
     <Compile Include="Contexts\TargetTypeContext.cs" />
     <Compile Include="Contracts\IInjectionContext.cs" />
     <Compile Include="Contracts\IMethodContext.cs" />
@@ -115,10 +116,6 @@
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj">
       <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
       <Name>AspectInjector.Broker</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AspectInjector.Snippets\AspectInjector.Snippets.csproj">
-      <Project>{16309079-d308-497a-b1a6-68f3956f39ac}</Project>
-      <Name>AspectInjector.Snippets</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

@@ -103,7 +103,7 @@ namespace AspectInjector.BuildTask.Contexts
 
                 helperClass.Methods.Add(ctor);
 
-                var ctorProc = ctor.Body.GetILProcessor();
+                var ctorProc = ILProcessorFactory.GetOrCreateProcessor(ctor.Body);
                 ctorProc.Append(ctorProc.Create(OpCodes.Ldarg_0));
                 ctorProc.Append(ctorProc.Create(OpCodes.Call, TargetMethod.Module.Import(TargetMethod.Module.TypeSystem.Object.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic))));
                 ctorProc.Append(ctorProc.Create(OpCodes.Ret));
@@ -149,7 +149,7 @@ namespace AspectInjector.BuildTask.Contexts
             var tcsField = new FieldDefinition(string.Format(ContinuationFieldName, TargetMethod.Name), FieldAttributes.Public, tcsType);
             helper.Fields.Add(tcsField);
 
-            var proc = continuation.Body.GetILProcessor();
+            var proc = ILProcessorFactory.GetOrCreateProcessor(continuation.Body);
             var ret = proc.Create(OpCodes.Ret);
 
             proc.Append(ret);
@@ -207,24 +207,26 @@ namespace AspectInjector.BuildTask.Contexts
                 taskResult = OriginalEntryPoint.CreateVariable(TargetMethod.ReturnType);
             }
 
-            var singleReturnPoint = Processor.Create(OpCodes.Nop);
-            _originalReturnPoint = new PointCut(Processor, SetupSingleReturnPoint(Processor.Create(OpCodes.Br, singleReturnPoint), taskResult)); //todo:: optimize
+            var processor = ILProcessorFactory.GetOrCreateProcessor(TargetMethod.Body);
+
+            var singleReturnPoint = processor.Create(OpCodes.Nop);
+            _originalReturnPoint = new PointCut(processor, SetupSingleReturnPoint(processor.Create(OpCodes.Br, singleReturnPoint), taskResult)); //todo:: optimize
 
             if (_isVoid)
                 AsyncVoidRewriter.Rewrite(_originalReturnPoint, TargetMethod, taskResult);
 
-            Processor.SafeAppend(singleReturnPoint);
+            processor.SafeAppend(singleReturnPoint);
 
             PointCut continuationPoint = null;
 
             if (!_isVoid)
             {
-                continuationPoint = new PointCut(Processor, Processor.SafeAppend(Processor.CreateOptimized(OpCodes.Ldloc, taskResult.Index)));
-                Processor.SafeAppend(Processor.Create(OpCodes.Ret));
+                continuationPoint = new PointCut(processor, processor.SafeAppend(processor.CreateOptimized(OpCodes.Ldloc, taskResult.Index)));
+                processor.SafeAppend(processor.Create(OpCodes.Ret));
             }
             else
             {
-                continuationPoint = new PointCut(Processor, Processor.SafeAppend(Processor.Create(OpCodes.Ret)));
+                continuationPoint = new PointCut(processor, processor.SafeAppend(processor.Create(OpCodes.Ret)));
             }
 
             // var tcs = new TaskContinuationSource<TResult>();

@@ -20,8 +20,6 @@ namespace AspectInjector.BuildTask.Contexts
         protected static readonly string AroundOriginalMethodPrefix = "__a$o_";
         protected static readonly string AroundUnwrappedMethodPrefix = "__a$u_";
 
-        protected readonly ILProcessor Processor;
-
         private PointCut _entryPoint;
         private PointCut _originalEntryPoint;  //<-- original method starts here
         private PointCut _originalReturnPoint; //<-- original method ends here
@@ -44,7 +42,6 @@ namespace AspectInjector.BuildTask.Contexts
             ModuleContext = moduleContext;
 
             TargetMethod = targetMethod;
-            Processor = targetMethod.Body.GetILProcessor();
         }
 
         #endregion Constructors
@@ -84,7 +81,7 @@ namespace AspectInjector.BuildTask.Contexts
             {
                 if (_argsVar == null)
                 {
-                    _argsVar = EntryPoint.CreateVariable(TypeSystem.ObjectArray, MethodArgsVariableName, c => c.LoadCallArgument(Processor.Body.Method.Parameters.ToArray(), TypeSystem.ObjectArray));
+                    _argsVar = EntryPoint.CreateVariable(TypeSystem.ObjectArray, MethodArgsVariableName, c => c.LoadCallArgument(TargetMethod.Body.Method.Parameters.ToArray(), TypeSystem.ObjectArray));
 
                     //foreach (var param in TargetMethod.Parameters)
                     //{
@@ -186,11 +183,12 @@ namespace AspectInjector.BuildTask.Contexts
             //else if (_topWrapper.ReturnType.IsValueType)
             //    tempPc.InsertBefore(tempPc.CreateInstruction(OpCodes.Box, TargetMethod.Module.Import(_topWrapper.ReturnType)));
 
-            var newWapperPoint = new WrapperPointCut(argsParam, _lastWrapper, newWapper.Body.GetILProcessor(), newWapper.Body.Instructions.First());
+            var newWapperPoint = new WrapperPointCut(argsParam, _lastWrapper, ILProcessorFactory.GetOrCreateProcessor(newWapper.Body), newWapper.Body.Instructions.First());
 
             _lastWrapper = newWapper;
             _wrapperNo++;
 
+            //substiture top wrapper's call
             _topWrapperCallSite.InjectionPoint.Operand = newWapper;
 
             return newWapperPoint;
@@ -203,7 +201,7 @@ namespace AspectInjector.BuildTask.Contexts
         protected PointCut FindBaseClassCtorCall()
         {
             var md = TargetMethod;
-            var proc = md.Body.GetILProcessor();
+            var proc = ILProcessorFactory.GetOrCreateProcessor(md.Body);
 
             if (!md.IsConstructor)
                 throw new Exception(md.ToString() + " is not ctor.");
@@ -225,7 +223,7 @@ namespace AspectInjector.BuildTask.Contexts
 
         protected PointCut GetMethodOriginalEntryPoint()
         {
-            var processor = TargetMethod.Body.GetILProcessor();
+            var processor = ILProcessorFactory.GetOrCreateProcessor(TargetMethod.Body);
 
             if (TargetMethod.Body.Instructions.Count == 1) //if code is optimized
                 processor.InsertBefore(TargetMethod.Body.Instructions.First(), processor.Create(OpCodes.Nop));
@@ -268,7 +266,7 @@ namespace AspectInjector.BuildTask.Contexts
 
         protected Instruction SetupSingleReturnPoint(Instruction suggestedSingleReturnPoint, VariableReference resultVar)
         {
-            var proc = TargetMethod.Body.GetILProcessor();
+            var proc = ILProcessorFactory.GetOrCreateProcessor(TargetMethod.Body);
 
             var rets = proc.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList();
 
@@ -453,7 +451,7 @@ namespace AspectInjector.BuildTask.Contexts
                 FindBaseClassCtorCall() :
                 GetMethodOriginalEntryPoint();
 
-            _entryPoint = OriginalEntryPoint.InsertBefore(Processor.Create(OpCodes.Nop));
+            _entryPoint = OriginalEntryPoint.InsertBefore(OriginalEntryPoint.CreateInstruction(OpCodes.Nop));
         }
 
         private void SetupReturnPoints()
@@ -463,18 +461,20 @@ namespace AspectInjector.BuildTask.Contexts
 
             SetupReturnVariable();
 
-            var singleReturnPoint = Processor.Create(OpCodes.Nop);
-            _originalReturnPoint = new PointCut(Processor, SetupSingleReturnPoint(Processor.Create(OpCodes.Br, singleReturnPoint), MethodResultVariable)); //todo:: optimize
-            Processor.SafeAppend(singleReturnPoint);
+            var processor = ILProcessorFactory.GetOrCreateProcessor(TargetMethod.Body);
+
+            var singleReturnPoint = processor.Create(OpCodes.Nop);
+            _originalReturnPoint = new PointCut(processor, SetupSingleReturnPoint(processor.Create(OpCodes.Br, singleReturnPoint), MethodResultVariable)); //todo:: optimize
+            processor.SafeAppend(singleReturnPoint);
 
             if (!TargetMethod.ReturnType.IsTypeOf(typeof(void)))
             {
-                _returnPoint = new PointCut(Processor, Processor.SafeAppend(Processor.CreateOptimized(OpCodes.Ldloc, MethodResultVariable.Index)));
-                Processor.SafeAppend(Processor.Create(OpCodes.Ret));
+                _returnPoint = new PointCut(processor, processor.SafeAppend(processor.CreateOptimized(OpCodes.Ldloc, MethodResultVariable.Index)));
+                processor.SafeAppend(processor.Create(OpCodes.Ret));
             }
             else
             {
-                _returnPoint = new PointCut(Processor, Processor.SafeAppend(Processor.Create(OpCodes.Ret)));
+                _returnPoint = new PointCut(processor, processor.SafeAppend(processor.Create(OpCodes.Ret)));
             }
         }
 

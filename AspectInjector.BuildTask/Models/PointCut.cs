@@ -40,6 +40,7 @@ namespace AspectInjector.BuildTask.Models
         protected ModuleContext ModuleContext { get; private set; }
 
         protected ExtendedTypeSystem TypeSystem { get; private set; }
+
         protected TargetMethodContext MethodContext { get; private set; }
 
         #endregion Properties
@@ -51,7 +52,7 @@ namespace AspectInjector.BuildTask.Models
             if (body.Instructions.Any())
                 throw new NotSupportedException("Can work only with empty bodies");
 
-            var proc = body.GetILProcessor();
+            var proc = ILProcessorFactory.GetOrCreateProcessor(body);
             var exit = proc.Create(exitCode);
             proc.Append(exit);
             return new PointCut(proc, exit);

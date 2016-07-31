@@ -75,7 +75,7 @@ namespace AspectInjector.BuildTask.Contexts
         public TargetMethodContext CreateMethod(string name, MethodAttributes attrs, TypeReference returnType)
         {
             var method = new MethodDefinition(name, attrs, TypeDefinition.Module.Import(returnType));
-            var processor = method.Body.GetILProcessor();
+            var processor = ILProcessorFactory.GetOrCreateProcessor(method.Body);
             processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ret));
             TypeDefinition.Methods.Add(method);
