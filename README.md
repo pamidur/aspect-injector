@@ -163,13 +163,15 @@ Is used to specify the source from which specific advice parameter should be pop
 
 |Name|Parameter type|Description|
 |:---|:-------------|:----------|
-|Instance| object | Target class instance.
-|TargetName| string | The name of the target member
-|TargetArguments| object[] | The array of target member arguments.
-|TargetValue| object | The return value of the target member.
-|TargetException| Exception | An exception occurred in the target.
-|AbortFlag| ref bool | A flag through which an advice can abort execution of the current target. Is appliable only for "Before" injection point and non-constructor targets.
-|CustomData| object | The data specified in CustomData property of the corresponding AspectAttribute
+|Instance| object | A target class instance.
+|Type| Type | The target class type.
+|Method| MethodBase | The target member meta-information.
+|Name| string | The name of the target member.
+|Arguments| object[] | An array of target member arguments. Mandatory for advices injecting "Around" target members.
+|ReturnValue| object | A return value of the target member.
+|Target| Func<object[], object> | A delegate to the target member. Mandatory for advices injecting "Around" target members. 
+|TargetReturnType| Type | The return type of the target member.
+|RoutableData| Attribute[] | TBD
 
 **InjectionPoints**
 
@@ -179,8 +181,7 @@ Is used to specify the point in the target class member, where the current advic
 |:---|:----------
 |Before| Before the target body is executed.
 |After| After the target body is executed.
-|Exception| On any exception occured inside the target method.
-
+|Around| Replaces the target with an advice method accepting both a delegate and parameters of the original call as the input. Allows to wrap any method with additional fucntionality - for example, measuring target call duration, exception handling etc.
 
 **InjectionTargets**
 
