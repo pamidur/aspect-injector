@@ -165,12 +165,12 @@ Is used to specify the source from which specific advice parameter should be pop
 |:---|:-------------|:----------|
 |Instance| object | A target class instance.
 |Type| Type | The target class type.
+|Arguments| object[] | An array of target member arguments. Mandatory for advices injecting "Around" target members.
+|Target| Func<object[], object> | A delegate to the target member. Mandatory for advices injecting "Around" target members. 
 |Method| MethodBase | The target member meta-information.
 |Name| string | The name of the target member.
-|Arguments| object[] | An array of target member arguments. Mandatory for advices injecting "Around" target members.
 |ReturnValue| object | A return value of the target member.
-|Target| Func<object[], object> | A delegate to the target member. Mandatory for advices injecting "Around" target members. 
-|TargetReturnType| Type | The return type of the target member.
+|ReturnType| Type | The return type of the target member.
 |RoutableData| Attribute[] | TBD
 
 **InjectionPoints**

@@ -21,7 +21,7 @@ namespace AspectInjector.BuildTask.Validation
             _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Instance, ShouldBeOfType = typeof(object) });
             _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Target, ShouldBeOfType = typeof(Func<object[], object>) });
             _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Type, ShouldBeOfType = typeof(Type) });
-            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.TargetReturnType, ShouldBeOfType = typeof(Type) });
+            _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.ReturnType, ShouldBeOfType = typeof(Type) });
             _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Method, ShouldBeOfType = typeof(MethodBase) });
             _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.Arguments, ShouldBeOfType = typeof(object[]) });
             _rules.Add(new ValidationRule() { Source = AdviceArgumentSource.RoutableData, ShouldBeOfType = typeof(Attribute[]) });

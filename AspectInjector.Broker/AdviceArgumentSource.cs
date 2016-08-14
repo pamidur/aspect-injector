@@ -7,11 +7,11 @@
         Method,
 
         Target,
-        TargetReturnType,
 
         Name,
         Arguments,
         ReturnValue,
+        ReturnType,
 
         RoutableData
     }
