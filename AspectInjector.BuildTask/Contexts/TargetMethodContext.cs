@@ -162,34 +162,34 @@ namespace AspectInjector.BuildTask.Contexts
             if (_topWrapperCallSite == null)
                 SetupAroundInfrastructure();
 
-            var newWapper = new MethodDefinition(AroundWrappedMethodPrefix + _wrapperNo + "_" + TopWrapper.Name,
+            var newWrapper = CopyMethodDefinition(AroundWrappedMethodPrefix + _wrapperNo + "_" + TopWrapper.Name,
                 TargetMethod.Attributes,
                 TypeSystem.Object);
 
-            newWapper.NoInlining = false;
+            newWrapper.NoInlining = false;
 
-            MarkDebuggerHidden(newWapper);
-            MarkCompilerGenerated(newWapper);
+            MarkDebuggerHidden(newWrapper);
+            MarkCompilerGenerated(newWrapper);
 
-            TargetMethod.DeclaringType.Methods.Add(newWapper);
+            TargetMethod.DeclaringType.Methods.Add(newWrapper);
 
             var argsParam = new ParameterDefinition(TypeSystem.ObjectArray);
-            newWapper.Parameters.Add(argsParam);
+            newWrapper.Parameters.Add(argsParam);
 
-            var tempPc = PointCut.FromEmptyBody(newWapper.Body, OpCodes.Ret);
+            var tempPc = PointCut.FromEmptyBody(newWrapper.Body, OpCodes.Ret);
 
             //if (_topWrapper.ReturnType == TypeSystem.Void)
             //    tempPc.CreateVariableFromStack(TypeSystem.Object);
             //else if (_topWrapper.ReturnType.IsValueType)
             //    tempPc.InsertBefore(tempPc.CreateInstruction(OpCodes.Box, TargetMethod.Module.Import(_topWrapper.ReturnType)));
 
-            var newWapperPoint = new WrapperPointCut(argsParam, _lastWrapper, ILProcessorFactory.GetOrCreateProcessor(newWapper.Body), newWapper.Body.Instructions.First());
+            var newWapperPoint = new WrapperPointCut(argsParam, _lastWrapper, ILProcessorFactory.GetOrCreateProcessor(newWrapper.Body), newWrapper.Body.Instructions.First());
 
-            _lastWrapper = newWapper;
+            _lastWrapper = newWrapper;
             _wrapperNo++;
 
             //substiture top wrapper's call
-            _topWrapperCallSite.InjectionPoint.Operand = newWapper;
+            _topWrapperCallSite.InjectionPoint.Operand = newWrapper;
 
             return newWapperPoint;
         }
@@ -297,7 +297,7 @@ namespace AspectInjector.BuildTask.Contexts
 
         private MethodDefinition CreateUnwrapMethod(MethodDefinition originalMethod)
         {
-            var unwrapMethod = new MethodDefinition(AroundUnwrappedMethodPrefix + originalMethod.Name,
+            var unwrapMethod = CopyMethodDefinition(AroundUnwrappedMethodPrefix + originalMethod.Name,
                 originalMethod.Attributes,
                 TypeSystem.Object);
 
@@ -361,7 +361,7 @@ namespace AspectInjector.BuildTask.Contexts
 
         private MethodDefinition WrapOriginalMethod()
         {
-            var originalMethod = new MethodDefinition(AroundOriginalMethodPrefix + TargetMethod.Name,
+            var originalMethod = CopyMethodDefinition(AroundOriginalMethodPrefix + TargetMethod.Name,
                 TargetMethod.Attributes,
                 TargetMethod.ReturnType);
 
@@ -503,6 +503,19 @@ namespace AspectInjector.BuildTask.Contexts
             {
                 _resultVar = OriginalEntryPoint.CreateVariable(TargetMethod.ReturnType, MethodResultVariableName);
             }
+        }
+
+        private MethodDefinition CopyMethodDefinition(string name,
+            MethodAttributes attributes, 
+            TypeReference returnType)
+        {
+            var copy = new MethodDefinition(name,
+                attributes & (MethodAttributes.Static | MethodAttributes.HideBySig),
+                returnType);
+
+            copy.IsPrivate = true;
+
+            return copy;
         }
 
         #endregion Private Methods

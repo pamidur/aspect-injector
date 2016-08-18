@@ -88,6 +88,7 @@
     <Compile Include="StaticMembersTests.cs" />
     <Compile Include="Utils\Checker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VirtualMembersTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj">
