@@ -37,7 +37,8 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
         {
             var targetMethod = targetMethodContext.TargetMethod;
 
-            if (targetMethod.IsAbstract)
+            if (targetMethod.IsAbstract || 
+                targetMethod.IsPInvokeImpl)
             {
                 return false;
             }

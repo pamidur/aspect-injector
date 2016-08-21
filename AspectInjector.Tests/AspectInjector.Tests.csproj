@@ -73,6 +73,7 @@
     <Compile Include="AroundTests\BasicAroundTests.cs" />
     <Compile Include="AspectFactoryMethodTests.cs" />
     <Compile Include="AspectScopeTests.cs" />
+    <Compile Include="FiltersTests\SkipUnmanagedTests.cs" />
     <Compile Include="Generics\AdviceInjectionGenericTests.cs" />
     <Compile Include="Generics\AdviceInjectionOpenGenericTests.cs" />
     <Compile Include="ImportingTypesTests.cs" />
