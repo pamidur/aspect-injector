@@ -8,6 +8,7 @@
 
 # Build results
 _assemblycache/
+packagebuildplace/
 [Dd]ebug/
 [Rr]elease/
 x64/
