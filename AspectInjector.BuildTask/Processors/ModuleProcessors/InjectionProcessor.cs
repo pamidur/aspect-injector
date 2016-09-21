@@ -143,48 +143,23 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             };
         }
 
-        private IEnumerable<AspectDefinition> MergeAspectDefinitions(IEnumerable<AspectDefinition> definitions)
+        private void ProcessAspectDefinitions(MethodDefinition targetMethod, string targetName, IEnumerable<AspectDefinition> aspectDefinitions)
         {
-            var result = new List<AspectDefinition>();
-
-            foreach (var cd in definitions)
-            {
-                var match = result.FirstOrDefault(ad => ad.AdviceClassType.Equals(cd.AdviceClassType));
-                if (match == null)
-                    result.Add(cd);
-                else
-                    match.RoutableData = match.RoutableData.Concat(cd.RoutableData);
-            }
-
-            return result;
-        }
-
-        private void ProcessAspectDefinitions(MethodDefinition targetMethod,
-            string targetName,
-            IEnumerable<AspectDefinition> aspectDefinitions)
-        {
-            var filteredDefinitions = aspectDefinitions.Where(def => CheckFilter(targetMethod, targetName, def));
-            var mergedDefinitions = MergeAspectDefinitions(filteredDefinitions);
-
-            var contexts = mergedDefinitions
-                .Select(def =>
+            var contexts = aspectDefinitions
+                .Where(def => CheckFilter(targetMethod, targetName, def))
+                .GroupBy(d => d.AdviceClassType)
+                .Select(g =>
                 {
-                    var adviceClassType = def.AdviceClassType;
+                    var adviceClassType = g.First().AdviceClassType;
 
-                    var aspectScope = targetMethod.IsStatic ? AspectScope.Type : AspectScope.Instance;
-                    if (adviceClassType.CustomAttributes.HasAttributeOfType<AspectScopeAttribute>())
-                        aspectScope = (AspectScope)adviceClassType.CustomAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
-
-                    var aspectContext = new AspectContext()
+                    return new AspectContext
                     {
                         TargetName = targetName,
                         TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType),
                         AdviceClassType = adviceClassType,
-                        AdviceClassScope = aspectScope,
-                        AspectRoutableData = def.RoutableData == null ? new CustomAttribute[] { } : def.RoutableData.ToArray()
+                        AdviceClassScope = GetAspectScope(targetMethod, adviceClassType),
+                        AspectRoutableData = g.SelectMany(d => d.RoutableData).ToArray()
                     };
-
-                    return aspectContext;
                 })
                 .Where(ctx => _processors.Any(p => p.CanProcess(ctx.AdviceClassType)))
                 .ToList();
@@ -193,13 +168,22 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
             foreach (var context in contexts)
             {
-                var targetMethodContext = MethodContextFactory.GetOrCreateContext(targetMethod);
-                context.TargetMethodContext = targetMethodContext; //setting it here for better performance
+                // setting the TargetMethodContext here for better performance
+                context.TargetMethodContext = MethodContextFactory.GetOrCreateContext(targetMethod);
 
                 foreach (var processor in _processors)
                     if (processor.CanProcess(context.AdviceClassType))
                         processor.Process(context);
             }
+        }
+
+        private static AspectScope GetAspectScope(MethodDefinition targetMethod, TypeDefinition adviceClassType)
+        {
+            var customAttributes = adviceClassType.CustomAttributes;
+            if (customAttributes.HasAttributeOfType<AspectScopeAttribute>())
+                return (AspectScope)customAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
+
+            return targetMethod.IsStatic ? AspectScope.Type : AspectScope.Instance;
         }
     }
 }
