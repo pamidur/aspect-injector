@@ -1,50 +1,62 @@
-﻿using AspectInjector.Broker;
+﻿using System.Linq;
+using AspectInjector.Broker;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
-using System.Linq;
 
 namespace AspectInjector.BuildTask.Contexts
 {
     public class AspectContext
     {
-        private MethodDefinition _adviceClassFactory = null;
+        private MethodDefinition _adviceClassFactory;
 
-        public AspectContext()
-        {
-        }
-
-        public CustomAttribute[] AspectRoutableData { get; set; }
+        public CustomAttribute[] AspectRoutableData { get; }
 
         public MethodDefinition AdviceClassFactory
         {
-            get
-            {
-                if (_adviceClassFactory == null)
-                {
-                    var aspectFactories = AdviceClassType.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>()).ToList();
-
-                    if (aspectFactories.Any())
-                        _adviceClassFactory = aspectFactories[0];
-                    else
-                    {
-                        _adviceClassFactory = AdviceClassType.Methods
-                        .Where(c => c.IsConstructor && !c.IsStatic && !c.Parameters.Any())
-                        .FirstOrDefault();
-                    }
-                }
-
-                return _adviceClassFactory;
-            }
+            get { return _adviceClassFactory ?? (_adviceClassFactory = GetAdviceClassFactory()); }
         }
 
-        public TypeDefinition AdviceClassType { get; set; }
+        public TypeDefinition AdviceClassType { get; }
 
-        public AspectScope AdviceClassScope { get; set; }
+        public AspectScope AdviceClassScope { get; }
 
         public TargetMethodContext TargetMethodContext { get; set; }
 
-        public string TargetName { get; set; }
+        public string TargetName { get; }
 
-        public TargetTypeContext TargetTypeContext { get; set; }
+        public TargetTypeContext TargetTypeContext { get; }
+
+        public AspectContext(MethodDefinition targetMethod, string targetName, TypeDefinition adviceClassType, CustomAttribute[] routableData)
+        {
+            TargetName = targetName;
+            TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType);
+            AdviceClassType = adviceClassType;
+            AdviceClassScope = GetAspectScope(targetMethod, adviceClassType);
+            AspectRoutableData = routableData;
+        }
+
+        private static bool IsAspectFactory(MethodDefinition method)
+        {
+            return method.IsStatic && !method.IsConstructor && method.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>();
+        }
+
+        private static bool IsDefaultConstructor(MethodDefinition method)
+        {
+            return method.IsConstructor && !method.IsStatic && !method.Parameters.Any();
+        }
+
+        private static AspectScope GetAspectScope(MethodDefinition targetMethod, TypeDefinition adviceClassType)
+        {
+            var customAttributes = adviceClassType.CustomAttributes;
+            if (customAttributes.HasAttributeOfType<AspectScopeAttribute>())
+                return (AspectScope)customAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
+
+            return targetMethod.IsStatic ? AspectScope.Type : AspectScope.Instance;
+        }
+
+        private MethodDefinition GetAdviceClassFactory()
+        {
+            return AdviceClassType.Methods.FirstOrDefault(IsAspectFactory) ?? AdviceClassType.Methods.FirstOrDefault(IsDefaultConstructor);
+        }
     }
 }

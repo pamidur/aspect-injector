@@ -65,8 +65,6 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                     }
                 }
             }
-
-            //ValidateContexts(contexts);
         }
 
         private static bool CheckFilter(MethodDefinition targetMethod,
@@ -110,23 +108,16 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             return result;
         }
 
-        private static AspectScope GetAspectScope(MethodDefinition targetMethod, TypeDefinition adviceClassType)
-        {
-            var customAttributes = adviceClassType.CustomAttributes;
-            if (customAttributes.HasAttributeOfType<AspectScopeAttribute>())
-                return (AspectScope)customAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
-
-            return targetMethod.IsStatic ? AspectScope.Type : AspectScope.Instance;
-        }
-
         private static List<AspectDefinition> FindAspectDefinitions(Collection<CustomAttribute> collection)
         {
-            var result = collection.GetAttributesOfType<AspectAttribute>().Select(attr => new AspectDefinition(attr, null)).ToList();
+            var customAttrs = collection
+                .GroupBy(ca => ca.AttributeType.Resolve().CustomAttributes.GetAttributeOfType<AspectDefinitionAttribute>())
+                .Where(g => g.Key != null);
 
-            var customAttrs =
-                collection.GroupBy(ca => ca.AttributeType.Resolve().CustomAttributes.GetAttributeOfType<AspectDefinitionAttribute>()).Where(g => g.Key != null);
-
-            result = result.Concat(customAttrs.Select(ca => new AspectDefinition(ca.Key, ca.First()))).ToList();
+            var result = collection.GetAttributesOfType<AspectAttribute>()
+                .Select(attr => new AspectDefinition(attr, null))
+                .Concat(customAttrs.Select(ca => new AspectDefinition(ca.Key, ca.First())))
+                .ToList();
 
             return result;
         }
@@ -139,15 +130,8 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 .Select(g =>
                 {
                     var adviceClassType = g.First().AdviceClassType;
-
-                    return new AspectContext
-                           {
-                               TargetName = targetName,
-                               TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType),
-                               AdviceClassType = adviceClassType,
-                               AdviceClassScope = GetAspectScope(targetMethod, adviceClassType),
-                               AspectRoutableData = g.SelectMany(d => d.RoutableData).ToArray()
-                           };
+                    var routableData = g.SelectMany(d => d.RoutableData).ToArray();
+                    return new AspectContext(targetMethod, targetName, adviceClassType, routableData);
                 })
                 .Where(ctx => _processors.Any(p => p.CanProcess(ctx.AdviceClassType)))
                 .ToList();
