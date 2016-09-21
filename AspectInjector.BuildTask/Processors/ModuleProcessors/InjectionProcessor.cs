@@ -22,47 +22,54 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         public void ProcessModule(ModuleDefinition module)
         {
-            foreach (var @class in module.Types.Where(t => t.IsClass).SelectMany(t => t.GetClassesTree()))
+            var classes = module.Types.Where(t => t.IsClass).SelectMany(t => t.GetClassesTree());
+            foreach (var @class in classes)
             {
                 var classAspectDefinitions = FindAspectDefinitions(@class.CustomAttributes);
 
-                foreach (var method in @class.Methods.Where(m => !m.IsSetter && !m.IsGetter && !m.IsAddOn && !m.IsRemoveOn).ToList())
-                {
-                    var methodAspectDefinitions = FindAspectDefinitions(method.CustomAttributes);
-                    ProcessAspectDefinitions(method, method.Name, classAspectDefinitions.Concat(methodAspectDefinitions));
-                }
+                ProcessMethods(@class, classAspectDefinitions);
+                ProcessProperties(@class, classAspectDefinitions);
+                ProcessEvents(@class, classAspectDefinitions);
+            }
+        }
 
-                foreach (var property in @class.Properties.ToList())
-                {
-                    var propertyAspectDefinitions = FindAspectDefinitions(property.CustomAttributes);
-                    var allAspectDefinitions = classAspectDefinitions.Concat(propertyAspectDefinitions);
+        private void ProcessMethods(TypeDefinition @class, List<AspectDefinition> classAspectDefinitions)
+        {
+            var methods = @class.Methods.Where(m => !m.IsSetter && !m.IsGetter && !m.IsAddOn && !m.IsRemoveOn);
+            foreach (var method in methods)
+            {
+                var methodAspectDefinitions = FindAspectDefinitions(method.CustomAttributes);
+                ProcessAspectDefinitions(method, method.Name, classAspectDefinitions.Concat(methodAspectDefinitions));
+            }
+        }
 
-                    if (property.GetMethod != null)
-                    {
-                        ProcessAspectDefinitions(property.GetMethod, property.Name, allAspectDefinitions);
-                    }
+        private void ProcessProperties(TypeDefinition @class, List<AspectDefinition> classAspectDefinitions)
+        {
+            foreach (var property in @class.Properties)
+            {
+                var propertyAspectDefinitions = FindAspectDefinitions(property.CustomAttributes);
+                var allAspectDefinitions = classAspectDefinitions.Concat(propertyAspectDefinitions);
 
-                    if (property.SetMethod != null)
-                    {
-                        ProcessAspectDefinitions(property.SetMethod, property.Name, allAspectDefinitions);
-                    }
-                }
+                if (property.GetMethod != null)
+                    ProcessAspectDefinitions(property.GetMethod, property.Name, allAspectDefinitions);
 
-                foreach (var @event in @class.Events.ToList())
-                {
-                    var eventAspectDefinitions = FindAspectDefinitions(@event.CustomAttributes);
-                    var allAspectDefinitions = classAspectDefinitions.Concat(eventAspectDefinitions);
+                if (property.SetMethod != null)
+                    ProcessAspectDefinitions(property.SetMethod, property.Name, allAspectDefinitions);
+            }
+        }
 
-                    if (@event.AddMethod != null)
-                    {
-                        ProcessAspectDefinitions(@event.AddMethod, @event.Name, allAspectDefinitions);
-                    }
+        private void ProcessEvents(TypeDefinition @class, List<AspectDefinition> classAspectDefinitions)
+        {
+            foreach (var @event in @class.Events)
+            {
+                var eventAspectDefinitions = FindAspectDefinitions(@event.CustomAttributes);
+                var allAspectDefinitions = classAspectDefinitions.Concat(eventAspectDefinitions);
 
-                    if (@event.RemoveMethod != null)
-                    {
-                        ProcessAspectDefinitions(@event.RemoveMethod, @event.Name, allAspectDefinitions);
-                    }
-                }
+                if (@event.AddMethod != null)
+                    ProcessAspectDefinitions(@event.AddMethod, @event.Name, allAspectDefinitions);
+
+                if (@event.RemoveMethod != null)
+                    ProcessAspectDefinitions(@event.RemoveMethod, @event.Name, allAspectDefinitions);
             }
         }
 
