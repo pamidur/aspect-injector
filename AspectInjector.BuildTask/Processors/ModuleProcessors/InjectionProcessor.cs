@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using AspectInjector.Broker;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
@@ -67,47 +66,6 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             }
         }
 
-        private static bool CheckFilter(MethodDefinition targetMethod,
-            string targetName,
-            AspectDefinition aspectDefinition)
-        {
-            var result = true;
-
-            var nameFilter = aspectDefinition.NameFilter;
-            var accessModifierFilter = aspectDefinition.AccessModifierFilter;
-
-            if (!string.IsNullOrEmpty(nameFilter))
-            {
-                result = Regex.IsMatch(targetName, nameFilter);
-            }
-
-            if (result && accessModifierFilter != 0)
-            {
-                if (targetMethod.IsPrivate)
-                {
-                    result = (accessModifierFilter & AccessModifiers.Private) != 0;
-                }
-                else if (targetMethod.IsFamily)
-                {
-                    result = (accessModifierFilter & AccessModifiers.Protected) != 0;
-                }
-                else if (targetMethod.IsAssembly)
-                {
-                    result = (accessModifierFilter & AccessModifiers.Internal) != 0;
-                }
-                else if (targetMethod.IsFamilyOrAssembly)
-                {
-                    result = (accessModifierFilter & AccessModifiers.ProtectedInternal) != 0;
-                }
-                else if (targetMethod.IsPublic)
-                {
-                    result = (accessModifierFilter & AccessModifiers.Public) != 0;
-                }
-            }
-
-            return result;
-        }
-
         private static List<AspectDefinition> FindAspectDefinitions(Collection<CustomAttribute> collection)
         {
             var customAttrs = collection
@@ -125,7 +83,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         private void ProcessAspectDefinitions(MethodDefinition targetMethod, string targetName, IEnumerable<AspectDefinition> aspectDefinitions)
         {
             var contexts = aspectDefinitions
-                .Where(def => CheckFilter(targetMethod, targetName, def))
+                .Where(def => def.CanBeAppliedTo(targetMethod, targetName))
                 .GroupBy(d => d.AdviceClassType)
                 .Select(g =>
                 {
