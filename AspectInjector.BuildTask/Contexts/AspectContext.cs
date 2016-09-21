@@ -35,7 +35,7 @@ namespace AspectInjector.BuildTask.Contexts
             AspectRoutableData = routableData;
         }
 
-        private static bool IsAspectFactory(MethodDefinition method)
+        internal static bool IsAspectFactory(MethodDefinition method)
         {
             return method.IsStatic && !method.IsConstructor && method.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>();
         }

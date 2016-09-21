@@ -90,13 +90,12 @@ namespace AspectInjector.BuildTask.Validation
         {
             foreach (var context in contexts)
             {
-                var aspectFactories = context.AdviceClassType.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>()).ToList();
-
-                if (aspectFactories.Count > 1)
-                    throw new CompilationException("Only one method can be AspectFactory", aspectFactories.Last());
-
                 if (context.AdviceClassFactory == null)
                     throw new CompilationException("Cannot find either empty constructor or factory for aspect.", context.AdviceClassType);
+
+                var aspectFactories = context.AdviceClassType.Methods.Where(AspectContext.IsAspectFactory).ToList();
+                if (aspectFactories.Count > 1)
+                    throw new CompilationException("Only one method can be AspectFactory", aspectFactories.Last());
             }
         }
     }
