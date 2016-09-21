@@ -1,4 +1,7 @@
-﻿using AspectInjector.Broker;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using AspectInjector.Broker;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
@@ -6,9 +9,6 @@ using AspectInjector.BuildTask.Models;
 using AspectInjector.BuildTask.Validation;
 using Mono.Cecil;
 using Mono.Collections.Generic;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 {
@@ -110,37 +110,25 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             return result;
         }
 
-        private List<AspectDefinition> FindAspectDefinitions(Collection<CustomAttribute> collection)
+        private static AspectScope GetAspectScope(MethodDefinition targetMethod, TypeDefinition adviceClassType)
         {
-            var result = collection.GetAttributesOfType<AspectAttribute>().Select(ParseAspectAttribute).ToList();
+            var customAttributes = adviceClassType.CustomAttributes;
+            if (customAttributes.HasAttributeOfType<AspectScopeAttribute>())
+                return (AspectScope)customAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
 
-            var customAttrs = collection.GroupBy(ca => ca.AttributeType.Resolve().CustomAttributes.GetAttributeOfType<AspectDefinitionAttribute>()).Where(g => g.Key != null);
+            return targetMethod.IsStatic ? AspectScope.Type : AspectScope.Instance;
+        }
 
-            result = result.Concat(customAttrs.Select(ca => ParseCustomAspectAttribute(ca.Key, ca.First()))).ToList();
+        private static List<AspectDefinition> FindAspectDefinitions(Collection<CustomAttribute> collection)
+        {
+            var result = collection.GetAttributesOfType<AspectAttribute>().Select(attr => new AspectDefinition(attr, null)).ToList();
+
+            var customAttrs =
+                collection.GroupBy(ca => ca.AttributeType.Resolve().CustomAttributes.GetAttributeOfType<AspectDefinitionAttribute>()).Where(g => g.Key != null);
+
+            result = result.Concat(customAttrs.Select(ca => new AspectDefinition(ca.Key, ca.First()))).ToList();
 
             return result;
-        }
-
-        private AspectDefinition ParseAspectAttribute(CustomAttribute attr)
-        {
-            return new AspectDefinition()
-            {
-                AdviceClassType = ((TypeReference)attr.ConstructorArguments[0].Value).Resolve(),
-                NameFilter = (string)attr.GetPropertyValue("NameFilter"),
-                AccessModifierFilter = (AccessModifiers)(attr.GetPropertyValue("AccessModifierFilter") ?? 0),
-                RoutableData = new List<CustomAttribute>()
-            };
-        }
-
-        private AspectDefinition ParseCustomAspectAttribute(CustomAttribute attr, CustomAttribute baseAttr)
-        {
-            return new AspectDefinition()
-            {
-                AdviceClassType = ((TypeReference)attr.ConstructorArguments[0].Value).Resolve(),
-                NameFilter = (string)attr.GetPropertyValue("NameFilter"),
-                AccessModifierFilter = (AccessModifiers)(attr.GetPropertyValue("AccessModifierFilter") ?? 0),
-                RoutableData = new List<CustomAttribute> { baseAttr }
-            };
         }
 
         private void ProcessAspectDefinitions(MethodDefinition targetMethod, string targetName, IEnumerable<AspectDefinition> aspectDefinitions)
@@ -153,13 +141,13 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                     var adviceClassType = g.First().AdviceClassType;
 
                     return new AspectContext
-                    {
-                        TargetName = targetName,
-                        TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType),
-                        AdviceClassType = adviceClassType,
-                        AdviceClassScope = GetAspectScope(targetMethod, adviceClassType),
-                        AspectRoutableData = g.SelectMany(d => d.RoutableData).ToArray()
-                    };
+                           {
+                               TargetName = targetName,
+                               TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType),
+                               AdviceClassType = adviceClassType,
+                               AdviceClassScope = GetAspectScope(targetMethod, adviceClassType),
+                               AspectRoutableData = g.SelectMany(d => d.RoutableData).ToArray()
+                           };
                 })
                 .Where(ctx => _processors.Any(p => p.CanProcess(ctx.AdviceClassType)))
                 .ToList();
@@ -175,15 +163,6 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                     if (processor.CanProcess(context.AdviceClassType))
                         processor.Process(context);
             }
-        }
-
-        private static AspectScope GetAspectScope(MethodDefinition targetMethod, TypeDefinition adviceClassType)
-        {
-            var customAttributes = adviceClassType.CustomAttributes;
-            if (customAttributes.HasAttributeOfType<AspectScopeAttribute>())
-                return (AspectScope)customAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
-
-            return targetMethod.IsStatic ? AspectScope.Type : AspectScope.Instance;
         }
     }
 }
