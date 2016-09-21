@@ -80,18 +80,20 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             return result;
         }
 
+        private static AspectContext CreateAspectContext(MethodDefinition targetMethod, string targetName, IGrouping<TypeDefinition, AspectDefinition> @group)
+        {
+            var adviceClassType = @group.First().AdviceClassType;
+            var routableData = @group.SelectMany(d => d.RoutableData).ToArray();
+            return new AspectContext(targetMethod, targetName, adviceClassType, routableData);
+        }
+
         private void ProcessAspectDefinitions(MethodDefinition targetMethod, string targetName, IEnumerable<AspectDefinition> aspectDefinitions)
         {
             var contexts = aspectDefinitions
-                .Where(def => def.CanBeAppliedTo(targetMethod, targetName))
-                .GroupBy(d => d.AdviceClassType)
-                .Select(g =>
-                {
-                    var adviceClassType = g.First().AdviceClassType;
-                    var routableData = g.SelectMany(d => d.RoutableData).ToArray();
-                    return new AspectContext(targetMethod, targetName, adviceClassType, routableData);
-                })
-                .Where(ctx => _processors.Any(p => p.CanProcess(ctx.AdviceClassType)))
+                .Where(definition => definition.CanBeAppliedTo(targetMethod, targetName))
+                .GroupBy(definition => definition.AdviceClassType)
+                .Select(group => CreateAspectContext(targetMethod, targetName, group))
+                .Where(context => _processors.Any(p => p.CanProcess(context.AdviceClassType)))
                 .ToList();
 
             Validator.ValidateAspectContexts(contexts);
