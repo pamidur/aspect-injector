@@ -62,6 +62,7 @@
     <Compile Include="InjectionProcessorAssemblyTests.cs" />
     <Compile Include="InjectionProcessorBaseClassTests.cs" />
     <Compile Include="InjectionProcessorClassTests.cs" />
+    <Compile Include="InjectionProcessorInterfaceTests.cs" />
     <Compile Include="InjectionProcessorTestBase.cs" />
     <Compile Include="InjectionProcessorTests.cs" />
     <Compile Include="RefOutTests.cs" />
