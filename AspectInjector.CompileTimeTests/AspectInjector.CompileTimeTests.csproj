@@ -59,6 +59,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AroundRefOutTests.cs" />
+    <Compile Include="InjectionProcessorBaseClassTests.cs" />
+    <Compile Include="InjectionProcessorClassTests.cs" />
+    <Compile Include="InjectionProcessorTestBase.cs" />
+    <Compile Include="InjectionProcessorTests.cs" />
     <Compile Include="RefOutTests.cs" />
     <Compile Include="Infrastructure\CompileTimeTestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
