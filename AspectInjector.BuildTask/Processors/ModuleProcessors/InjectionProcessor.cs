@@ -35,7 +35,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             }
         }
 
-        private static IEnumerable<AspectContext> GetAspectContexts(ModuleDefinition module)
+        internal static IEnumerable<AspectContext> GetAspectContexts(ModuleDefinition module)
         {
             return module.Types
                          .Where(t => t.IsClass).SelectMany(t => t.GetClassesTree())
@@ -67,8 +67,9 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             var propertyDefinition = member as PropertyDefinition;
             if (propertyDefinition != null)
             {
-                return CreateAspectContexts(propertyDefinition.GetMethod, member.Name, allAspects)
-                    .Concat(CreateAspectContexts(propertyDefinition.SetMethod, member.Name, allAspects));
+                return new[] { propertyDefinition.GetMethod, propertyDefinition.SetMethod }
+                    .Where(m => m != null)
+                    .SelectMany(m => CreateAspectContexts(m, member.Name, allAspects));
             }
 
             var eventDefinition = member as EventDefinition;
