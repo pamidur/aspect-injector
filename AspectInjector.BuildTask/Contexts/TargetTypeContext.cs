@@ -18,12 +18,12 @@ namespace AspectInjector.BuildTask.Contexts
         private static readonly string AspectStaticPropertyNamePrefix = "__a$t_";
         private static readonly string AspectInstancePropertyNamePrefix = "__a$i_";
 
-        public TypeDefinition TypeDefinition { get; private set; }
+        public TypeDefinition TypeDefinition { get; }
 
-        private TargetMethodContext[] _constructors;
+        private readonly TargetMethodContext[] _constructors;
 
-        private TargetMethodContext _typeAspectsInitializer = null;
-        private TargetMethodContext _instanceAspectsInitializer = null;
+        private TargetMethodContext _typeAspectsInitializer;
+        private TargetMethodContext _instanceAspectsInitializer;
 
         public TargetTypeContext(TypeDefinition typeDefinition, TargetMethodContext[] ctorCtx)
         {
@@ -87,9 +87,9 @@ namespace AspectInjector.BuildTask.Contexts
             if (info.TargetTypeContext != this)
                 throw new NotSupportedException("Aspect info mismatch.");
 
-            TargetMethodContext initMethod = null;
+            TargetMethodContext initMethod;
             FieldAttributes fieldAttrs;
-            string aspectPropertyName = null;
+            string aspectPropertyName;
 
             if (info.AdviceClassScope == AspectScope.Instance)
             {
@@ -112,7 +112,7 @@ namespace AspectInjector.BuildTask.Contexts
             var field = new FieldDefinition(aspectPropertyName, fieldAttrs, TypeDefinition.Module.Import(info.AdviceClassType));
             TypeDefinition.Fields.Add(field);
 
-            InjectInitialization(initMethod, field, info.AdviceClassFactory);
+            InjectInitialization(initMethod, field, info.AdviceClassFactory.Value);
 
             return field;
         }

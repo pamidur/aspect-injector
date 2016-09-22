@@ -8,14 +8,9 @@ namespace AspectInjector.BuildTask.Contexts
 {
     public class AspectContext
     {
-        private MethodDefinition _adviceClassFactory;
-
         public CustomAttribute[] AspectRoutableData { get; }
 
-        public MethodDefinition AdviceClassFactory
-        {
-            get { return _adviceClassFactory ?? (_adviceClassFactory = GetAdviceClassFactory()); }
-        }
+        public Lazy<MethodDefinition> AdviceClassFactory { get; }
 
         public TypeDefinition AdviceClassType { get; }
 
@@ -35,6 +30,7 @@ namespace AspectInjector.BuildTask.Contexts
             AdviceClassScope = GetAspectScope(targetMethod, adviceClassType);
             AspectRoutableData = routableData;
             TargetMethodContext = new Lazy<TargetMethodContext>(() => MethodContextFactory.GetOrCreateContext(targetMethod));
+            AdviceClassFactory = new Lazy<MethodDefinition>(GetAdviceClassFactory);
         }
 
         internal static bool IsAspectFactory(MethodDefinition method)
