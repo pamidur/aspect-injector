@@ -86,7 +86,9 @@ namespace AspectInjector.CompileTimeTests.Infrastructure
                 }
             }
 
-            var newtype = new TypeDefinition(ns, type.Name, attrs, CopyReference(type.BaseType));
+            var newtype = type.IsInterface
+                ? new TypeDefinition(ns, type.Name, attrs)
+                : new TypeDefinition(ns, type.Name, attrs, CopyReference(type.BaseType));
 
             _refsMap.Add(type, newtype);
 
@@ -123,8 +125,8 @@ namespace AspectInjector.CompileTimeTests.Infrastructure
         {
             var newProp = new PropertyDefinition(prop.Name, prop.Attributes, CopyReference(prop.PropertyType))
                           {
-                              GetMethod = CopyReference(prop.GetMethod),
-                              SetMethod = CopyReference(prop.SetMethod)
+                              GetMethod = prop.GetMethod != null ? CopyReference(prop.GetMethod) : null,
+                              SetMethod = prop.SetMethod != null ? CopyReference(prop.SetMethod) : null
                           };
 
             _refsMap.Add(prop, newProp);
@@ -156,6 +158,14 @@ namespace AspectInjector.CompileTimeTests.Infrastructure
                 parMap.Add(par, npar);
             }
 
+            if (method.Body != null)
+                CopyMethodBody(method, newMethod, varMap, instMap, parMap);
+
+            return newMethod;
+        }
+
+        private void CopyMethodBody(MethodDefinition method, MethodDefinition newMethod, Dictionary<VariableDefinition, VariableDefinition> varMap, Dictionary<Instruction, Instruction> instMap, Dictionary<ParameterDefinition, ParameterDefinition> parMap)
+        {
             foreach (var v in method.Body.Variables)
             {
                 var nv = new VariableDefinition(v.Name, CopyReference(v.VariableType));
@@ -179,25 +189,25 @@ namespace AspectInjector.CompileTimeTests.Infrastructure
             {
                 if (i.Operand is ParameterDefinition)
                 {
-                    var ni = ilp.Create(i.OpCode, parMap[(ParameterDefinition)i.Operand]);
+                    var ni = ilp.Create(i.OpCode, parMap[(ParameterDefinition) i.Operand]);
                     ilp.SafeReplace(i, ni);
                 }
 
                 if (i.Operand is VariableDefinition)
                 {
-                    var ni = ilp.Create(i.OpCode, varMap[(VariableDefinition)i.Operand]);
+                    var ni = ilp.Create(i.OpCode, varMap[(VariableDefinition) i.Operand]);
                     ilp.SafeReplace(i, ni);
                 }
 
                 if (i.Operand is Instruction)
                 {
-                    var ni = ilp.Create(i.OpCode, instMap[(Instruction)i.Operand]);
+                    var ni = ilp.Create(i.OpCode, instMap[(Instruction) i.Operand]);
                     ilp.SafeReplace(i, ni);
                 }
 
                 if (i.Operand is Instruction[])
                 {
-                    var ni = ilp.Create(i.OpCode, ((Instruction[])i.Operand).Select(ii => instMap[ii]).ToArray());
+                    var ni = ilp.Create(i.OpCode, ((Instruction[]) i.Operand).Select(ii => instMap[ii]).ToArray());
                     ilp.SafeReplace(i, ni);
                 }
             }
@@ -214,8 +224,6 @@ namespace AspectInjector.CompileTimeTests.Infrastructure
                                                          TryStart = h.TryStart == null ? null : instMap[h.TryStart]
                                                      });
             }
-
-            return newMethod;
         }
 
         private Instruction CopyInstruction(ILProcessor ilp, Instruction inst)
