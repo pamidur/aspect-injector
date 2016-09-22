@@ -1,18 +1,18 @@
-﻿using AspectInjector.BuildTask.Extensions;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using AspectInjector.BuildTask.Extensions;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 
-namespace AspectInjector.CompileTimeTests
+namespace AspectInjector.CompileTimeTests.Infrastructure
 {
     internal class TestAssemblyGenerator
     {
         private ModuleDefinition _module;
-        private AssemblyDefinition _snippetsAssembly;
+        private readonly AssemblyDefinition _snippetsAssembly;
 
         private Dictionary<object, object> _refsMap;
         private readonly Type _source;
@@ -22,7 +22,7 @@ namespace AspectInjector.CompileTimeTests
             _snippetsAssembly = AssemblyDefinition.ReadAssembly(Path.Combine(Assembly.GetExecutingAssembly().Location),
                 new ReaderParameters
                 {
-                    ReadingMode = Mono.Cecil.ReadingMode.Deferred,
+                    ReadingMode = ReadingMode.Deferred,
                 });
 
             _source = source;
@@ -108,10 +108,11 @@ namespace AspectInjector.CompileTimeTests
 
         private EventDefinition CopyEvent(TypeDefinition target, EventDefinition oldEvent)
         {
-            var newEvent = new EventDefinition(oldEvent.Name, oldEvent.Attributes, CopyReference(oldEvent.EventType));
-
-            newEvent.AddMethod = CopyReference(oldEvent.AddMethod);
-            newEvent.RemoveMethod = CopyReference(oldEvent.RemoveMethod);
+            var newEvent = new EventDefinition(oldEvent.Name, oldEvent.Attributes, CopyReference(oldEvent.EventType))
+                           {
+                               AddMethod = CopyReference(oldEvent.AddMethod),
+                               RemoveMethod = CopyReference(oldEvent.RemoveMethod)
+                           };
 
             _refsMap.Add(oldEvent, newEvent);
             target.Events.Add(newEvent);
@@ -120,10 +121,11 @@ namespace AspectInjector.CompileTimeTests
 
         private PropertyDefinition CopyProperty(TypeDefinition target, PropertyDefinition prop)
         {
-            var newProp = new PropertyDefinition(prop.Name, prop.Attributes, CopyReference(prop.PropertyType));
-
-            newProp.GetMethod = CopyReference(prop.GetMethod);
-            newProp.SetMethod = CopyReference(prop.SetMethod);
+            var newProp = new PropertyDefinition(prop.Name, prop.Attributes, CopyReference(prop.PropertyType))
+                          {
+                              GetMethod = CopyReference(prop.GetMethod),
+                              SetMethod = CopyReference(prop.SetMethod)
+                          };
 
             _refsMap.Add(prop, newProp);
             target.Properties.Add(newProp);
@@ -132,8 +134,7 @@ namespace AspectInjector.CompileTimeTests
 
         private ParameterDefinition CopyParameterDefinition(ParameterDefinition parmd)
         {
-            var npar = new ParameterDefinition(parmd.Name, parmd.Attributes, CopyReference(parmd.ParameterType));
-            return npar;
+            return new ParameterDefinition(parmd.Name, parmd.Attributes, CopyReference(parmd.ParameterType));
         }
 
         private MethodDefinition CopyMethod(TypeDefinition newtype, MethodDefinition method)
@@ -203,15 +204,15 @@ namespace AspectInjector.CompileTimeTests
 
             foreach (var h in method.Body.ExceptionHandlers)
             {
-                var nh = new ExceptionHandler(h.HandlerType);
-                nh.CatchType = h.CatchType == null ? null : CopyReference(h.CatchType);
-                nh.FilterStart = h.FilterStart == null ? null : instMap[h.FilterStart];
-                nh.HandlerEnd = h.HandlerEnd == null ? null : instMap[h.HandlerEnd];
-                nh.HandlerStart = h.HandlerStart == null ? null : instMap[h.HandlerStart];
-                nh.TryEnd = h.TryEnd == null ? null : instMap[h.TryEnd];
-                nh.TryStart = h.TryStart == null ? null : instMap[h.TryStart];
-
-                newMethod.Body.ExceptionHandlers.Add(nh);
+                newMethod.Body.ExceptionHandlers.Add(new ExceptionHandler(h.HandlerType)
+                                                     {
+                                                         CatchType = h.CatchType == null ? null : CopyReference(h.CatchType),
+                                                         FilterStart = h.FilterStart == null ? null : instMap[h.FilterStart],
+                                                         HandlerEnd = h.HandlerEnd == null ? null : instMap[h.HandlerEnd],
+                                                         HandlerStart = h.HandlerStart == null ? null : instMap[h.HandlerStart],
+                                                         TryEnd = h.TryEnd == null ? null : instMap[h.TryEnd],
+                                                         TryStart = h.TryStart == null ? null : instMap[h.TryStart]
+                                                     });
             }
 
             return newMethod;
@@ -225,18 +226,16 @@ namespace AspectInjector.CompileTimeTests
             if (operand is MemberReference)
                 operand = CopyReference((MemberReference)operand);
 
-            var argTypes = new Type[] { typeof(OpCode) };
+            var argTypes = new[] { typeof(OpCode) };
             if (operand != null)
-                argTypes = argTypes.Concat(new Type[] { operand.GetType() }).ToArray();
+                argTypes = argTypes.Concat(new[] { operand.GetType() }).ToArray();
 
             var args = new object[] { opcode };
             if (operand != null)
-                args = args.Concat(new object[] { operand }).ToArray();
+                args = args.Concat(new[] { operand }).ToArray();
 
             var factory = ilp.GetType().GetMethod("Create", argTypes);
-            var ni = (Instruction)factory.Invoke(ilp, args);
-
-            return ni;
+            return (Instruction)factory.Invoke(ilp, args);
         }
 
         private GenericParameter CopyGenericParameter(GenericParameter generic)
@@ -299,7 +298,7 @@ namespace AspectInjector.CompileTimeTests
 
         private T CopyMember<T>(T reference)
         {
-            object result = null;
+            object result;
 
             if (reference is MemberReference)
             {
@@ -354,7 +353,7 @@ namespace AspectInjector.CompileTimeTests
             if (reference == null)
                 return null;
 
-            MemberReference resolvedRef = null;
+            MemberReference resolvedRef;
 
             if (reference is GenericParameter || reference is TypeSpecification)
                 resolvedRef = reference;
@@ -378,7 +377,7 @@ namespace AspectInjector.CompileTimeTests
             var memberRef = GetMappedMember(reference);
             var memberRefType = reference.GetType();
 
-            return (T)(object)_module.GetType().GetMethod("Import", new[] { memberRefType }).Invoke(_module, new[] { memberRef });
+            return (T)_module.GetType().GetMethod("Import", new[] { memberRefType }).Invoke(_module, new[] { memberRef });
         }
     }
 }
