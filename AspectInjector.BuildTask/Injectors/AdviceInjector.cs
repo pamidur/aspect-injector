@@ -23,18 +23,18 @@ namespace AspectInjector.BuildTask.Injectors
             switch (context.InjectionPoint)
             {
                 case InjectionPoints.Before:
-                    injectionPoint = context.AspectContext.TargetMethodContext.EntryPoint;
+                    injectionPoint = context.AspectContext.TargetMethodContext.Value.EntryPoint;
                     break;
 
                 case InjectionPoints.After:
-                    injectionPoint = context.AspectContext.TargetMethodContext.ReturnPoint;
+                    injectionPoint = context.AspectContext.TargetMethodContext.Value.ReturnPoint;
                     break;
 
                 case InjectionPoints.Around:
-                    injectionPoint = context.AspectContext.TargetMethodContext.CreateNewAroundPoint();
+                    injectionPoint = context.AspectContext.TargetMethodContext.Value.CreateNewAroundPoint();
                     break;
 
-                default: throw new NotSupportedException(context.InjectionPoint.ToString() + " is not supported (yet?)");
+                default: throw new NotSupportedException(context.InjectionPoint + " is not supported (yet?)");
             }
 
             var argumentValue = ResolveArgumentsValues(
@@ -56,7 +56,7 @@ namespace AspectInjector.BuildTask.Injectors
                 switch (argumentSource)
                 {
                     case AdviceArgumentSource.Instance:
-                        yield return context.TargetMethodContext.TargetMethod.IsStatic ? Markers.DefaultMarker : Markers.InstanceSelfMarker;
+                        yield return context.TargetMethodContext.Value.TargetMethod.IsStatic ? Markers.DefaultMarker : Markers.InstanceSelfMarker;
                         break;
 
                     case AdviceArgumentSource.Type:
@@ -64,7 +64,7 @@ namespace AspectInjector.BuildTask.Injectors
                         break;
 
                     case AdviceArgumentSource.Method:
-                        yield return context.TargetMethodContext.TopWrapper ?? context.TargetMethodContext.TargetMethod;
+                        yield return context.TargetMethodContext.Value.TopWrapper ?? context.TargetMethodContext.Value.TargetMethod;
                         break;
 
                     case AdviceArgumentSource.Arguments:
@@ -76,11 +76,11 @@ namespace AspectInjector.BuildTask.Injectors
                         break;
 
                     case AdviceArgumentSource.ReturnType:
-                        yield return context.TargetMethodContext.TargetMethod.ReturnType;
+                        yield return context.TargetMethodContext.Value.TargetMethod.ReturnType;
                         break;
 
                     case AdviceArgumentSource.ReturnValue:
-                        yield return context.TargetMethodContext.MethodResultVariable ?? Markers.DefaultMarker;
+                        yield return context.TargetMethodContext.Value.MethodResultVariable ?? Markers.DefaultMarker;
                         break;
 
                     case AdviceArgumentSource.RoutableData:

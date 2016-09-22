@@ -107,9 +107,6 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
             foreach (var context in contexts)
             {
-                // setting the TargetMethodContext here for better performance
-                context.TargetMethodContext = MethodContextFactory.GetOrCreateContext(targetMethod);
-
                 foreach (var processor in _processors)
                     if (processor.CanProcess(context.AdviceClassType))
                         processor.Process(context);

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AspectInjector.Broker;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
@@ -20,7 +21,7 @@ namespace AspectInjector.BuildTask.Contexts
 
         public AspectScope AdviceClassScope { get; }
 
-        public TargetMethodContext TargetMethodContext { get; set; }
+        public Lazy<TargetMethodContext> TargetMethodContext { get; }
 
         public string TargetName { get; }
 
@@ -33,6 +34,7 @@ namespace AspectInjector.BuildTask.Contexts
             AdviceClassType = adviceClassType;
             AdviceClassScope = GetAspectScope(targetMethod, adviceClassType);
             AspectRoutableData = routableData;
+            TargetMethodContext = new Lazy<TargetMethodContext>(() => MethodContextFactory.GetOrCreateContext(targetMethod));
         }
 
         internal static bool IsAspectFactory(MethodDefinition method)
