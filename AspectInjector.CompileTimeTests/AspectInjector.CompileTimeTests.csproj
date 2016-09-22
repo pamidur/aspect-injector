@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AroundRefOutTests.cs" />
+    <Compile Include="InjectionProcessorAssemblyTests.cs" />
     <Compile Include="InjectionProcessorBaseClassTests.cs" />
     <Compile Include="InjectionProcessorClassTests.cs" />
     <Compile Include="InjectionProcessorTestBase.cs" />

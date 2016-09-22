@@ -37,14 +37,16 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         internal static IEnumerable<AspectContext> GetAspectContexts(ModuleDefinition module)
         {
+            var assemblyAspectDefinitions = GetAspectDefinitions(module.CustomAttributes).ToArray();
+
             return module.Types
                          .Where(t => t.IsClass).SelectMany(t => t.GetClassesTree())
-                         .SelectMany(GetAspectContexts);
+                         .SelectMany(definition => GetAspectContexts(definition, assemblyAspectDefinitions));
         }
 
-        private static IEnumerable<AspectContext> GetAspectContexts(TypeDefinition @class)
+        private static IEnumerable<AspectContext> GetAspectContexts(TypeDefinition @class, IEnumerable<AspectDefinition> parentDefinitions)
         {
-            var classAspectDefinitions = GetAspectDefinitions(@class.CustomAttributes);
+            var classAspectDefinitions = parentDefinitions.Concat(GetAspectDefinitions(@class.CustomAttributes)).ToArray();
 
             return @class.Methods
                          .Where(m => !m.IsSetter && !m.IsGetter && !m.IsAddOn && !m.IsRemoveOn)
