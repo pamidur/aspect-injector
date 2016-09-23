@@ -119,6 +119,9 @@ namespace AspectInjector.CompileTimeTests.Infrastructure
                                RemoveMethod = CopyReference(oldEvent.RemoveMethod)
                            };
 
+            newEvent.AddMethod.IsAddOn = true;
+            newEvent.RemoveMethod.IsRemoveOn = true;
+
             _refsMap.Add(oldEvent, newEvent);
             target.Events.Add(newEvent);
             return newEvent;
@@ -131,6 +134,12 @@ namespace AspectInjector.CompileTimeTests.Infrastructure
                               GetMethod = prop.GetMethod != null ? CopyReference(prop.GetMethod) : null,
                               SetMethod = prop.SetMethod != null ? CopyReference(prop.SetMethod) : null
                           };
+
+            if (newProp.GetMethod != null)
+                newProp.GetMethod.IsGetter = true;
+
+            if (newProp.SetMethod != null)
+                newProp.SetMethod.IsSetter = true;
 
             _refsMap.Add(prop, newProp);
             target.Properties.Add(newProp);
