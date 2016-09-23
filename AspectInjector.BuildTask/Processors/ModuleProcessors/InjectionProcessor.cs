@@ -46,19 +46,19 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         private static IEnumerable<AspectContext> GetAspectContexts(TypeDefinition @class, IEnumerable<AspectDefinition> parentDefinitions)
         {
-            var classAspectDefinitions = parentDefinitions.Concat(GetAspectDefinitions(@class.CustomAttributes)).ToArray();
+            var allAspects = GetAspectDefinitions(@class.CustomAttributes, parentDefinitions);
 
             return @class.Methods
                          .Where(m => !m.IsSetter && !m.IsGetter && !m.IsAddOn && !m.IsRemoveOn)
                          .Cast<IMemberDefinition>()
                          .Concat(@class.Properties)
                          .Concat(@class.Events)
-                         .SelectMany(member => GetAspectContexts(member, classAspectDefinitions));
+                         .SelectMany(member => GetAspectContexts(member, allAspects));
         }
 
         private static IEnumerable<AspectContext> GetAspectContexts(IMemberDefinition member, IEnumerable<AspectDefinition> parentDefinitions)
         {
-            var allAspects = parentDefinitions.Concat(GetAspectDefinitions(member.CustomAttributes)).ToArray();
+            var allAspects = GetAspectDefinitions(member.CustomAttributes, parentDefinitions);
 
             var methodDefinition = member as MethodDefinition;
             if (methodDefinition != null)
@@ -82,6 +82,11 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             }
 
             return Enumerable.Empty<AspectContext>();
+        }
+
+        private static AspectDefinition[] GetAspectDefinitions(Collection<CustomAttribute> attributes, IEnumerable<AspectDefinition> parentDefinitions)
+        {
+            return parentDefinitions.Concat(GetAspectDefinitions(attributes)).ToArray();
         }
 
         private static IEnumerable<AspectDefinition> GetAspectDefinitions(Collection<CustomAttribute> collection)
