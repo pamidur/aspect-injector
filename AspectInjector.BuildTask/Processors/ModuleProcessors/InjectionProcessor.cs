@@ -54,10 +54,17 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         private static IEnumerable<CustomAttribute> GetCustomAttributeRecursive(TypeDefinition type)
         {
-            return type.BaseType == null
-                ? Enumerable.Empty<CustomAttribute>()
-                : type.CustomAttributes.Concat(GetCustomAttributeRecursive(type.BaseType.Resolve()));
+            var baseTypesAndInterfaces = GetBaseTypesAndInterfaces(type);
+            return type.CustomAttributes.Concat(baseTypesAndInterfaces.SelectMany(GetCustomAttributeRecursive));
         }
+
+        private static TypeDefinition[] GetBaseTypesAndInterfaces(TypeDefinition type)
+        {
+            return type.Interfaces.Concat(new[] { type.BaseType })
+                       .Where(t => t != null)
+                       .Select(t => t.Resolve())
+                       .ToArray();
+        } 
 
         private static IEnumerable<TypeReference> GetInterfacesRecursive(TypeDefinition type)
         {
@@ -121,14 +128,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             return definitions
                 .Where(d => d.CanBeAppliedTo(targetMethod, targetName))
                 .GroupBy(definition => definition.AdviceClassType)
-                .Select(group => CreateAspectContext(targetMethod, targetName, @group));
-        }
-
-        private static AspectContext CreateAspectContext(MethodDefinition targetMethod, string targetName, IGrouping<TypeDefinition, AspectDefinition> @group)
-        {
-            var adviceClassType = @group.First().AdviceClassType;
-            var routableData = @group.SelectMany(d => d.RoutableData).ToArray();
-            return new AspectContext(targetMethod, targetName, adviceClassType, routableData);
+                .Select(group => new AspectContext(targetMethod, targetName, @group.Key, @group.SelectMany(d => d.RoutableData).ToArray()));
         }
     }
 }
