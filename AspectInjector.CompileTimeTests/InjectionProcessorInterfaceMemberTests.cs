@@ -7,11 +7,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace AspectInjector.CompileTimeTests
 {
     [TestClass]
-    public class InjectionProcessorInterfaceTests : InjectionProcessorTestBase
+    public class InjectionProcessorInterfaceMemberTests : InjectionProcessorTestBase
     {
         [TestMethod]
-        [Ignore] // please delete me if this isn't a desireable feature
-        public void Finds_Method_AspectContexts_Interface()
+        public void Finds_Method_AspectContexts_InterfaceMember()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
 
@@ -19,28 +18,29 @@ namespace AspectInjector.CompileTimeTests
         }
 
         [TestMethod]
-        [Ignore] // please delete me if this isn't a desireable feature
-        public void Finds_Property_AspectContexts_Interface()
+        public void Finds_Property_AspectContexts_InterfaceMember()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
 
-            Assert.AreEqual(2, contexts.Count(c => c.TargetName == "PropertyInInterface"));
+            Assert.AreEqual(1, contexts.Count(c => c.TargetName == "PropertyInInterface"));
         }
 
         [TestMethod]
-        [Ignore] // please delete me if this isn't a desireable feature
-        public void Finds_Event_AspectContexts_Interface()
+        public void Finds_Event_AspectContexts_InterfaceMember()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
 
             Assert.AreEqual(2, contexts.Count(c => c.TargetName == "EventInInterface"));
         }
-        
-        public interface ITestInterface
+
+        public interface ITestBaseInterface
         {
             [Aspect(typeof(TestAspectImplementation))]
             void MethodInInterface();
+        }
 
+        public interface ITestInterface : ITestBaseInterface
+        {
             [Aspect(typeof(TestAspectImplementation))]
             string PropertyInInterface { get; }
 

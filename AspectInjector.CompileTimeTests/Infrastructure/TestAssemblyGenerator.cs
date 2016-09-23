@@ -35,7 +35,7 @@ namespace AspectInjector.CompileTimeTests.Infrastructure
 
             _refsMap = new Dictionary<object, object>();
 
-            var types = _snippetsAssembly.MainModule.Types.FirstOrDefault(t => t.FullName == _source.FullName).NestedTypes;
+            var types = _snippetsAssembly.MainModule.Types.Single(t => t.FullName == _source.FullName).NestedTypes;
 
             foreach (var type in types)
                 ProcessType(type);

@@ -48,12 +48,23 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         {
             var allAspects = GetAspectDefinitions(@class.CustomAttributes, parentDefinitions);
 
-            return @class.Methods
-                         .Where(m => !m.IsSetter && !m.IsGetter && !m.IsAddOn && !m.IsRemoveOn)
-                         .Cast<IMemberDefinition>()
-                         .Concat(@class.Properties)
-                         .Concat(@class.Events)
-                         .SelectMany(member => GetAspectContexts(member, allAspects));
+            return GetTypeMembers(@class)
+                .Concat(GetInterfacesRecursive(@class).Distinct().SelectMany(i => GetTypeMembers(i.Resolve())))
+                .SelectMany(member => GetAspectContexts(member, allAspects));
+        }
+
+        private static IEnumerable<TypeReference> GetInterfacesRecursive(TypeDefinition type)
+        {
+            return type.Interfaces.Concat(type.Interfaces.SelectMany(i => GetInterfacesRecursive(i.Resolve())));
+        } 
+
+        private static IEnumerable<IMemberDefinition> GetTypeMembers(TypeDefinition type)
+        {
+            return type.Methods
+                       .Where(m => !m.IsSetter && !m.IsGetter && !m.IsAddOn && !m.IsRemoveOn)
+                       .Cast<IMemberDefinition>()
+                       .Concat(type.Properties)
+                       .Concat(type.Events);
         }
 
         private static IEnumerable<AspectContext> GetAspectContexts(IMemberDefinition member, IEnumerable<AspectDefinition> parentDefinitions)
