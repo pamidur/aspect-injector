@@ -33,6 +33,11 @@ namespace AspectInjector.BuildTask.Contexts
             AdviceClassFactory = new Lazy<MethodDefinition>(GetAdviceClassFactory);
         }
 
+        public override string ToString()
+        {
+            return string.Format("{0}, {1}, {2}", AdviceClassScope, AdviceClassType != null ? AdviceClassType.Name : null, TargetName);
+        }
+
         internal static bool IsAspectFactory(MethodDefinition method)
         {
             return method.IsStatic && !method.IsConstructor && method.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>();
