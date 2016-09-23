@@ -90,6 +90,9 @@ namespace AspectInjector.CompileTimeTests.Infrastructure
                 ? new TypeDefinition(ns, type.Name, attrs)
                 : new TypeDefinition(ns, type.Name, attrs, CopyReference(type.BaseType));
 
+            foreach (var existingInterface in type.Interfaces)
+                newtype.Interfaces.Add(existingInterface);
+
             _refsMap.Add(type, newtype);
 
             if (destination == null)
