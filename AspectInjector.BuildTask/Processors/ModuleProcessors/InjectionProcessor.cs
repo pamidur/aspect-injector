@@ -7,7 +7,6 @@ using AspectInjector.BuildTask.Extensions;
 using AspectInjector.BuildTask.Models;
 using AspectInjector.BuildTask.Validation;
 using Mono.Cecil;
-using Mono.Collections.Generic;
 
 namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 {
@@ -46,11 +45,18 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         private static IEnumerable<AspectContext> GetAspectContexts(TypeDefinition @class, IEnumerable<AspectDefinition> parentDefinitions)
         {
-            var allAspects = GetAspectDefinitions(@class.CustomAttributes, parentDefinitions);
+            var allAspects = GetAspectDefinitions(GetCustomAttributeRecursive(@class).ToList(), parentDefinitions);
 
             return GetTypeMembers(@class)
                 .Concat(GetInterfacesRecursive(@class).Distinct().SelectMany(i => GetTypeMembers(i.Resolve())))
                 .SelectMany(member => GetAspectContexts(member, allAspects));
+        }
+
+        private static IEnumerable<CustomAttribute> GetCustomAttributeRecursive(TypeDefinition type)
+        {
+            return type.BaseType == null
+                ? Enumerable.Empty<CustomAttribute>()
+                : type.CustomAttributes.Concat(GetCustomAttributeRecursive(type.BaseType.Resolve()));
         }
 
         private static IEnumerable<TypeReference> GetInterfacesRecursive(TypeDefinition type)
@@ -95,12 +101,12 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             return Enumerable.Empty<AspectContext>();
         }
 
-        private static AspectDefinition[] GetAspectDefinitions(Collection<CustomAttribute> attributes, IEnumerable<AspectDefinition> parentDefinitions)
+        private static AspectDefinition[] GetAspectDefinitions(IList<CustomAttribute> attributes, IEnumerable<AspectDefinition> parentDefinitions)
         {
             return parentDefinitions.Concat(GetAspectDefinitions(attributes)).ToArray();
         }
 
-        private static IEnumerable<AspectDefinition> GetAspectDefinitions(Collection<CustomAttribute> collection)
+        private static IEnumerable<AspectDefinition> GetAspectDefinitions(IList<CustomAttribute> collection)
         {
             return collection.GetAttributesOfType<AspectAttribute>()
                              .Select(attr => new AspectDefinition(attr, null))

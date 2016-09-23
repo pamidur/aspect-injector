@@ -10,7 +10,6 @@ namespace AspectInjector.CompileTimeTests
     public class InjectionProcessorBaseClassTests : InjectionProcessorTestBase
     {
         [TestMethod]
-        [Ignore] // please delete me if this isn't a desireable feature
         public void Finds_Ctor_AspectContexts_BaseClass()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
@@ -19,7 +18,6 @@ namespace AspectInjector.CompileTimeTests
         }
 
         [TestMethod]
-        [Ignore] // please delete me if this isn't a desireable feature
         public void Finds_Method_AspectContexts_BaseClass()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
@@ -30,7 +28,6 @@ namespace AspectInjector.CompileTimeTests
         }
 
         [TestMethod]
-        [Ignore] // please delete me if this isn't a desireable feature
         public void Finds_Property_AspectContexts_BaseClass()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
@@ -39,7 +36,6 @@ namespace AspectInjector.CompileTimeTests
         }
 
         [TestMethod]
-        [Ignore] // please delete me if this isn't a desireable feature
         public void Finds_Event_AspectContexts_BaseClass()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
@@ -61,11 +57,6 @@ namespace AspectInjector.CompileTimeTests
 
             public TestClass()
             {
-            }
-
-            public override void VirtualMethodInBase()
-            {
-                base.VirtualMethodInBase();
             }
 
             public object Do2(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut, ref long longRef, ref double doubleRef, ref char charRef)
