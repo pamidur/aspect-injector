@@ -18,7 +18,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         BaseTypeMember,
 
         /// <summary>
-        ///     Applies to all members implementing any of the interface members.
+        ///     Applies to all members implementing any of the interface members. Is also inherited by child interfaces.
         /// </summary>
         Interface,
 

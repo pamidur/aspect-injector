@@ -14,18 +14,10 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         public TypeAspectDiscovery(TypeDefinition typeDefinition, ModuleDefinition module)
         {
-            var allInterfaces = GetInterfacesRecursive(typeDefinition).Distinct().ToArray();
-
             _allFoundDefinitions = GetAspectDefinitions(module.CustomAttributes, d => new FoundAspectDefinition(d, FoundOn.Assembly))
-                .Concat(GetAspectDefinitions(typeDefinition.CustomAttributes, d => new FoundAspectDefinition(d, FoundOn.Type)))
-                .Concat(allInterfaces.SelectMany(i => GetAspectDefinitions(i.CustomAttributes, d => new FoundAspectDefinition(d, FoundOn.Interface, i))))
-                .Concat(allInterfaces.SelectMany(i => GetMemberAspectDefinitions(i, FoundOn.InterfaceMember)))
+                .Concat(GetDefinitionsForType(typeDefinition))
+                .Distinct()
                 .ToList();
-
-            // TODO: base types (this includes interface implemented on base types)
-            // TODO: base type members (this includes interface implemented on base types)
-            //var allAspects = GetAspectDefinitions(GetCustomAttributeRecursive(@class).ToList(), parentDefinitions);
-            //.Concat(GetInterfacesRecursive(@class).Distinct().SelectMany(i => GetTypeMembers(i.Resolve())))
         }
 
         public IEnumerable<AspectDefinition> GetAspectDefinitions(MethodDefinition method, IList<CustomAttribute> memberAttributes)
@@ -36,12 +28,25 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 .Concat(GetAspectDefinitions(memberAttributes, d => d));
         }
 
-        private static TypeDefinition[] GetBaseTypesAndInterfaces(TypeDefinition type)
+        private static IEnumerable<FoundAspectDefinition> GetDefinitionsForType(TypeDefinition typeDefinition)
         {
-            return type.Interfaces.Concat(new[] { type.BaseType })
-                       .Where(t => t != null)
-                       .Select(t => t.Resolve())
-                       .ToArray();
+            return GetAspectDefinitions(typeDefinition.CustomAttributes, d => new FoundAspectDefinition(d, FoundOn.Type))
+                .Concat(GetInterfaceAspectsRecursive(typeDefinition))
+                .Concat(GetInterfacesRecursive(typeDefinition).Distinct().SelectMany(i => GetMemberAspectDefinitions(i, FoundOn.InterfaceMember)));
+
+            // TODO: base types (this includes interface implemented on base types)
+            // TODO: base type members (this includes interface implemented on base types)
+        }
+
+        private static IEnumerable<FoundAspectDefinition> GetInterfaceAspectsRecursive(TypeDefinition type)
+        {
+            var parentDefinitions = type.Interfaces.SelectMany(i => GetInterfaceAspectsRecursive(i.Resolve())).ToArray();
+
+            return parentDefinitions
+                .Concat(parentDefinitions.Select(p => new FoundAspectDefinition(p.AspectDefinition, FoundOn.Interface, type)))
+                .Concat(type.IsInterface
+                    ? GetAspectDefinitions(type.CustomAttributes, d => new FoundAspectDefinition(d, FoundOn.Interface, type))
+                    : Enumerable.Empty<FoundAspectDefinition>());
         }
 
         private static IEnumerable<TypeDefinition> GetInterfacesRecursive(TypeDefinition type)
