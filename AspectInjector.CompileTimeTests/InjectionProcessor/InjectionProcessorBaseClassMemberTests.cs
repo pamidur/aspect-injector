@@ -29,6 +29,14 @@ namespace AspectInjector.CompileTimeTests.InjectionProcessor
         }
 
         [TestMethod]
+        public void Finds_AbstractMethod_AspectContexts_BaseClassMember()
+        {
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
+
+            Assert.AreEqual(1, contexts.Count(c => c.TargetName == "AbstractMethodInBase" && c.TargetTypeContext.TypeDefinition.Name == "TestClass"));
+        }
+
+        [TestMethod]
         public void Doesnt_Find_Method_AspectContexts_NoBaseClassMember()
         {
             var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
@@ -63,6 +71,9 @@ namespace AspectInjector.CompileTimeTests.InjectionProcessor
             [Aspect(typeof(TestAspectImplementation))]
             public virtual void VirtualMethodInBase() { }
 
+            [Aspect(typeof (TestAspectImplementation))]
+            public abstract void AbstractMethodInBase();
+
             [Aspect(typeof(TestAspectImplementation))]
             public virtual void MethodInBase() { }
 
@@ -84,6 +95,10 @@ namespace AspectInjector.CompileTimeTests.InjectionProcessor
             public override event EventHandler TestEvent;
 
             public override void VirtualMethodInBase()
+            {
+            }
+
+            public override void AbstractMethodInBase()
             {
             }
 
