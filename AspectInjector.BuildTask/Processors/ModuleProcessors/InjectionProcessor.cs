@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using AspectInjector.Broker;
 using AspectInjector.BuildTask.Contexts;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
@@ -36,42 +35,18 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         internal static IEnumerable<AspectContext> GetAspectContexts(ModuleDefinition module)
         {
-            var assemblyAspectDefinitions = GetAspectDefinitions(module.CustomAttributes).ToArray();
-
             return module.Types
-                         .Where(t => t.IsClass).SelectMany(t => t.GetClassesTree())
-                         .SelectMany(definition => GetAspectContexts(definition, assemblyAspectDefinitions));
+                         .Where(t => t.IsClass)
+                         .SelectMany(t => t.GetClassesTree())
+                         .SelectMany(c => GetAspectContexts(c, module));
         }
 
-        private static IEnumerable<AspectContext> GetAspectContexts(TypeDefinition @class, IEnumerable<AspectDefinition> parentDefinitions)
+        private static IEnumerable<AspectContext> GetAspectContexts(TypeDefinition type, ModuleDefinition module)
         {
-            var allAspects = GetAspectDefinitions(GetCustomAttributeRecursive(@class).ToList(), parentDefinitions);
-
-            return GetTypeMembers(@class)
-                .Concat(GetInterfacesRecursive(@class).Distinct().SelectMany(i => GetTypeMembers(i.Resolve())))
-                .SelectMany(member => GetAspectContexts(member, allAspects));
+            return GetMembers(type).SelectMany(member => GetAspectContexts(member, new TypeAspectDiscovery(type, module)));
         }
 
-        private static IEnumerable<CustomAttribute> GetCustomAttributeRecursive(TypeDefinition type)
-        {
-            var baseTypesAndInterfaces = GetBaseTypesAndInterfaces(type);
-            return type.CustomAttributes.Concat(baseTypesAndInterfaces.SelectMany(GetCustomAttributeRecursive));
-        }
-
-        private static TypeDefinition[] GetBaseTypesAndInterfaces(TypeDefinition type)
-        {
-            return type.Interfaces.Concat(new[] { type.BaseType })
-                       .Where(t => t != null)
-                       .Select(t => t.Resolve())
-                       .ToArray();
-        } 
-
-        private static IEnumerable<TypeReference> GetInterfacesRecursive(TypeDefinition type)
-        {
-            return type.Interfaces.Concat(type.Interfaces.SelectMany(i => GetInterfacesRecursive(i.Resolve())));
-        } 
-
-        private static IEnumerable<IMemberDefinition> GetTypeMembers(TypeDefinition type)
+        private static IEnumerable<IMemberDefinition> GetMembers(TypeDefinition type)
         {
             return type.Methods
                        .Where(m => !m.IsSetter && !m.IsGetter && !m.IsAddOn && !m.IsRemoveOn)
@@ -80,14 +55,12 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                        .Concat(type.Events);
         }
 
-        private static IEnumerable<AspectContext> GetAspectContexts(IMemberDefinition member, IEnumerable<AspectDefinition> parentDefinitions)
+        private static IEnumerable<AspectContext> GetAspectContexts(IMemberDefinition member, TypeAspectDiscovery typeAspects)
         {
-            var allAspects = GetAspectDefinitions(member.CustomAttributes, parentDefinitions);
-
             var methodDefinition = member as MethodDefinition;
             if (methodDefinition != null)
             {
-                return CreateAspectContexts(methodDefinition, member.Name, allAspects);
+                return CreateAspectContexts(methodDefinition, member.Name, typeAspects.GetAspectDefinitions(methodDefinition, member.CustomAttributes));
             }
 
             var propertyDefinition = member as PropertyDefinition;
@@ -95,32 +68,17 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
             {
                 return new[] { propertyDefinition.GetMethod, propertyDefinition.SetMethod }
                     .Where(m => m != null)
-                    .SelectMany(m => CreateAspectContexts(m, member.Name, allAspects));
+                    .SelectMany(m => CreateAspectContexts(m, member.Name, typeAspects.GetAspectDefinitions(m, member.CustomAttributes)));
             }
 
             var eventDefinition = member as EventDefinition;
             if (eventDefinition != null)
             {
-                return CreateAspectContexts(eventDefinition.AddMethod, member.Name, allAspects)
-                    .Concat(CreateAspectContexts(eventDefinition.RemoveMethod, member.Name, allAspects));
+                return CreateAspectContexts(eventDefinition.AddMethod, member.Name, typeAspects.GetAspectDefinitions(eventDefinition.AddMethod, member.CustomAttributes))
+                    .Concat(CreateAspectContexts(eventDefinition.RemoveMethod, member.Name, typeAspects.GetAspectDefinitions(eventDefinition.RemoveMethod, member.CustomAttributes)));
             }
 
             return Enumerable.Empty<AspectContext>();
-        }
-
-        private static AspectDefinition[] GetAspectDefinitions(IList<CustomAttribute> attributes, IEnumerable<AspectDefinition> parentDefinitions)
-        {
-            return parentDefinitions.Concat(GetAspectDefinitions(attributes)).ToArray();
-        }
-
-        private static IEnumerable<AspectDefinition> GetAspectDefinitions(IList<CustomAttribute> collection)
-        {
-            return collection.GetAttributesOfType<AspectAttribute>()
-                             .Select(attr => new AspectDefinition(attr, null))
-                             .Concat(collection
-                                 .GroupBy(ca => ca.AttributeType.Resolve().CustomAttributes.GetAttributeOfType<AspectDefinitionAttribute>())
-                                 .Where(g => g.Key != null)
-                                 .Select(ca => new AspectDefinition(ca.Key, ca.First())));
         }
 
         private static IEnumerable<AspectContext> CreateAspectContexts(MethodDefinition targetMethod, string targetName, IEnumerable<AspectDefinition> definitions)

@@ -10,7 +10,6 @@ namespace AspectInjector.CompileTimeTests
     public class InjectionProcessorInterfaceTests : InjectionProcessorTestBase
     {
         [TestMethod]
-        [Ignore]
         public void Finds_Constructor_AspectContexts_Interface()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
@@ -20,7 +19,6 @@ namespace AspectInjector.CompileTimeTests
         }
 
         [TestMethod]
-        [Ignore] // fails because of duplicates, implement rules to fix this
         public void Finds_Method_AspectContexts_Interface()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
@@ -29,7 +27,6 @@ namespace AspectInjector.CompileTimeTests
         }
 
         [TestMethod]
-        [Ignore] // fails because of duplicates, implement rules to fix this
         public void Finds_Property_AspectContexts_Interface()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
@@ -38,7 +35,6 @@ namespace AspectInjector.CompileTimeTests
         }
 
         [TestMethod]
-        [Ignore] // fails because of duplicates, implement rules to fix this
         public void Finds_Event_AspectContexts_Interface()
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
