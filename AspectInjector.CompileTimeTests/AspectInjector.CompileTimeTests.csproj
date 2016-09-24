@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="AroundRefOutTests.cs" />
     <Compile Include="InjectionProcessor\InjectionProcessorAssemblyTests.cs" />
+    <Compile Include="InjectionProcessor\InjectionProcessorBaseClassMemberTests.cs" />
     <Compile Include="InjectionProcessor\InjectionProcessorBaseClassTests.cs" />
     <Compile Include="InjectionProcessor\InjectionProcessorClassTests.cs" />
     <Compile Include="InjectionProcessor\InjectionProcessorInterfaceMemberTests.cs" />
