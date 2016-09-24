@@ -42,13 +42,13 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                     return true;
 
                 case FoundOn.BaseTypeMember:
-                    return FoundOnMember == targetMethod || FoundOnMember.Overrides.Contains(targetMethod);
+                    return targetMethod.GetBaseMethod() == FoundOnMember;
 
                 case FoundOn.Interface:
-                    return FoundOnInterface.Methods.Any(m => IsImplementationOf(targetMethod, m));
+                    return FoundOnInterface.Methods.Any(targetMethod.IsInterfaceImplementation);
 
                 case FoundOn.InterfaceMember:
-                    return IsImplementationOf(targetMethod, FoundOnMember);
+                    return targetMethod.IsInterfaceImplementation(FoundOnMember);
 
                 case FoundOn.Type:
                     return true;
@@ -56,12 +56,6 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 default:
                     return false;
             }
-        }
-
-        private static bool IsImplementationOf(MethodDefinition implementingMethod, MethodReference implementedMethod)
-        {
-            return implementingMethod.IsInterfaceImplementation(implementedMethod) 
-                || implementingMethod.IsExplicitInterfaceImplementation(implementedMethod);
         }
     }
 }

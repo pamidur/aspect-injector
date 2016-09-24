@@ -15,7 +15,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
         public TypeAspectDiscovery(TypeDefinition typeDefinition, ModuleDefinition module)
         {
             _allFoundDefinitions = GetAspectDefinitions(module.CustomAttributes, d => new FoundAspectDefinition(d, FoundOn.Assembly))
-                .Concat(GetDefinitionsForType(typeDefinition))
+                .Concat(GetDefinitionsForType(typeDefinition, FoundOn.Type))
                 .Distinct()
                 .ToList();
         }
@@ -28,14 +28,22 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
                 .Concat(GetAspectDefinitions(memberAttributes, d => d));
         }
 
-        private static IEnumerable<FoundAspectDefinition> GetDefinitionsForType(TypeDefinition typeDefinition)
+        private static IEnumerable<FoundAspectDefinition> GetDefinitionsForType(TypeDefinition typeDefinition, FoundOn foundOn)
         {
-            return GetAspectDefinitions(typeDefinition.CustomAttributes, d => new FoundAspectDefinition(d, FoundOn.Type))
+            return GetAspectDefinitions(typeDefinition.CustomAttributes, d => new FoundAspectDefinition(d, foundOn))
                 .Concat(GetInterfaceAspects(typeDefinition))
                 .Concat(GetInterfaceMemberAspects(typeDefinition))
-                .Concat(typeDefinition.BaseType == null
-                    ? Enumerable.Empty<FoundAspectDefinition>()
-                    : GetDefinitionsForType(typeDefinition.BaseType.Resolve()));
+                .Concat(GetBaseTypeDefinitions(typeDefinition));
+        }
+
+        private static IEnumerable<FoundAspectDefinition> GetBaseTypeDefinitions(TypeDefinition typeDefinition)
+        {
+            if (typeDefinition.BaseType == null)
+                return Enumerable.Empty<FoundAspectDefinition>();
+
+            var baseType = typeDefinition.BaseType.Resolve();
+            return GetDefinitionsForType(baseType, FoundOn.BaseType)
+                .Concat(GetMemberAspectDefinitions(baseType, FoundOn.BaseTypeMember));
         }
 
         private static IEnumerable<FoundAspectDefinition> GetInterfaceAspects(TypeDefinition type)

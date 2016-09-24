@@ -17,8 +17,8 @@ namespace AspectInjector.CompileTimeTests.InjectionProcessor
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == "VirtualMethodInBase" && c.TargetTypeContext.TypeDefinition.Name == "TestClass"));
             
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == "MethodInBase"));
-            Assert.AreEqual(1, contexts.Count(c => c.TargetName == "Do1"));
-            Assert.AreEqual(1, contexts.Count(c => c.TargetName == "Do2"));
+            Assert.AreEqual(0, contexts.Count(c => c.TargetName == "Do1"));
+            Assert.AreEqual(0, contexts.Count(c => c.TargetName == "Do2"));
         }
 
         [TestMethod]
