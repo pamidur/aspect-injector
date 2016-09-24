@@ -4,9 +4,9 @@ using AspectInjector.CompileTimeTests.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mono.Cecil;
 
-namespace AspectInjector.CompileTimeTests
+namespace AspectInjector.CompileTimeTests.InjectionProcessor
 {
-    public abstract class InjectionProcessorTestBase
+    public abstract class AInjectionProcessorTest
     {
         protected ModuleDefinition Module;
 

@@ -1,18 +1,17 @@
 using System;
 using System.Linq;
 using AspectInjector.Broker;
-using AspectInjector.BuildTask.Processors.ModuleProcessors;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AspectInjector.CompileTimeTests
+namespace AspectInjector.CompileTimeTests.InjectionProcessor
 {
     [TestClass]
-    public class InjectionProcessorTests : InjectionProcessorTestBase
+    public class InjectionProcessorClassMemberTests : AInjectionProcessorTest
     {
         [TestMethod]
         public void Finds_Ctor_AspectContexts_Member()
         {
-            var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
 
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == ".ctor"));
         }
@@ -20,7 +19,7 @@ namespace AspectInjector.CompileTimeTests
         [TestMethod]
         public void Finds_Method_AspectContexts_Member()
         {
-            var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
 
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == "Do1"));
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == "Do2"));
@@ -29,7 +28,7 @@ namespace AspectInjector.CompileTimeTests
         [TestMethod]
         public void Finds_Property_AspectContexts_Member()
         {
-            var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
 
             Assert.AreEqual(2, contexts.Count(c => c.TargetName == "TestProperty"));
         }
@@ -37,7 +36,7 @@ namespace AspectInjector.CompileTimeTests
         [TestMethod]
         public void Finds_Event_AspectContexts_Member()
         {
-            var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
 
             Assert.AreEqual(2, contexts.Count(c => c.TargetName == "TestEvent"));
         }

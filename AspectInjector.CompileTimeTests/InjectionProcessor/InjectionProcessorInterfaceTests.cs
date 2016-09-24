@@ -1,18 +1,17 @@
 using System;
 using System.Linq;
 using AspectInjector.Broker;
-using AspectInjector.BuildTask.Processors.ModuleProcessors;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AspectInjector.CompileTimeTests
+namespace AspectInjector.CompileTimeTests.InjectionProcessor
 {
     [TestClass]
-    public class InjectionProcessorInterfaceTests : InjectionProcessorTestBase
+    public class InjectionProcessorInterfaceTests : AInjectionProcessorTest
     {
         [TestMethod]
         public void Finds_Constructor_AspectContexts_Interface()
         {
-            var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
 
             // the ctor should not inherit the attribute from an interface
             Assert.AreEqual(0, contexts.Count(c => c.TargetName == ".ctor"));
@@ -21,7 +20,7 @@ namespace AspectInjector.CompileTimeTests
         [TestMethod]
         public void Finds_Method_AspectContexts_Interface()
         {
-            var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
 
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == "MethodInInterface"));
         }
@@ -29,7 +28,7 @@ namespace AspectInjector.CompileTimeTests
         [TestMethod]
         public void Finds_Property_AspectContexts_Interface()
         {
-            var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
 
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == "PropertyInInterface"));
         }
@@ -37,7 +36,7 @@ namespace AspectInjector.CompileTimeTests
         [TestMethod]
         public void Finds_Event_AspectContexts_Interface()
         {
-            var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
 
             Assert.AreEqual(2, contexts.Count(c => c.TargetName == "EventInInterface"));
         }

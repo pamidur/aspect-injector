@@ -59,13 +59,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AroundRefOutTests.cs" />
-    <Compile Include="InjectionProcessorAssemblyTests.cs" />
-    <Compile Include="InjectionProcessorBaseClassTests.cs" />
-    <Compile Include="InjectionProcessorClassTests.cs" />
-    <Compile Include="InjectionProcessorInterfaceMemberTests.cs" />
-    <Compile Include="InjectionProcessorInterfaceTests.cs" />
-    <Compile Include="InjectionProcessorTestBase.cs" />
-    <Compile Include="InjectionProcessorTests.cs" />
+    <Compile Include="InjectionProcessor\InjectionProcessorAssemblyTests.cs" />
+    <Compile Include="InjectionProcessor\InjectionProcessorBaseClassTests.cs" />
+    <Compile Include="InjectionProcessor\InjectionProcessorClassTests.cs" />
+    <Compile Include="InjectionProcessor\InjectionProcessorInterfaceMemberTests.cs" />
+    <Compile Include="InjectionProcessor\InjectionProcessorInterfaceTests.cs" />
+    <Compile Include="InjectionProcessor\AInjectionProcessorTest.cs" />
+    <Compile Include="InjectionProcessor\InjectionProcessorClassMemberTests.cs" />
     <Compile Include="RefOutTests.cs" />
     <Compile Include="Infrastructure\CompileTimeTestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

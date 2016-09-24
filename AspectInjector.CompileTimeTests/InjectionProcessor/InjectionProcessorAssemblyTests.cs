@@ -2,14 +2,13 @@ using System;
 using System.Linq;
 using AspectInjector.Broker;
 using AspectInjector.BuildTask.Contexts;
-using AspectInjector.BuildTask.Processors.ModuleProcessors;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mono.Cecil;
 
-namespace AspectInjector.CompileTimeTests
+namespace AspectInjector.CompileTimeTests.InjectionProcessor
 {
     [TestClass]
-    public class InjectionProcessorAssemblyTests : InjectionProcessorTestBase
+    public class InjectionProcessorAssemblyTests : AInjectionProcessorTest
     {
         private ModuleDefinition GetModuleWithAssemblyAttribute()
         {
@@ -24,7 +23,7 @@ namespace AspectInjector.CompileTimeTests
 
         private AspectContext[] GetAspectContexts(string testClassName)
         {
-            return InjectionProcessor.GetAspectContexts(GetModuleWithAssemblyAttribute())
+            return BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(GetModuleWithAssemblyAttribute())
                                      .Where(c => c.TargetTypeContext.TypeDefinition.Name == testClassName)
                                      .ToArray();
         }
