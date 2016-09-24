@@ -26,6 +26,13 @@ namespace AspectInjector.CompileTimeTests.InjectionProcessor
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == "VirtualMethodInBase" && c.TargetTypeContext.TypeDefinition.Name == "TestClass"));
             
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == "MethodInBase"));
+        }
+
+        [TestMethod]
+        public void Doesnt_Find_Method_AspectContexts_NoBaseClassMember()
+        {
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
+
             Assert.AreEqual(0, contexts.Count(c => c.TargetName == "Do1"));
             Assert.AreEqual(0, contexts.Count(c => c.TargetName == "Do2"));
         }
