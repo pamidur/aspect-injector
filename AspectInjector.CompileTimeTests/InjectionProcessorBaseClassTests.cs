@@ -22,7 +22,9 @@ namespace AspectInjector.CompileTimeTests
         {
             var contexts = InjectionProcessor.GetAspectContexts(Module).ToArray();
             
-            Assert.AreEqual(1, contexts.Count(c => c.TargetName == "VirtualMethodInBase"));
+            Assert.AreEqual(1, contexts.Count(c => c.TargetName == "VirtualMethodInBase" && c.TargetTypeContext.TypeDefinition.Name == "TestClass"));
+            Assert.AreEqual(1, contexts.Count(c => c.TargetName == "VirtualMethodInBase" && c.TargetTypeContext.TypeDefinition.Name == "TestBaseClass"));
+            Assert.AreEqual(1, contexts.Count(c => c.TargetName == "MethodInBase"));
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == "Do1"));
             Assert.AreEqual(1, contexts.Count(c => c.TargetName == "Do2"));
         }
@@ -47,6 +49,8 @@ namespace AspectInjector.CompileTimeTests
         public abstract class TestBaseClass
         {
             public virtual void VirtualMethodInBase() { }
+
+            public virtual void MethodInBase() { }
         }
 
         public class TestClass : TestBaseClass
@@ -57,6 +61,11 @@ namespace AspectInjector.CompileTimeTests
 
             public TestClass()
             {
+            }
+
+            public override void VirtualMethodInBase()
+            {
+                base.VirtualMethodInBase();
             }
 
             public object Do2(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut, ref long longRef, ref double doubleRef, ref char charRef)

@@ -60,7 +60,8 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
         private static bool IsImplementationOf(MethodDefinition implementingMethod, MethodReference implementedMethod)
         {
-            return implementingMethod.IsInterfaceImplementation(implementedMethod) || implementingMethod.IsExplicitInterfaceImplementation(implementedMethod);
+            return implementingMethod.IsInterfaceImplementation(implementedMethod) 
+                || implementingMethod.IsExplicitInterfaceImplementation(implementedMethod);
         }
     }
 }
