@@ -9,6 +9,15 @@ namespace AspectInjector.CompileTimeTests.InjectionProcessor
     public class InjectionProcessorBaseClassMemberTests : AInjectionProcessorTest
     {
         [TestMethod]
+        public void Finds_Ctor_AspectContexts_BaseClassMember()
+        {
+            var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
+
+            Assert.AreEqual(1, contexts.Count(c => c.TargetName == ".ctor" && c.TargetTypeContext.TypeDefinition.Name == "TestBaseClass"));
+            Assert.AreEqual(1, contexts.Count(c => c.TargetName == ".ctor" && c.TargetTypeContext.TypeDefinition.Name == "TestClass"));
+        }
+
+        [TestMethod]
         public void Finds_Method_AspectContexts_BaseClassMember()
         {
             var contexts = BuildTask.Processors.ModuleProcessors.InjectionProcessor.GetAspectContexts(Module).ToArray();
@@ -41,6 +50,9 @@ namespace AspectInjector.CompileTimeTests.InjectionProcessor
         
         public abstract class TestBaseClass
         {
+            [Aspect(typeof(TestAspectImplementation))]
+            public TestBaseClass() { }
+
             [Aspect(typeof(TestAspectImplementation))]
             public virtual void VirtualMethodInBase() { }
 
