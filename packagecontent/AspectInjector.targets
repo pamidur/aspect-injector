@@ -1,29 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Target Name="AfterCompile">
-    <AspectInjectorBuildTask Assembly="$(TargetFileName)"
-                             References="@(ReferencePath)"
-                             OutputPath="$(IntermediateOutputPath)"
-                             ConfigurationName="$(Configuration)"
- />
+  <Target Name="AspectInjectionTasks" DependsOnTargets="InjectAspects;SignAssembly">
+  </Target>
 
+  <Target Name="InjectAspects">
+    <AspectInjectorBuildTask Assembly="$(TargetFileName)"
+                 References="@(ReferencePath)"
+                 OutputPath="$(IntermediateOutputPath)"
+                 ConfigurationName="$(Configuration)" />
+
+  </Target>
+
+  <Target Name="SignAssembly" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySing)' != 'true'" DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
+
+    <Message Text="SnTool found: $(SnTool)"/>
+
+    <PropertyGroup>
+      <signcmd>&quot;$(SnTool)&quot; -R $(IntermediateOutputPath)$(TargetFileName) $(AssemblyOriginatorKeyFile)</signcmd>
+    </PropertyGroup>
+
+    <Exec Command="$(signcmd)" />
+  </Target>
+
+  <Target Name="GetSnToolForUnix" Condition=" '$(OS)' == 'Unix' ">
+    <PropertyGroup>
+      <SnTool>sn</SnTool>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="GetSnToolForWindows" Condition=" '$(OS)' != 'Unix' ">
     <GetFrameworkSdkPath>
       <Output TaskParameter="Path" PropertyName="WindowsSdkPath" />
     </GetFrameworkSdkPath>
-
     <ItemGroup>
       <SnTools Include="$(WindowsSdkPath)**\sn.exe" />
     </ItemGroup>
-
     <PropertyGroup>
       <SnToolsRaw>@(SnTools)</SnToolsRaw>
     </PropertyGroup>
-
     <PropertyGroup>
       <SnTool>$(SnToolsRaw.Substring(0, $(SnToolsRaw.IndexOf(';'))))</SnTool>
     </PropertyGroup>
-
-    <Exec Condition="'$(SignAssembly)' == 'true' AND '$(DelaySing)' != 'true'" Command="&quot;$(SnTool)&quot; -R $(IntermediateOutputPath)$(TargetFileName) $(AssemblyOriginatorKeyFile)" />
   </Target>
+
 </Project>
