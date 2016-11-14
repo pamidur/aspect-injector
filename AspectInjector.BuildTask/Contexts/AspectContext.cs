@@ -1,50 +1,65 @@
-﻿using AspectInjector.Broker;
+﻿using System;
+using System.Linq;
+using AspectInjector.Broker;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
-using System.Linq;
 
 namespace AspectInjector.BuildTask.Contexts
 {
     public class AspectContext
     {
-        private MethodDefinition _adviceClassFactory = null;
+        public CustomAttribute[] AspectRoutableData { get; }
 
-        public AspectContext()
+        public Lazy<MethodDefinition> AdviceClassFactory { get; }
+
+        public TypeDefinition AdviceClassType { get; }
+
+        public AspectScope AdviceClassScope { get; }
+
+        public Lazy<TargetMethodContext> TargetMethodContext { get; }
+
+        public string TargetName { get; }
+
+        public TargetTypeContext TargetTypeContext { get; }
+
+        public AspectContext(MethodDefinition targetMethod, string targetName, TypeDefinition adviceClassType, CustomAttribute[] routableData)
         {
+            TargetName = targetName;
+            TargetTypeContext = TypeContextFactory.GetOrCreateContext(targetMethod.DeclaringType);
+            AdviceClassType = adviceClassType;
+            AdviceClassScope = GetAspectScope(targetMethod, adviceClassType);
+            AspectRoutableData = routableData;
+            TargetMethodContext = new Lazy<TargetMethodContext>(() => MethodContextFactory.GetOrCreateContext(targetMethod));
+            AdviceClassFactory = new Lazy<MethodDefinition>(GetAdviceClassFactory);
         }
 
-        public CustomAttribute[] AspectRoutableData { get; set; }
-
-        public MethodDefinition AdviceClassFactory
+        public override string ToString()
         {
-            get
-            {
-                if (_adviceClassFactory == null)
-                {
-                    var aspectFactories = AdviceClassType.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>()).ToList();
-
-                    if (aspectFactories.Any())
-                        _adviceClassFactory = aspectFactories[0];
-                    else
-                    {
-                        _adviceClassFactory = AdviceClassType.Methods
-                        .Where(c => c.IsConstructor && !c.IsStatic && !c.Parameters.Any())
-                        .FirstOrDefault();
-                    }
-                }
-
-                return _adviceClassFactory;
-            }
+            return string.Format("{0}, {1}, {2}", AdviceClassScope, AdviceClassType != null ? AdviceClassType.Name : null, TargetName);
         }
 
-        public TypeDefinition AdviceClassType { get; set; }
+        internal static bool IsAspectFactory(MethodDefinition method)
+        {
+            return method.IsStatic && !method.IsConstructor && method.CustomAttributes.HasAttributeOfType<AspectFactoryAttribute>();
+        }
 
-        public AspectScope AdviceClassScope { get; set; }
+        private static bool IsDefaultConstructor(MethodDefinition method)
+        {
+            return method.IsConstructor && !method.IsStatic && !method.Parameters.Any();
+        }
 
-        public TargetMethodContext TargetMethodContext { get; set; }
+        private static AspectScope GetAspectScope(MethodDefinition targetMethod, TypeDefinition adviceClassType)
+        {
+            var customAttributes = adviceClassType.CustomAttributes;
+            if (customAttributes.HasAttributeOfType<AspectScopeAttribute>())
+                return (AspectScope)customAttributes.GetAttributeOfType<AspectScopeAttribute>().ConstructorArguments[0].Value;
 
-        public string TargetName { get; set; }
+            return targetMethod.IsStatic ? AspectScope.Type : AspectScope.Instance;
+        }
 
-        public TargetTypeContext TargetTypeContext { get; set; }
+        private MethodDefinition GetAdviceClassFactory()
+        {
+            return AdviceClassType.Methods.FirstOrDefault(IsAspectFactory) ?? AdviceClassType.Methods.FirstOrDefault(IsDefaultConstructor);
+        }
     }
 }

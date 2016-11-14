@@ -109,7 +109,7 @@ namespace AspectInjector.BuildTask.Processors.AspectProcessors
             {
                 foreach (InjectionTargets target in Enum.GetValues(typeof(InjectionTargets)).Cast<InjectionTargets>().Where(t => (targets & t) != 0))
                 {
-                    if (CheckTarget(parentContext.TargetMethodContext, target))
+                    if (CheckTarget(parentContext.TargetMethodContext.Value, target))
                     {
                         var context = new AdviceInjectionContext() { AspectContext = parentContext };
 

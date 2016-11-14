@@ -1,15 +1,13 @@
-﻿using AspectInjector.Broker;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using AspectInjector.BuildTask;
 using AspectInjector.BuildTask.Processors;
 using Microsoft.Build.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mono.Cecil;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 
-namespace AspectInjector.CompileTimeTests
+namespace AspectInjector.CompileTimeTests.Infrastructure
 {
     public abstract class CompileTimeTestRunner
     {
@@ -29,7 +27,6 @@ namespace AspectInjector.CompileTimeTests
             asmproc.Process(_asm);
         }
 
-        [TestMethod]
         protected void PE_Integrity_Is_Ok()
         {
             var tempFile = Path.GetTempFileName() + ".dll";

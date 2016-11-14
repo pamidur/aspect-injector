@@ -366,7 +366,7 @@ namespace AspectInjector.BuildTask.Contexts
                 TargetMethod.ReturnType);
 
             //MarkDebuggerStepThrough(originalMethod);
-            ///MarkCompilerGenerated(originalMethod);
+            //MarkCompilerGenerated(originalMethod);
 
             foreach (var inst in TargetMethod.Body.Instructions)
                 originalMethod.Body.Instructions.Add(inst);

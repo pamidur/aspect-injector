@@ -1,13 +1,6 @@
 ﻿using AspectInjector.Broker;
-using AspectInjector.BuildTask;
-using AspectInjector.BuildTask.Processors;
-using Microsoft.Build.Utilities;
+using AspectInjector.CompileTimeTests.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mono.Cecil;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 
 namespace AspectInjector.CompileTimeTests
 {

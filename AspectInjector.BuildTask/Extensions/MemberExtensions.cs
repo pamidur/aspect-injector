@@ -8,7 +8,7 @@ namespace AspectInjector.BuildTask.Extensions
     {
         public static MethodReference MakeGeneric(this MethodReference self, TypeReference owner, params TypeReference[] arguments)
         {
-            MethodReference reference = null;
+            MethodReference reference;
 
             if (arguments != null && arguments.Length > 0)
             {
@@ -91,7 +91,7 @@ namespace AspectInjector.BuildTask.Extensions
             if (self == null)
                 throw new ArgumentNullException("self");
 
-            if (!self.IsVirtual)
+            if (!self.IsVirtual && !self.IsConstructor)
                 return self;
 
             var baseType = self.DeclaringType.ResolveBaseType();
