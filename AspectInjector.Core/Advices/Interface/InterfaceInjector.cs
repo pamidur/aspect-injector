@@ -1,6 +1,6 @@
-﻿using AspectInjector.Core.Defaults;
-using AspectInjector.Core.Models;
+﻿using AspectInjector.Core.Models;
 using Mono.Cecil;
+using System;
 
 namespace AspectInjector.Core.Advices.Interface
 {
@@ -9,6 +9,11 @@ namespace AspectInjector.Core.Advices.Interface
         protected override void Apply(Aspect<AssemblyDefinition> aspect, InterfaceAdvice advice)
         {
             base.Apply(aspect, advice);
+        }
+
+        protected override bool CanApply(InterfaceAdvice advice)
+        {
+            throw new NotImplementedException();
         }
     }
 }

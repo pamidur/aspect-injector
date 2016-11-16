@@ -3,7 +3,6 @@ using AspectInjector.Core.Contracts;
 using Mono.Cecil;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -18,6 +17,7 @@ namespace AspectInjector.Core.Defaults
 
         private ProcessingContext _context;
         private readonly JsonSerializer _serializer;
+        private string _resourceName;
 
         protected ILogger Log { get; private set; }
 
@@ -33,22 +33,23 @@ namespace AspectInjector.Core.Defaults
 
         public void Init(ProcessingContext context)
         {
+            _context = context;
+            _resourceName = $"{context.Services.Prefix}advices";
             Log = context.Services.Log;
         }
 
-        public IEnumerable<T> GetAdvices<T>(TypeReference type) where T : IAdvice
+        public IEnumerable<IAdvice> GetAdvices(TypeReference type)
         {
-            return ReadAdvicesFromModule<T>(type.Module).Where(a => a.HostType.FullName == type.FullName);
+            return ReadAdvicesFromModule(type.Module).Where(a => a.HostType.FullName == type.FullName);
         }
 
-        public void StoreAdvices<T>(ModuleDefinition toModule, IEnumerable<T> advices) where T : IAdvice
+        public void StoreAdvices(ModuleDefinition toModule, IEnumerable<IAdvice> advices)
         {
-            var existingAdvices = ReadAdvicesFromModule<T>(toModule);
+            var existingAdvices = ReadAdvicesFromModule(toModule);
 
             var newAdviceSet = advices.Union(existingAdvices).ToList();
 
-            var resourceName = GetResourceName(typeof(T));
-            var resource = toModule.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == resourceName);
+            var resource = toModule.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == _resourceName);
 
             if (resource != null)
                 toModule.Resources.Remove(resource);
@@ -60,44 +61,38 @@ namespace AspectInjector.Core.Defaults
 
                 buffer.Seek(0, SeekOrigin.Begin);
 
-                resource = new EmbeddedResource(resourceName, ManifestResourceAttributes.Private, buffer);
+                resource = new EmbeddedResource(_resourceName, ManifestResourceAttributes.Private, buffer);
             }
 
             toModule.Resources.Add(resource);
 
-            var cacheKey = GetCacheKey(toModule, typeof(T));
+            var cacheKey = GetCacheKey(toModule);
             object temp;
             _adviceCache.TryRemove(cacheKey, out temp);
         }
 
-        private IEnumerable<T> ReadAdvicesFromModule<T>(ModuleDefinition module) where T : IAdvice
+        private IEnumerable<IAdvice> ReadAdvicesFromModule(ModuleDefinition module)
         {
-            var cacheKey = GetCacheKey(module, typeof(T));
+            var cacheKey = GetCacheKey(module);
 
             object result;
 
             if (!_adviceCache.TryGetValue(cacheKey, out result))
             {
-                var resourceName = GetResourceName(typeof(T));
-                var resource = module.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == resourceName);
+                var resource = module.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == _resourceName);
 
                 if (resource == null)
-                    return new List<T>();
+                    return new List<IAdvice>();
 
-                result = _serializer.Deserialize<List<T>>(new JsonTextReader(new StreamReader(((EmbeddedResource)resource).GetResourceStream())));
+                result = _serializer.Deserialize<List<IAdvice>>(new JsonTextReader(new StreamReader(((EmbeddedResource)resource).GetResourceStream())));
             }
 
-            return (IEnumerable<T>)result;
+            return (IEnumerable<IAdvice>)result;
         }
 
-        private string GetCacheKey(ModuleDefinition module, Type adviceType)
+        private string GetCacheKey(ModuleDefinition module)
         {
-            return $"{module.FullyQualifiedName}:{adviceType.FullName}";
-        }
-
-        private string GetResourceName(Type type)
-        {
-            return $"{_context.Services.Prefix}{type.Name}";
+            return $"{module.FullyQualifiedName}";
         }
     }
 }

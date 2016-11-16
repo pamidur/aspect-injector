@@ -1,9 +1,6 @@
 ﻿using AspectInjector.Core.Configuration;
-using AspectInjector.Core.Contexts;
-using AspectInjector.Core.Contracts;
 using Mono.Cecil;
 using System.IO;
-using System.Reflection;
 
 namespace AspectInjector.Core
 {

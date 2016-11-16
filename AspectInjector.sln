@@ -28,9 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.CompileTimeTests", "AspectInjector.CompileTimeTests\AspectInjector.CompileTimeTests.csproj", "{217FD2E2-0AB4-4D1B-9EF7-E7139D893A99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core", "AspectInjector.Processing\AspectInjector.Core.csproj", "{ACCC10D0-D079-4B9C-8269-71796A0EF822}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core", "AspectInjector.Core\AspectInjector.Core.csproj", "{ACCC10D0-D079-4B9C-8269-71796A0EF822}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector", "AspectInjector.CommandLine\AspectInjector.csproj", "{FC862191-9081-4A58-96FF-B57F17AC40A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.CommandLine", "AspectInjector.CommandLine\AspectInjector.CommandLine.csproj", "{FC862191-9081-4A58-96FF-B57F17AC40A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

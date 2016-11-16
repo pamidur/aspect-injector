@@ -7,7 +7,7 @@
     <ProjectGuid>{FC862191-9081-4A58-96FF-B57F17AC40A9}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AspectInjector</RootNamespace>
+    <RootNamespace>AspectInjector.CommandLine</RootNamespace>
     <AssemblyName>AspectInjector</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -70,7 +70,7 @@
       <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
       <Name>AspectInjector.Broker</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AspectInjector.Processing\AspectInjector.Core.csproj">
+    <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj">
       <Project>{accc10d0-d079-4b9c-8269-71796a0ef822}</Project>
       <Name>AspectInjector.Core</Name>
     </ProjectReference>

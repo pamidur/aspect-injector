@@ -13,18 +13,31 @@ namespace AspectInjector.Core.Configuration
     public class ProcessingConfiguration
     {
         public ILogger Log { get; private set; }
-        public string Prefix { get; private set; }
-        public Type AspectExtractor { get; private set; }
-        public Type ModuleProcessor { get; private set; }
-        public Type AdviceCacheProvider { get; private set; }
-        public IReadOnlyCollection<AdviceTypesConfiguration> AdviceTypes { get; private set; } = new List<AdviceTypesConfiguration>();
 
-        public AdviceTypesConfiguration<T> RegisterAdvice<T>()
-            where T : class, IAdvice
+        public string Prefix { get; private set; }
+
+        public Type AspectExtractor { get; private set; }
+
+        public Type ModuleProcessor { get; private set; }
+
+        public Type AdviceCacheProvider { get; private set; }
+
+        public IReadOnlyCollection<Type> Extractors { get; private set; } = new List<Type>();
+
+        public IReadOnlyCollection<Type> Injectors { get; private set; } = new List<Type>();
+
+        public ProcessingConfiguration RegisterAdviceExtractor<T>()
+            where T : class, IAdviceExtractor
         {
-            var advice = new AdviceTypesConfiguration<T>(this);
-            ((List<AdviceTypesConfiguration>)AdviceTypes).Add(advice);
-            return advice;
+            ((List<Type>)Extractors).Add(typeof(T));
+            return this;
+        }
+
+        public ProcessingConfiguration RegisterInjector<T>()
+            where T : class, IInjector
+        {
+            ((List<Type>)Injectors).Add(typeof(T));
+            return this;
         }
 
         public ProcessingConfiguration SetAdviceCacheProvider<T>() where T : class, IAdviceCacheProvider
@@ -64,30 +77,24 @@ namespace AspectInjector.Core.Configuration
             var context = new ProcessingContext
             {
                 Assembly = assembly,
-                Resolver = resolver
-            };
-
-            //foreach (var adviceType in AdviceTypes)
-            //{
-            //    var extractor = (IAdviceExtractor<IAdvice>)Activator.CreateInstance(adviceType.Extractor);
-            //    adviceType.Type
-            //}
-
-            context.Services = new ServicesContext
-            {
-                Log = Log,
-                Prefix = Prefix,
-                AdviceCacheProvider = (IAdviceCacheProvider)Activator.CreateInstance(AdviceCacheProvider),
-                AspectExtractor = (IAspectExtractor)Activator.CreateInstance(AspectExtractor),
-                ModuleProcessor = (IModuleProcessor)Activator.CreateInstance(ModuleProcessor),
-                // Advices = compiledAdvices
+                Resolver = resolver,
+                Services = new ServicesContext
+                {
+                    Log = Log,
+                    Prefix = Prefix,
+                    AdviceCacheProvider = (IAdviceCacheProvider)Activator.CreateInstance(AdviceCacheProvider),
+                    AspectExtractor = (IAspectExtractor)Activator.CreateInstance(AspectExtractor),
+                    ModuleProcessor = (IModuleProcessor)Activator.CreateInstance(ModuleProcessor),
+                    AdviceExtractors = Extractors.Select(e => (IAdviceExtractor)Activator.CreateInstance(e)).ToList(),
+                    Injectors = Injectors.Select(i => (IInjector)Activator.CreateInstance(i)).ToList(),
+                }
             };
 
             context.Services.AdviceCacheProvider.Init(context);
             context.Services.AspectExtractor.Init(context);
             context.Services.ModuleProcessor.Init(context);
-
-            //init everything
+            context.Services.AdviceExtractors.ToList().ForEach(e => e.Init(context));
+            context.Services.Injectors.ToList().ForEach(i => i.Init(context));
 
             return context;
         }
@@ -108,15 +115,6 @@ namespace AspectInjector.Core.Configuration
 
             if (string.IsNullOrWhiteSpace(Prefix))
                 throw new Exception("Prefix should be set.");
-
-            foreach (var adviceType in AdviceTypes)
-            {
-                if (adviceType.Extractor == null)
-                    throw new Exception($"Extractor should be set for {adviceType.Type.Name}.");
-
-                if (!adviceType.Injectors.Any())
-                    throw new Exception($"Advice {adviceType.Type.Name} should have at least one injector.");
-            }
         }
 
         public static ProcessingConfiguration Default { get; private set; }
@@ -129,14 +127,10 @@ namespace AspectInjector.Core.Configuration
             .SetAdviceCacheProvider<EmbeddedResourceAdviceProvider>()
             .SetModuleProcessor<DefaultModuleProcessor>()
             .SetAspectExtractor<DefaultAspectExtractor>()
-            .RegisterAdvice<MethodCallAdvice>()
-                .SetExtractor<MethodCallAdviceExtractor>()
-                .AddInjector<MethodCallInjector>()
-                .Done()
-            .RegisterAdvice<InterfaceAdvice>()
-                .SetExtractor<InterfaceAdviceExtractor>()
-                .AddInjector<InterfaceInjector>()
-                .Done();
+            .RegisterAdviceExtractor<MethodCallAdviceExtractor>()
+            .RegisterAdviceExtractor<InterfaceAdviceExtractor>()
+            .RegisterInjector<MethodCallInjector>()
+            .RegisterInjector<InterfaceInjector>();
         }
     }
 }

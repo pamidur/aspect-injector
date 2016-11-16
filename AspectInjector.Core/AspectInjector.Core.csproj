@@ -71,7 +71,6 @@
     <Compile Include="Advices\MethodCall\MethodCallAdvice.cs" />
     <Compile Include="Advices\MethodCall\MethodCallAdviceExtractor.cs" />
     <Compile Include="Advices\MethodCall\MethodCallInjector.cs" />
-    <Compile Include="Configuration\AdviceTypesConfiguration.cs" />
     <Compile Include="Contexts\CompiledAdviceConfig.cs" />
     <Compile Include="Contexts\ServicesContext.cs" />
     <Compile Include="Configuration\ProcessingConfiguration.cs" />

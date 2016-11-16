@@ -1,13 +1,8 @@
 ﻿using AspectInjector.Core;
 using AspectInjector.Core.Configuration;
 using Mono.Cecil;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AspectInjector
+namespace AspectInjector.CommandLine
 {
     internal class Program
     {
@@ -19,7 +14,7 @@ namespace AspectInjector
             var resolver = new DefaultAssemblyResolver();
             resolver.AddSearchDirectory(@"D:\publish\infoaxs.mobile\bin\");
 
-            processor.Process(@"D:\publish\infoaxs.mobile\bin\Corp.InfoAXS.Mobile.Api.dll", resolver);
+            processor.Process(@"D:\SVN\Git\aspect-injector\AspectInjector.Tests\bin\Debug\AspectInjector.Tests.dll", resolver);
         }
     }
 }
