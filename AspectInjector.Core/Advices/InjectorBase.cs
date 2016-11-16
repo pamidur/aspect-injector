@@ -51,6 +51,9 @@ namespace AspectInjector.Core.Advices
             return advice is T && CanApply((T)advice);
         }
 
-        protected abstract bool CanApply(T advice);
+        protected virtual bool CanApply(T advice)
+        {
+            return true;
+        }
     }
 }
