@@ -1,4 +1,4 @@
-﻿using AspectInjector.Contracts;
+﻿using AspectInjector.Core.Contracts;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AspectInjector.Models
+namespace AspectInjector.Core.Models
 {
     public class Aspect<TTarget> : Aspect
     {

@@ -1,13 +1,10 @@
-﻿using AspectInjector.Contexts;
-using AspectInjector.Models;
+﻿using AspectInjector.Core.Contexts;
+using AspectInjector.Core.Models;
 
-namespace AspectInjector.Contracts
+namespace AspectInjector.Core.Contracts
 {
-    public interface IInjector<T>
-        where T : IAdvice
+    public interface IInjector<in IAdvice> : IInitializable
     {
-        void Init(ProcessingContext context);
-
-        void Apply(Aspect aspect, T advice);
+        void Apply(Aspect aspect, IAdvice advice);
     }
 }

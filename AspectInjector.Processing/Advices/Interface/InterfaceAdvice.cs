@@ -1,9 +1,9 @@
-﻿using AspectInjector.Contracts;
-using AspectInjector.Models;
+﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System;
 
-namespace AspectInjector.Advices.Interface
+namespace AspectInjector.Core.Advices.Interface
 {
     public class InterfaceAdvice : IAdvice
     {

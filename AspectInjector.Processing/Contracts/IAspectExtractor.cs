@@ -1,14 +1,12 @@
-﻿using AspectInjector.Contexts;
-using AspectInjector.Models;
+﻿using AspectInjector.Core.Contexts;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
 
-namespace AspectInjector.Contracts
+namespace AspectInjector.Core.Contracts
 {
-    public interface IAspectExtractor
+    public interface IAspectExtractor : IInitializable
     {
-        void Init(ProcessingContext context);
-
         IEnumerable<Aspect> ExtractAspects(ModuleDefinition module);
     }
 }

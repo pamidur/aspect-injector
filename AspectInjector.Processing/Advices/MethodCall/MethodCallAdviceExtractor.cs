@@ -1,11 +1,11 @@
-﻿using AspectInjector.Defaults;
+﻿using AspectInjector.Core.Defaults;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 
-namespace AspectInjector.Advices.MethodCall
+namespace AspectInjector.Core.Advices.MethodCall
 {
-    public class MethodCallAdviceExtractor : DefaultAdviceExtractorBase<MethodCallAdvice>
+    public class MethodCallAdviceExtractor : AdviceExtractorBase<MethodCallAdvice>
     {
         public override IEnumerable<MethodCallAdvice> ExtractAdvices(ModuleDefinition module)
         {

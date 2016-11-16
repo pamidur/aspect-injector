@@ -1,11 +1,11 @@
-﻿using AspectInjector.Contexts;
-using AspectInjector.Contracts;
-using AspectInjector.Models;
+﻿using AspectInjector.Core.Contexts;
+using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 
-namespace AspectInjector.Defaults
+namespace AspectInjector.Core.Advices
 {
-    public abstract class DefaultInjectorBase<T> : IInjector<T>
+    public abstract class InjectorBase<T> : IInjector<T>
         where T : IAdvice
     {
         protected ILogger Log { get; private set; }
@@ -38,7 +38,7 @@ namespace AspectInjector.Defaults
 
         public void Init(ProcessingContext context)
         {
-            Log = context.Log;
+            Log = context.Services.Log;
         }
     }
 }

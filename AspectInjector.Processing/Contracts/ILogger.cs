@@ -1,10 +1,12 @@
 ﻿using System;
 
-namespace AspectInjector.Contracts
+namespace AspectInjector.Core.Contracts
 {
     public interface ILogger
     {
         void LogMessage(string message);
+
+        void LogInformation(string message);
 
         void LogWarning(string message);
 

@@ -1,51 +1,46 @@
-﻿using AspectInjector.Contexts;
+﻿using AspectInjector.Core.Configuration;
+using AspectInjector.Core.Contexts;
+using AspectInjector.Core.Contracts;
 using Mono.Cecil;
 using System.IO;
+using System.Reflection;
 
-namespace AspectInjector
+namespace AspectInjector.Core
 {
     public class Processor
     {
-        private readonly Configuration _config;
+        private readonly ProcessingConfiguration _config;
 
-        public Processor(Configuration config)
+        public Processor(ProcessingConfiguration config)
         {
             _config = config;
         }
 
-        public void Process(string assemblyFile, string[] references)
+        public void Process(string assemblyFile, IAssemblyResolver resolver)
         {
-            _config.Log.LogMessage($"Aspect Injector has started for {Path.GetFileName(assemblyFile)}");
+            _config.Log.LogInformation($"Aspect Injector has started for {Path.GetFileName(assemblyFile)}");
 
-            var context = new ProcessingContext
-            {
-                Log = _config.Log,
-                Assembly = ReadAssembly(assemblyFile, references),
-            };
+            var context = _config.CreateContext(ReadAssembly(assemblyFile, resolver), resolver);
 
-            context.Assembly.MainModule.Resources.Add(new EmbeddedResource())
+            foreach (var module in context.Assembly.Modules)
+                context.Services.ModuleProcessor.ProcessModule(module);
 
-            foreach (var processor in _processors)
-            {
-                processor.ProcessModule(assembly.MainModule);
-            }
+            _config.Log.LogInformation("Assembly has been patched.");
 
-            _config.Log.LogMessage("Assembly has been patched");
+            WriteAssembly(context.Assembly, assemblyFile);
         }
 
-        private AssemblyDefinition ReadAssembly(string assemblyFile, string[] references)
+        private AssemblyDefinition ReadAssembly(string assemblyFile, IAssemblyResolver resolver)
         {
-            var resolver = new StrictAssemblyResolver(references);
-
             var assembly = AssemblyDefinition.ReadAssembly(assemblyFile,
                 new ReaderParameters
                 {
                     ReadingMode = ReadingMode.Deferred,
                     AssemblyResolver = resolver,
-                    ReadSymbols = true
+                    ReadSymbols = AreSymbolsFound(assemblyFile)
                 });
 
-            _config.Log.LogMessage("Assembly has been loaded");
+            _config.Log.LogInformation("Assembly has been read.");
 
             return assembly;
         }
@@ -55,11 +50,16 @@ namespace AspectInjector
             assembly.Write(path,
                 new WriterParameters()
                 {
-                    WriteSymbols = true,
+                    WriteSymbols = AreSymbolsFound(path),
                     ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
                 });
 
-            _config.Log.LogMessage("Assembly has been written");
+            _config.Log.LogInformation("Assembly has been written.");
+        }
+
+        private bool AreSymbolsFound(string dllPath)
+        {
+            return File.Exists(Path.Combine(Path.GetDirectoryName(dllPath), Path.GetFileNameWithoutExtension(dllPath) + ".pdb"));
         }
     }
 }

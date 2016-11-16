@@ -1,8 +1,8 @@
-﻿using AspectInjector.Defaults;
+﻿using AspectInjector.Core.Defaults;
 
-namespace AspectInjector.Advices.MethodCall
+namespace AspectInjector.Core.Advices.MethodCall
 {
-    public class MethodCallInjector : DefaultInjectorBase<MethodCallAdvice>
+    public class MethodCallInjector : InjectorBase<MethodCallAdvice>
     {
     }
 }

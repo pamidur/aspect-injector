@@ -1,13 +1,13 @@
-﻿using AspectInjector.Contracts;
+﻿using AspectInjector.Core.Contracts;
 using System;
 
-namespace AspectInjector.Defaults
+namespace AspectInjector.Core.Defaults
 {
-    public class DefaultLogger : ILogger
+    public class ConsoleLogger : ILogger
     {
         public void LogError(string message)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(message);
             Console.ResetColor();
         }
@@ -20,11 +20,16 @@ namespace AspectInjector.Defaults
             Console.WriteLine(exception.StackTrace);
         }
 
-        public void LogMessage(string message)
+        public void LogInformation(string message)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(message);
             Console.ResetColor();
+        }
+
+        public void LogMessage(string message)
+        {
+            Console.WriteLine(message);
         }
 
         public void LogWarning(string message)

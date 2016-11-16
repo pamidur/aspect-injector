@@ -1,9 +1,9 @@
-﻿using AspectInjector.Contracts;
-using AspectInjector.Models;
+﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System;
 
-namespace AspectInjector.Advices.MethodCall
+namespace AspectInjector.Core.Advices.MethodCall
 {
     public class MethodCallAdvice : IAdvice
     {
