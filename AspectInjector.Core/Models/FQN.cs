@@ -45,7 +45,7 @@ namespace AspectInjector.Core.Models
 
         public override int GetHashCode()
         {
-            return ToString().GetHashCode();
+            return AssemblyName.GetHashCode();
         }
 
         public override string ToString()
