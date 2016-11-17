@@ -7,7 +7,7 @@ namespace AspectInjector.Core.Contexts
     {
         public IAdviceCacheProvider AdviceCacheProvider { get; internal set; }
 
-        public IModuleProcessor ModuleProcessor { get; internal set; }
+        public IAssemblyProcessor AssemblyProcessor { get; internal set; }
 
         public ILogger Log { get; internal set; }
 

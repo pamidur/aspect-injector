@@ -5,7 +5,7 @@ using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AspectInjector.Core.Dafaults
+namespace AspectInjector.Core.Defaults
 {
     public abstract class DefaultAdviceExtractorBase<T> : IAdviceExtractor
         where T : Advice

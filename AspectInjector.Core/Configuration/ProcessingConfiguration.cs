@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Defaults;
+using AspectInjector.Core.Processing;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ namespace AspectInjector.Core.Configuration
             return this;
         }
 
-        public ProcessingConfiguration SetModuleProcessor<T>() where T : class, IModuleProcessor
+        public ProcessingConfiguration SetModuleProcessor<T>() where T : class, IAssemblyProcessor
         {
             ModuleProcessor = typeof(T);
             return this;
@@ -82,7 +83,7 @@ namespace AspectInjector.Core.Configuration
                     Prefix = Prefix,
                     AdviceCacheProvider = (IAdviceCacheProvider)Activator.CreateInstance(AdviceCacheProvider),
                     AspectExtractor = (IAspectExtractor)Activator.CreateInstance(AspectExtractor),
-                    ModuleProcessor = (IModuleProcessor)Activator.CreateInstance(ModuleProcessor),
+                    AssemblyProcessor = (IAssemblyProcessor)Activator.CreateInstance(ModuleProcessor),
                     AdviceExtractors = Extractors.Select(e => (IAdviceExtractor)Activator.CreateInstance(e)).ToList(),
                     Injectors = Injectors.Select(i => (IInjector)Activator.CreateInstance(i)).ToList(),
                 }
@@ -90,7 +91,7 @@ namespace AspectInjector.Core.Configuration
 
             context.Services.AdviceCacheProvider.Init(context);
             context.Services.AspectExtractor.Init(context);
-            context.Services.ModuleProcessor.Init(context);
+            context.Services.AssemblyProcessor.Init(context);
             context.Services.AdviceExtractors.ToList().ForEach(e => e.Init(context));
             context.Services.Injectors.ToList().ForEach(i => i.Init(context));
 
@@ -123,8 +124,8 @@ namespace AspectInjector.Core.Configuration
             .SetPrefix("__a$")
             .SetLogger(new ConsoleLogger())
             .SetAdviceCacheProvider<EmbeddedResourceAdviceProvider>()
-            .SetModuleProcessor<DefaultModuleProcessor>()
-            .SetAspectExtractor<DefaultAspectExtractor>();
+            .SetModuleProcessor<AssemblyProcessor>()
+            .SetAspectExtractor<AspectExtractor>();
         }
     }
 }

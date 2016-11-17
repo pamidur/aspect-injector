@@ -4,7 +4,7 @@ using Mono.Cecil;
 
 namespace AspectInjector.Core.InterfaceProxy
 {
-    public class InterfaceInjector : DefaultInjectorBase<InterfaceAdvice>
+    internal class InterfaceInjector : DefaultInjectorBase<InterfaceAdvice>
     {
         protected override void Apply(Aspect<AssemblyDefinition> aspect, InterfaceAdvice advice)
         {

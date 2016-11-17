@@ -1,7 +1,7 @@
 ﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Defaults.Converters;
 using AspectInjector.Core.Models;
+using AspectInjector.Core.Processing.Converters;
 using Mono.Cecil;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AspectInjector.Core.Defaults
+namespace AspectInjector.Core.Processing
 {
     public class EmbeddedResourceAdviceProvider : IAdviceCacheProvider
     {

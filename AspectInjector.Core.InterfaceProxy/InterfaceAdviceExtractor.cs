@@ -1,14 +1,13 @@
 ﻿using AspectInjector.Broker;
-using AspectInjector.Core.Dafaults;
+using AspectInjector.Core.Defaults;
 using AspectInjector.Core.Extensions;
 using Mono.Cecil;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.Core.InterfaceProxy
 {
-    public class InterfaceAdviceExtractor : DefaultAdviceExtractorBase<InterfaceAdvice>
+    internal class InterfaceAdviceExtractor : DefaultAdviceExtractorBase<InterfaceAdvice>
     {
         protected override IEnumerable<InterfaceAdvice> ExtractAdvices(ModuleDefinition module)
 

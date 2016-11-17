@@ -19,8 +19,7 @@ namespace AspectInjector.Core
 
             var context = _config.CreateContext(ReadAssembly(assemblyFile, resolver), resolver);
 
-            foreach (var module in context.Assembly.Modules)
-                context.Services.ModuleProcessor.ProcessModule(module);
+            context.Services.AssemblyProcessor.ProcessAssembly(context.Assembly);
 
             _config.Log.LogInformation("Assembly has been patched.");
 

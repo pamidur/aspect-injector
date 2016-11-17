@@ -1,7 +1,5 @@
 ﻿using AspectInjector.Core;
 using AspectInjector.Core.Configuration;
-using AspectInjector.Core.InterfaceProxy;
-using AspectInjector.Core.MethodCall;
 using Mono.Cecil;
 
 namespace AspectInjector.CommandLine
@@ -11,8 +9,7 @@ namespace AspectInjector.CommandLine
         private static void Main(string[] args)
         {
             var config = ProcessingConfiguration.Default
-                .RegisterAdviceExtractor<InterfaceAdviceExtractor>()
-                .RegisterInjector<InterfaceInjector>()
+                .UseInterfaceProxyInjection()
                 //.RegisterAdviceExtractor<MethodCallAdviceExtractor>()
                 //.RegisterInjector<MethodCallInjector>()
                 ;

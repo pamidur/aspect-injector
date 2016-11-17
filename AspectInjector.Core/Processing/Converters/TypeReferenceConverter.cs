@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 
-namespace AspectInjector.Core.Defaults.Converters
+namespace AspectInjector.Core.Processing.Converters
 {
     internal class TypeReferenceConverter : JsonConverter
     {

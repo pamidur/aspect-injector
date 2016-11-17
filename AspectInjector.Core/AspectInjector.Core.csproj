@@ -68,21 +68,22 @@
     <Compile Include="Contexts\ServicesContext.cs" />
     <Compile Include="Configuration\ProcessingConfiguration.cs" />
     <Compile Include="Contexts\ProcessingContext.cs" />
-    <Compile Include="Models\IAdvice.cs" />
+    <Compile Include="Models\Advice.cs" />
     <Compile Include="Contracts\IAdviceExtractor.cs" />
     <Compile Include="Contracts\IAspectExtractor.cs" />
     <Compile Include="Contracts\IInitializable.cs" />
     <Compile Include="Contracts\ILogger.cs" />
     <Compile Include="Contracts\IInjector.cs" />
     <Compile Include="Contracts\IAdviceCacheProvider.cs" />
-    <Compile Include="Defaults\Converters\TypeReferenceConverter.cs" />
+    <Compile Include="Models\AspectTargetType.cs" />
+    <Compile Include="Processing\Converters\TypeReferenceConverter.cs" />
     <Compile Include="Defaults\DefaultAdviceExtractorBase.cs" />
     <Compile Include="Defaults\DefaultInjectorBase.cs" />
     <Compile Include="Contracts\IModuleProcessor.cs" />
     <Compile Include="Defaults\ConsoleLogger.cs" />
-    <Compile Include="Defaults\DefaultAspectExtractor.cs" />
-    <Compile Include="Defaults\EmbeddedResourceAdviceProvider.cs" />
-    <Compile Include="Defaults\DefaultModuleProcessor.cs" />
+    <Compile Include="Processing\AspectExtractor.cs" />
+    <Compile Include="Processing\EmbeddedResourceAdviceProvider.cs" />
+    <Compile Include="Processing\AssemblyProcessor.cs" />
     <Compile Include="Extensions\CustomAttributeExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Extensions\TypeReferenceExtensions.cs" />
@@ -96,7 +97,12 @@
     <None Include="packages.config" />
     <None Include="Settings.StyleCop" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj">
+      <Project>{0926FE28-73BA-4F73-9188-B196FBBC9410}</Project>
+      <Name>AspectInjector.Broker</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\BuildTools.StyleCop.4.7.49.0\tools\StyleCop.targets" Condition="Exists('..\packages\BuildTools.StyleCop.4.7.49.0\tools\StyleCop.targets')" />
   <Target Name="___packages_BuildTools_StyleCop_4_7_49_0_tools_StyleCop_targets" Condition="$(StyleCopOutputFile)==''" BeforeTargets="BeforeBuild">

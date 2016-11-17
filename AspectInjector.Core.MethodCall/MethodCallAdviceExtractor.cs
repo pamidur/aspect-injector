@@ -1,4 +1,4 @@
-﻿using AspectInjector.Core.Dafaults;
+﻿using AspectInjector.Core.Defaults;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;

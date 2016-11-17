@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration.cs" />
     <Compile Include="InterfaceAdvice.cs" />
     <Compile Include="InterfaceAdviceExtractor.cs" />
     <Compile Include="InterfaceInjector.cs" />

@@ -24,7 +24,7 @@ namespace AspectInjector.Core.Defaults
         {
         }
 
-        protected virtual void Apply(Aspect<MemberReference> aspect, T advice)
+        protected virtual void Apply(Aspect<MethodDefinition> aspect, T advice)
         {
         }
 

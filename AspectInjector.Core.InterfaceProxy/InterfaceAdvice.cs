@@ -4,7 +4,7 @@ using Mono.Cecil;
 
 namespace AspectInjector.Core.InterfaceProxy
 {
-    public class InterfaceAdvice : Advice
+    internal class InterfaceAdvice : Advice
     {
         public TypeReference InterfaceType { get; set; }
 
