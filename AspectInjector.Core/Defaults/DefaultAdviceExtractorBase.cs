@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Linq;
 namespace AspectInjector.Core.Dafaults
 {
     public abstract class DefaultAdviceExtractorBase<T> : IAdviceExtractor
-        where T : IAdvice
+        where T : Advice
     {
         protected ILogger Log { get; private set; }
 
@@ -18,9 +19,9 @@ namespace AspectInjector.Core.Dafaults
             Log = context.Services.Log;
         }
 
-        IEnumerable<IAdvice> IAdviceExtractor.ExtractAdvices(ModuleDefinition module)
+        IEnumerable<Advice> IAdviceExtractor.ExtractAdvices(ModuleDefinition module)
         {
-            return ExtractAdvices(module).Cast<IAdvice>();
+            return ExtractAdvices(module).Cast<Advice>();
         }
     }
 }

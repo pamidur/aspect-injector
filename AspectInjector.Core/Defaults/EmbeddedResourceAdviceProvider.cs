@@ -1,12 +1,12 @@
 ﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Defaults.Converters;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -40,12 +40,12 @@ namespace AspectInjector.Core.Defaults
             _serializerSettings.Converters.Add(new TypeReferenceConverter(context));
         }
 
-        public IEnumerable<IAdvice> GetAdvices(TypeReference type)
+        public IEnumerable<Advice> GetAdvices(TypeReference type)
         {
             return ReadAdvicesFromModule(type.Module).Where(a => a.HostType.FullName == type.FullName);
         }
 
-        public void StoreAdvices(ModuleDefinition toModule, IEnumerable<IAdvice> advices)
+        public void StoreAdvices(ModuleDefinition toModule, IEnumerable<Advice> advices)
         {
             var existingAdvices = ReadAdvicesFromModule(toModule);
 
@@ -67,7 +67,7 @@ namespace AspectInjector.Core.Defaults
             _adviceCache.TryRemove(cacheKey, out temp);
         }
 
-        private IEnumerable<IAdvice> ReadAdvicesFromModule(ModuleDefinition module)
+        private IEnumerable<Advice> ReadAdvicesFromModule(ModuleDefinition module)
         {
             var cacheKey = GetCacheKey(module);
 
@@ -78,14 +78,14 @@ namespace AspectInjector.Core.Defaults
                 var resource = module.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == _resourceName);
 
                 if (resource == null)
-                    return new List<IAdvice>();
+                    return new List<Advice>();
 
                 var json = Encoding.UTF8.GetString(((EmbeddedResource)resource).GetResourceData());
 
-                result = JsonConvert.DeserializeObject<List<IAdvice>>(json, _serializerSettings);
+                result = JsonConvert.DeserializeObject<List<Advice>>(json, _serializerSettings);
             }
 
-            return (IEnumerable<IAdvice>)result;
+            return (IEnumerable<Advice>)result;
         }
 
         private string GetCacheKey(ModuleDefinition module)

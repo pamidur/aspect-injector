@@ -1,11 +1,11 @@
-﻿using System;
-using System.Linq;
-using AspectInjector.BuildTask.Common;
+﻿using AspectInjector.BuildTask.Common;
 using AspectInjector.BuildTask.Contracts;
 using AspectInjector.BuildTask.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
+using System;
+using System.Linq;
 
 namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 {

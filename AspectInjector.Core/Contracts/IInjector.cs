@@ -4,8 +4,8 @@ namespace AspectInjector.Core.Contracts
 {
     public interface IInjector : IInitializable
     {
-        void Apply(Aspect aspect, IAdvice advice);
+        void Apply(Aspect aspect, Advice advice);
 
-        bool CanApply(IAdvice advice);
+        bool CanApply(Advice advice);
     }
 }

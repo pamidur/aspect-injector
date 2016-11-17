@@ -68,7 +68,7 @@
     <Compile Include="Contexts\ServicesContext.cs" />
     <Compile Include="Configuration\ProcessingConfiguration.cs" />
     <Compile Include="Contexts\ProcessingContext.cs" />
-    <Compile Include="Contracts\IAdvice.cs" />
+    <Compile Include="Models\IAdvice.cs" />
     <Compile Include="Contracts\IAdviceExtractor.cs" />
     <Compile Include="Contracts\IAspectExtractor.cs" />
     <Compile Include="Contracts\IInitializable.cs" />

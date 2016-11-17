@@ -6,7 +6,7 @@ using Mono.Cecil;
 namespace AspectInjector.Core.Defaults
 {
     public abstract class DefaultInjectorBase<T> : IInjector
-        where T : IAdvice
+        where T : Advice
     {
         protected ILogger Log { get; private set; }
 
@@ -34,7 +34,7 @@ namespace AspectInjector.Core.Defaults
             Context = context;
         }
 
-        public void Apply(Aspect aspect, IAdvice advice)
+        public void Apply(Aspect aspect, Advice advice)
         {
             var typedAdvice = (T)advice;
 
@@ -46,7 +46,7 @@ namespace AspectInjector.Core.Defaults
                 Apply((Aspect<TypeDefinition>)aspect, typedAdvice);
         }
 
-        public bool CanApply(IAdvice advice)
+        public bool CanApply(Advice advice)
         {
             return advice is T && CanApply((T)advice);
         }

@@ -5,17 +5,24 @@ using System;
 
 namespace AspectInjector.Core.MethodCall
 {
-    public class MethodCallAdvice : IAdvice
+    public class MethodCallAdvice : Advice, IEquatable<MethodCallAdvice>
     {
-        public TypeReference HostType
+        public bool Equals(MethodCallAdvice other)
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            throw new NotImplementedException();
+        }
+
+        public bool Equals(Advice other)
+        {
+            throw new NotImplementedException();
         }
 
         public bool IsApplicableFor(Aspect aspect)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override bool IsEqualTo(Advice other)
         {
             throw new NotImplementedException();
         }
