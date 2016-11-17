@@ -4,9 +4,9 @@ using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AspectInjector.Core.Advices
+namespace AspectInjector.Core.Dafaults
 {
-    public abstract class AdviceExtractorBase<T> : IAdviceExtractor
+    public abstract class DefaultAdviceExtractorBase<T> : IAdviceExtractor
         where T : IAdvice
     {
         protected ILogger Log { get; private set; }

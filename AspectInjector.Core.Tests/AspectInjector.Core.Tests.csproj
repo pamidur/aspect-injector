@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FC862191-9081-4A58-96FF-B57F17AC40A9}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{9641A20D-A3A6-4A80-A839-D80950CE959A}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AspectInjector.CommandLine</RootNamespace>
-    <AssemblyName>aspectinjector.cli</AssemblyName>
+    <RootNamespace>AspectInjector.Core.Tests</RootNamespace>
+    <AssemblyName>AspectInjector.Core.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -32,6 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.9.6.4\lib\net45\Mono.Cecil.dll</HintPath>
       <Private>True</Private>
@@ -58,30 +57,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj">
+      <Project>{ACCC10D0-D079-4B9C-8269-71796A0EF822}</Project>
+      <Name>AspectInjector.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj">
-      <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
-      <Name>AspectInjector.Broker</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AspectInjector.Core.InterfaceProxy\AspectInjector.Core.InterfaceProxy.csproj">
-      <Project>{3fbd73f5-6098-45a8-a236-6cc2f093b804}</Project>
-      <Name>AspectInjector.Core.InterfaceProxy</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AspectInjector.Core.MethodCall\AspectInjector.Core.MethodCall.csproj">
-      <Project>{1a96aa51-2cbc-4901-91d1-53208ad5e6b6}</Project>
-      <Name>AspectInjector.Core.MethodCall</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj">
-      <Project>{accc10d0-d079-4b9c-8269-71796a0ef822}</Project>
-      <Name>AspectInjector.Core</Name>
-    </ProjectReference>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

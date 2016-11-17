@@ -3,7 +3,7 @@ using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System;
 
-namespace AspectInjector.Core.Advices.MethodCall
+namespace AspectInjector.Core.MethodCall
 {
     public class MethodCallAdvice : IAdvice
     {

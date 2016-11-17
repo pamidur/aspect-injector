@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-[assembly: AssemblyTitle("AspectInjector.CommandLine")]
+[assembly: AssemblyTitle("AspectInjector.Core.InterfaceProxy")]
 [assembly: AssemblyProduct("AspectInjector")]
 [assembly: AssemblyCopyright("Copyright © AspectInjectorTeam 2016")]
 [assembly: AssemblyVersion("9999.0.0")]

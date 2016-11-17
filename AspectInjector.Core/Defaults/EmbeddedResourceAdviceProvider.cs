@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Defaults.Converters;
 using Mono.Cecil;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -7,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace AspectInjector.Core.Defaults
 {
@@ -16,26 +18,26 @@ namespace AspectInjector.Core.Defaults
         private readonly ConcurrentDictionary<string, object> _adviceCache = new ConcurrentDictionary<string, object>();
 
         private ProcessingContext _context;
-        private readonly JsonSerializer _serializer;
         private string _resourceName;
+        private JsonSerializerSettings _serializerSettings;
 
         protected ILogger Log { get; private set; }
-
-        public EmbeddedResourceAdviceProvider()
-        {
-            _serializer = JsonSerializer.Create(new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                MissingMemberHandling = MissingMemberHandling.Ignore,
-                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-            });
-        }
 
         public void Init(ProcessingContext context)
         {
             _context = context;
             _resourceName = $"{context.Services.Prefix}advices";
             Log = context.Services.Log;
+
+            _serializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                TypeNameHandling = TypeNameHandling.Auto,
+            };
+
+            _serializerSettings.Converters.Add(new TypeReferenceConverter(context));
         }
 
         public IEnumerable<IAdvice> GetAdvices(TypeReference type)
@@ -54,15 +56,9 @@ namespace AspectInjector.Core.Defaults
             if (resource != null)
                 toModule.Resources.Remove(resource);
 
-            using (var buffer = new MemoryStream())
-            {
-                var writer = new StreamWriter(buffer);
-                _serializer.Serialize(writer, newAdviceSet);
+            var json = JsonConvert.SerializeObject(newAdviceSet, _serializerSettings);
 
-                buffer.Seek(0, SeekOrigin.Begin);
-
-                resource = new EmbeddedResource(_resourceName, ManifestResourceAttributes.Private, buffer);
-            }
+            resource = new EmbeddedResource(_resourceName, ManifestResourceAttributes.Private, Encoding.UTF8.GetBytes(json));
 
             toModule.Resources.Add(resource);
 
@@ -84,7 +80,9 @@ namespace AspectInjector.Core.Defaults
                 if (resource == null)
                     return new List<IAdvice>();
 
-                result = _serializer.Deserialize<List<IAdvice>>(new JsonTextReader(new StreamReader(((EmbeddedResource)resource).GetResourceStream())));
+                var json = Encoding.UTF8.GetString(((EmbeddedResource)resource).GetResourceData());
+
+                result = JsonConvert.DeserializeObject<List<IAdvice>>(json, _serializerSettings);
             }
 
             return (IEnumerable<IAdvice>)result;

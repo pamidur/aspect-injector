@@ -1,6 +1,4 @@
-﻿using AspectInjector.Core.Advices.Interface;
-using AspectInjector.Core.Advices.MethodCall;
-using AspectInjector.Core.Contexts;
+﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Defaults;
 using Mono.Cecil;
@@ -126,11 +124,7 @@ namespace AspectInjector.Core.Configuration
             .SetLogger(new ConsoleLogger())
             .SetAdviceCacheProvider<EmbeddedResourceAdviceProvider>()
             .SetModuleProcessor<DefaultModuleProcessor>()
-            .SetAspectExtractor<DefaultAspectExtractor>()
-            .RegisterAdviceExtractor<MethodCallAdviceExtractor>()
-            .RegisterAdviceExtractor<InterfaceAdviceExtractor>()
-            .RegisterInjector<MethodCallInjector>()
-            .RegisterInjector<InterfaceInjector>();
+            .SetAspectExtractor<DefaultAspectExtractor>();
         }
     }
 }

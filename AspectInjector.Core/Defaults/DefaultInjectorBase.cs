@@ -3,9 +3,9 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 
-namespace AspectInjector.Core.Advices
+namespace AspectInjector.Core.Defaults
 {
-    public abstract class InjectorBase<T> : IInjector
+    public abstract class DefaultInjectorBase<T> : IInjector
         where T : IAdvice
     {
         protected ILogger Log { get; private set; }

@@ -2,11 +2,11 @@
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 
-namespace AspectInjector.Core.Advices.Interface
+namespace AspectInjector.Core.InterfaceProxy
 {
     public class InterfaceAdvice : IAdvice
     {
-        public TypeDefinition InterfaceType { get; set; }
+        public TypeReference InterfaceType { get; set; }
 
         public TypeReference HostType { get; set; }
 

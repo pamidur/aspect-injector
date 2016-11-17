@@ -49,17 +49,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessModifiers.cs" />
-    <Compile Include="AdviceArgumentAttribute.cs" />
-    <Compile Include="AdviceArgumentSource.cs" />
-    <Compile Include="AdviceAttribute.cs" />
-    <Compile Include="AdviceInterfaceProxyAttribute.cs" />
+    <Compile Include="MethodCall\AdviceArgumentAttribute.cs" />
+    <Compile Include="MethodCall\AdviceArgumentSource.cs" />
+    <Compile Include="MethodCall\AdviceAttribute.cs" />
+    <Compile Include="InterfaceProxy\AdviceInterfaceProxyAttribute.cs" />
     <Compile Include="AspectAttribute.cs" />
     <Compile Include="AspectFactoryAttribute.cs" />
     <Compile Include="AspectScope.cs" />
     <Compile Include="AspectScopeAttribute.cs" />
     <Compile Include="AspectDefinitionAttribute.cs" />
-    <Compile Include="InjectionPoints.cs" />
-    <Compile Include="InjectionTargets.cs" />
+    <Compile Include="MethodCall\InjectionPoints.cs" />
+    <Compile Include="MethodCall\InjectionTargets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
