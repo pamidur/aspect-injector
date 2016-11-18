@@ -6,7 +6,7 @@ namespace AspectInjector.Core.InterfaceProxy
 {
     internal class InterfaceInjector : DefaultInjectorBase<InterfaceAdvice>
     {
-        protected override void Apply(Aspect<AssemblyDefinition> aspect, InterfaceAdvice advice)
+        protected override void Apply(Aspect<TypeDefinition> aspect, InterfaceAdvice advice)
         {
             base.Apply(aspect, advice);
         }

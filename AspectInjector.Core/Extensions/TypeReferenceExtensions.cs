@@ -1,6 +1,8 @@
 ﻿using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AspectInjector.Core.Extensions
 {
@@ -19,6 +21,17 @@ namespace AspectInjector.Core.Extensions
         public static FQN GetFQN(this TypeReference type)
         {
             return FQN.FromTypeReference(type);
+        }
+
+        public static IEnumerable<TypeDefinition> GetTypesTree(this TypeDefinition type)
+        {
+            yield return type;
+
+            foreach (var nestedType in type.NestedTypes
+                .SelectMany(t => GetTypesTree(t)))
+            {
+                yield return nestedType;
+            }
         }
     }
 }

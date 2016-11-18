@@ -10,7 +10,7 @@ namespace AspectInjector.Core.InterfaceProxy
 
         protected override bool IsApplicableForAspect(Aspect aspect)
         {
-            return aspect is Aspect<TypeDefinition>;
+            return aspect.TargetType == AspectTargetType.TypeDefinition;
         }
 
         protected override bool IsEqualTo(Advice advice)

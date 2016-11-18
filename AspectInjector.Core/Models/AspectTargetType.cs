@@ -3,14 +3,17 @@
     public enum AspectTargetType
     {
         AssemblyDefinition,
-        GenericParameter,
+        ModuleDefinition,
+        TypeDefinition,
+
         EventDefinition,
+        PropertyDefinition,
+
         FieldDefinition,
         MethodDefinition,
+
+        GenericParameter,
         MethodReturnType,
-        ParameterDefinition,
-        PropertyDefinition,
-        ModuleDefinition,
-        TypeDefinition
+        ParameterDefinition
     }
 }

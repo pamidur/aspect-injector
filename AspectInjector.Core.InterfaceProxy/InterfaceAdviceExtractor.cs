@@ -24,12 +24,21 @@ namespace AspectInjector.Core.InterfaceProxy
         {
             var advices = from ca in type.CustomAttributes
                           where ca.AttributeType.IsTypeOf(typeof(AdviceInterfaceProxyAttribute))
-                          select new InterfaceAdvice { InterfaceType = (TypeReference)ca.ConstructorArguments[0].Value, HostType = type };
+                          select new InterfaceAdvice { InterfaceType = ca.GetConstructorValue<TypeReference>(0), HostType = type };
 
             foreach (var nestedType in type.NestedTypes)
                 advices = advices.Concat(ExtractAdvicesFromType(nestedType));
 
             return advices;
         }
+
+        //private InterfaceAdvice ValidateAdvice(InterfaceAdvice advice)
+        //{
+        //    if (!advice.InterfaceType.Resolve().IsInterface)
+        //        throw new CompilationException(context.InterfaceDefinition.Name + " is not an interface on interface injection definition on acpect " + aspectDefinition.Name, aspectDefinition);
+
+        //    if (!context.AspectContext.AdviceClassType.ImplementsInterface(context.InterfaceDefinition))
+        //        throw new CompilationException(aspectDefinition.Name + " should implement " + interfaceDefinition.Name, aspectDefinition);
+        //}
     }
 }

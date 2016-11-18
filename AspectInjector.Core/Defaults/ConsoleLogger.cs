@@ -5,18 +5,19 @@ namespace AspectInjector.Core.Defaults
 {
     public class ConsoleLogger : ILogger
     {
+        public bool IsErrorThrown { get; private set; }
+
         public void LogError(string message)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(message);
             Console.ResetColor();
+            IsErrorThrown = true;
         }
 
         public void LogException(Exception exception)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(exception.Message);
-            Console.ResetColor();
+            LogError(exception.Message);
             Console.WriteLine(exception.StackTrace);
         }
 

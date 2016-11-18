@@ -1,0 +1,19 @@
+			[entrypoint]
+			      |      
+				  |	<- config
+				  |	
+			 [processor]
+			      |
+				  | <- context
+				  |
+			[asm_processor]<----->[advices_cache]
+			^     |       ^
+			|     |       |
+   aspects->|     |       |<-advices
+			|     |       |
+	[aspect_ext]  |  [advice_ext]
+	              | 
+				  |
+				  |<- aspect-advice pair (like source/target)
+				  |
+		     [injector]

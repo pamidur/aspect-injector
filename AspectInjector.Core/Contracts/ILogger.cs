@@ -13,5 +13,7 @@ namespace AspectInjector.Core.Contracts
         void LogError(string message);
 
         void LogException(Exception exception);
+
+        bool IsErrorThrown { get; }
     }
 }

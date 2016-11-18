@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessModifiers.cs" />
+    <Compile Include="AspectAttributeBase.cs" />
     <Compile Include="MethodCall\AdviceArgumentAttribute.cs" />
     <Compile Include="MethodCall\AdviceArgumentSource.cs" />
     <Compile Include="MethodCall\AdviceAttribute.cs" />

@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Processing.EqualityComparers;
 using Mono.Cecil;
 using System.Linq;
 
