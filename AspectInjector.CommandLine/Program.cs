@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Core;
 using AspectInjector.Core.Configuration;
+using AspectInjector.Core.Mixin;
 using Mono.Cecil;
 
 namespace AspectInjector.CommandLine
@@ -9,7 +10,7 @@ namespace AspectInjector.CommandLine
         private static void Main(string[] args)
         {
             var config = ProcessingConfiguration.Default
-                .UseInterfaceProxyInjection()
+                .UseMixinInjections()
                 //.RegisterAdviceExtractor<MethodCallAdviceExtractor>()
                 //.RegisterInjector<MethodCallInjector>()
                 ;

@@ -19,24 +19,24 @@ namespace AspectInjector.Core.Processing
 
         public void ProcessAssembly(AssemblyDefinition assembly)
         {
-            var aspects = _context.Services.AspectExtractor.ExtractAspects(assembly);
+            var aspects = _context.Services.AspectReader.ReadAspects(assembly);
 
             foreach (var module in assembly.Modules)
             {
-                foreach (var extrator in _context.Services.AdviceExtractors)
+                foreach (var extrator in _context.Services.InjectionReaders)
                 {
-                    var advices = extrator.ExtractAdvices(module);
-                    _context.Services.AdviceCacheProvider.StoreAdvices(module, advices);
+                    var injections = extrator.ReadInjections(module);
+                    _context.Services.InjectionCacheProvider.StoreInjections(module, injections);
                 }
 
                 foreach (var aspect in aspects)
                 {
-                    var matchedAdvices = _context.Services.AdviceCacheProvider.GetAdvices(aspect.AdviceHost).Where(a => a.IsApplicableFor(aspect)).ToList();
+                    var matchednjections = _context.Services.InjectionCacheProvider.GetInjections(aspect.InjectionHost).Where(a => a.IsApplicableFor(aspect)).ToList();
 
                     foreach (var injector in _context.Services.Injectors)
-                        foreach (var advice in matchedAdvices)
-                            if (injector.CanApply(advice))
-                                injector.Apply(aspect, advice);
+                        foreach (var injection in matchednjections)
+                            if (injector.CanApply(injection))
+                                injector.Apply(aspect, injection);
                 }
             }
         }

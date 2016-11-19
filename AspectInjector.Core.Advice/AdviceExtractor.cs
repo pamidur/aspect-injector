@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace AspectInjector.Core.MethodCall
 {
-    public class MethodCallAdviceExtractor : DefaultAdviceExtractorBase<MethodCallAdvice>
+    public class AdviceExtractor : InjectionReaderBase<Advice>
     {
-        protected override IEnumerable<MethodCallAdvice> ExtractAdvices(ModuleDefinition module)
+        protected override IEnumerable<Advice> ReadInjections(ModuleDefinition module)
         {
             throw new NotImplementedException();
         }

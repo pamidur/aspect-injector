@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 
 namespace AspectInjector.Core.Processing
 {
-    public class AspectExtractor : IAspectExtractor
+    public class AspectReader : IAspectReader
     {
         private ProcessingContext _context;
         protected ILogger Log { get; private set; }
@@ -23,7 +23,7 @@ namespace AspectInjector.Core.Processing
             Log = context.Services.Log;
         }
 
-        public IEnumerable<Aspect> ExtractAspects(AssemblyDefinition assembly)
+        public IEnumerable<Aspect> ReadAspects(AssemblyDefinition assembly)
         {
             var aspects = Enumerable.Empty<Aspect>();
             aspects = aspects.Concat(ExtractAspectsFrom(assembly));
@@ -79,7 +79,7 @@ namespace AspectInjector.Core.Processing
             return new Tuple<Aspect<T>, ChildrenFilter>(new Aspect<T>()
             {
                 Target = source,
-                AdviceHost = attr.GetConstructorValue<TypeReference>(0),
+                InjectionHost = attr.GetConstructorValue<TypeReference>(0),
                 RoutableData = routableData == null ? new List<CustomAttribute>() : new List<CustomAttribute> { routableData }
             },
             new ChildrenFilter

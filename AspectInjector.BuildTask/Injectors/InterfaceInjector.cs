@@ -27,8 +27,8 @@ namespace AspectInjector.BuildTask.Injectors
             var ed = context.AspectContext.TargetTypeContext.TypeDefinition.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.IsTypeOf(originalEvent.EventType));
             if (ed == null)
             {
-                var newAddMethod = GetOrCreateMethodProxy(context, originalEvent.AddMethod);
-                var newRemoveMethod = GetOrCreateMethodProxy(context, originalEvent.RemoveMethod);
+                var newAddMethod = originalEvent.AddMethod == null ? null : GetOrCreateMethodProxy(context, originalEvent.AddMethod);
+                var newRemoveMethod = originalEvent.AddMethod == null ? null : GetOrCreateMethodProxy(context, originalEvent.RemoveMethod);
 
                 ed = new EventDefinition(eventName, EventAttributes.None, context.AspectContext.TargetTypeContext.TypeDefinition.Module.Import(originalEvent.EventType));
                 ed.AddMethod = newAddMethod;
@@ -47,8 +47,8 @@ namespace AspectInjector.BuildTask.Injectors
             var pd = context.AspectContext.TargetTypeContext.TypeDefinition.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.IsTypeOf(originalProperty.PropertyType));
             if (pd == null)
             {
-                var newGetMethod = GetOrCreateMethodProxy(context, originalProperty.GetMethod);
-                var newSetMethod = GetOrCreateMethodProxy(context, originalProperty.SetMethod);
+                var newGetMethod = originalProperty.GetMethod == null ? null : GetOrCreateMethodProxy(context, originalProperty.GetMethod);
+                var newSetMethod = originalProperty.SetMethod == null ? null : GetOrCreateMethodProxy(context, originalProperty.SetMethod);
 
                 pd = new PropertyDefinition(propertyName, PropertyAttributes.None, context.AspectContext.TargetTypeContext.TypeDefinition.Module.Import(originalProperty.PropertyType));
                 pd.GetMethod = newGetMethod;

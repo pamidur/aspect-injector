@@ -37,9 +37,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Entrypoints", "Entrypoints"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2DAB661A-26B2-440A-BC54-59F2C8404F12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core.InterfaceProxy", "AspectInjector.Core.InterfaceProxy\AspectInjector.Core.InterfaceProxy.csproj", "{3FBD73F5-6098-45A8-A236-6CC2F093B804}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core.Mixin", "AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj", "{3FBD73F5-6098-45A8-A236-6CC2F093B804}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core.MethodCall", "AspectInjector.Core.MethodCall\AspectInjector.Core.MethodCall.csproj", "{1A96AA51-2CBC-4901-91D1-53208AD5E6B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core.Advice", "AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj", "{1A96AA51-2CBC-4901-91D1-53208AD5E6B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core.Tests", "AspectInjector.Core.Tests\AspectInjector.Core.Tests.csproj", "{9641A20D-A3A6-4A80-A839-D80950CE959A}"
 EndProject

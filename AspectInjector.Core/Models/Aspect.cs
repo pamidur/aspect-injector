@@ -19,7 +19,7 @@ namespace AspectInjector.Core.Models
         public bool Equals(Aspect other)
         {
             return other is Aspect<TTarget>
-                && other.AdviceHost.GetFQN() == AdviceHost.GetFQN()
+                && other.InjectionHost.GetFQN() == InjectionHost.GetFQN()
                 && ((Aspect<TTarget>)other).Target == Target;
         }
 
@@ -30,7 +30,7 @@ namespace AspectInjector.Core.Models
 
         public override int GetHashCode()
         {
-            return AdviceHost.GetFQN().GetHashCode();
+            return InjectionHost.GetFQN().GetHashCode();
         }
     }
 
@@ -38,7 +38,7 @@ namespace AspectInjector.Core.Models
     {
         public AspectTargetType TargetType { get; protected set; }
 
-        public TypeReference AdviceHost { get; set; }
+        public TypeReference InjectionHost { get; set; }
 
         public IEnumerable<CustomAttribute> RoutableData { get; set; }
     }

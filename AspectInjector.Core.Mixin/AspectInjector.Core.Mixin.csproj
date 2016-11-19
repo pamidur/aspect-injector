@@ -7,8 +7,8 @@
     <ProjectGuid>{3FBD73F5-6098-45A8-A236-6CC2F093B804}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AspectInjector.Core.InterfaceProxy</RootNamespace>
-    <AssemblyName>AspectInjector.Core.InterfaceProxy</AssemblyName>
+    <RootNamespace>AspectInjector.Core.Mixin</RootNamespace>
+    <AssemblyName>AspectInjector.Core.Mixin</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StyleCopOverrideSettingsFile>Settings.StyleCop</StyleCopOverrideSettingsFile>
@@ -62,9 +62,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
-    <Compile Include="InterfaceAdvice.cs" />
-    <Compile Include="InterfaceAdviceExtractor.cs" />
-    <Compile Include="InterfaceInjector.cs" />
+    <Compile Include="Mixin.cs" />
+    <Compile Include="MixinExtractor.cs" />
+    <Compile Include="MixinInjector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

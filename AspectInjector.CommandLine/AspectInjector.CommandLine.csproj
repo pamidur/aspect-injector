@@ -70,13 +70,13 @@
       <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
       <Name>AspectInjector.Broker</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AspectInjector.Core.InterfaceProxy\AspectInjector.Core.InterfaceProxy.csproj">
+    <ProjectReference Include="..\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj">
       <Project>{3fbd73f5-6098-45a8-a236-6cc2f093b804}</Project>
-      <Name>AspectInjector.Core.InterfaceProxy</Name>
+      <Name>AspectInjector.Core.Mixin</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AspectInjector.Core.MethodCall\AspectInjector.Core.MethodCall.csproj">
+    <ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj">
       <Project>{1a96aa51-2cbc-4901-91d1-53208ad5e6b6}</Project>
-      <Name>AspectInjector.Core.MethodCall</Name>
+      <Name>AspectInjector.Core.Advice</Name>
     </ProjectReference>
     <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj">
       <Project>{accc10d0-d079-4b9c-8269-71796a0ef822}</Project>

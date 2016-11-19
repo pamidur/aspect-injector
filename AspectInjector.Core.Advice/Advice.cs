@@ -5,14 +5,14 @@ using System;
 
 namespace AspectInjector.Core.MethodCall
 {
-    public class MethodCallAdvice : Advice, IEquatable<MethodCallAdvice>
+    public class Advice : Injection, IEquatable<Advice>
     {
-        public bool Equals(MethodCallAdvice other)
+        public bool Equals(Advice other)
         {
             throw new NotImplementedException();
         }
 
-        public bool Equals(Advice other)
+        public bool Equals(Injection other)
         {
             throw new NotImplementedException();
         }
@@ -22,7 +22,7 @@ namespace AspectInjector.Core.MethodCall
             throw new NotImplementedException();
         }
 
-        protected override bool IsEqualTo(Advice other)
+        protected override bool IsEqualTo(Injection other)
         {
             throw new NotImplementedException();
         }

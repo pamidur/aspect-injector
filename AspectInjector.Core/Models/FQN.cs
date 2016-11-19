@@ -115,6 +115,9 @@ namespace AspectInjector.Core.Models
 
         public static FQN FromString(string fqnString)
         {
+            if (string.IsNullOrEmpty(fqnString))
+                return null;
+
             var match = _fqnMatch.Match(fqnString);
 
             if (!match.Success)
@@ -193,6 +196,9 @@ namespace AspectInjector.Core.Models
 
         public static FQN FromTypeReference(TypeReference type)
         {
+            if (type == null)
+                return null;
+
             var fqn = new FQN
             {
                 Name = type.Name
@@ -220,6 +226,9 @@ namespace AspectInjector.Core.Models
 
         public static bool operator ==(FQN a, FQN b)
         {
+            if (object.Equals(a, null) || object.Equals(b, null))
+                return false;
+
             return a.Equals(b);
         }
 

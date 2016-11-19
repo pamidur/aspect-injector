@@ -61,9 +61,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MethodCallAdvice.cs" />
-    <Compile Include="MethodCallAdviceExtractor.cs" />
-    <Compile Include="MethodCallInjector.cs" />
+    <Compile Include="Advice.cs" />
+    <Compile Include="AdviceExtractor.cs" />
+    <Compile Include="AdviceInjector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
