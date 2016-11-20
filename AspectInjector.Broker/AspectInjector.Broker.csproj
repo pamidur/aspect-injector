@@ -53,7 +53,7 @@
     <Compile Include="MethodCall\AdviceArgumentAttribute.cs" />
     <Compile Include="MethodCall\AdviceArgumentSource.cs" />
     <Compile Include="MethodCall\AdviceAttribute.cs" />
-    <Compile Include="InterfaceProxy\AdviceInterfaceProxyAttribute.cs" />
+    <Compile Include="Mixin\AdviceInterfaceProxyAttribute.cs" />
     <Compile Include="AspectAttribute.cs" />
     <Compile Include="AspectFactoryAttribute.cs" />
     <Compile Include="AspectScope.cs" />

@@ -4,11 +4,11 @@ using System;
 
 namespace AspectInjector.Core.Models
 {
-    public abstract class Advice : IEquatable<Advice>
+    public abstract class Injection : IEquatable<Injection>
     {
         public TypeReference HostType { get; set; }
 
-        public bool Equals(Advice other)
+        public bool Equals(Injection other)
         {
             return other.HostType.GetFQN() == HostType.GetFQN() && IsEqualTo(other);
         }
@@ -20,7 +20,7 @@ namespace AspectInjector.Core.Models
             if (obj.GetType() != GetType())
                 return false;
 
-            return Equals((Advice)obj);
+            return Equals((Injection)obj);
         }
 
         public override int GetHashCode()
@@ -30,7 +30,7 @@ namespace AspectInjector.Core.Models
 
         public bool IsApplicableFor(Aspect aspect)
         {
-            return aspect.AdviceHost.GetFQN() == HostType.GetFQN() && IsApplicableForAspect(aspect);
+            return aspect.InjectionHost.GetFQN() == HostType.GetFQN() && IsApplicableForAspect(aspect);
         }
 
         protected virtual bool IsApplicableForAspect(Aspect aspect)
@@ -38,6 +38,6 @@ namespace AspectInjector.Core.Models
             return true;
         }
 
-        protected abstract bool IsEqualTo(Advice other);
+        protected abstract bool IsEqualTo(Injection other);
     }
 }

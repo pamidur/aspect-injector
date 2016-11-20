@@ -3,9 +3,9 @@ using System;
 
 namespace AspectInjector.Core.MethodCall
 {
-    public class MethodCallInjector : DefaultInjectorBase<MethodCallAdvice>
+    public class AdviceInjector : InjectorBase<Advice>
     {
-        protected override bool CanApply(MethodCallAdvice advice)
+        protected override bool CanApply(Advice advice)
         {
             throw new NotImplementedException();
         }

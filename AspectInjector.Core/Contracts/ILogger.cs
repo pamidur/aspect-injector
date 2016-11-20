@@ -1,4 +1,4 @@
-﻿using System;
+﻿using AspectInjector.Core.Models;
 
 namespace AspectInjector.Core.Contracts
 {
@@ -12,7 +12,7 @@ namespace AspectInjector.Core.Contracts
 
         void LogError(string message);
 
-        void LogException(Exception exception);
+        void LogError(CompilationError error);
 
         bool IsErrorThrown { get; }
     }

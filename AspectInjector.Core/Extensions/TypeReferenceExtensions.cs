@@ -33,5 +33,11 @@ namespace AspectInjector.Core.Extensions
                 yield return nestedType;
             }
         }
+
+        public static bool Implements(this TypeReference tr, TypeReference @interface)
+        {
+            TypeDefinition td = tr.Resolve();
+            return td.Interfaces.Any(i => i.IsTypeOf(@interface)) || (td.BaseType != null && td.BaseType.Implements(@interface));
+        }
     }
 }

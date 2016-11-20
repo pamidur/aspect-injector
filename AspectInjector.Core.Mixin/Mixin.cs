@@ -2,9 +2,9 @@
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 
-namespace AspectInjector.Core.InterfaceProxy
+namespace AspectInjector.Core.Mixin
 {
-    internal class InterfaceAdvice : Advice
+    internal class Mixin : Injection
     {
         public TypeReference InterfaceType { get; set; }
 
@@ -13,9 +13,9 @@ namespace AspectInjector.Core.InterfaceProxy
             return aspect.TargetType == AspectTargetType.TypeDefinition;
         }
 
-        protected override bool IsEqualTo(Advice advice)
+        protected override bool IsEqualTo(Injection injection)
         {
-            var other = (InterfaceAdvice)advice;
+            var other = (Mixin)injection;
             return other.InterfaceType.GetFQN() == InterfaceType.GetFQN();
         }
     }

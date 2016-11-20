@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Models;
 using System;
 
 namespace AspectInjector.Core.Defaults
@@ -15,10 +16,10 @@ namespace AspectInjector.Core.Defaults
             IsErrorThrown = true;
         }
 
-        public void LogException(Exception exception)
+        public void LogError(CompilationError error)
         {
-            LogError(exception.Message);
-            Console.WriteLine(exception.StackTrace);
+            LogError(error.Message);
+            Console.WriteLine($"{error.SequencePoint.Document.Url} line:{error.SequencePoint.StartLine}");
         }
 
         public void LogInformation(string message)

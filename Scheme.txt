@@ -9,11 +9,11 @@
 			[asm_processor]<----->[advices_cache]
 			^     |       ^
 			|     |       |
-   aspects->|     |       |<-advices
+   aspects->|     |       |<-injections
 			|     |       |
-	[aspect_ext]  |  [advice_ext]
+	[aspect_read] |  [injection_read]
 	              | 
 				  |
-				  |<- aspect-advice pair (like source/target)
+				  |<- aspect-injection pair (like target/source)
 				  |
 		     [injector]

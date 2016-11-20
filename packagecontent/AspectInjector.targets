@@ -8,7 +8,9 @@
     <AspectInjectorBuildTask Assembly="$(TargetFileName)"
                  References="@(ReferencePath)"
                  OutputPath="$(IntermediateOutputPath)"
-                 ConfigurationName="$(Configuration)" />
+                 ConfigurationName="$(Configuration)" >
+      <!--<Output TaskParameter="RevisedReferences" ItemName="ReferencePath"/>-->
+    </AspectInjectorBuildTask>
 
   </Target>
 

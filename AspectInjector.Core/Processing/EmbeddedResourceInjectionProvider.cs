@@ -12,10 +12,10 @@ using System.Text;
 
 namespace AspectInjector.Core.Processing
 {
-    public class EmbeddedResourceAdviceProvider : IAdviceCacheProvider
+    public class EmbeddedResourceInjectionProvider : IInjectionCacheProvider
     {
         //todo:: better static cache with assembly update check
-        private readonly ConcurrentDictionary<string, object> _adviceCache = new ConcurrentDictionary<string, object>();
+        private readonly ConcurrentDictionary<string, object> _injectionCache = new ConcurrentDictionary<string, object>();
 
         private ProcessingContext _context;
         private string _resourceName;
@@ -26,7 +26,7 @@ namespace AspectInjector.Core.Processing
         public void Init(ProcessingContext context)
         {
             _context = context;
-            _resourceName = $"{context.Services.Prefix}advices";
+            _resourceName = $"{context.Services.Prefix}injections";
             Log = context.Services.Log;
 
             _serializerSettings = new JsonSerializerSettings
@@ -40,23 +40,23 @@ namespace AspectInjector.Core.Processing
             _serializerSettings.Converters.Add(new TypeReferenceConverter(context));
         }
 
-        public IEnumerable<Advice> GetAdvices(TypeReference type)
+        public IEnumerable<Injection> GetInjections(TypeReference type)
         {
-            return ReadAdvicesFromModule(type.Module).Where(a => a.HostType.FullName == type.FullName);
+            return ReadInjectionsFromModule(type.Module).Where(a => a.HostType.FullName == type.FullName);
         }
 
-        public void StoreAdvices(ModuleDefinition toModule, IEnumerable<Advice> advices)
+        public void StoreInjections(ModuleDefinition toModule, IEnumerable<Injection> injections)
         {
-            var existingAdvices = ReadAdvicesFromModule(toModule);
+            var existingInjections = ReadInjectionsFromModule(toModule);
 
-            var newAdviceSet = advices.Union(existingAdvices).ToList();
+            var newInjectionSet = injections.Union(existingInjections).ToList();
 
             var resource = toModule.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == _resourceName);
 
             if (resource != null)
                 toModule.Resources.Remove(resource);
 
-            var json = JsonConvert.SerializeObject(newAdviceSet, _serializerSettings);
+            var json = JsonConvert.SerializeObject(newInjectionSet, _serializerSettings);
 
             resource = new EmbeddedResource(_resourceName, ManifestResourceAttributes.Private, Encoding.UTF8.GetBytes(json));
 
@@ -64,28 +64,28 @@ namespace AspectInjector.Core.Processing
 
             var cacheKey = GetCacheKey(toModule);
             object temp;
-            _adviceCache.TryRemove(cacheKey, out temp);
+            _injectionCache.TryRemove(cacheKey, out temp);
         }
 
-        private IEnumerable<Advice> ReadAdvicesFromModule(ModuleDefinition module)
+        private IEnumerable<Injection> ReadInjectionsFromModule(ModuleDefinition module)
         {
             var cacheKey = GetCacheKey(module);
 
             object result;
 
-            if (!_adviceCache.TryGetValue(cacheKey, out result))
+            if (!_injectionCache.TryGetValue(cacheKey, out result))
             {
                 var resource = module.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == _resourceName);
 
                 if (resource == null)
-                    return new List<Advice>();
+                    return new List<Injection>();
 
                 var json = Encoding.UTF8.GetString(((EmbeddedResource)resource).GetResourceData());
 
-                result = JsonConvert.DeserializeObject<List<Advice>>(json, _serializerSettings);
+                result = JsonConvert.DeserializeObject<List<Injection>>(json, _serializerSettings);
             }
 
-            return (IEnumerable<Advice>)result;
+            return (IEnumerable<Injection>)result;
         }
 
         private string GetCacheKey(ModuleDefinition module)

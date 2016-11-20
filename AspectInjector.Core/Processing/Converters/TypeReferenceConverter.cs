@@ -26,7 +26,7 @@ namespace AspectInjector.Core.Processing.Converters
             var jt = JToken.Load(reader);
             var fqn = FQN.FromString(jt.ToObject<string>());
 
-            return fqn.ToTypeReference(_context.Resolver);
+            return fqn?.ToTypeReference(_context.Resolver);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

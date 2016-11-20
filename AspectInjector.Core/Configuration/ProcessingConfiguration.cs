@@ -15,20 +15,20 @@ namespace AspectInjector.Core.Configuration
 
         public string Prefix { get; private set; }
 
-        public Type AspectExtractor { get; private set; }
+        public Type AspectReader { get; private set; }
 
-        public Type ModuleProcessor { get; private set; }
+        public Type AssemblyProcessor { get; private set; }
 
-        public Type AdviceCacheProvider { get; private set; }
+        public Type InjectionCacheProvider { get; private set; }
 
-        public IReadOnlyCollection<Type> Extractors { get; private set; } = new List<Type>();
+        public IReadOnlyCollection<Type> InjectionReaders { get; private set; } = new List<Type>();
 
         public IReadOnlyCollection<Type> Injectors { get; private set; } = new List<Type>();
 
-        public ProcessingConfiguration RegisterAdviceExtractor<T>()
-            where T : class, IAdviceExtractor
+        public ProcessingConfiguration RegisterInjectionReader<T>()
+            where T : class, IInjectionReader
         {
-            ((List<Type>)Extractors).Add(typeof(T));
+            ((List<Type>)InjectionReaders).Add(typeof(T));
             return this;
         }
 
@@ -39,21 +39,21 @@ namespace AspectInjector.Core.Configuration
             return this;
         }
 
-        public ProcessingConfiguration SetAdviceCacheProvider<T>() where T : class, IAdviceCacheProvider
+        public ProcessingConfiguration SetInjectionCacheProvider<T>() where T : class, IInjectionCacheProvider
         {
-            AdviceCacheProvider = typeof(T);
+            InjectionCacheProvider = typeof(T);
             return this;
         }
 
-        public ProcessingConfiguration SetModuleProcessor<T>() where T : class, IAssemblyProcessor
+        public ProcessingConfiguration SetAssemblyProcessor<T>() where T : class, IAssemblyProcessor
         {
-            ModuleProcessor = typeof(T);
+            AssemblyProcessor = typeof(T);
             return this;
         }
 
-        public ProcessingConfiguration SetAspectExtractor<T>() where T : class, IAspectExtractor
+        public ProcessingConfiguration SetAspectReader<T>() where T : class, IAspectReader
         {
-            AspectExtractor = typeof(T);
+            AspectReader = typeof(T);
             return this;
         }
 
@@ -81,18 +81,18 @@ namespace AspectInjector.Core.Configuration
                 {
                     Log = Log,
                     Prefix = Prefix,
-                    AdviceCacheProvider = (IAdviceCacheProvider)Activator.CreateInstance(AdviceCacheProvider),
-                    AspectExtractor = (IAspectExtractor)Activator.CreateInstance(AspectExtractor),
-                    AssemblyProcessor = (IAssemblyProcessor)Activator.CreateInstance(ModuleProcessor),
-                    AdviceExtractors = Extractors.Select(e => (IAdviceExtractor)Activator.CreateInstance(e)).ToList(),
+                    InjectionCacheProvider = (IInjectionCacheProvider)Activator.CreateInstance(InjectionCacheProvider),
+                    AspectReader = (IAspectReader)Activator.CreateInstance(AspectReader),
+                    AssemblyProcessor = (IAssemblyProcessor)Activator.CreateInstance(AssemblyProcessor),
+                    InjectionReaders = InjectionReaders.Select(e => (IInjectionReader)Activator.CreateInstance(e)).ToList(),
                     Injectors = Injectors.Select(i => (IInjector)Activator.CreateInstance(i)).ToList(),
                 }
             };
 
-            context.Services.AdviceCacheProvider.Init(context);
-            context.Services.AspectExtractor.Init(context);
+            context.Services.InjectionCacheProvider.Init(context);
+            context.Services.AspectReader.Init(context);
             context.Services.AssemblyProcessor.Init(context);
-            context.Services.AdviceExtractors.ToList().ForEach(e => e.Init(context));
+            context.Services.InjectionReaders.ToList().ForEach(e => e.Init(context));
             context.Services.Injectors.ToList().ForEach(i => i.Init(context));
 
             return context;
@@ -103,14 +103,14 @@ namespace AspectInjector.Core.Configuration
             if (Log == null)
                 throw new Exception("Log should be set.");
 
-            if (AdviceCacheProvider == null)
-                throw new Exception("AdviceProvider should be set.");
+            if (InjectionCacheProvider == null)
+                throw new Exception("InjectionCacheProvider should be set.");
 
-            if (AspectExtractor == null)
-                throw new Exception("AspectExtractor should be set.");
+            if (AspectReader == null)
+                throw new Exception("AspectReader should be set.");
 
-            if (ModuleProcessor == null)
-                throw new Exception("AspectExtractor should be set.");
+            if (AssemblyProcessor == null)
+                throw new Exception("AssemblyProcessor should be set.");
 
             if (string.IsNullOrWhiteSpace(Prefix))
                 throw new Exception("Prefix should be set.");
@@ -123,9 +123,9 @@ namespace AspectInjector.Core.Configuration
             Default = new ProcessingConfiguration()
             .SetPrefix("__a$")
             .SetLogger(new ConsoleLogger())
-            .SetAdviceCacheProvider<EmbeddedResourceAdviceProvider>()
-            .SetModuleProcessor<AssemblyProcessor>()
-            .SetAspectExtractor<AspectExtractor>();
+            .SetInjectionCacheProvider<EmbeddedResourceInjectionProvider>()
+            .SetAssemblyProcessor<AssemblyProcessor>()
+            .SetAspectReader<AspectReader>();
         }
     }
 }

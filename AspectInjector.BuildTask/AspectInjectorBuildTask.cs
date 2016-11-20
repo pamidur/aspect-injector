@@ -11,7 +11,7 @@ namespace AspectInjector.BuildTask
 {
     [ComVisible(false)]
     public class AspectInjectorBuildTask : Task
-    {       
+    {
         [Required]
         public string Assembly { get; set; }
 
@@ -27,6 +27,9 @@ namespace AspectInjector.BuildTask
 
         [Required]
         public string[] References { get; set; }
+
+        [Output]
+        public string[] RevisedReferences { get; set; }
 
         public override bool Execute()
         {
@@ -64,6 +67,14 @@ namespace AspectInjector.BuildTask
 
                 var injector = new AssemblyProcessor(Configuration.GetProcessorsTree());
                 injector.Process(assembly);
+
+                var strictResolver = new StrictAssemblyResolver();
+                foreach (var r in References)
+                    strictResolver.RegisterAssembly(r);
+
+                //RevisedReferences = References.Where(r => !r.ToLowerInvariant().Contains("aspectinjector.broker.dll")).ToArray(); //.Except(new[] { strictResolver.Resolve(typeof(AspectAttribute).Assembly.GetName().Name).MainModule.FullyQualifiedName }).ToArray();
+
+                //RevisedReferences = assembly.Modules.SelectMany(m=>m.AssemblyReferences.Select(ar=>ar.FullName)).
 
                 Console.WriteLine("Assembly has been patched");
 
