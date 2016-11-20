@@ -2,7 +2,7 @@
 //using Microsoft.VisualStudio.TestTools.UnitTesting;
 //using AspectInjector.Broker;
 
-//namespace AspectInjector.Tests
+//namespace AspectInjector.Tests.General
 //{
 //    [TestClass]
 //    public class AspectScopeTests

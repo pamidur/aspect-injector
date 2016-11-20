@@ -1,13 +1,13 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AspectInjector.Tests
+namespace AspectInjector.Tests.Advices
 {
     [TestClass]
     public class NestedClassesTests
     {
         [TestMethod]
-        public void Process_Nested_Classes()
+        public void Advices_InjectBeforeMethod_NestedClass()
         {
             Checker.Passed = false;
             var testClass = new NestedClassesTests_Target();

@@ -5,13 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace AspectInjector.Tests
+namespace AspectInjector.Tests.General
 {
     [TestClass]
     public class PETest
     {
         [TestMethod]
-        public void PE_Integrity_Is_Ok()
+        public void General_PEIntegrity_IsOk()
         {
             var sdkFolder = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
 

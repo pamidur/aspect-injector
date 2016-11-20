@@ -1,23 +1,22 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.ComponentModel;
 
-namespace AspectInjector.Tests.InterfaceInjection
+namespace AspectInjector.Tests.Interfaces
 {
     [TestClass]
-    public class BasicTests
+    public class GeneralTests
     {
-        private IInterfaceInjectionTests _testClass;
+        private IGeneralTests _testClass;
 
         [TestInitialize]
         public void SetUp()
         {
-            _testClass = (IInterfaceInjectionTests)new InterfaceInjectionTests_Target();
+            _testClass = (IGeneralTests)new GeneralTests_Target();
         }
 
         [TestMethod]
-        public void Inject_AspectReference_Into_SecondConstructor()
+        public void Interfaces_InjectAspectReference_SecondConstructor()
         {
             object ref1 = new object();
             object out1;
@@ -25,13 +24,13 @@ namespace AspectInjector.Tests.InterfaceInjection
             int out2;
 
             Checker.Passed = false;
-            var result = ((IInterfaceInjectionTests)new InterfaceInjectionTests_Target(1)).TestMethod("ok", 1, ref ref1, out out1, ref ref2, out out2);
+            var result = ((IGeneralTests)new GeneralTests_Target(1)).TestMethod("ok", 1, ref ref1, out out1, ref ref2, out out2);
             Assert.AreEqual("ok", result);
             Assert.IsTrue(Checker.Passed);
         }
 
         [TestMethod]
-        public void Inject_Method_Proxy()
+        public void Interfaces_InjectMethodProxy()
         {
             object ref1 = new object();
             object out1;
@@ -45,7 +44,7 @@ namespace AspectInjector.Tests.InterfaceInjection
         }
 
         [TestMethod]
-        public void Inject_Setter_Proxy()
+        public void Interfaces_InjectSetterProxy()
         {
             Checker.Passed = false;
             _testClass.TestProperty = 4;
@@ -53,7 +52,7 @@ namespace AspectInjector.Tests.InterfaceInjection
         }
 
         [TestMethod]
-        public void Inject_Getter_Proxy()
+        public void Interfaces_InjectGetterProxy()
         {
             Checker.Passed = false;
             var a = _testClass.TestProperty;
@@ -61,7 +60,7 @@ namespace AspectInjector.Tests.InterfaceInjection
         }
 
         [TestMethod]
-        public void Inject_EventAdd_Proxy()
+        public void Interfaces_InjectEventAddProxy()
         {
             Checker.Passed = false;
             _testClass.TestEvent += (s, e) => { };
@@ -69,27 +68,27 @@ namespace AspectInjector.Tests.InterfaceInjection
         }
 
         [TestMethod]
-        public void Inject_EventRemove_Proxy()
+        public void Interfaces_InjectEventRemoveProxy()
         {
             Checker.Passed = false;
             _testClass.TestEvent -= (s, e) => { };
             Assert.IsTrue(Checker.Passed);
         }
 
-        [Aspect(typeof(InterfaceInjectionTests_Aspect))]
+        [Aspect(typeof(GeneralTests_Aspect))]
         //[Aspect(typeof(INotifyPropertyChanged_Aspect))]
-        internal class InterfaceInjectionTests_Target
+        internal class GeneralTests_Target
         {
-            public InterfaceInjectionTests_Target()
+            public GeneralTests_Target()
             {
             }
 
-            public InterfaceInjectionTests_Target(int a)
+            public GeneralTests_Target(int a)
             {
             }
         }
 
-        internal interface IInterfaceInjectionTests
+        internal interface IGeneralTests
         {
             string TestMethod(string data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue);
 
@@ -98,16 +97,16 @@ namespace AspectInjector.Tests.InterfaceInjection
             int TestProperty { get; set; }
         }
 
-        [AdviceInterfaceProxy(typeof(INotifyPropertyChanged))]
+        /*[AdviceInterfaceProxy(typeof(INotifyPropertyChanged))]
         internal class INotifyPropertyChanged_Aspect : INotifyPropertyChanged
         {
             public event PropertyChangedEventHandler PropertyChanged;
-        }
+        }*/
 
-        [AdviceInterfaceProxy(typeof(IInterfaceInjectionTests))]
-        internal class InterfaceInjectionTests_Aspect : IInterfaceInjectionTests
+        [AdviceInterfaceProxy(typeof(IGeneralTests))]
+        internal class GeneralTests_Aspect : IGeneralTests
         {
-            string IInterfaceInjectionTests.TestMethod(string data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue)
+            string IGeneralTests.TestMethod(string data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue)
             {
                 Checker.Passed = true;
                 testOut = new object();
@@ -115,7 +114,7 @@ namespace AspectInjector.Tests.InterfaceInjection
                 return data;
             }
 
-            public event System.EventHandler<System.EventArgs> TestEvent
+            public event EventHandler<System.EventArgs> TestEvent
             {
                 add { Checker.Passed = true; }
                 remove { Checker.Passed = true; }

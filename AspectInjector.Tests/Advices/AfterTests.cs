@@ -2,23 +2,23 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AspectInjector.Tests
+namespace AspectInjector.Tests.Advices
 {
     [TestClass]
-    public class AdviceInjectionAfterTests
-    {        
-        private AdviceInjectionAfterTests_Target _afterTestClass;
+    public class AfterTests
+    {
+        private AfterTests_AfterMethodTarget _afterTestClass;
 
         [TestInitialize]
         public void SetUp()
         {
-            _afterTestClass = new AdviceInjectionAfterTests_Target();
+            _afterTestClass = new AfterTests_AfterMethodTarget();
         }        
 
         //after
 
         [TestMethod]
-        public void Inject_Advice_After_Method()
+        public void Advices_InjectAfterMethod()
         {
             Checker.Passed = false;
 
@@ -27,7 +27,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void Inject_Advice_After_Setter()
+        public void Advices_InjectAfterSetter()
         {
             Checker.Passed = false;
 
@@ -36,7 +36,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void Inject_Advice_After_Custom_Setter()
+        public void Advices_InjectAfterCustomSetter()
         {
             Checker.Passed = false;
 
@@ -45,7 +45,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void Inject_Advice_After_Custom_Setter2()
+        public void Advices_InjectAfterCustomSetter2()
         {
             Checker.Passed = false;
 
@@ -54,7 +54,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void Inject_Advice_After_Getter()
+        public void Advices_InjectAfterGetter()
         {
             Checker.Passed = false;
 
@@ -63,7 +63,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void Inject_Advice_After_AddEvent()
+        public void Advices_InjectAfterAddEvent()
         {
             Checker.Passed = false;
 
@@ -72,7 +72,7 @@ namespace AspectInjector.Tests
         }
 
         [TestMethod]
-        public void Inject_Advice_After_RemoveEvent()
+        public void Advices_InjectAfterRemoveEvent()
         {
             Checker.Passed = false;
 
@@ -83,41 +83,54 @@ namespace AspectInjector.Tests
         //constructors          
 
         [TestMethod]
-        public void Inject_Advice_After_Constructor()
+        public void Advices_InjectAfterConstructor()
         {
             Checker.Passed = false;
 
-            var a = new AdviceInjectionAfterTests_AfterConstructorTarget();
+            var a = new AfterTests_AfterConstructorTarget();
             Assert.IsTrue(Checker.Passed);
         }
 
         [TestMethod]
-        public void Inject_Advice_After_SecondConstructor()
+        public void Advices_InjectAfterSecondConstructor()
         {
             Checker.Passed = false;
 
-            var a = new AdviceInjectionAfterTests_AfterConstructorTarget("");
+            var a = new AfterTests_AfterConstructorTarget("");
+            Assert.IsTrue(Checker.Passed);
+        }
+
+        [TestMethod]
+        public void Advices_InjectAfterSetter_AccessOldValue()
+        {
+            Checker.Passed = false;
+
+            var a = new AfterTests_SetterValueTarget();
+            a.Data = 2;
+            AfterTests_SetterValueTarget.GlobalData = 2;
+            a.Data = 4;
+
             Assert.IsTrue(Checker.Passed);
         }
     }    
         
     //test classes
 
-    [Aspect(typeof(AdviceInjectionAfterTests_AfterConstructorAspect))]
-    internal class AdviceInjectionAfterTests_AfterConstructorTarget
+    [Aspect(typeof(AfterTests_AfterConstructorAspect))]
+    internal class AfterTests_AfterConstructorTarget
     {
-        public AdviceInjectionAfterTests_AfterConstructorTarget()
+        public AfterTests_AfterConstructorTarget()
         {
         }
 
-        public AdviceInjectionAfterTests_AfterConstructorTarget(string a)
+        public AfterTests_AfterConstructorTarget(string a)
         {
         }
     }
     
 
-    [Aspect(typeof(AdviceInjectionAfterTests_AfterMethodAspect))]
-    internal class AdviceInjectionAfterTests_Target
+    [Aspect(typeof(AfterTests_AfterMethodAspect))]
+    internal class AfterTests_AfterMethodTarget
     {
         public void TestMethod(string data)
         {
@@ -141,7 +154,7 @@ namespace AspectInjector.Tests
 
     //aspects
 
-    internal class AdviceInjectionAfterTests_AfterMethodAspect
+    internal class AfterTests_AfterMethodAspect
     {
         //Property
         [Advice(InjectionPoints.After, InjectionTargets.Setter)]
@@ -162,9 +175,26 @@ namespace AspectInjector.Tests
         public void AfterMethod() { Checker.Passed = true; }
     }       
 
-    internal class AdviceInjectionAfterTests_AfterConstructorAspect
+    internal class AfterTests_AfterConstructorAspect
     {
         [Advice(InjectionPoints.After, InjectionTargets.Constructor)]
         public void AfterConstructor() { Checker.Passed = true; }
-    }    
+    }
+
+    internal class AfterTests_SetterValueTarget
+    {
+        public static int GlobalData = 0;
+
+        [Aspect(typeof(AfterTests_SetterValueAspect))]
+        public int Data { get; set; }
+    }
+
+    internal class AfterTests_SetterValueAspect
+    {
+        [Advice(InjectionPoints.After, InjectionTargets.Setter)]
+        public void AfterMethod([AdviceArgument(AdviceArgumentSource.ReturnValue)] object old)
+        {
+            Checker.Passed = (int)old == AfterTests_SetterValueTarget.GlobalData;
+        }
+    }
 }

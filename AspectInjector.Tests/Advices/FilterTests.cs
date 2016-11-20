@@ -1,37 +1,32 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AspectInjector.Tests.FiltersTests
+namespace AspectInjector.Tests.Advices
 {
     [TestClass]
-    public class GeneralTests
+    public class FilterTests
     {
         [TestMethod]
-        public void Same_Aspect_Called_Once_On_Multiple_Filters_Match()
+        public void Advices_InjectAfterMethod_NameFilter()
         {
             Checker.Passed = false;
 
-            var a = new TestClass();
+            var a = new FilterTests_Target();
             a.Do123();
 
             Assert.IsTrue(Checker.Passed);
         }
 
-        [Aspect(typeof(TestAspectImplementation))]
-        public class TestClass
+        [Aspect(typeof(FilterTests_Aspect))]
+        public class FilterTests_Target
         {
-            [Aspect(typeof(TestAspectImplementation), NameFilter = "Do")]
+            [Aspect(typeof(FilterTests_Aspect), NameFilter = "Do")]
             public void Do123()
             {
             }
         }
 
-        public class TestAspectImplementation
+        public class FilterTests_Aspect
         {
             public int Counter = 0;
 

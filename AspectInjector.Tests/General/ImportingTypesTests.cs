@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.ComponentModel;
 
-namespace AspectInjector.Tests
+namespace AspectInjector.Tests.General
 {
     [TestClass]
     public class ImportingTypesTests

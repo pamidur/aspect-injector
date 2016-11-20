@@ -2,15 +2,15 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AspectInjector.Tests
+namespace AspectInjector.Tests.Advices
 {
     [TestClass]
-    public class VirtualMembersTests
+    public class VirtualTests
     {
         [TestMethod]
-        public void Inject_Advice_Around_VirtualAndOverride()
+        public void Advices_InjectAroundVirtualOverrideMethods()
         {
-            VirtualMembersTests_Base t = new VirtualMembersTests_Inherited();
+            VirtualTests_Base t = new VirtualTests_Inherited();
             try
             {
                 t.Test();
@@ -23,16 +23,16 @@ namespace AspectInjector.Tests
     }
 
 
-    [Aspect(typeof(VirtualMembersTests_Aspect))]
-    internal class VirtualMembersTests_Base
+    [Aspect(typeof(VirtualTests_Aspect))]
+    internal class VirtualTests_Base
     {
         public virtual void Test()
         {
         }
     }
 
-    [Aspect(typeof(VirtualMembersTests_Aspect))]
-    internal class VirtualMembersTests_Inherited : VirtualMembersTests_Base
+    [Aspect(typeof(VirtualTests_Aspect))]
+    internal class VirtualTests_Inherited : VirtualTests_Base
     {
         public override void Test()
         {
@@ -40,7 +40,7 @@ namespace AspectInjector.Tests
         }
     }
 
-    internal class VirtualMembersTests_Aspect
+    internal class VirtualTests_Aspect
     {
         private int counter = 0;
 
