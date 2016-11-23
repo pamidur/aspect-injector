@@ -114,7 +114,7 @@ namespace AspectInjector.Core.Mixin
 
                         method.OnEntry(e =>
                         {
-                            e.Return(ret => ret.Call(FluentMethod method, args =>)) CallMethod LoadAspect(aspect)
+                            e.Return(ret => ret.Call(method, from => from.Aspect(aspect), args =>));
                         });
                     });
                 }
