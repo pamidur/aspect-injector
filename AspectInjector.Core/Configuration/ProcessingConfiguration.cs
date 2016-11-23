@@ -121,7 +121,7 @@ namespace AspectInjector.Core.Configuration
         static ProcessingConfiguration()
         {
             Default = new ProcessingConfiguration()
-            .SetPrefix("__a$")
+            .SetPrefix("__a$_")
             .SetLogger(new ConsoleLogger())
             .SetInjectionCacheProvider<EmbeddedResourceInjectionProvider>()
             .SetAssemblyProcessor<AssemblyProcessor>()

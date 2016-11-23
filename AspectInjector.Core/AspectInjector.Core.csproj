@@ -68,9 +68,11 @@
     <Compile Include="Contexts\ServicesContext.cs" />
     <Compile Include="Configuration\ProcessingConfiguration.cs" />
     <Compile Include="Contexts\ProcessingContext.cs" />
+    <Compile Include="Fluent\FluentContext.cs" />
     <Compile Include="Fluent\FluentInterfaceConstructor.cs" />
-    <Compile Include="Fluent\FluentMethodConstructor.cs" />
-    <Compile Include="Fluent\FluentTypeConstructor.cs" />
+    <Compile Include="Fluent\FluentMethod.cs" />
+    <Compile Include="Fluent\FluentType.cs" />
+    <Compile Include="Fluent\Models\ExtendedTypeSystem.cs" />
     <Compile Include="Fluent\PointCut.cs" />
     <Compile Include="Fluent\VariableContructor.cs" />
     <Compile Include="Models\Injection.cs" />

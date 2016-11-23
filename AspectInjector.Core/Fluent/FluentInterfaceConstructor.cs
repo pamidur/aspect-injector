@@ -4,7 +4,7 @@ namespace AspectInjector.Core.Fluent
 {
     public class FluentInterfaceImplementation
     {
-        public FluentInterfaceImplementation ImplementMethod(Action<FluentMethodConstructor> action)
+        public FluentInterfaceImplementation ImplementMethod(Action<FluentMethod> action)
         {
             return this;
         }

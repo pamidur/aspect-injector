@@ -6,7 +6,16 @@ using System.Threading.Tasks;
 
 namespace AspectInjector.Core.Fluent
 {
-    class PointCut
+    public class PointCut
     {
+        public void Return(Action<PointCut> arg)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Call(FluentMethod method, Action<PointCut> from = null, Action<PointCut> args = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

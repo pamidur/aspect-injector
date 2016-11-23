@@ -6,19 +6,23 @@ using System.Linq.Expressions;
 
 namespace AspectInjector.Core.Fluent
 {
-    public class FluentTypeConstructor
+    public class FluentType
     {
         private readonly TypeDefinition _td;
 
-        public FluentTypeConstructor(ProcessingContext context, TypeDefinition td)
+        public FluentType(FluentContext context, TypeDefinition td)
         {
         }
 
         private List<FluentInterfaceImplementation> _ifaceImplementations = new List<FluentInterfaceImplementation>();
 
-        public FluentTypeConstructor ImplementInterface(Expression<Action<FluentInterfaceImplementation>> action)
+        public FluentType ImplementInterface(Expression<Action<FluentInterfaceImplementation>> action)
         {
             return this;
+        }
+
+        public FluentType CreateMethod(string name, Action<FluentMethod> action)
+        {
         }
 
         /// <summary>
