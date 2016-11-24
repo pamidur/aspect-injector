@@ -1,7 +1,11 @@
 ﻿using AspectInjector.Core.Defaults;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
@@ -11,145 +15,157 @@ namespace AspectInjector.Core.Mixin
         {
             var target = aspect.Target;
 
-            new Fluent.FluentTypeConstructor(aspect.Target)
-                .ImplementInterface(
-                    ic =>
-                    {
-                        ic.ImplementMethod(
-                            mc => mc.Equals()
-                            );
-                    }
-                );
-
-            if (!classDefinition.TypeDefinition.ImplementsInterface(interfaceDefinition))
+            if (!target.Implements(mixin.InterfaceType))
             {
-                var ifaces = interfaceDefinition.GetInterfacesTree();
+                var ifaces = GetInterfacesTree(mixin.InterfaceType);
 
                 foreach (var iface in ifaces)
-                    classDefinition.TypeDefinition.Interfaces.Add(classDefinition.TypeDefinition.Module.Import(iface));
+                    target.Interfaces.Add(target.Module.Import(iface));
             }
-            else if (!classDefinition.TypeDefinition.Interfaces.Any(i => i.IsTypeOf(interfaceDefinition)))
+            else if (!target.Interfaces.Any(i => i.IsTypeOf(mixin.InterfaceType)))
             {
                 //In order to behave the same as csc
-                classDefinition.TypeDefinition.Interfaces.Add(classDefinition.TypeDefinition.Module.Import(interfaceDefinition));
+                target.Interfaces.Add(target.Module.Import(mixin.InterfaceType));
             }
 
-            context.Methods = interfaceDefinition.GetInterfaceTreeMembers(td => td.Methods)
+            var methods = GetInterfaceTreeMembers(mixin.InterfaceType, td => td.Methods)
                 .Where(m => !m.IsAddOn && !m.IsRemoveOn && !m.IsSetter && !m.IsGetter)
                 .ToArray();
 
-            context.Properties = interfaceDefinition.GetInterfaceTreeMembers(td => td.Properties)
+            var props = GetInterfaceTreeMembers(mixin.InterfaceType, td => td.Properties)
                 .ToArray();
 
-            context.Events = interfaceDefinition.GetInterfaceTreeMembers(td => td.Events)
+            var events = GetInterfaceTreeMembers(mixin.InterfaceType, td => td.Events)
                 .ToArray();
 
-            foreach (var method in context.Methods)
-                GetOrCreateMethodProxy(context, method);
+            foreach (var method in methods)
+                GetOrCreateMethodProxy(method, aspect);
 
-            foreach (var @event in context.Events)
-                GetOrCreateEventProxy(context, @event);
+            foreach (var @event in events)
+                GetOrCreateEventProxy(@event, aspect);
 
-            foreach (var property in context.Properties)
-                GetOrCreatePropertyProxy(context, property);
+            foreach (var property in props)
+                GetOrCreatePropertyProxy(property, aspect);
         }
 
-        protected EventDefinition GetOrCreateEventProxy(InterfaceInjectionContext context, EventDefinition originalEvent)
+        protected MethodDefinition GetOrCreateMethodProxy(MethodDefinition method, Aspect<TypeDefinition> aspect)
+        {
+            var targetType = aspect.Target;
+            var methodName = GenerateMemberProxyName(method);
+
+            var proxy = targetType.Methods.FirstOrDefault(m => m.Name == methodName && SignatureMatches(m, method));
+            if (proxy == null)
+            {
+                proxy = new MethodDefinition(methodName,
+                    MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
+                    targetType.Module.Import(method.ReturnType));
+
+                targetType.Methods.Add(proxy);
+
+                if (method.IsSpecialName)
+                    proxy.IsSpecialName = true;
+
+                proxy.Overrides.Add(targetType.Module.Import(method));
+
+                foreach (var parameter in method.Parameters)
+                    proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, proxy.Module.Import(parameter.ParameterType)));
+
+                //TODO:: Use method from SnippetsProcessor
+                foreach (var genericParameter in method.GenericParameters)
+                    proxy.GenericParameters.Add(genericParameter);
+
+                proxy.Body
+                    .OnEntry(e => e
+                    .Return(ret => ret.Field(aspect)
+                    .Call(method, args => proxy.Parameters.ToList().ForEach(p => args.Parameter(p)))));
+            }
+
+            return proxy;
+        }
+
+        protected EventDefinition GetOrCreateEventProxy(EventDefinition originalEvent, Aspect<TypeDefinition> aspect)
         {
             var eventName = GenerateMemberProxyName(originalEvent);
 
-            var ed = context.AspectContext.TargetTypeContext.TypeDefinition.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.IsTypeOf(originalEvent.EventType));
+            var ed = aspect.Target.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.IsTypeOf(originalEvent.EventType));
             if (ed == null)
             {
-                var newAddMethod = originalEvent.AddMethod == null ? null : GetOrCreateMethodProxy(context, originalEvent.AddMethod);
-                var newRemoveMethod = originalEvent.AddMethod == null ? null : GetOrCreateMethodProxy(context, originalEvent.RemoveMethod);
+                var newAddMethod = originalEvent.AddMethod == null ? null : GetOrCreateMethodProxy(originalEvent.AddMethod, aspect);
+                var newRemoveMethod = originalEvent.AddMethod == null ? null : GetOrCreateMethodProxy(originalEvent.RemoveMethod, aspect);
 
-                ed = new EventDefinition(eventName, EventAttributes.None, context.AspectContext.TargetTypeContext.TypeDefinition.Module.Import(originalEvent.EventType));
+                ed = new EventDefinition(eventName, EventAttributes.None, aspect.Target.Module.Import(originalEvent.EventType));
                 ed.AddMethod = newAddMethod;
                 ed.RemoveMethod = newRemoveMethod;
 
-                context.AspectContext.TargetTypeContext.TypeDefinition.Events.Add(ed);
+                aspect.Target.Events.Add(ed);
             }
 
             return ed;
         }
 
-        protected PropertyDefinition GetOrCreatePropertyProxy(InterfaceInjectionContext context, PropertyDefinition originalProperty)
+        protected PropertyDefinition GetOrCreatePropertyProxy(PropertyDefinition originalProperty, Aspect<TypeDefinition> aspect)
         {
             var propertyName = GenerateMemberProxyName(originalProperty);
 
-            var pd = context.AspectContext.TargetTypeContext.TypeDefinition.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.IsTypeOf(originalProperty.PropertyType));
+            var pd = aspect.Target.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.IsTypeOf(originalProperty.PropertyType));
             if (pd == null)
             {
-                var newGetMethod = originalProperty.GetMethod == null ? null : GetOrCreateMethodProxy(context, originalProperty.GetMethod);
-                var newSetMethod = originalProperty.SetMethod == null ? null : GetOrCreateMethodProxy(context, originalProperty.SetMethod);
+                var newGetMethod = originalProperty.GetMethod == null ? null : GetOrCreateMethodProxy(originalProperty.GetMethod, aspect);
+                var newSetMethod = originalProperty.SetMethod == null ? null : GetOrCreateMethodProxy(originalProperty.SetMethod, aspect);
 
-                pd = new PropertyDefinition(propertyName, PropertyAttributes.None, context.AspectContext.TargetTypeContext.TypeDefinition.Module.Import(originalProperty.PropertyType));
+                pd = new PropertyDefinition(propertyName, PropertyAttributes.None, aspect.Target.Module.Import(originalProperty.PropertyType));
                 pd.GetMethod = newGetMethod;
                 pd.SetMethod = newSetMethod;
 
-                context.AspectContext.TargetTypeContext.TypeDefinition.Properties.Add(pd);
+                aspect.Target.Properties.Add(pd);
             }
 
             return pd;
         }
 
-        protected MethodDefinition GetOrCreateMethodProxy(InterfaceInjectionContext context, MethodDefinition interfaceMethodDefinition)
-        {
-            var targetType = context.AspectContext.TargetTypeContext.TypeDefinition;
-            var methodName = GenerateMemberProxyName(interfaceMethodDefinition);
-
-            var md = targetType.Methods.FirstOrDefault(m => m.Name == methodName && m.SignatureMatches(interfaceMethodDefinition));
-            if (md == null)
-            {
-                {
-                    FluentType type = null;
-                    Aspect aspect = null;
-
-                    type.CreateMethod(methodName, method =>
-                    {
-                        method.Attributes = MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
-                        method.ReturnType = interfaceMethodDefinition.ReturnType;
-                        method.IsSpecialName = interfaceMethodDefinition.IsSpecialName;
-
-                        method.OnEntry(e =>
-                        {
-                            e.Return(ret => ret.Call(method, from => from.Aspect(aspect), args =>));
-                        });
-                    });
-                }
-
-                var ctx = context.AspectContext.TargetTypeContext.CreateMethod(methodName,
-                    MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
-                    targetType.Module.Import(interfaceMethodDefinition.ReturnType));
-
-                md = ctx.TargetMethod;
-
-                if (interfaceMethodDefinition.IsSpecialName)
-                    md.IsSpecialName = true;
-
-                md.Overrides.Add(targetType.Module.Import(interfaceMethodDefinition));
-
-                foreach (var parameter in interfaceMethodDefinition.Parameters)
-                    md.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, md.Module.Import(parameter.ParameterType)));
-
-                //TODO:: Use method from SnippetsProcessor
-                foreach (var genericParameter in interfaceMethodDefinition.GenericParameters)
-                    md.GenericParameters.Add(genericParameter);
-
-                var aspectField = context.AspectContext.TargetTypeContext.GetOrCreateAspectReference(context.AspectContext);
-
-                if (!aspectField.Resolve().IsStatic) ctx.EntryPoint.LoadSelfOntoStack();
-                ctx.EntryPoint.LoadField(aspectField);
-                ctx.EntryPoint.InjectMethodCall(interfaceMethodDefinition, md.Parameters.ToArray());
-            }
-
-            return md;
-        }
-
         private static string GenerateMemberProxyName(IMemberDefinition member)
         {
             return member.DeclaringType.FullName + "." + member.Name;
+        }
+
+        private static IEnumerable<TypeReference> GetInterfacesTree(TypeReference typeReference)
+        {
+            var definition = typeReference.Resolve();
+            if (!definition.IsInterface)
+                throw new NotSupportedException(typeReference.Name + " should be an interface");
+
+            return new[] { definition }.Concat(definition.Interfaces);
+        }
+
+        private static IEnumerable<T> GetInterfaceTreeMembers<T>(TypeReference typeReference, Func<TypeDefinition, IEnumerable<T>> selector)
+        {
+            var definition = typeReference.Resolve();
+            if (!definition.IsInterface)
+                throw new NotSupportedException(typeReference.Name + " should be an interface");
+
+            var members = selector(definition);
+
+            if (definition.Interfaces.Count > 0)
+                members = members.Concat(definition.Interfaces.Select(i => selector(i.Resolve())).Aggregate((a, b) => a.Concat(b)));
+
+            return members;
+        }
+
+        public static bool SignatureMatches(MethodReference methodReference1, MethodReference methodReference2)
+        {
+            if (methodReference1.IsGenericInstance && methodReference2.HasGenericParameters)
+            {
+                //todo:: check generic args and params
+            }
+
+            if (!methodReference1.MethodReturnType.ReturnType.IsTypeOf(methodReference2.MethodReturnType.ReturnType))
+                return false;
+
+            for (int i = 0; i < methodReference1.Parameters.Count; i++)
+                if (!methodReference1.Parameters[i].ParameterType.IsTypeOf(methodReference2.Parameters[i].ParameterType))
+                    return false;
+
+            return true;
         }
     }
 }

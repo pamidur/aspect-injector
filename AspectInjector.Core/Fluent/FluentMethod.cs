@@ -3,6 +3,7 @@ using AspectInjector.Core.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.Core.Fluent
@@ -26,15 +27,15 @@ namespace AspectInjector.Core.Fluent
             return this;
         }
 
-        public FluentMethod OnEntry(Action<PointCut> action)
+        public FluentMethod OnEntry(Action<PointCut, IEnumerable<FluentParameter>> action)
         {
         }
 
-        public FluentMethod OnExit(Action<PointCut> action)
+        public FluentMethod OnExit(Action<PointCut, IEnumerable<FluentParameter>> action)
         {
         }
 
-        public FluentMethod OnException(Action<PointCut> action)
+        public FluentMethod OnException(Action<PointCut, IEnumerable<FluentParameter>> action)
         {
         }
 
@@ -79,6 +80,16 @@ namespace AspectInjector.Core.Fluent
                 .Methods.First(m => m.IsConstructor && !m.IsStatic);
             _md.Module.Import
             member.CustomAttributes.Add(new CustomAttribute(_ctx.TypeSystem.Import(constructor)));
+        }
+
+        public bool SignatureMatches(FluentMethod interfaceMethod)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Overrides(FluentMethod interfaceMethod)
+        {
+            throw new NotImplementedException();
         }
     }
 }

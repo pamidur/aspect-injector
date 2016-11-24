@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AspectInjector.Core.Fluent
 {
-    public class FluentContext
+    internal class FluentContext
     {
         public FluentContext(ModuleDefinition md)
         {
@@ -16,5 +16,25 @@ namespace AspectInjector.Core.Fluent
         }
 
         public ExtendedTypeSystem TypeSystem { get; }
+
+        public FluentMethod GetFluentMember(MethodDefinition md)
+        {
+        }
+
+        public FluentField GetFluentMember(FieldDefinition md)
+        {
+        }
+
+        public FluentProperty GetFluentMember(PropertyDefinition md)
+        {
+        }
+
+        public FluentEvent GetFluentMember(EventDefinition md)
+        {
+        }
+
+        public FluentType GetFluentMember(TypeDefinition md)
+        {
+        }
     }
 }

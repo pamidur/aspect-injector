@@ -1,11 +1,12 @@
 ﻿using AspectInjector.Core.Models;
+using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AspectInjector.Core.Fluent
+namespace AspectInjector.Core.Models
 {
     public class PointCut
     {
@@ -14,21 +15,24 @@ namespace AspectInjector.Core.Fluent
             throw new NotImplementedException();
         }
 
-        public void Call(FluentMethod method, Action<PointCut> from = null, Action<PointCut> args = null)
+        public PointCut Call(MethodReference method, Action<PointCut> args = null)
         {
             throw new NotImplementedException();
         }
 
-        public void This()
-        {
-        }
+        public PointCut This { get; }
 
-        public void Aspect(Aspect aspect)
+        public PointCut Field(Aspect aspect)
         {
             throw new NotImplementedException();
         }
 
-        public void Field(Aspect aspect)
+        public PointCut Field(FieldReference field)
+        {
+            throw new NotImplementedException();
+        }
+
+        public PointCut Parameter(ParameterReference par)
         {
             throw new NotImplementedException();
         }

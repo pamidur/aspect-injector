@@ -8,21 +8,27 @@ namespace AspectInjector.Core.Fluent
 {
     public class FluentType
     {
-        private readonly TypeDefinition _td;
+        internal TypeDefinition Definition { get; private set; }
 
-        public FluentType(FluentContext context, TypeDefinition td)
+        internal FluentType(FluentContext ctx, TypeDefinition td)
         {
+            _ctx = ctx;
+            Definition = td;
         }
 
         private List<FluentInterfaceImplementation> _ifaceImplementations = new List<FluentInterfaceImplementation>();
+        private readonly FluentContext _ctx;
+
+        public IEnumerable<FluentMethod> Methods { get; set; }
 
         public FluentType ImplementInterface(Expression<Action<FluentInterfaceImplementation>> action)
         {
             return this;
         }
 
-        public FluentType CreateMethod(string name, Action<FluentMethod> action)
+        public T Create<T>(Func<FluentMemberConstructor, T> action)
         {
+            return action(new FluentMemberConstructor(_ctx, this));
         }
 
         /// <summary>
