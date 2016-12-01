@@ -10,7 +10,7 @@ namespace AspectInjector.Core.Mixin
 
         protected override bool IsApplicableForAspect(Aspect aspect)
         {
-            return aspect.TargetType == AspectTargetType.TypeDefinition;
+            return aspect.TargetKind == AspectTargetKind.TypeDefinition;
         }
 
         protected override bool IsEqualTo(Injection injection)

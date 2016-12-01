@@ -2,6 +2,7 @@
 using AspectInjector.Core.Configuration;
 using AspectInjector.Core.Mixin;
 using Mono.Cecil;
+using System;
 
 namespace AspectInjector.CommandLine
 {
@@ -21,6 +22,8 @@ namespace AspectInjector.CommandLine
             resolver.AddSearchDirectory(@"D:\tests\");
 
             processor.Process(@"D:\tests\AspectInjector.Tests.dll", resolver);
+
+            Console.ReadKey();
         }
     }
 }

@@ -74,10 +74,11 @@ namespace AspectInjector.Core.Mixin
                 foreach (var genericParameter in method.GenericParameters)
                     proxy.GenericParameters.Add(genericParameter);
 
-                proxy.Body
-                    .OnEntry(e => e
-                    .Return(ret => ret.Field(aspect)
-                    .Call(method, args => proxy.Parameters.ToList().ForEach(p => args.Parameter(p)))));
+                var me = Context.Editors.GetEditor(proxy);
+
+                me.Instead(e => e
+                .Return(ret => ret.Load(aspect)
+                .Call(method, args => proxy.Parameters.ToList().ForEach(p => args.Load(p)))));
             }
 
             return proxy;

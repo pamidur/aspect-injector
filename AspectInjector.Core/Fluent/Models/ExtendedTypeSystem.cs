@@ -99,6 +99,11 @@ namespace AspectInjector.Core.Fluent.Models
             };
         }
 
+        public TypeReference Import(TypeReference returnType)
+        {
+            return _module.Import(returnType);
+        }
+
         #endregion Public Constructors
 
         #region Public Properties

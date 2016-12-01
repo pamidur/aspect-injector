@@ -65,24 +65,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\MemberReferenceExtensions.cs" />
+    <Compile Include="Fluent\AspectFactory.cs" />
+    <Compile Include="Fluent\EditorContext.cs" />
+    <Compile Include="Fluent\EditorFactory.cs" />
     <Compile Include="Contexts\ServicesContext.cs" />
     <Compile Include="Configuration\ProcessingConfiguration.cs" />
     <Compile Include="Contexts\ProcessingContext.cs" />
     <Compile Include="Extensions\ILProcessorExtension.cs" />
-    <Compile Include="Extensions\MethodBodyExtensions.cs" />
-    <Compile Include="Fluent\Constructors\FluentMethodParameterContructor.cs" />
-    <Compile Include="Fluent\FluentContext.cs" />
-    <Compile Include="Fluent\FluentEvent.cs" />
-    <Compile Include="Fluent\FluentField.cs" />
-    <Compile Include="Fluent\FluentInterfaceConstructor.cs" />
     <Compile Include="Fluent\Constructors\FluentMemberConstructor.cs" />
-    <Compile Include="Fluent\FluentMethod.cs" />
-    <Compile Include="Fluent\FluentParameter.cs" />
-    <Compile Include="Fluent\FluentProperty.cs" />
-    <Compile Include="Fluent\FluentType.cs" />
+    <Compile Include="Fluent\MethodEditor.cs" />
+    <Compile Include="Fluent\TypeEditor.cs" />
     <Compile Include="Fluent\Models\ExtendedTypeSystem.cs" />
-    <Compile Include="Models\PointCut.cs" />
-    <Compile Include="Fluent\VariableContructor.cs" />
+    <Compile Include="Fluent\PointCut.cs" />
     <Compile Include="Models\Injection.cs" />
     <Compile Include="Contracts\IInjectionReader.cs" />
     <Compile Include="Contracts\IAspectReader.cs" />
@@ -102,7 +97,6 @@
     <Compile Include="Processing\EmbeddedResourceInjectionProvider.cs" />
     <Compile Include="Processing\AssemblyProcessor.cs" />
     <Compile Include="Extensions\CustomAttributeExtensions.cs" />
-    <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Extensions\TypeReferenceExtensions.cs" />
     <Compile Include="Models\Aspect.cs" />
     <Compile Include="Models\FQN.cs" />

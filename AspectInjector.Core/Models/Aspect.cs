@@ -11,7 +11,7 @@ namespace AspectInjector.Core.Models
     {
         public Aspect()
         {
-            TargetType = (AspectTargetType)Enum.Parse(typeof(AspectTargetType), typeof(TTarget).Name);
+            TargetKind = (AspectTargetKind)Enum.Parse(typeof(AspectTargetKind), typeof(TTarget).Name);
         }
 
         public TTarget Target { get; set; }
@@ -36,10 +36,13 @@ namespace AspectInjector.Core.Models
 
     public abstract class Aspect
     {
-        public AspectTargetType TargetType { get; protected set; }
+        public AspectTargetKind TargetKind { get; protected set; }
+        public MethodDefinition InjectionHostFactory { get; internal set; }
 
-        public TypeReference InjectionHost { get; set; }
+        public AspectScope Scope { get; internal set; }
 
-        public IEnumerable<CustomAttribute> RoutableData { get; set; }
+        public TypeReference InjectionHost { get; internal set; }
+
+        public IEnumerable<CustomAttribute> RoutableData { get; internal set; }
     }
 }

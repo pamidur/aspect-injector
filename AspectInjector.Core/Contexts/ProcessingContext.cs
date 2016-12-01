@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.Core.Fluent;
+using Mono.Cecil;
 
 namespace AspectInjector.Core.Contexts
 {
@@ -6,8 +7,10 @@ namespace AspectInjector.Core.Contexts
     {
         public AssemblyDefinition Assembly { get; internal set; }
 
-        public IAssemblyResolver Resolver { get; set; }
+        public IAssemblyResolver Resolver { get; internal set; }
 
-        public ServicesContext Services { get; set; }
+        public ServicesContext Services { get; internal set; }
+
+        public EditorFactory Editors { get; internal set; }
     }
 }

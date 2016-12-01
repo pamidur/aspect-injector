@@ -185,6 +185,14 @@ namespace AspectInjector.BuildTask.Contexts
                            pct.LoadSelfOntoStack();
                            pct.LoadField(tcsField);
                            pct.InjectMethodCall(setresultMethod, new object[] { _resultVar ?? Markers.DefaultMarker });
+                       },
+                       doIfFalse: pcf =>
+                       {
+                           var setresultMethod = tcsType.Resolve().Methods.First(m => m.Name == "SetResult").MakeGeneric(tcsType);
+
+                           pc.LoadSelfOntoStack();
+                           pc.LoadField(tcsField);
+                           pc.InjectMethodCall(setresultMethod, new object[] { Markers.DefaultMarker });
                        });
                 },
                 doIfFalse: pc =>

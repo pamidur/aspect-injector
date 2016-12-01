@@ -23,11 +23,17 @@ namespace AspectInjector.Core.Extensions
             return FQN.FromTypeReference(type);
         }
 
+        public static FQN GetFQN(this Type type)
+        {
+            return FQN.FromType(type);
+        }
+
         public static IEnumerable<TypeDefinition> GetTypesTree(this TypeDefinition type)
         {
             yield return type;
 
             foreach (var nestedType in type.NestedTypes
+
                 .SelectMany(t => GetTypesTree(t)))
             {
                 yield return nestedType;

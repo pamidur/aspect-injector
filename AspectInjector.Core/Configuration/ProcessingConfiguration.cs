@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Defaults;
+using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Processing;
 using Mono.Cecil;
 using System;
@@ -77,6 +78,7 @@ namespace AspectInjector.Core.Configuration
             {
                 Assembly = assembly,
                 Resolver = resolver,
+                Editors = new EditorFactory(Prefix),
                 Services = new ServicesContext
                 {
                     Log = Log,

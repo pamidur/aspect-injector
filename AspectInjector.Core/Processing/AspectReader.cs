@@ -76,10 +76,37 @@ namespace AspectInjector.Core.Processing
         private Tuple<Aspect<T>, ChildrenFilter> ParseAspectAttribute<T>(T source, CustomAttribute attr, CustomAttribute routableData = null)
             where T : class, ICustomAttributeProvider
         {
+            var injectionHost = attr.GetConstructorValue<TypeReference>(0).Resolve();
+
+            if (!injectionHost.IsClass)
+                Log.LogError(CompilationError.From("Aspect should be a class.", source));
+
+            var aspectFactory = injectionHost.Methods
+                .Where(c => c.IsConstructor && !c.IsStatic && !c.Parameters.Any())
+                .FirstOrDefault();
+
+            var aspectFactories = injectionHost.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.Any(ca => ca.AttributeType.IsTypeOf(typeof(AspectFactoryAttribute)))).ToList();
+
+            foreach (var af in aspectFactories)
+            {
+                if (aspectFactories.Count > 1)
+                    Log.LogError(CompilationError.From("Cannot have aspect factories.", af));
+
+                if (af.Parameters.Any())
+                    Log.LogError(CompilationError.From("Aspect factory cannot have parameters.", af));
+
+                if (af.GenericParameters.Any())
+                    Log.LogError(CompilationError.From("Aspect factory cannot have generic parameters.", af));
+            }
+
+            if (aspectFactories.Any())
+                aspectFactory = aspectFactories.First();
+
             return new Tuple<Aspect<T>, ChildrenFilter>(new Aspect<T>()
             {
                 Target = source,
-                InjectionHost = attr.GetConstructorValue<TypeReference>(0),
+                InjectionHost = injectionHost,
+                InjectionHostFactory = aspectFactory,
                 RoutableData = routableData == null ? new List<CustomAttribute>() : new List<CustomAttribute> { routableData }
             },
             new ChildrenFilter
@@ -97,7 +124,7 @@ namespace AspectInjector.Core.Processing
 
         private IEnumerable<Aspect> FindApplicableChildren<T>(Aspect<T> arg, ChildrenFilter filter) where T : class, ICustomAttributeProvider
         {
-            // here goes applicable children lookup, below is exaple fot T : TypeDefinition looking gor applicable methods
+            //todo:: here goes applicable children lookup, below is exaple fot T : TypeDefinition looking gor applicable methods
             return Enumerable.Empty<Aspect>();
         }
 
