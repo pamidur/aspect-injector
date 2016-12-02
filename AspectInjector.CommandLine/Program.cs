@@ -19,9 +19,9 @@ namespace AspectInjector.CommandLine
             var processor = new Processor(config);
 
             var resolver = new DefaultAssemblyResolver();
-            resolver.AddSearchDirectory(@"D:\tests\");
+            resolver.AddSearchDirectory(@"C:\Users\Oleksandr.Hulyi\Documents\visual studio 2015\Projects\InterfacesTests\bin\Debug\");
 
-            processor.Process(@"D:\tests\AspectInjector.Tests.dll", resolver);
+            processor.Process(@"C:\Users\Oleksandr.Hulyi\Documents\visual studio 2015\Projects\InterfacesTests\bin\Debug\InterfacesTests.exe", resolver);
 
             Console.ReadKey();
         }

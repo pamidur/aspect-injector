@@ -89,7 +89,7 @@ namespace AspectInjector.Core.Models
                 exactType = newRef;
             }
 
-            var tr = new TypeReference(maintype.Namespace, exactType.Name, maintype.Module, exactType.Scope);
+            var tr = new TypeReference(exactType.Namespace ?? "", exactType.Name, maintype.Module, exactType.Scope);
 
             tr.DeclaringType = exactType.DeclaringType;
 

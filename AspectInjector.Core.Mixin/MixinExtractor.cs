@@ -40,10 +40,10 @@ namespace AspectInjector.Core.Mixin
             foreach (var mixin in mixins)
             {
                 if (!mixin.InterfaceType.Resolve().IsInterface)
-                    Log.LogError(CompilationError.From($"{mixin.InterfaceType.Name} is not an interface.", mixin.HostType));
+                    Log.LogError(CompilationError.From($"{mixin.InterfaceType.Name} is not an interface.", mixin.HostType.Resolve()));
 
                 if (!mixin.HostType.Implements(mixin.InterfaceType))
-                    Log.LogError(CompilationError.From($"{mixin.HostType.Name} should implement {mixin.InterfaceType.Name}.", mixin.HostType));
+                    Log.LogError(CompilationError.From($"{mixin.HostType.Name} should implement {mixin.InterfaceType.Name}.", mixin.HostType.Resolve()));
 
                 yield return mixin;
             }

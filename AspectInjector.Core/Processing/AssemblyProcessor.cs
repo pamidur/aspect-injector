@@ -2,6 +2,7 @@
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Processing.EqualityComparers;
 using Mono.Cecil;
+using System;
 using System.Linq;
 
 namespace AspectInjector.Core.Processing
@@ -28,6 +29,9 @@ namespace AspectInjector.Core.Processing
                     var injections = extrator.ReadInjections(module);
                     _context.Services.InjectionCacheProvider.StoreInjections(module, injections);
                 }
+
+                if (Log.IsErrorThrown)
+                    throw new Exception("Compilation error occurred.");
 
                 foreach (var aspect in aspects)
                 {

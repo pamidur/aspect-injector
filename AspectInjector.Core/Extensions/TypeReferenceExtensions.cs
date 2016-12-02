@@ -1,4 +1,5 @@
-﻿using AspectInjector.Core.Models;
+﻿using AspectInjector.Core.Fluent.Models;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
@@ -45,5 +46,14 @@ namespace AspectInjector.Core.Extensions
             TypeDefinition td = tr.Resolve();
             return td.Interfaces.Any(i => i.IsTypeOf(@interface)) || (td.BaseType != null && td.BaseType.Implements(@interface));
         }
+
+        //public static IEnumerable<MethodReference> GetMethodRefs(this TypeReference tr, ExtendedTypeSystem ts)
+        //{
+        //    var def = tr.Resolve();
+        //    var methods = def.Methods.Select(d => d.CreateReference(ts));
+
+        //    GenericParameter a;
+        //    a.
+        //}
     }
 }

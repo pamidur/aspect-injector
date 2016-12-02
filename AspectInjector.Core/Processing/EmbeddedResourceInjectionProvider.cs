@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Core.Processing.Converters;
 using Mono.Cecil;
@@ -42,7 +43,7 @@ namespace AspectInjector.Core.Processing
 
         public IEnumerable<Injection> GetInjections(TypeReference type)
         {
-            return ReadInjectionsFromModule(type.Module).Where(a => a.HostType.FullName == type.FullName);
+            return ReadInjectionsFromModule(type.Module).Where(a => a.HostType.IsTypeOf(type));
         }
 
         public void StoreInjections(ModuleDefinition toModule, IEnumerable<Injection> injections)

@@ -65,7 +65,6 @@ namespace AspectInjector.Core.Fluent
         {
             var method = new MethodDefinition(name, attrs, _ctx.TypeSystem.Import(returnType));
             var processor = _ctx.Factory.GetProcessor(method.Body);
-            processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ret));
             td.Methods.Add(method);
             return method;

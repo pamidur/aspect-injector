@@ -32,6 +32,8 @@ namespace AspectInjector.Core.Processing
             {
                 aspects = aspects.Concat(ExtractAspectsFrom(module));
 
+                var types = module.Types.SelectMany(t => t.GetTypesTree());
+
                 foreach (var type in module.Types.SelectMany(t => t.GetTypesTree()))
                 {
                     aspects = aspects.Concat(ExtractAspectsFrom(type));
@@ -68,7 +70,7 @@ namespace AspectInjector.Core.Processing
 
             aspectAndFilterPairs = aspectAndFilterPairs.Concat(aspectDefinitions.SelectMany(g => g.SelectMany(ads => ads.Select(ad => ParseAspectAttribute(source, ad, g.Key)))));
 
-            var result = aspectAndFilterPairs.Select(p => p.Item1).Concat(aspectAndFilterPairs.SelectMany(p => FindApplicableChildren(p.Item1, p.Item2)));
+            var result = aspectAndFilterPairs.SelectMany(p => FindApplicableChildren(p.Item1, p.Item2).Concat(new[] { p.Item1 }));
 
             return result;
         }
@@ -79,7 +81,10 @@ namespace AspectInjector.Core.Processing
             var injectionHost = attr.GetConstructorValue<TypeReference>(0).Resolve();
 
             if (!injectionHost.IsClass)
-                Log.LogError(CompilationError.From("Aspect should be a class.", source));
+                Log.LogError(CompilationError.From($"Aspect {injectionHost.FullName} should be a class.", source));
+
+            if (injectionHost.HasGenericParameters)
+                Log.LogError(CompilationError.From($"Aspect {injectionHost.FullName} should not have generic parameters.", source));
 
             var aspectFactory = injectionHost.Methods
                 .Where(c => c.IsConstructor && !c.IsStatic && !c.Parameters.Any())

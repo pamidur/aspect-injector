@@ -15,13 +15,6 @@ namespace AspectInjector.Core.Fluent
         private readonly MethodDefinition _md;
         private readonly EditorContext _ctx;
 
-        public string Name { get; set; }
-        public MethodAttributes Attributes { get; set; }
-        public TypeReference ReturnType { get; set; }
-        public bool IsSpecialName { get; set; }
-
-        public ExtendedTypeSystem TypeSystem { get; private set; }
-
         internal MethodEditor(EditorContext context, MethodDefinition md)
         {
             _ctx = context;
@@ -110,25 +103,15 @@ namespace AspectInjector.Core.Fluent
             return _md.Body.Instructions.First();
         }
 
-        protected void Mark<T>(ICustomAttributeProvider member) where T : Attribute
+        protected void Mark<T>() where T : Attribute
         {
-            if (member.CustomAttributes.Any(ca => ca.AttributeType.IsTypeOf(typeof(T))))
+            if (_md.CustomAttributes.Any(ca => ca.AttributeType.IsTypeOf(typeof(T))))
                 return;
 
-            var constructor = TypeSystem.CompilerGeneratedAttribute.Resolve()
+            var constructor = _ctx.TypeSystem.CompilerGeneratedAttribute.Resolve()
                 .Methods.First(m => m.IsConstructor && !m.IsStatic);
 
-            member.CustomAttributes.Add(new CustomAttribute(_md.Module.Import(constructor)));
-        }
-
-        public bool SignatureMatches(MethodEditor interfaceMethod)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Overrides(MethodEditor interfaceMethod)
-        {
-            throw new NotImplementedException();
+            _md.CustomAttributes.Add(new CustomAttribute(_md.Module.Import(constructor)));
         }
     }
 }

@@ -79,6 +79,8 @@
     <Compile Include="Advices\NestedClassesTests.cs" />
     <Compile Include="General\PETest.cs" />
     <Compile Include="General\CustomAttributesTests.cs" />
+    <Compile Include="Interfaces\GenericInterfacesTests.cs" />
+    <Compile Include="Interfaces\PartialMembersInterfacesTests.cs" />
     <Compile Include="Utils\Checker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Advices\VirtualTests.cs" />

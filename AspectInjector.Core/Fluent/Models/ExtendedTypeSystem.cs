@@ -3,6 +3,7 @@ using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -99,9 +100,39 @@ namespace AspectInjector.Core.Fluent.Models
             };
         }
 
-        public TypeReference Import(TypeReference returnType)
+        public ModuleDefinition GetModule()
         {
-            return _module.Import(returnType);
+            return _module;
+        }
+
+        public TypeReference Import(TypeReference type)
+        {
+            //if (type.IsGenericParameter)
+            //{
+            //    var generic = (GenericParameter)type;
+
+            //    var ngp = new GenericParameter(generic.Name, generic.Owner);
+
+            //    //ngp = generic.Position;
+            //    //generic.Position, generic.Type, _module);
+
+            //    ngp.Attributes = generic.Attributes;
+
+            //    generic.Constraints.Select(c => Import(c)).ToList().ForEach(c => ngp.Constraints.Add(c));
+
+            //    return ngp;
+            //}
+
+            IGenericParameterProvider context = null;
+            if (type.IsGenericParameter)
+                context = ((GenericParameter)type).Owner;
+
+            return _module.Import(type, context);
+        }
+
+        public MethodReference Import(MethodReference type)
+        {
+            return _module.Import(type);
         }
 
         #endregion Public Constructors
@@ -174,7 +205,7 @@ namespace AspectInjector.Core.Fluent.Models
 
         public TypeReference MakeArrayType(TypeReference argument)
         {
-            return _module.Import(new ArrayType(_module.Import(argument)));
+            return Import(new ArrayType(Import(argument)));
         }
 
         public TypeReference MakeGenericInstanceType(TypeReference openGenericType, params TypeReference[] arguments)
@@ -186,7 +217,7 @@ namespace AspectInjector.Core.Fluent.Models
             foreach (var argument in arguments)
                 instance.GenericArguments.Add(argument);
 
-            return _module.Import(instance);
+            return Import(instance);
         }
 
         #endregion Public Methods

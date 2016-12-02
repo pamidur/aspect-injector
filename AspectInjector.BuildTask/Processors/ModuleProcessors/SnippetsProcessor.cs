@@ -214,7 +214,7 @@ namespace AspectInjector.BuildTask.Processors.ModuleProcessors
 
             var ngp = new GenericParameter(generic.Name, generic.Owner);
 
-            //ngp. = generic.Position;
+            //ngp = generic.Position;
             //generic.Position, generic.Type, _module);
 
             _refsMap.Add(generic, ngp);
