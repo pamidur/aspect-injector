@@ -12,6 +12,11 @@ namespace AspectInjector.Core.Mixin
 {
     internal class MixinInjector : InjectorBase<Mixin>
     {
+        public MixinInjector()
+        {
+            Priority = 10;
+        }
+
         protected override void Apply(Aspect<TypeDefinition> aspect, Mixin mixin)
         {
             var ts = Context.Editors.GetContext(aspect.Target.Module).TypeSystem;
@@ -31,15 +36,17 @@ namespace AspectInjector.Core.Mixin
                 target.Interfaces.Add(ts.Import(mixin.InterfaceType));
             }
 
+            var host = aspect.InjectionHost.Resolve();
+
             var methods = GetInterfaceTreeMembers(mixin.InterfaceType, td => td.Methods)
                 .Where(m => !m.IsAddOn && !m.IsRemoveOn && !m.IsSetter && !m.IsGetter)
                 .ToArray();
 
             var props = GetInterfaceTreeMembers(mixin.InterfaceType, td => td.Properties)
-                .ToArray();
+                .Select(p => host.Properties.First(hp => hp.Name == p.Name));
 
             var events = GetInterfaceTreeMembers(mixin.InterfaceType, td => td.Events)
-                .ToArray();
+                .Select(e => host.Events.First(he => he.Name == e.Name));
 
             foreach (var method in methods)
                 GetOrCreateMethodProxy(method, mixin.InterfaceType, aspect, ts);
@@ -79,9 +86,9 @@ namespace AspectInjector.Core.Mixin
 
                 var me = Context.Editors.GetEditor(proxy);
 
-                me.Instead(e => e
-                .Return(ret =>
-                ret.Load(aspect).Call(method, args => proxy.Parameters.ToList().ForEach(p => args.Load(p)))));
+                me.Instead(e =>
+                    e.Return(ret =>
+                    ret.Load(aspect).Call(method, args => proxy.Parameters.ToList().ForEach(p => args.Load(p)))));
             }
 
             return proxy;

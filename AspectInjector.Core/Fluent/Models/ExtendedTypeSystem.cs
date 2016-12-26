@@ -107,21 +107,50 @@ namespace AspectInjector.Core.Fluent.Models
 
         public TypeReference Import(TypeReference type)
         {
-            //if (type.IsGenericParameter)
-            //{
-            //    var generic = (GenericParameter)type;
+            TypeReference result;
 
-            //    var ngp = new GenericParameter(generic.Name, generic.Owner);
+            if (type.IsGenericParameter)
+            {
+                var generic = (GenericParameter)type;
 
-            //    //ngp = generic.Position;
-            //    //generic.Position, generic.Type, _module);
+                var ngp = new GenericParameter(generic.Name, generic.Owner);
 
-            //    ngp.Attributes = generic.Attributes;
+                //ngp = generic.Position;
+                //generic.Position, generic.Type, _module);
 
-            //    generic.Constraints.Select(c => Import(c)).ToList().ForEach(c => ngp.Constraints.Add(c));
+                ngp.Attributes = generic.Attributes;
 
-            //    return ngp;
-            //}
+                generic.Constraints.Select(c => Import(c)).ToList().ForEach(c => ngp.Constraints.Add(c));
+
+                result = ngp;
+            }
+            else if (type.IsGenericInstance)
+            {
+                var ogit = (GenericInstanceType)type;
+
+                var git = new GenericInstanceType(Import(ogit.ElementType));
+
+                foreach (var ga in ogit.GenericArguments)
+                    git.GenericArguments.Add(Import(ga));
+
+                result = git;
+            }
+            else if (type.IsArray)
+                result = new ArrayType(Import(((ArrayType)type).ElementType), ((ArrayType)type).Rank);
+            else
+            {
+                var tr = new TypeReference(type.Namespace, type.Name, _module, type.Scope, type.IsValueType);
+
+                if (type.DeclaringType != null)
+                    tr.DeclaringType = Import(type.DeclaringType);
+
+                result = tr;
+            }
+
+            foreach (var gp in type.GenericParameters)
+                result.GenericParameters.Add((GenericParameter)Import(gp));
+
+            return result;
 
             IGenericParameterProvider context = null;
             if (type.IsGenericParameter)
@@ -132,7 +161,8 @@ namespace AspectInjector.Core.Fluent.Models
 
         public MethodReference Import(MethodReference type)
         {
-            return _module.Import(type);
+            var result = _module.Import(type);
+            return result;
         }
 
         #endregion Public Constructors

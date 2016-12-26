@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Advice.cs" />
     <Compile Include="AdviceExtractor.cs" />
+    <Compile Include="AroundAdviceInjector.cs" />
     <Compile Include="AdviceInjector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

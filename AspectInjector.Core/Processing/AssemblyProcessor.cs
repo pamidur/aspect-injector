@@ -20,7 +20,7 @@ namespace AspectInjector.Core.Processing
 
         public void ProcessAssembly(AssemblyDefinition assembly)
         {
-            var aspects = _context.Services.AspectReader.ReadAspects(assembly);
+            var aspects = _context.Services.AspectReader.ReadAspects(assembly).ToList();
 
             foreach (var module in assembly.Modules)
             {
@@ -32,15 +32,19 @@ namespace AspectInjector.Core.Processing
 
                 if (Log.IsErrorThrown)
                     throw new Exception("Compilation error occurred.");
+            }
 
-                foreach (var aspect in aspects)
+            foreach (var injector in _context.Services.Injectors.OrderByDescending(i => i.Priority))
+            {
+                Log.LogInformation($"Executing {injector.GetType().Name}");
+
+                foreach (var aspect in aspects.OrderByDescending(a => a.Priority))
                 {
-                    var matchednjections = _context.Services.InjectionCacheProvider.GetInjections(aspect.InjectionHost).Where(a => a.IsApplicableFor(aspect)).ToList();
+                    var matchednjections = _context.Services.InjectionCacheProvider.GetInjections(aspect.InjectionHost).Where(i => i.IsApplicableFor(aspect)).ToList();
 
-                    foreach (var injector in _context.Services.Injectors)
-                        foreach (var injection in matchednjections)
-                            if (injector.CanApply(injection))
-                                injector.Apply(aspect, injection);
+                    foreach (var injection in matchednjections.OrderByDescending(i => i.Priority))
+                        if (injector.CanApply(injection))
+                            injector.Apply(aspect, injection);
                 }
             }
         }

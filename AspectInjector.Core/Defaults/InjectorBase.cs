@@ -2,6 +2,7 @@
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
+using System;
 
 namespace AspectInjector.Core.Defaults
 {
@@ -11,6 +12,8 @@ namespace AspectInjector.Core.Defaults
         protected ILogger Log { get; private set; }
 
         protected ProcessingContext Context { get; private set; }
+
+        public byte Priority { get; protected set; }
 
         protected virtual void Apply(Aspect<AssemblyDefinition> aspect, T injection)
         {

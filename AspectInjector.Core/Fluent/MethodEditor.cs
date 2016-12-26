@@ -111,7 +111,7 @@ namespace AspectInjector.Core.Fluent
             var constructor = _ctx.TypeSystem.CompilerGeneratedAttribute.Resolve()
                 .Methods.First(m => m.IsConstructor && !m.IsStatic);
 
-            _md.CustomAttributes.Add(new CustomAttribute(_md.Module.Import(constructor)));
+            _md.CustomAttributes.Add(new CustomAttribute(_ctx.TypeSystem.Import(constructor)));
         }
     }
 }

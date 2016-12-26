@@ -3,11 +3,11 @@ using System;
 
 namespace AspectInjector.Core.MethodCall
 {
-    public class AdviceInjector : InjectorBase<Advice>
+    public class AroundAdviceInjector : InjectorBase<Advice>
     {
-        public AdviceInjector()
+        public AroundAdviceInjector()
         {
-            Priority = 20;
+            Priority = 90;
         }
 
         protected override bool CanApply(Advice advice)

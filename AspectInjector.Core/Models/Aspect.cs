@@ -38,11 +38,9 @@ namespace AspectInjector.Core.Models
     {
         public AspectTargetKind TargetKind { get; protected set; }
         public MethodDefinition InjectionHostFactory { get; internal set; }
-
         public AspectScope Scope { get; internal set; }
-
+        public uint Priority { get; internal set; }
         public TypeReference InjectionHost { get; internal set; }
-
         public IEnumerable<CustomAttribute> RoutableData { get; internal set; }
     }
 }

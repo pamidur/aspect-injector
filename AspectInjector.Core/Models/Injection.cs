@@ -8,6 +8,8 @@ namespace AspectInjector.Core.Models
     {
         public TypeReference HostType { get; set; }
 
+        public uint Priority { get; protected set; }
+
         public bool Equals(Injection other)
         {
             return other.HostType.GetFQN() == HostType.GetFQN() && IsEqualTo(other);
