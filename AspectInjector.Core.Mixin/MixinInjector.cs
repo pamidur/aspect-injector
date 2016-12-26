@@ -1,9 +1,9 @@
 ﻿using AspectInjector.Core.Defaults;
 using AspectInjector.Core.Extensions;
-using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,19 +23,13 @@ namespace AspectInjector.Core.Mixin
 
             var target = aspect.Target;
 
-            if (!target.Implements(mixin.InterfaceType))
-            {
-                var ifaces = GetInterfacesTree(mixin.InterfaceType);
+            var ifaceTree = GetInterfacesTree(mixin.InterfaceType);
 
-                foreach (var iface in ifaces)
+            foreach (var iface in ifaceTree)
+                if (target.Interfaces.All(i => !i.IsTypeOf(iface)))
                     target.Interfaces.Add(ts.Import(iface));
-            }
-            else if (!target.Interfaces.Any(i => i.IsTypeOf(mixin.InterfaceType)))
-            {
-                //In order to behave the same as csc
-                target.Interfaces.Add(ts.Import(mixin.InterfaceType));
-            }
 
+            //search for implementtions
             var host = aspect.InjectionHost.Resolve();
 
             var methods = GetInterfaceTreeMembers(mixin.InterfaceType, td => td.Methods)
@@ -58,10 +52,11 @@ namespace AspectInjector.Core.Mixin
                 GetOrCreatePropertyProxy(property, mixin.InterfaceType, aspect, ts);
         }
 
-        protected MethodDefinition GetOrCreateMethodProxy(MethodDefinition method, TypeReference owner, Aspect<TypeDefinition> aspect, ExtendedTypeSystem ts)
+        protected MethodDefinition GetOrCreateMethodProxy(MethodReference method, TypeReference owner, Aspect<TypeDefinition> aspect, ExtendedTypeSystem ts)
         {
             var targetType = aspect.Target;
-            var methodName = GenerateMemberProxyName(method);
+            var methodDef = method.Resolve();
+            var methodName = GenerateMemberProxyName(methodDef);
 
             var proxy = targetType.Methods.FirstOrDefault(m => m.Name == methodName && SignatureMatches(m, method));
             if (proxy == null)
@@ -72,7 +67,7 @@ namespace AspectInjector.Core.Mixin
 
                 targetType.Methods.Add(proxy);
 
-                if (method.IsSpecialName)
+                if (methodDef.IsSpecialName)
                     proxy.IsSpecialName = true;
 
                 proxy.Overrides.Add(ts.Import(method));
@@ -145,7 +140,29 @@ namespace AspectInjector.Core.Mixin
             if (!definition.IsInterface)
                 throw new NotSupportedException(typeReference.Name + " should be an interface");
 
-            return new[] { typeReference }.Concat(definition.Interfaces);
+            var nestedIfaces = definition.Interfaces.ToList().AsEnumerable();
+
+            if (typeReference.IsGenericInstance)
+            {
+                var generic = (IGenericInstance)typeReference;
+
+                nestedIfaces = nestedIfaces.Select(nested =>
+                {
+                    if (nested.IsGenericInstance)
+                    {
+                        var nestedGeneric = (IGenericInstance)nested;
+                        var args = generic.GenericArguments.Concat(nestedGeneric.GenericArguments.Skip(generic.GenericArguments.Count)).ToArray();
+
+                        return nested.Resolve().MakeGenericInstanceType(args);
+                    }
+                    else
+                    {
+                        return nested.MakeGenericInstanceType(generic.GenericArguments.ToArray());
+                    }
+                });
+            }
+
+            return new[] { typeReference }.Concat(nestedIfaces);
         }
 
         private static IEnumerable<T> GetInterfaceTreeMembers<T>(TypeReference typeReference, Func<TypeDefinition, IEnumerable<T>> selector)
@@ -162,25 +179,42 @@ namespace AspectInjector.Core.Mixin
             return members;
         }
 
-        private static IEnumerable<MethodReference> GetInterfaceTreeMethods(TypeReference typeReference)
+        private MethodReference ParametrizeGenerics(MethodReference method, GenericInstanceType owner, ExtendedTypeSystem ts)
         {
-            var definition = typeReference.Resolve();
-            if (!definition.IsInterface)
-                throw new NotSupportedException(typeReference.Name + " should be an interface");
+            var mr = new MethodReference(method.Name, FindMathingArgument(method.ReturnType, owner, ts), owner);
 
-            IEnumerable<MethodReference> members = definition.Methods.Where(m => !m.IsAddOn && !m.IsRemoveOn && !m.IsSetter && !m.IsGetter).ToList();
+            mr.CallingConvention = method.CallingConvention;
+            mr.ExplicitThis = method.ExplicitThis;
+            mr.HasThis = method.HasThis;
+            mr.MetadataToken = method.MetadataToken;
 
-            if (definition.Interfaces.Count > 0)
-                members = members.Concat(definition.Interfaces.SelectMany(i => GetInterfaceTreeMethods(i)));
+            foreach (var gp in method.GenericParameters)
+                mr.GenericParameters.Add((GenericParameter)ts.Import(gp));
 
-            return members;
+            foreach (var par in method.Parameters)
+                mr.Parameters.Add(new ParameterDefinition(par.Name, par.Attributes, FindMathingArgument(par.ParameterType, owner, ts)));
+
+            return mr;
+        }
+
+        public static TypeReference FindMathingArgument(TypeReference par, IGenericInstance owner, ExtendedTypeSystem ts)
+        {
+            if (par is GenericParameter)
+            {
+                var gpar = (GenericParameter)par;
+
+                if (gpar.Owner is TypeReference)
+                    return owner.GenericArguments[gpar.Position];
+            }
+
+            return par;
         }
 
         public static bool SignatureMatches(MethodReference methodReference1, MethodReference methodReference2)
         {
             if (methodReference1.IsGenericInstance && methodReference2.HasGenericParameters)
             {
-                //todo:: check generic args and params
+                // if(methodReference1.)
             }
 
             if (!methodReference1.MethodReturnType.ReturnType.IsTypeOf(methodReference2.MethodReturnType.ReturnType))

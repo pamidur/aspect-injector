@@ -107,6 +107,11 @@ namespace AspectInjector.Core.Fluent.Models
 
         public TypeReference Import(TypeReference type)
         {
+            // return _module.Import(type);
+
+            if (type.Module == _module)
+                return type;
+
             TypeReference result;
 
             if (type.IsGenericParameter)
@@ -159,9 +164,22 @@ namespace AspectInjector.Core.Fluent.Models
             return _module.Import(type, context);
         }
 
-        public MethodReference Import(MethodReference type)
+        public MethodReference Import(MethodReference method)
         {
-            var result = _module.Import(type);
+            return _module.Import(method);
+
+            var result = new MethodReference(method.Name, Import(method.ReturnType), Import(method.DeclaringType));
+
+            result.CallingConvention = method.CallingConvention;
+            result.ExplicitThis = method.ExplicitThis;
+            result.HasThis = method.HasThis;
+
+            foreach (var gp in method.GenericParameters)
+                result.GenericParameters.Add((GenericParameter)Import(gp));
+
+            foreach (var par in method.Parameters)
+                result.Parameters.Add(new ParameterDefinition(par.Name, par.Attributes, Import(par.ParameterType)));
+
             return result;
         }
 
@@ -196,13 +214,17 @@ namespace AspectInjector.Core.Fluent.Models
         public TypeReference Int64 { get; private set; }
 
         public TypeReference IntPtr { get; private set; }
+
         public IReadOnlyDictionary<TypeReference, OpCode> LoadIndirectMap { get; private set; }
+
         public TypeReference MethodBase { get; private set; }
 
         public TypeReference Object { get; private set; }
 
         public TypeReference ObjectArray { get; private set; }
+
         public Dictionary<TypeReference, OpCode> SaveIndirectMap { get; private set; }
+
         public TypeReference SByte { get; private set; }
 
         public TypeReference Single { get; private set; }
