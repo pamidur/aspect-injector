@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,28 @@ namespace AspectInjector.Core.Extensions
                 .SelectMany(t => GetTypesTree(t)))
             {
                 yield return nestedType;
+            }
+        }
+
+        public static TypeReference ParametrizeGenericChild(this TypeReference type, TypeReference child)
+        {
+            if (child.IsGenericInstance)
+            {
+                var nestedGeneric = (GenericInstanceType)child;
+
+                if (!nestedGeneric.ContainsGenericParameter)
+                    return nestedGeneric;
+
+                var args = nestedGeneric.GenericArguments.Select(ga => type.ResolveGenericType(ga)).ToArray();
+
+                return child.Resolve().MakeGenericInstanceType(args);
+            }
+            else
+            {
+                if (!child.HasGenericParameters)
+                    return child;
+
+                return child.MakeGenericInstanceType(child.GenericParameters.Select(type.ResolveGenericType).ToArray());
             }
         }
 
