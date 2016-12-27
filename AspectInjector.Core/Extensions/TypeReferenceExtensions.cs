@@ -1,5 +1,4 @@
-﻿using AspectInjector.Core.Fluent.Models;
-using AspectInjector.Core.Models;
+﻿using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
 using System;
@@ -40,41 +39,6 @@ namespace AspectInjector.Core.Extensions
             {
                 yield return nestedType;
             }
-        }
-
-        public static TypeReference ParametrizeGenericChild(this TypeReference type, TypeReference child)
-        {
-            if (child.IsGenericInstance)
-            {
-                var nestedGeneric = (GenericInstanceType)child;
-
-                if (!nestedGeneric.ContainsGenericParameter)
-                    return nestedGeneric;
-
-                var args = nestedGeneric.GenericArguments.Select(ga => type.ResolveGenericType(ga)).ToArray();
-
-                return child.Resolve().MakeGenericInstanceType(args);
-            }
-            else
-            {
-                if (!child.HasGenericParameters)
-                    return child;
-
-                return child.MakeGenericInstanceType(child.GenericParameters.Select(type.ResolveGenericType).ToArray());
-            }
-        }
-
-        public static TypeReference ResolveGenericType(this TypeReference type, TypeReference mappingType)
-        {
-            if (!mappingType.IsGenericParameter)
-                return mappingType;
-
-            var gp = (GenericParameter)mappingType;
-
-            if (!type.IsGenericInstance || gp.Owner != type.Resolve())
-                return gp;
-
-            return ((IGenericInstance)type).GenericArguments[gp.Position];
         }
 
         public static bool Implements(this TypeReference tr, TypeReference @interface)

@@ -10,10 +10,12 @@ namespace AspectInjector.Core.Processing.Converters
     internal class TypeReferenceConverter : JsonConverter
     {
         private readonly ProcessingContext _context;
+        private readonly ModuleDefinition _reference;
 
-        public TypeReferenceConverter(ProcessingContext context)
+        public TypeReferenceConverter(ProcessingContext context, ModuleDefinition reference)
         {
             _context = context;
+            _reference = reference;
         }
 
         public override bool CanConvert(Type objectType)
@@ -26,7 +28,7 @@ namespace AspectInjector.Core.Processing.Converters
             var jt = JToken.Load(reader);
             var fqn = FQN.FromString(jt.ToObject<string>());
 
-            return fqn?.ToTypeReference(_context.Resolver);
+            return fqn?.ToTypeReference(_context.Resolver, _reference);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

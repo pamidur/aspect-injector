@@ -20,7 +20,6 @@ namespace AspectInjector.Core.Processing
 
         private ProcessingContext _context;
         private string _resourceName;
-        private JsonSerializerSettings _serializerSettings;
 
         protected ILogger Log { get; private set; }
 
@@ -29,16 +28,6 @@ namespace AspectInjector.Core.Processing
             _context = context;
             _resourceName = $"{context.Services.Prefix}injections";
             Log = context.Services.Log;
-
-            _serializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                MissingMemberHandling = MissingMemberHandling.Ignore,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                TypeNameHandling = TypeNameHandling.Auto,
-            };
-
-            _serializerSettings.Converters.Add(new TypeReferenceConverter(context));
         }
 
         public IEnumerable<Injection> GetInjections(TypeReference type)
@@ -48,6 +37,16 @@ namespace AspectInjector.Core.Processing
 
         public void StoreInjections(ModuleDefinition toModule, IEnumerable<Injection> injections)
         {
+            var serializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                TypeNameHandling = TypeNameHandling.Auto,
+            };
+
+            serializerSettings.Converters.Add(new TypeReferenceConverter(_context, toModule));
+
             var existingInjections = ReadInjectionsFromModule(toModule);
 
             var newInjectionSet = injections.Union(existingInjections).ToList();
@@ -57,7 +56,7 @@ namespace AspectInjector.Core.Processing
             if (resource != null)
                 toModule.Resources.Remove(resource);
 
-            var json = JsonConvert.SerializeObject(newInjectionSet, _serializerSettings);
+            var json = JsonConvert.SerializeObject(newInjectionSet, serializerSettings);
 
             resource = new EmbeddedResource(_resourceName, ManifestResourceAttributes.Private, Encoding.UTF8.GetBytes(json));
 
@@ -70,6 +69,16 @@ namespace AspectInjector.Core.Processing
 
         private IEnumerable<Injection> ReadInjectionsFromModule(ModuleDefinition module)
         {
+            var serializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                TypeNameHandling = TypeNameHandling.Auto,
+            };
+
+            serializerSettings.Converters.Add(new TypeReferenceConverter(_context, module));
+
             var cacheKey = GetCacheKey(module);
 
             object result;
@@ -83,7 +92,7 @@ namespace AspectInjector.Core.Processing
 
                 var json = Encoding.UTF8.GetString(((EmbeddedResource)resource).GetResourceData());
 
-                result = JsonConvert.DeserializeObject<List<Injection>>(json, _serializerSettings);
+                result = JsonConvert.DeserializeObject<List<Injection>>(json, serializerSettings);
             }
 
             return (IEnumerable<Injection>)result;

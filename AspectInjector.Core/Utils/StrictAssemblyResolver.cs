@@ -1,11 +1,10 @@
 ﻿using Mono.Cecil;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace AspectInjector.Core.Utils
 {
     [ComVisible(false)]
-    public class StrictAssemblyResolver : DefaultAssemblyResolver
+    public class StrictAssemblyResolver : CachedAssemblyResolver
     {
         public void RegisterAssembly(string assemblyPath)
         {

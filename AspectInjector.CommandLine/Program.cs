@@ -1,7 +1,7 @@
 ﻿using AspectInjector.Core;
 using AspectInjector.Core.Configuration;
 using AspectInjector.Core.Mixin;
-using Mono.Cecil;
+using AspectInjector.Core.Utils;
 using System;
 
 namespace AspectInjector.CommandLine
@@ -18,10 +18,10 @@ namespace AspectInjector.CommandLine
 
             var processor = new Processor(config);
 
-            var resolver = new DefaultAssemblyResolver();
-            resolver.AddSearchDirectory(@"C:\Users\Oleksandr.Hulyi\Documents\visual studio 2015\Projects\InterfacesTests\bin\Debug\");
+            var resolver = new CachedAssemblyResolver();
+            resolver.AddSearchDirectory(@"C:\Users\Alexander\Documents\visual studio 2015\Projects\MixinInjectionTests\MixinInjectionTests\bin\Debug\");
 
-            processor.Process(@"C:\Users\Oleksandr.Hulyi\Documents\visual studio 2015\Projects\InterfacesTests\bin\Debug\InterfacesTests.exe", resolver);
+            processor.Process(@"C:\Users\Alexander\Documents\visual studio 2015\Projects\MixinInjectionTests\MixinInjectionTests\bin\Debug\MixinInjectionTests.exe", resolver);
 
             Console.ReadKey();
         }

@@ -21,19 +21,17 @@ namespace AspectInjector.Core.Mixin
         {
             var ts = Context.Editors.GetContext(aspect.Target.Module).TypeSystem;
 
-            var target = aspect.Target;
-
             var ifaceTree = GetInterfacesTree(mixin.InterfaceType);
 
             foreach (var iface in ifaceTree)
-                if (target.Interfaces.All(i => !i.IsTypeOf(iface)))
+                if (aspect.Target.Interfaces.All(i => !i.IsTypeOf(iface)))
                 {
-                    target.Interfaces.Add(ts.Import(iface));
+                    aspect.Target.Interfaces.Add(ts.Import(iface));
 
                     var gargs = new TypeReference[] { };
 
                     if (iface.IsGenericInstance)
-                        gargs = ((GenericInstanceType)iface).GenericArguments.ToArray();
+                        gargs = ((GenericInstanceType)iface).GenericArguments.Select(ga => ts.Import(ga)).ToArray();
 
                     var ifaceDefinition = iface.Resolve();
 
@@ -63,21 +61,21 @@ namespace AspectInjector.Core.Mixin
             {
                 proxy = new MethodDefinition(methodName,
                     MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
-                     ts.Import(method.ResolveGenericType(method.ReturnType)));
+                     ts.Import(method.SafeReturnType(), method));
 
                 targetType.Methods.Add(proxy);
 
                 if (method.Resolve().IsSpecialName)
                     proxy.IsSpecialName = true;
 
+                foreach (var gp in method.GenericParameters)
+                    //proxy.GenericParameters.Add(new GenericParameter(gp.Name, proxy));
+                    proxy.GenericParameters.Add(gp);
+
                 proxy.Overrides.Add(ts.Import(method));
 
                 foreach (var parameter in method.Parameters)
-                    proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, ts.Import(method.ResolveGenericType(parameter.ParameterType))));
-
-                //TODO:: Use method from SnippetsProcessor, check generic args
-                foreach (var genericParameter in method.GenericParameters)
-                    proxy.GenericParameters.Add(genericParameter);
+                    proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, ts.Import(method.ResolveGenericType(parameter.ParameterType), proxy)));
 
                 var me = Context.Editors.GetEditor(proxy);
 

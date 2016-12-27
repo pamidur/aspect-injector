@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Core.Configuration;
+using AspectInjector.Core.Utils;
 using Mono.Cecil;
 using System.IO;
 
@@ -31,10 +32,15 @@ namespace AspectInjector.Core
             var assembly = AssemblyDefinition.ReadAssembly(assemblyFile,
                 new ReaderParameters
                 {
-                    ReadingMode = ReadingMode.Deferred,
-                    AssemblyResolver = resolver,
-                    ReadSymbols = AreSymbolsFound(assemblyFile)
+                    ReadingMode = ReadingMode.Deferred
                 });
+
+            assembly = resolver.Resolve(assembly.Name, new ReaderParameters
+            {
+                ReadingMode = ReadingMode.Deferred,
+                AssemblyResolver = resolver,
+                ReadSymbols = AreSymbolsFound(assemblyFile)
+            });
 
             _config.Log.LogInformation("Assembly has been read.");
 

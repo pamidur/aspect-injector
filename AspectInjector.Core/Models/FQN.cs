@@ -60,7 +60,7 @@ namespace AspectInjector.Core.Models
             return fqn;
         }
 
-        public TypeReference ToTypeReference(IAssemblyResolver resolver)
+        public TypeReference ToTypeReference(IAssemblyResolver resolver, ModuleDefinition reference)
         {
             var asm = resolver.Resolve(AssemblyName);
 
@@ -89,13 +89,13 @@ namespace AspectInjector.Core.Models
                 exactType = newRef;
             }
 
-            var tr = new TypeReference(exactType.Namespace ?? "", exactType.Name, maintype.Module, exactType.Scope);
+            var tr = new TypeReference(exactType.Namespace ?? "", exactType.Name, reference, exactType.Scope);
 
             tr.DeclaringType = exactType.DeclaringType;
 
             if (Arguments != null && Arguments.Any())
             {
-                var args = Arguments.Select(a => a.ToTypeReference(resolver));
+                var args = Arguments.Select(a => a.ToTypeReference(resolver, reference));
 
                 var gps = args.Where(a => a is GenericParameter).ToList();
                 var gas = args.Except(gps).ToList();
@@ -108,6 +108,7 @@ namespace AspectInjector.Core.Models
                 }
 
                 gps.Cast<GenericParameter>().ToList().ForEach(gp => tr.GenericParameters.Add(gp));
+                //gps.Cast<GenericParameter>().ToList().ForEach(gp => tr.GenericParameters.Add(new GenericParameter(gp.Name, tr)));
             }
 
             return tr;
@@ -189,7 +190,7 @@ namespace AspectInjector.Core.Models
             }
 
             fqn.Namespace = type.Namespace;
-            fqn.AssemblyName = type.Assembly.GetName().Name;
+            fqn.AssemblyName = type.Assembly.GetName().FullName;
 
             return fqn;
         }
@@ -219,7 +220,7 @@ namespace AspectInjector.Core.Models
             }
 
             fqn.Namespace = type.Namespace;
-            fqn.AssemblyName = type.Resolve().Module.Assembly.Name.Name;
+            fqn.AssemblyName = type.Resolve().Module.Assembly.Name.FullName;
 
             return fqn;
         }

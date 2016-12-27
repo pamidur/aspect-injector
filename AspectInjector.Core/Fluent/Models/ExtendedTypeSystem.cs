@@ -3,7 +3,6 @@ using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -100,66 +99,31 @@ namespace AspectInjector.Core.Fluent.Models
             };
         }
 
+        internal FieldReference Import(FieldReference field)
+        {
+            IGenericParameterProvider context = null;
+            if (field.DeclaringType.IsGenericParameter)
+                context = ((GenericParameter)field.DeclaringType).Owner;
+
+            return _module.Import(field, context);
+        }
+
         public ModuleDefinition GetModule()
         {
             return _module;
         }
 
+        public TypeReference Import(TypeReference type, IGenericParameterProvider genericContext)
+
+        {
+            return _module.Import(type, genericContext);
+        }
+
         public TypeReference Import(TypeReference type)
         {
-            return _module.Import(type);
-
-            if (type.Module == _module)
-                return type;
-
-            TypeReference result;
-
-            if (type.IsGenericParameter)
-            {
-                var generic = (GenericParameter)type;
-
-                var ngp = new GenericParameter(generic.Name, generic.Owner);
-
-                //ngp = generic.Position;
-                //generic.Position, generic.Type, _module);
-
-                ngp.Attributes = generic.Attributes;
-
-                generic.Constraints.Select(c => Import(c)).ToList().ForEach(c => ngp.Constraints.Add(c));
-
-                result = ngp;
-            }
-            else if (type.IsGenericInstance)
-            {
-                var ogit = (GenericInstanceType)type;
-
-                var git = new GenericInstanceType(Import(ogit.ElementType));
-
-                foreach (var ga in ogit.GenericArguments)
-                    git.GenericArguments.Add(Import(ga));
-
-                result = git;
-            }
-            else if (type.IsArray)
-                result = new ArrayType(Import(((ArrayType)type).ElementType), ((ArrayType)type).Rank);
-            else
-            {
-                var tr = new TypeReference(type.Namespace, type.Name, _module, type.Scope, type.IsValueType);
-
-                if (type.DeclaringType != null)
-                    tr.DeclaringType = Import(type.DeclaringType);
-
-                result = tr;
-            }
-
-            foreach (var gp in type.GenericParameters)
-                result.GenericParameters.Add((GenericParameter)Import(gp));
-
-            return result;
-
             IGenericParameterProvider context = null;
-            if (type.IsGenericParameter)
-                context = ((GenericParameter)type).Owner;
+            //if (type.IsGenericParameter)
+            //    context = ((GenericParameter)type).Owner;
 
             return _module.Import(type, context);
         }
@@ -167,20 +131,6 @@ namespace AspectInjector.Core.Fluent.Models
         public MethodReference Import(MethodReference method)
         {
             return _module.Import(method);
-
-            var result = new MethodReference(method.Name, Import(method.ReturnType), Import(method.DeclaringType));
-
-            result.CallingConvention = method.CallingConvention;
-            result.ExplicitThis = method.ExplicitThis;
-            result.HasThis = method.HasThis;
-
-            foreach (var gp in method.GenericParameters)
-                result.GenericParameters.Add((GenericParameter)Import(gp));
-
-            foreach (var par in method.Parameters)
-                result.Parameters.Add(new ParameterDefinition(par.Name, par.Attributes, Import(par.ParameterType)));
-
-            return result;
         }
 
         #endregion Public Constructors

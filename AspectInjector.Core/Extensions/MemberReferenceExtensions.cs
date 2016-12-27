@@ -2,10 +2,7 @@
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.Core.Extensions
 {
@@ -32,7 +29,8 @@ namespace AspectInjector.Core.Extensions
 
             foreach (var genericParam in self.GenericParameters)
             {
-                reference.GenericParameters.Add(new GenericParameter(genericParam.Name, reference));
+                //reference.GenericParameters.Add(new GenericParameter(genericParam.Name, reference));
+                reference.GenericParameters.Add(genericParam);
             }
 
             return reference;
@@ -63,22 +61,6 @@ namespace AspectInjector.Core.Extensions
                 return true;
 
             return false;
-        }
-
-        public static TypeReference ResolveGenericType(this MethodReference method, TypeReference mappingType)
-        {
-            if (!mappingType.IsGenericParameter)
-                return mappingType;
-
-            var gp = (GenericParameter)mappingType;
-
-            if (gp.Owner == method.Resolve() && method.IsGenericInstance)
-                return ((IGenericInstance)method).GenericArguments[gp.Position];
-
-            if (gp.Owner == method.DeclaringType.Resolve() && method.DeclaringType.IsGenericInstance)
-                return ((IGenericInstance)method.DeclaringType).GenericArguments[gp.Position];
-
-            return gp;
         }
 
         public static MemberReference CreateReference(this MemberReference member, ExtendedTypeSystem ts)
@@ -116,7 +98,7 @@ namespace AspectInjector.Core.Extensions
             if (methodReference != null)
             {
                 //TODO: more fields may need to be copied
-                var methodReferenceCopy = new MethodReference(member.Name, (TypeReference)CreateReference(methodReference.ReturnType, ts), declaringType)
+                var methodReferenceCopy = new MethodReference(member.Name, (TypeReference)CreateReference(methodReference.SafeReturnType(), ts), declaringType)
                 {
                     HasThis = methodReference.HasThis,
                     ExplicitThis = methodReference.ExplicitThis,
@@ -125,7 +107,7 @@ namespace AspectInjector.Core.Extensions
 
                 foreach (var parameter in methodReference.Parameters)
                 {
-                    methodReferenceCopy.Parameters.Add(new ParameterDefinition((TypeReference)CreateReference(parameter.ParameterType, ts)));
+                    methodReferenceCopy.Parameters.Add(new ParameterDefinition((TypeReference)CreateReference(methodReference.ResolveGenericType(parameter.ParameterType), ts)));
                 }
 
                 return methodReferenceCopy;

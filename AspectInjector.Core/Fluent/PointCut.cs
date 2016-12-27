@@ -44,7 +44,7 @@ namespace AspectInjector.Core.Models
         {
             args?.Invoke(this);
 
-            var methodRef = (MethodReference)method.CreateReference(_ctx.TypeSystem);
+            var methodRef = _ctx.TypeSystem.Import(method);// (MethodReference)method.CreateReference(_ctx.TypeSystem);
             var def = method.Resolve();
 
             var code = OpCodes.Call;
@@ -72,7 +72,7 @@ namespace AspectInjector.Core.Models
         {
             val(this);
 
-            var fieldRef = (FieldReference)field.CreateReference(_ctx.TypeSystem);
+            var fieldRef = _ctx.TypeSystem.Import(field);// (FieldReference)field.CreateReference(_ctx.TypeSystem);
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
@@ -92,7 +92,7 @@ namespace AspectInjector.Core.Models
 
         public PointCut Load(FieldReference field)
         {
-            var fieldRef = (FieldReference)field.CreateReference(_ctx.TypeSystem);
+            var fieldRef = _ctx.TypeSystem.Import(field); //(FieldReference)field.CreateReference(_ctx.TypeSystem);
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, fieldRef));
