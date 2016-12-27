@@ -41,10 +41,25 @@ namespace AspectInjector.Core.Extensions
             }
         }
 
+        public static TypeReference ResolveGenericType(this TypeReference type, TypeReference mappingType)
+        {
+            if (!mappingType.IsGenericParameter)
+                return mappingType;
+
+            var gp = (GenericParameter)mappingType;
+
+            if (!type.IsGenericInstance || gp.Owner != type.Resolve())
+                return gp;
+
+            return ((IGenericInstance)type).GenericArguments[gp.Position];
+        }
+
         public static bool Implements(this TypeReference tr, TypeReference @interface)
         {
-            TypeDefinition td = tr.Resolve();
-            return td.Interfaces.Any(i => i.IsTypeOf(@interface)) || (td.BaseType != null && td.BaseType.Implements(@interface));
+            var td = tr.Resolve();
+            var ti = @interface;
+
+            return td.Interfaces.Any(i => i.IsTypeOf(ti)) || (td.BaseType != null && td.BaseType.Implements(ti));
         }
 
         //public static IEnumerable<MethodReference> GetMethodRefs(this TypeReference tr, ExtendedTypeSystem ts)

@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Core.Fluent.Models;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,76 @@ namespace AspectInjector.Core.Extensions
 {
     public static class MemberReferenceExtensions
     {
+        public static MethodReference MakeHostInstanceGeneric(
+                                  this MethodReference self,
+                                  params TypeReference[] args)
+        {
+            var reference = new MethodReference(
+                self.Name,
+                self.ReturnType,
+                self.DeclaringType.MakeGenericInstanceType(args))
+            {
+                HasThis = self.HasThis,
+                ExplicitThis = self.ExplicitThis,
+                CallingConvention = self.CallingConvention
+            };
+
+            foreach (var parameter in self.Parameters)
+            {
+                reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
+            }
+
+            foreach (var genericParam in self.GenericParameters)
+            {
+                reference.GenericParameters.Add(new GenericParameter(genericParam.Name, reference));
+            }
+
+            return reference;
+        }
+
+        public static bool IsImplementationOf(this MethodDefinition m, MethodReference ifaceMethod)
+        {
+            if (m.IsExplicitImplementationOf(ifaceMethod))
+                return true;
+
+            var ifaceMethodDef = ifaceMethod.Resolve();
+
+            if (m.Name == ifaceMethod.Name && m.Parameters.Count == ifaceMethodDef.Parameters.Count)
+            {
+                for (int i = 0; i < m.Parameters.Count; i++)
+                    if (!m.Parameters[i].ParameterType.IsTypeOf(ifaceMethod.ResolveGenericType(ifaceMethodDef.Parameters[i].ParameterType)))
+                        return false;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsExplicitImplementationOf(this MethodDefinition m, MethodReference ifaceMethod)
+        {
+            if (m.Overrides.Any(o => o.FullName == ifaceMethod.FullName))
+                return true;
+
+            return false;
+        }
+
+        public static TypeReference ResolveGenericType(this MethodReference method, TypeReference mappingType)
+        {
+            if (!mappingType.IsGenericParameter)
+                return mappingType;
+
+            var gp = (GenericParameter)mappingType;
+
+            if (gp.Owner == method.Resolve() && method.IsGenericInstance)
+                return ((IGenericInstance)method).GenericArguments[gp.Position];
+
+            if (gp.Owner == method.DeclaringType.Resolve() && method.DeclaringType.IsGenericInstance)
+                return ((IGenericInstance)method.DeclaringType).GenericArguments[gp.Position];
+
+            return gp;
+        }
+
         public static MemberReference CreateReference(this MemberReference member, ExtendedTypeSystem ts)
         {
             var module = ts.GetModule();

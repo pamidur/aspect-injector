@@ -107,7 +107,7 @@ namespace AspectInjector.Core.Fluent.Models
 
         public TypeReference Import(TypeReference type)
         {
-            // return _module.Import(type);
+            return _module.Import(type);
 
             if (type.Module == _module)
                 return type;
