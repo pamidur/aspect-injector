@@ -8,34 +8,6 @@ namespace AspectInjector.Core.Extensions
 {
     public static class MemberReferenceExtensions
     {
-        public static MethodReference MakeHostInstanceGeneric(
-                                  this MethodReference self,
-                                  params TypeReference[] args)
-        {
-            var reference = new MethodReference(
-                self.Name,
-                self.ReturnType,
-                self.DeclaringType.MakeGenericInstanceType(args))
-            {
-                HasThis = self.HasThis,
-                ExplicitThis = self.ExplicitThis,
-                CallingConvention = self.CallingConvention
-            };
-
-            foreach (var parameter in self.Parameters)
-            {
-                reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
-            }
-
-            foreach (var genericParam in self.GenericParameters)
-            {
-                //reference.GenericParameters.Add(new GenericParameter(genericParam.Name, reference));
-                reference.GenericParameters.Add(genericParam);
-            }
-
-            return reference;
-        }
-
         public static bool IsImplementationOf(this MethodDefinition m, MethodReference ifaceMethod)
         {
             if (m.IsExplicitImplementationOf(ifaceMethod))

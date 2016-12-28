@@ -10,7 +10,45 @@ namespace AspectInjector.Core.Extensions
 {
     public static class GenericProcessingExtension
     {
+        public static MethodReference MakeHostInstanceGeneric(
+                                  this MethodReference self,
+                                  IGenericInstance context)
+        {
+            var reference = new MethodReference(
+                self.Name,
+                self.ReturnType,
+                context.ParametrizeGenericChild(self.DeclaringType))
+            {
+                HasThis = self.HasThis,
+                ExplicitThis = self.ExplicitThis,
+                CallingConvention = self.CallingConvention
+            };
+
+            foreach (var parameter in self.Parameters)
+            {
+                reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
+            }
+
+            foreach (var genericParam in self.GenericParameters)
+            {
+                reference.GenericParameters.Add(new GenericParameter(genericParam.Name, self.Resolve()));
+            }
+
+            return reference;
+        }
+
         public static TypeReference ParametrizeGenericChild(this MethodReference method, TypeReference child)
+        {
+            if (method.IsGenericInstance)
+                return ((IGenericInstance)method).ParametrizeGenericChild(child);
+
+            if (method.DeclaringType.IsGenericInstance)
+                return ((IGenericInstance)method.DeclaringType).ParametrizeGenericChild(child);
+
+            return child;
+        }
+
+        public static MethodReference ParametrizeGenericChild(this MethodReference method, MethodReference child)
         {
             if (method.IsGenericInstance)
                 return ((IGenericInstance)method).ParametrizeGenericChild(child);
@@ -48,6 +86,14 @@ namespace AspectInjector.Core.Extensions
             return child;
         }
 
+        public static MethodReference ParametrizeGenericChild(this TypeReference type, MethodReference child)
+        {
+            if (type.IsGenericInstance)
+                return ((IGenericInstance)type).ParametrizeGenericChild(child);
+
+            return child;
+        }
+
         public static TypeReference ParametrizeGenericChild(this IGenericInstance type, TypeReference child)
         {
             if (child.IsGenericInstance)
@@ -67,6 +113,34 @@ namespace AspectInjector.Core.Extensions
                     return child;
 
                 return child.MakeGenericInstanceType(child.GenericParameters.Select(type.ResolveGenericType).ToArray());
+            }
+        }
+
+        public static MethodReference ParametrizeGenericChild(this IGenericInstance type, MethodReference child)
+        {
+            if (child.IsGenericInstance)
+            {
+                var nestedGeneric = (GenericInstanceMethod)child;
+
+                if (!nestedGeneric.ContainsGenericParameter)
+                    return nestedGeneric;
+
+                var args = nestedGeneric.GenericArguments.Select(ga => type.ResolveGenericType(ga)).ToArray();
+
+                var result = new GenericInstanceMethod(child.MakeHostInstanceGeneric(type));
+                args.ToList().ForEach(result.GenericArguments.Add);
+
+                return result;
+            }
+            else
+            {
+                if (!child.HasGenericParameters)
+                    return child;
+
+                var result = new GenericInstanceMethod(child.MakeHostInstanceGeneric(type));
+                child.GenericParameters.Select(type.ResolveGenericType).ToList().ForEach(result.GenericArguments.Add);
+
+                return result;
             }
         }
 

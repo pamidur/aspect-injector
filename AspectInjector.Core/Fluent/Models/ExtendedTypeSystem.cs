@@ -101,11 +101,11 @@ namespace AspectInjector.Core.Fluent.Models
 
         internal FieldReference Import(FieldReference field)
         {
-            IGenericParameterProvider context = null;
-            if (field.DeclaringType.IsGenericParameter)
-                context = ((GenericParameter)field.DeclaringType).Owner;
+            //IGenericParameterProvider context = null;
+            //if (field.DeclaringType.IsGenericParameter)
+            //    context = ((GenericParameter)field.DeclaringType).Owner;
 
-            return _module.Import(field, context);
+            return _module.Import(field/*, context*/);
         }
 
         public ModuleDefinition GetModule()
@@ -114,7 +114,6 @@ namespace AspectInjector.Core.Fluent.Models
         }
 
         public TypeReference Import(TypeReference type, IGenericParameterProvider genericContext)
-
         {
             return _module.Import(type, genericContext);
         }

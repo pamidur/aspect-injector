@@ -89,26 +89,21 @@ namespace AspectInjector.Core.Models
                 exactType = newRef;
             }
 
-            var tr = new TypeReference(exactType.Namespace ?? "", exactType.Name, reference, exactType.Scope);
-
-            tr.DeclaringType = exactType.DeclaringType;
+            var tr = reference.Import(exactType);
 
             if (Arguments != null && Arguments.Any())
             {
-                var args = Arguments.Select(a => a.ToTypeReference(resolver, reference));
+                if (!tr.HasGenericParameters)
+                    throw new Exception("Wrong!");
 
-                var gps = args.Where(a => a is GenericParameter).ToList();
-                var gas = args.Except(gps).ToList();
+                var args = Arguments.Select(a => a.ToTypeReference(resolver, reference)).ToList();
 
-                if (gas.Any())
+                if (!args.All(a => a is GenericParameter))
                 {
                     var gtr = new GenericInstanceType(tr);
-                    gas.ForEach(ga => gtr.GenericArguments.Add(ga));
+                    tr.GenericParameters.Select(gp => args[gp.Position]).ToList().ForEach(ga => gtr.GenericArguments.Add(ga));
                     tr = gtr;
                 }
-
-                gps.Cast<GenericParameter>().ToList().ForEach(gp => tr.GenericParameters.Add(gp));
-                //gps.Cast<GenericParameter>().ToList().ForEach(gp => tr.GenericParameters.Add(new GenericParameter(gp.Name, tr)));
             }
 
             return tr;
