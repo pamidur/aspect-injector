@@ -6,6 +6,8 @@ namespace AspectInjector.Core.Contracts
 {
     public interface IAspectReader : IInitializable
     {
-        IEnumerable<AspectUsage> ReadAspects(AssemblyDefinition assembly);
+        IEnumerable<Effect> ReadEffects(ModuleDefinition module);
+
+        void Cleanup(ModuleDefinition module);
     }
 }

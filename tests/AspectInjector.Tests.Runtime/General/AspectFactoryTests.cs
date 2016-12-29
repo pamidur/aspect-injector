@@ -15,7 +15,7 @@ namespace AspectInjector.Tests.General
         }
     }
 
-    [Aspect(typeof(AspectFactoryTests_Aspect))]
+    [Incut(typeof(AspectFactoryTests_Aspect))]
     public class AspectFactoryTests_Target
     {
     }

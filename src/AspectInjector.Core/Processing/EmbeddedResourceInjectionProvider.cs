@@ -13,7 +13,7 @@ using System.Text;
 
 namespace AspectInjector.Core.Processing
 {
-    public class EmbeddedResourceInjectionProvider : IInjectionCacheProvider
+    public class EmbeddedResourceInjectionProvider : IAspectCacheProvider
     {
         //todo:: better static cache with assembly update check
         private readonly ConcurrentDictionary<string, object> _injectionCache = new ConcurrentDictionary<string, object>();
@@ -30,12 +30,12 @@ namespace AspectInjector.Core.Processing
             Log = context.Services.Log;
         }
 
-        public IEnumerable<Injection> GetInjections(TypeReference type)
+        public IEnumerable<Effect> GetEffects(TypeReference type)
         {
-            return ReadInjectionsFromModule(type.Module).Where(a => a.HostType.IsTypeOf(type));
+            return ReadInjectionsFromModule(type.Module).Where(a => a.Aspect.IsTypeOf(type));
         }
 
-        public void StoreInjections(ModuleDefinition toModule, IEnumerable<Injection> injections)
+        public void CacheEffects(ModuleDefinition toModule, IEnumerable<Effect> injections)
         {
             var serializerSettings = new JsonSerializerSettings
             {
@@ -67,7 +67,7 @@ namespace AspectInjector.Core.Processing
             _injectionCache.TryRemove(cacheKey, out temp);
         }
 
-        private IEnumerable<Injection> ReadInjectionsFromModule(ModuleDefinition module)
+        private IEnumerable<Effect> ReadInjectionsFromModule(ModuleDefinition module)
         {
             var serializerSettings = new JsonSerializerSettings
             {
@@ -88,14 +88,14 @@ namespace AspectInjector.Core.Processing
                 var resource = module.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == _resourceName);
 
                 if (resource == null)
-                    return new List<Injection>();
+                    return new List<Effect>();
 
                 var json = Encoding.UTF8.GetString(((EmbeddedResource)resource).GetResourceData());
 
-                result = JsonConvert.DeserializeObject<List<Injection>>(json, serializerSettings);
+                result = JsonConvert.DeserializeObject<List<Effect>>(json, serializerSettings);
             }
 
-            return (IEnumerable<Injection>)result;
+            return (IEnumerable<Effect>)result;
         }
 
         private string GetCacheKey(ModuleDefinition module)

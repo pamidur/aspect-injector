@@ -11,7 +11,7 @@ namespace AspectInjector.Tests.Interfaces
     [TestClass]
     public class GenericInterfacesTests
     {
-        [Broker.Aspect(typeof(Aspect))]
+        [Broker.Incut(typeof(Aspect))]
         public class TestClass
         {
             public TestClass()

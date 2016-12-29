@@ -1,5 +1,4 @@
-﻿using AspectInjector.Broker;
-using AspectInjector.Core.Contexts;
+﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
@@ -13,7 +12,7 @@ using static AspectInjector.Broker.AspectBase;
 
 namespace AspectInjector.Core.Processing
 {
-    public class AspectReader : IAspectReader
+    public class AspectReader : IInjectionReader
     {
         private ProcessingContext _context;
         protected ILogger Log { get; private set; }
@@ -24,9 +23,9 @@ namespace AspectInjector.Core.Processing
             Log = context.Services.Log;
         }
 
-        public IEnumerable<AspectUsage> ReadAspects(AssemblyDefinition assembly)
+        public IEnumerable<Models.Injection> ReadAspects(AssemblyDefinition assembly)
         {
-            var aspects = Enumerable.Empty<AspectUsage>();
+            var aspects = Enumerable.Empty<Models.Injection>();
             aspects = aspects.Concat(ExtractAspectsFrom(assembly));
 
             foreach (var module in assembly.Modules)
@@ -61,13 +60,13 @@ namespace AspectInjector.Core.Processing
             return aspects;
         }
 
-        protected virtual IEnumerable<AspectUsage> ExtractAspectsFrom<T>(T source) where T : class, ICustomAttributeProvider
+        protected virtual IEnumerable<Models.Injection> ExtractAspectsFrom<T>(T source) where T : class, ICustomAttributeProvider
         {
             //to much linq in this method, be careful!
 
-            var aspectAndFilterPairs = source.CustomAttributes.Where(a => a.AttributeType.IsTypeOf(typeof(Aspect))).Select(a => ParseAspectAttribute(source, a));
+            var aspectAndFilterPairs = source.CustomAttributes.Where(a => a.AttributeType.IsTypeOf(typeof(Broker.Incut))).Select(a => ParseAspectAttribute(source, a));
 
-            var aspectDefinitions = source.CustomAttributes.GroupBy(ca => ca, ca => ca.AttributeType.Resolve().CustomAttributes.Where(ad => ad.AttributeType.IsTypeOf(typeof(AspectDefinition)))).Where(g => g.Any());
+            var aspectDefinitions = source.CustomAttributes.GroupBy(ca => ca, ca => ca.AttributeType.Resolve().CustomAttributes.Where(ad => ad.AttributeType.IsTypeOf(typeof(Broker.IncutSpecification)))).Where(g => g.Any());
 
             aspectAndFilterPairs = aspectAndFilterPairs.Concat(aspectDefinitions.SelectMany(g => g.SelectMany(ads => ads.Select(ad => ParseAspectAttribute(source, ad, g.Key)))));
 
@@ -76,7 +75,7 @@ namespace AspectInjector.Core.Processing
             return result;
         }
 
-        private Tuple<AspectUsage<T>, ChildrenFilter> ParseAspectAttribute<T>(T source, CustomAttribute attr, CustomAttribute routableData = null)
+        private Tuple<Injection<T>, ChildrenFilter> ParseAspectAttribute<T>(T source, CustomAttribute attr, CustomAttribute routableData = null)
             where T : class, ICustomAttributeProvider
         {
             var injectionHost = attr.GetConstructorValue<TypeReference>(0).Resolve();
@@ -91,7 +90,7 @@ namespace AspectInjector.Core.Processing
                 .Where(c => c.IsConstructor && !c.IsStatic && !c.Parameters.Any())
                 .FirstOrDefault();
 
-            var aspectFactories = injectionHost.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.Any(ca => ca.AttributeType.IsTypeOf(typeof(AspectFactoryAttribute)))).ToList();
+            var aspectFactories = injectionHost.Methods.Where(m => m.IsStatic && !m.IsConstructor && m.CustomAttributes.Any(ca => ca.AttributeType.IsTypeOf(typeof(Broker.AspectFactory)))).ToList();
 
             foreach (var af in aspectFactories)
             {
@@ -108,27 +107,27 @@ namespace AspectInjector.Core.Processing
             if (aspectFactories.Any())
                 aspectFactory = aspectFactories.First();
 
-            return new Tuple<AspectUsage<T>, ChildrenFilter>(new AspectUsage<T>()
+            return new Tuple<Injection<T>, ChildrenFilter>(new Injection<T>()
             {
                 Target = source,
-                InjectionHost = injectionHost,
-                InjectionHostFactory = aspectFactory,
+                Aspect = injectionHost,
+                AspectFactory = aspectFactory,
                 RoutableData = routableData == null ? new List<CustomAttribute>() : new List<CustomAttribute> { routableData }
             },
             null//attr.GetPropertyValue<AspectBase, ChildrenFilter>(a => a.Filter)
             );
         }
 
-        private AspectUsage MergeAspects(AspectUsage a1, AspectUsage a2)
+        private Injection MergeAspects(Models.Injection a1, Models.Injection a2)
         {
             a1.RoutableData = a1.RoutableData.Union(a2.RoutableData, CustomAttribureEqualityComparer.Instance).ToList();
             return a1;
         }
 
-        private IEnumerable<Models.AspectUsage> FindApplicableChildren<T>(AspectUsage<T> arg, ChildrenFilter filter) where T : class, ICustomAttributeProvider
+        private IEnumerable<Models.Injection> FindApplicableChildren<T>(Injection<T> arg, ChildrenFilter filter) where T : class, ICustomAttributeProvider
         {
             //todo:: here goes applicable children lookup, below is exaple fot T : TypeDefinition looking gor applicable methods
-            return Enumerable.Empty<Models.AspectUsage>();
+            return Enumerable.Empty<Models.Injection>();
         }
 
         private static bool CheckFilter(MethodDefinition targetMethod,

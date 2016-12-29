@@ -20,7 +20,7 @@ namespace AspectInjector.CompileTimeTests
 
         public class TargetClass
         {
-            [Aspect(typeof(AspectImplementation))]
+            [Incut(typeof(AspectImplementation))]
             public void TestMethod(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut, ref long longRef, ref double doubleRef, ref char charRef)
             {
                 valueOut = 1;

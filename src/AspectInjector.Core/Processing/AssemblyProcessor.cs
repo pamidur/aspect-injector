@@ -26,8 +26,8 @@ namespace AspectInjector.Core.Processing
             {
                 foreach (var extrator in _context.Services.InjectionReaders)
                 {
-                    var injections = extrator.ReadInjections(module);
-                    _context.Services.InjectionCacheProvider.StoreInjections(module, injections);
+                    var injections = extrator.ReadEffects(module);
+                    _context.Services.InjectionCacheProvider.CacheEffects(module, injections);
                 }
             }
 
@@ -43,7 +43,7 @@ namespace AspectInjector.Core.Processing
 
                 foreach (var aspect in aspects.OrderByDescending(a => a.Priority))
                 {
-                    var matchednjections = _context.Services.InjectionCacheProvider.GetInjections(aspect.InjectionHost).Where(i => i.IsApplicableFor(aspect)).ToList();
+                    var matchednjections = _context.Services.InjectionCacheProvider.GetEffects(aspect.Aspect).Where(i => i.IsApplicableFor(aspect)).ToList();
 
                     foreach (var injection in matchednjections.OrderByDescending(i => i.Priority))
                         if (injector.CanApply(injection))

@@ -19,7 +19,7 @@ namespace AspectInjector.CompileTimeTests
 
         public class TestClass
         {
-            [Aspect(typeof(TestAspectImplementation))]
+            [Incut(typeof(TestAspectImplementation))]
             public object Do2(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut, ref long longRef, ref double doubleRef, ref char charRef)
             {
                 objOut = new object();
@@ -28,7 +28,7 @@ namespace AspectInjector.CompileTimeTests
                 return new object();
             }
 
-            [Aspect(typeof(TestAspectImplementation))]
+            [Incut(typeof(TestAspectImplementation))]
             public static object Do1(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut, ref long longRef, ref double doubleRef, ref char charRef)
             {
                 objOut = new object();

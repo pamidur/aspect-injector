@@ -26,7 +26,7 @@ namespace AspectInjector.Tests.General
         }
     }
 
-    [AspectDefinition(typeof(NotifyPropertyChangedAspect))]
+    [IncutSpecification(typeof(NotifyPropertyChangedAspect))]
     internal class NotifyAttribute : Attribute
     {
         public string NotifyAlso { get; set; }

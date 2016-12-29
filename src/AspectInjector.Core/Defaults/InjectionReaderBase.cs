@@ -8,8 +8,8 @@ using System.Linq;
 
 namespace AspectInjector.Core.Defaults
 {
-    public abstract class InjectionReaderBase<T> : IInjectionReader
-        where T : Injection
+    public abstract class InjectionReaderBase<T> : IAspectReader
+        where T : Effect
     {
         protected ILogger Log { get; private set; }
 
@@ -20,9 +20,9 @@ namespace AspectInjector.Core.Defaults
             Log = context.Services.Log;
         }
 
-        IEnumerable<Injection> IInjectionReader.ReadInjections(ModuleDefinition module)
+        IEnumerable<Effect> IAspectReader.ReadEffects(ModuleDefinition module)
         {
-            return ReadInjections(module).Cast<Injection>();
+            return ReadInjections(module).Cast<Effect>();
         }
 
         public void Cleanup(ModuleDefinition module)

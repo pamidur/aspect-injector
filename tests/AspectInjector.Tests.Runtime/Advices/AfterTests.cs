@@ -116,7 +116,7 @@ namespace AspectInjector.Tests.Advices
 
     //test classes
 
-    [Aspect(typeof(AfterTests_AfterConstructorAspect))]
+    [Incut(typeof(AfterTests_AfterConstructorAspect))]
     internal class AfterTests_AfterConstructorTarget
     {
         public AfterTests_AfterConstructorTarget()
@@ -128,7 +128,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
-    [Aspect(typeof(AfterTests_AfterMethodAspect))]
+    [Incut(typeof(AfterTests_AfterMethodAspect))]
     internal class AfterTests_AfterMethodTarget
     {
         public void TestMethod(string data)
@@ -184,7 +184,7 @@ namespace AspectInjector.Tests.Advices
     {
         public static int GlobalData = 0;
 
-        [Aspect(typeof(AfterTests_SetterValueAspect))]
+        [Incut(typeof(AfterTests_SetterValueAspect))]
         public int Data { get; set; }
     }
 

@@ -1,45 +1,46 @@
-﻿using AspectInjector.Core.Extensions;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Extensions;
 using Mono.Cecil;
 using System;
+using System.Collections.Generic;
 
 namespace AspectInjector.Core.Models
 {
-    public abstract class Injection : IEquatable<Injection>
+    public class Injection<TTarget> : Injection, IEquatable<Injection>
+        where TTarget : class, ICustomAttributeProvider
     {
-        public TypeReference HostType { get; set; }
+        public Injection()
+        {
+            TargetKind = (InjectionTargetType)Enum.Parse(typeof(InjectionTargetType), typeof(TTarget).Name);
+        }
 
-        public uint Priority { get; protected set; }
+        public TTarget Target { get; set; }
 
         public bool Equals(Injection other)
         {
-            return other.HostType.GetFQN() == HostType.GetFQN() && IsEqualTo(other);
+            return other is Injection<TTarget>
+                && other.Aspect.GetFQN() == Aspect.GetFQN()
+                && ((Injection<TTarget>)other).Target == Target;
         }
 
         public override bool Equals(object obj)
         {
-            if (obj == null)
-                return false;
-            if (obj.GetType() != GetType())
-                return false;
-
-            return Equals((Injection)obj);
+            return obj != null && obj is Injection<TTarget> && Equals((Injection<TTarget>)obj);
         }
 
         public override int GetHashCode()
         {
-            return HostType.GetFQN().GetHashCode();
+            return Aspect.GetFQN().GetHashCode();
         }
+    }
 
-        public bool IsApplicableFor(AspectUsage aspect)
-        {
-            return aspect.InjectionHost.GetFQN() == HostType.GetFQN() && IsApplicableForAspect(aspect);
-        }
-
-        protected virtual bool IsApplicableForAspect(AspectUsage aspect)
-        {
-            return true;
-        }
-
-        protected abstract bool IsEqualTo(Injection other);
+    public abstract class Injection
+    {
+        public InjectionTargetType TargetKind { get; protected set; }
+        public MethodDefinition AspectFactory { get; internal set; }
+        public AspectCreationScope Scope { get; internal set; }
+        public uint Priority { get; internal set; }
+        public TypeReference Aspect { get; internal set; }
+        public IEnumerable<CustomAttribute> RoutableData { get; internal set; }
     }
 }

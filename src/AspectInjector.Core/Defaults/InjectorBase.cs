@@ -7,7 +7,7 @@ using System;
 namespace AspectInjector.Core.Defaults
 {
     public abstract class InjectorBase<T> : IInjector
-        where T : Injection
+        where T : Effect
     {
         protected ILogger Log { get; private set; }
 
@@ -15,19 +15,19 @@ namespace AspectInjector.Core.Defaults
 
         public byte Priority { get; protected set; }
 
-        protected virtual void Apply(AspectUsage<AssemblyDefinition> aspect, T injection)
+        protected virtual void Apply(Injection<AssemblyDefinition> aspect, T injection)
         {
         }
 
-        protected virtual void Apply(AspectUsage<ModuleDefinition> aspect, T injection)
+        protected virtual void Apply(Injection<ModuleDefinition> aspect, T injection)
         {
         }
 
-        protected virtual void Apply(AspectUsage<TypeDefinition> aspect, T injection)
+        protected virtual void Apply(Injection<TypeDefinition> aspect, T injection)
         {
         }
 
-        protected virtual void Apply(AspectUsage<MethodDefinition> aspect, T injection)
+        protected virtual void Apply(Injection<MethodDefinition> aspect, T injection)
         {
         }
 
@@ -37,19 +37,19 @@ namespace AspectInjector.Core.Defaults
             Context = context;
         }
 
-        public void Apply(AspectUsage aspect, Injection injection)
+        public void Apply(Injection aspect, Effect injection)
         {
             var typedInjection = (T)injection;
 
-            if (aspect is AspectUsage<AssemblyDefinition>)
-                Apply((AspectUsage<AssemblyDefinition>)aspect, typedInjection);
-            else if (aspect is AspectUsage<ModuleDefinition>)
-                Apply((AspectUsage<ModuleDefinition>)aspect, typedInjection);
-            else if (aspect is AspectUsage<TypeDefinition>)
-                Apply((AspectUsage<TypeDefinition>)aspect, typedInjection);
+            if (aspect is Injection<AssemblyDefinition>)
+                Apply((Injection<AssemblyDefinition>)aspect, typedInjection);
+            else if (aspect is Injection<ModuleDefinition>)
+                Apply((Injection<ModuleDefinition>)aspect, typedInjection);
+            else if (aspect is Injection<TypeDefinition>)
+                Apply((Injection<TypeDefinition>)aspect, typedInjection);
         }
 
-        public bool CanApply(Injection injection)
+        public bool CanApply(Effect injection)
         {
             return injection is T && CanApply((T)injection);
         }

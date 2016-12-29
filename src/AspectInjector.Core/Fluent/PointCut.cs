@@ -78,7 +78,7 @@ namespace AspectInjector.Core.Models
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
         }
 
-        public PointCut Load(AspectUsage aspect)
+        public PointCut Load(Injection aspect)
         {
             var aspectField = _ctx.Aspects.Get(aspect, _proc.Body.Method.DeclaringType);
 

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace AspectInjector.Tests.General
 {
     //The compilation is just failed if injector tries to process external methods
-    [Aspect(typeof(UnmanagedTests_Aspect))]
+    [Incut(typeof(UnmanagedTests_Aspect))]
     public class UnmanagedTests
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto)]

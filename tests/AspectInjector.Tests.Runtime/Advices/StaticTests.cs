@@ -31,8 +31,8 @@ namespace AspectInjector.Tests.Advices
 
         public class StaticTests_AroundTarget
         {
-            [Aspect(typeof(StaticTests_AroundAspect1))]
-            [Aspect(typeof(StaticTests_AroundAspect2))] //fire first
+            [Incut(typeof(StaticTests_AroundAspect1))]
+            [Incut(typeof(StaticTests_AroundAspect2))] //fire first
             public static int Do123(int data, StringBuilder sb, object to, bool passed, bool passed2)
             {
                 Checker.Passed = passed && passed2;
@@ -63,7 +63,7 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(typeof(StaticTests_BeforeAspect))]
+        [Incut(typeof(StaticTests_BeforeAspect))]
         internal class StaticTests_BeforeTarget
         {
             public static void TestStaticMethod()

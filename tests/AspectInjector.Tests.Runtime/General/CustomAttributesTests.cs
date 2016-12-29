@@ -50,7 +50,7 @@ namespace AspectInjector.Tests.General
     }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = true)]
-    [AspectDefinition(typeof(CustomAttributesTests_Aspect))]
+    [IncutSpecification(typeof(CustomAttributesTests_Aspect))]
     internal class CustomAttributesTestsAttribute : Attribute
     {
         public string Header { get; private set; }
@@ -77,13 +77,13 @@ namespace AspectInjector.Tests.General
     }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = true)]
-    [AspectDefinition(typeof(CustomAttributesTests_MultipleAspect), NameFilter = "Do")]
+    [IncutSpecification(typeof(CustomAttributesTests_MultipleAspect), NameFilter = "Do")]
     public class CustomAttributesTests_Multiple1Attribute : Attribute
     {
     }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event, AllowMultiple = true)]
-    [AspectDefinition(typeof(CustomAttributesTests_MultipleAspect))]
+    [IncutSpecification(typeof(CustomAttributesTests_MultipleAspect))]
     public class CustomAttributesTests_Multiple2Attribute : Attribute
     {
     }

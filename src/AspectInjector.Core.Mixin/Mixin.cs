@@ -4,16 +4,16 @@ using Mono.Cecil;
 
 namespace AspectInjector.Core.Mixin
 {
-    internal class Mixin : Injection
+    internal class Mixin : Effect
     {
         public TypeReference InterfaceType { get; set; }
 
-        protected override bool IsApplicableForAspect(AspectUsage aspect)
+        protected override bool IsApplicableForAspect(Injection aspect)
         {
-            return aspect.TargetKind == AspectTargetKind.TypeDefinition;
+            return aspect.TargetKind == InjectionTargetType.TypeDefinition;
         }
 
-        protected override bool IsEqualTo(Injection injection)
+        protected override bool IsEqualTo(Effect injection)
         {
             var other = (Mixin)injection;
             return other.InterfaceType.GetFQN() == InterfaceType.GetFQN();

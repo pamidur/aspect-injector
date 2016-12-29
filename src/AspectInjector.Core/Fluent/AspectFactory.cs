@@ -70,7 +70,7 @@ namespace AspectInjector.Core.Fluent
             return method;
         }
 
-        public FieldDefinition Get(AspectUsage aspect, TypeDefinition target)
+        public FieldDefinition Get(Core.Models.Injection aspect, TypeDefinition target)
         {
             MethodDefinition initMethod = null;
             FieldAttributes fieldAttrs;
@@ -80,24 +80,24 @@ namespace AspectInjector.Core.Fluent
             {
                 fieldAttrs = FieldAttributes.Private;
                 initMethod = GetInstanсeAspectsInitializer(target);
-                aspectPropertyName = $"{_ctx.Factory.Prefix}i_{aspect.InjectionHost.Name}";
+                aspectPropertyName = $"{_ctx.Factory.Prefix}i_{aspect.Aspect.Name}";
             }
             else if (aspect.Scope == AspectCreationScope.Type)
             {
                 fieldAttrs = FieldAttributes.Private | FieldAttributes.Static;
                 initMethod = GetTypeAspectsInitializer(target);
-                aspectPropertyName = $"{_ctx.Factory.Prefix}t_{aspect.InjectionHost.Name}";
+                aspectPropertyName = $"{_ctx.Factory.Prefix}t_{aspect.Aspect.Name}";
             }
             else throw new NotSupportedException("Scope " + aspect.Scope.ToString() + " is not supported (yet).");
 
-            var existingField = target.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(aspect.InjectionHost));
+            var existingField = target.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(aspect.Aspect));
             if (existingField != null)
                 return existingField;
 
-            var field = new FieldDefinition(aspectPropertyName, fieldAttrs, _ctx.TypeSystem.Import(aspect.InjectionHost));
+            var field = new FieldDefinition(aspectPropertyName, fieldAttrs, _ctx.TypeSystem.Import(aspect.Aspect));
             target.Fields.Add(field);
 
-            InjectInitialization(initMethod, field, aspect.InjectionHostFactory);
+            InjectInitialization(initMethod, field, aspect.AspectFactory);
 
             return field;
         }

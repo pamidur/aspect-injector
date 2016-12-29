@@ -27,7 +27,7 @@ namespace AspectInjector.Core.Mixin
         {
             var advices = from ca in type.CustomAttributes
                           where ca.AttributeType.IsTypeOf(typeof(Broker.Mixin))
-                          select new Mixin { InterfaceType = ca.GetConstructorValue<TypeReference>(0), HostType = type };
+                          select new Mixin { InterfaceType = ca.GetConstructorValue<TypeReference>(0), Aspect = type };
 
             foreach (var nestedType in type.NestedTypes)
                 advices = advices.Concat(ReadMixins(nestedType));
@@ -40,10 +40,10 @@ namespace AspectInjector.Core.Mixin
             foreach (var mixin in mixins)
             {
                 if (!mixin.InterfaceType.Resolve().IsInterface)
-                    Log.LogError(CompilationError.From($"{mixin.InterfaceType.Name} is not an interface.", mixin.HostType.Resolve()));
+                    Log.LogError(CompilationError.From($"{mixin.InterfaceType.Name} is not an interface.", mixin.Aspect.Resolve()));
 
-                if (!mixin.HostType.Implements(mixin.InterfaceType))
-                    Log.LogError(CompilationError.From($"{mixin.HostType.Name} should implement {mixin.InterfaceType.Name}.", mixin.HostType.Resolve()));
+                if (!mixin.Aspect.Implements(mixin.InterfaceType))
+                    Log.LogError(CompilationError.From($"{mixin.Aspect.Name} should implement {mixin.InterfaceType.Name}.", mixin.Aspect.Resolve()));
 
                 yield return mixin;
             }

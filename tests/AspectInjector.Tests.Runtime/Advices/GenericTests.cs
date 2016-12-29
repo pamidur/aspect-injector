@@ -41,7 +41,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
-    [Aspect(typeof(GenericTests_Aspect))]
+    [Incut(typeof(GenericTests_Aspect))]
     internal class GenericTests_Target<T>
     {
         public void TestMethod()
@@ -63,7 +63,7 @@ namespace AspectInjector.Tests.Advices
     {
     }
 
-    [Aspect(typeof(GenericTests_OpenGenericAspect))]
+    [Incut(typeof(GenericTests_OpenGenericAspect))]
     internal class GenericTests_OpenGenericTarget<U, V> :
         GenericTests_OpenGenericTargetBase<string, U>
     {

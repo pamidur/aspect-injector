@@ -71,7 +71,7 @@ namespace AspectInjector.Broker
             ReturnType,
 
             /// <summary>
-            /// Set of Attributes that defines <see cref="AspectDefinition" />.
+            /// Set of Attributes that defines <see cref="IncutSpecification" />.
             /// Should be of type <c>Attribute[]</c>.
             /// </summary>
             RoutableData

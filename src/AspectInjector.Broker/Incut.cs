@@ -3,9 +3,9 @@
 namespace AspectInjector.Broker
 {
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
-    public sealed class Aspect : AspectBase
+    public sealed class Incut : AspectBase
     {
-        public Aspect(Type aspectType)
+        public Incut(Type aspectType)
         {
         }
     }

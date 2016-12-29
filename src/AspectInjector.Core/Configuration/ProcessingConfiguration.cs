@@ -27,7 +27,7 @@ namespace AspectInjector.Core.Configuration
         public IReadOnlyCollection<Type> Injectors { get; private set; } = new List<Type>();
 
         public ProcessingConfiguration RegisterInjectionReader<T>()
-            where T : class, IInjectionReader
+            where T : class, IAspectReader
         {
             ((List<Type>)InjectionReaders).Add(typeof(T));
             return this;
@@ -40,7 +40,7 @@ namespace AspectInjector.Core.Configuration
             return this;
         }
 
-        public ProcessingConfiguration SetInjectionCacheProvider<T>() where T : class, IInjectionCacheProvider
+        public ProcessingConfiguration SetInjectionCacheProvider<T>() where T : class, IAspectCacheProvider
         {
             InjectionCacheProvider = typeof(T);
             return this;
@@ -52,7 +52,7 @@ namespace AspectInjector.Core.Configuration
             return this;
         }
 
-        public ProcessingConfiguration SetAspectReader<T>() where T : class, IAspectReader
+        public ProcessingConfiguration SetAspectReader<T>() where T : class, IInjectionReader
         {
             AspectReader = typeof(T);
             return this;
@@ -83,10 +83,10 @@ namespace AspectInjector.Core.Configuration
                 {
                     Log = Log,
                     Prefix = Prefix,
-                    InjectionCacheProvider = (IInjectionCacheProvider)Activator.CreateInstance(InjectionCacheProvider),
-                    AspectReader = (IAspectReader)Activator.CreateInstance(AspectReader),
+                    InjectionCacheProvider = (IAspectCacheProvider)Activator.CreateInstance(InjectionCacheProvider),
+                    AspectReader = (IInjectionReader)Activator.CreateInstance(AspectReader),
                     AssemblyProcessor = (IAssemblyProcessor)Activator.CreateInstance(AssemblyProcessor),
-                    InjectionReaders = InjectionReaders.Select(e => (IInjectionReader)Activator.CreateInstance(e)).ToList(),
+                    InjectionReaders = InjectionReaders.Select(e => (IAspectReader)Activator.CreateInstance(e)).ToList(),
                     Injectors = Injectors.Select(i => (IInjector)Activator.CreateInstance(i)).ToList(),
                 }
             };

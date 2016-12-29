@@ -6,8 +6,8 @@ namespace AspectInjector.Core.Contracts
     {
         byte Priority { get; }
 
-        void Apply(AspectUsage aspect, Injection injection);
+        void Apply(Injection aspect, Effect injection);
 
-        bool CanApply(Injection injection);
+        bool CanApply(Effect injection);
     }
 }

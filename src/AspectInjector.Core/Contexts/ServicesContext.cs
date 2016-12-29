@@ -5,7 +5,7 @@ namespace AspectInjector.Core.Contexts
 {
     public class ServicesContext
     {
-        public IInjectionCacheProvider InjectionCacheProvider { get; internal set; }
+        public IAspectCacheProvider InjectionCacheProvider { get; internal set; }
 
         public IAssemblyProcessor AssemblyProcessor { get; internal set; }
 
@@ -13,9 +13,9 @@ namespace AspectInjector.Core.Contexts
 
         public string Prefix { get; internal set; }
 
-        public IAspectReader AspectReader { get; internal set; }
+        public IInjectionReader AspectReader { get; internal set; }
 
-        public IEnumerable<IInjectionReader> InjectionReaders { get; internal set; }
+        public IEnumerable<IAspectReader> InjectionReaders { get; internal set; }
 
         public IEnumerable<IInjector> Injectors { get; set; }
     }

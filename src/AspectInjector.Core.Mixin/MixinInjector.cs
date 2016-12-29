@@ -17,7 +17,7 @@ namespace AspectInjector.Core.Mixin
             Priority = 10;
         }
 
-        protected override void Apply(AspectUsage<TypeDefinition> aspect, Mixin mixin)
+        protected override void Apply(Injection<TypeDefinition> aspect, Mixin mixin)
         {
             var ts = Context.Editors.GetContext(aspect.Target.Module).TypeSystem;
 
@@ -41,7 +41,7 @@ namespace AspectInjector.Core.Mixin
                 }
         }
 
-        protected MethodDefinition GetOrCreateMethodProxy(MethodReference ifaceMethod, AspectUsage<TypeDefinition> aspect, ExtendedTypeSystem ts)
+        protected MethodDefinition GetOrCreateMethodProxy(MethodReference ifaceMethod, Injection<TypeDefinition> aspect, ExtendedTypeSystem ts)
         {
             var targetType = aspect.Target;
 
@@ -81,7 +81,7 @@ namespace AspectInjector.Core.Mixin
             return proxy;
         }
 
-        protected void CreateMethodProxy(MethodDefinition originalMethod, TypeReference @interface, AspectUsage<TypeDefinition> aspect, ExtendedTypeSystem ts)
+        protected void CreateMethodProxy(MethodDefinition originalMethod, TypeReference @interface, Injection<TypeDefinition> aspect, ExtendedTypeSystem ts)
         {
             var method = ts.Import(originalMethod);
 
@@ -91,7 +91,7 @@ namespace AspectInjector.Core.Mixin
             GetOrCreateMethodProxy(method, aspect, ts);
         }
 
-        protected void CreateEventProxy(EventDefinition originalEvent, TypeReference @interface, AspectUsage<TypeDefinition> aspect, ExtendedTypeSystem ts)
+        protected void CreateEventProxy(EventDefinition originalEvent, TypeReference @interface, Injection<TypeDefinition> aspect, ExtendedTypeSystem ts)
         {
             var eventName = $"{@interface.FullName}.{originalEvent.Name}";
             var eventType = @interface.ResolveGenericType(originalEvent.EventType);
@@ -121,7 +121,7 @@ namespace AspectInjector.Core.Mixin
             }
         }
 
-        protected void CreatePropertyProxy(PropertyDefinition originalProperty, TypeReference @interface, AspectUsage<TypeDefinition> aspect, ExtendedTypeSystem ts)
+        protected void CreatePropertyProxy(PropertyDefinition originalProperty, TypeReference @interface, Injection<TypeDefinition> aspect, ExtendedTypeSystem ts)
         {
             var propertyName = $"{@interface.FullName}.{originalProperty.Name}";
             var propertyType = @interface.ResolveGenericType(originalProperty.PropertyType);
