@@ -7,8 +7,8 @@ namespace AspectInjector.Core.Mixin
         public static ProcessingConfiguration UseMixinInjections(this ProcessingConfiguration config)
         {
             return config
-                .RegisterInjectionReader<MixinReader>()
-                .RegisterInjector<MixinInjector>();
+                .RegisterEffectReader<MixinReader>()
+                .RegisterWeaver<MixinInjector>();
         }
     }
 }

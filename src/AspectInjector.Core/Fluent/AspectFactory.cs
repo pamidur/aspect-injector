@@ -80,21 +80,21 @@ namespace AspectInjector.Core.Fluent
             {
                 fieldAttrs = FieldAttributes.Private;
                 initMethod = GetInstanсeAspectsInitializer(target);
-                aspectPropertyName = $"{_ctx.Factory.Prefix}i_{aspect.Aspect.Name}";
+                aspectPropertyName = $"{_ctx.Factory.Prefix}i_{aspect.Source.Name}";
             }
             else if (aspect.Scope == AspectCreationScope.Type)
             {
                 fieldAttrs = FieldAttributes.Private | FieldAttributes.Static;
                 initMethod = GetTypeAspectsInitializer(target);
-                aspectPropertyName = $"{_ctx.Factory.Prefix}t_{aspect.Aspect.Name}";
+                aspectPropertyName = $"{_ctx.Factory.Prefix}t_{aspect.Source.Name}";
             }
             else throw new NotSupportedException("Scope " + aspect.Scope.ToString() + " is not supported (yet).");
 
-            var existingField = target.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(aspect.Aspect));
+            var existingField = target.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(aspect.Source));
             if (existingField != null)
                 return existingField;
 
-            var field = new FieldDefinition(aspectPropertyName, fieldAttrs, _ctx.TypeSystem.Import(aspect.Aspect));
+            var field = new FieldDefinition(aspectPropertyName, fieldAttrs, _ctx.TypeSystem.Import(aspect.Source));
             target.Fields.Add(field);
 
             InjectInitialization(initMethod, field, aspect.AspectFactory);

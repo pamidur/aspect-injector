@@ -16,33 +16,35 @@ namespace AspectInjector.Core.Configuration
 
         public string Prefix { get; private set; }
 
+        public Type InjectionCollector { get; private set; }
+
         public Type AspectReader { get; private set; }
 
         public Type AssemblyProcessor { get; private set; }
 
-        public Type InjectionCacheProvider { get; private set; }
+        public Type AspectCache { get; private set; }
 
-        public IReadOnlyCollection<Type> InjectionReaders { get; private set; } = new List<Type>();
+        public IReadOnlyCollection<Type> EffectReaders { get; private set; } = new List<Type>();
 
-        public IReadOnlyCollection<Type> Injectors { get; private set; } = new List<Type>();
+        public IReadOnlyCollection<Type> Weavers { get; private set; } = new List<Type>();
 
-        public ProcessingConfiguration RegisterInjectionReader<T>()
+        public ProcessingConfiguration RegisterEffectReader<T>()
             where T : class, IAspectReader
         {
-            ((List<Type>)InjectionReaders).Add(typeof(T));
+            ((List<Type>)EffectReaders).Add(typeof(T));
             return this;
         }
 
-        public ProcessingConfiguration RegisterInjector<T>()
-            where T : class, IInjector
+        public ProcessingConfiguration RegisterWeaver<T>()
+            where T : class, IWeaver
         {
-            ((List<Type>)Injectors).Add(typeof(T));
+            ((List<Type>)Weavers).Add(typeof(T));
             return this;
         }
 
-        public ProcessingConfiguration SetInjectionCacheProvider<T>() where T : class, IAspectCacheProvider
+        public ProcessingConfiguration SetAspectCache<T>() where T : class, IAspectCache
         {
-            InjectionCacheProvider = typeof(T);
+            AspectCache = typeof(T);
             return this;
         }
 
@@ -52,7 +54,13 @@ namespace AspectInjector.Core.Configuration
             return this;
         }
 
-        public ProcessingConfiguration SetAspectReader<T>() where T : class, IInjectionReader
+        public ProcessingConfiguration SetInjectionCollector<T>() where T : class, IInjectionCollector
+        {
+            InjectionCollector = typeof(T);
+            return this;
+        }
+
+        public ProcessingConfiguration SetAspectReader<T>() where T : class, IInjectionCollector
         {
             AspectReader = typeof(T);
             return this;
@@ -83,19 +91,20 @@ namespace AspectInjector.Core.Configuration
                 {
                     Log = Log,
                     Prefix = Prefix,
-                    InjectionCacheProvider = (IAspectCacheProvider)Activator.CreateInstance(InjectionCacheProvider),
-                    AspectReader = (IInjectionReader)Activator.CreateInstance(AspectReader),
+                    AspectCache = (IAspectCache)Activator.CreateInstance(AspectCache),
+                    InjectionCollector = (IInjectionCollector)Activator.CreateInstance(InjectionCollector),
+                    AspectReader = (IAspectReader)Activator.CreateInstance(AspectReader),
                     AssemblyProcessor = (IAssemblyProcessor)Activator.CreateInstance(AssemblyProcessor),
-                    InjectionReaders = InjectionReaders.Select(e => (IAspectReader)Activator.CreateInstance(e)).ToList(),
-                    Injectors = Injectors.Select(i => (IInjector)Activator.CreateInstance(i)).ToList(),
+                    EffectReaders = EffectReaders.Select(e => (IEffectReader)Activator.CreateInstance(e)).ToList(),
+                    Weavers = Weavers.Select(i => (IWeaver)Activator.CreateInstance(i)).ToList(),
                 }
             };
 
-            context.Services.InjectionCacheProvider.Init(context);
-            context.Services.AspectReader.Init(context);
+            context.Services.AspectCache.Init(context);
+            context.Services.InjectionCollector.Init(context);
             context.Services.AssemblyProcessor.Init(context);
-            context.Services.InjectionReaders.ToList().ForEach(e => e.Init(context));
-            context.Services.Injectors.ToList().ForEach(i => i.Init(context));
+            context.Services.EffectReaders.ToList().ForEach(e => e.Init(context));
+            context.Services.Weavers.ToList().ForEach(i => i.Init(context));
 
             return context;
         }
@@ -105,10 +114,10 @@ namespace AspectInjector.Core.Configuration
             if (Log == null)
                 throw new Exception("Log should be set.");
 
-            if (InjectionCacheProvider == null)
+            if (AspectCache == null)
                 throw new Exception("InjectionCacheProvider should be set.");
 
-            if (AspectReader == null)
+            if (InjectionCollector == null)
                 throw new Exception("AspectReader should be set.");
 
             if (AssemblyProcessor == null)
@@ -125,9 +134,10 @@ namespace AspectInjector.Core.Configuration
             Default = new ProcessingConfiguration()
             .SetPrefix("__a$_")
             .SetLogger(new TraceLogger())
-            .SetInjectionCacheProvider<EmbeddedResourceInjectionProvider>()
+            .SetAspectCache<EmbeddedResourceAspectCache>()
             .SetAssemblyProcessor<AssemblyProcessor>()
-            .SetAspectReader<AspectReader>();
+            .SetAspectReader<InjectionCollector>()
+            .SetInjectionCollector<InjectionCollector>();
         }
     }
 }

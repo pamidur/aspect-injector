@@ -10,34 +10,34 @@ using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
-    internal class MixinInjector : InjectorBase<Mixin>
+    internal class MixinInjector : WeaverBase<Mixin>
     {
         public MixinInjector()
         {
             Priority = 10;
         }
 
-        protected override void Apply(Injection<TypeDefinition> aspect, Mixin mixin)
+        protected override void Apply(Injection<TypeDefinition> injection, Mixin mixin)
         {
-            var ts = Context.Editors.GetContext(aspect.Target.Module).TypeSystem;
+            var ts = Context.Editors.GetContext(injection.Target.Module).TypeSystem;
 
             var ifaceTree = GetInterfacesTree(mixin.InterfaceType);
 
             foreach (var iface in ifaceTree)
-                if (aspect.Target.Interfaces.All(i => !i.IsTypeOf(iface)))
+                if (injection.Target.Interfaces.All(i => !i.IsTypeOf(iface)))
                 {
-                    aspect.Target.Interfaces.Add(ts.Import(iface));
+                    injection.Target.Interfaces.Add(ts.Import(iface));
 
                     var ifaceDefinition = iface.Resolve();
 
                     foreach (var method in ifaceDefinition.Methods.Where(m => !m.IsAddOn && !m.IsRemoveOn && !m.IsSetter && !m.IsGetter))
-                        CreateMethodProxy(method, iface, aspect, ts);
+                        CreateMethodProxy(method, iface, injection, ts);
 
                     foreach (var @event in ifaceDefinition.Events)
-                        CreateEventProxy(@event, iface, aspect, ts);
+                        CreateEventProxy(@event, iface, injection, ts);
 
                     foreach (var property in ifaceDefinition.Properties)
-                        CreatePropertyProxy(property, iface, aspect, ts);
+                        CreatePropertyProxy(property, iface, injection, ts);
                 }
         }
 

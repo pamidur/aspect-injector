@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 namespace AspectInjector.Core.Contracts
 {
-    public interface IInjectionReader : IInitializable
+    public interface IInjectionCollector : IInitializable
     {
-        IEnumerable<Injection> ReadAspects(AssemblyDefinition assembly);
+        IEnumerable<Injection> Collect(AssemblyDefinition assembly);
     }
 }

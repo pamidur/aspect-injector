@@ -1,6 +1,6 @@
 ﻿namespace AspectInjector.Core.Models
 {
-    public enum InjectionTargetType
+    public enum InjectionTargetKind
     {
         AssemblyDefinition,
         ModuleDefinition,

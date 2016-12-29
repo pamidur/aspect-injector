@@ -8,21 +8,21 @@ using System.Linq;
 
 namespace AspectInjector.Core.Defaults
 {
-    public abstract class InjectionReaderBase<T> : IAspectReader
+    public abstract class EffectReaderBase<T> : IEffectReader
         where T : Effect
     {
         protected ILogger Log { get; private set; }
 
-        protected abstract IEnumerable<T> ReadInjections(ModuleDefinition module);
+        protected abstract IEnumerable<T> ReadEffects(TypeDefinition aspectHost);
 
         public void Init(ProcessingContext context)
         {
             Log = context.Services.Log;
         }
 
-        IEnumerable<Effect> IAspectReader.ReadEffects(ModuleDefinition module)
+        IEnumerable<Effect> IEffectReader.ReadEffects(TypeDefinition aspectHost)
         {
-            return ReadInjections(module).Cast<Effect>();
+            return ReadEffects(aspectHost).Cast<Effect>();
         }
 
         public void Cleanup(ModuleDefinition module)

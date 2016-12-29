@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
-    internal class MixinReader : InjectionReaderBase<Mixin>
+    internal class MixinReader : EffectReaderBase<Mixin>
     {
         protected override IEnumerable<Mixin> ReadInjections(ModuleDefinition module)
 

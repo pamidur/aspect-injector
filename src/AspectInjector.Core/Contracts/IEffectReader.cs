@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace AspectInjector.Core.Contracts
 {
-    public interface IAspectReader : IInitializable
+    public interface IEffectReader : IInitializable
     {
-        IEnumerable<AspectDefinition> Read(ModuleDefinition module);
+        IEnumerable<Effect> ReadEffects(TypeDefinition aspectHost);
 
         void Cleanup(ModuleDefinition module);
     }

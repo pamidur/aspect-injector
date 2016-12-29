@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AspectInjector.Core.MethodCall
 {
-    public class AdviceExtractor : InjectionReaderBase<Advice>
+    public class AdviceExtractor : EffectReaderBase<Advice>
     {
         protected override IEnumerable<Advice> ReadInjections(ModuleDefinition module)
         {

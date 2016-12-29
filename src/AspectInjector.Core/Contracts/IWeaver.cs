@@ -2,7 +2,7 @@
 
 namespace AspectInjector.Core.Contracts
 {
-    public interface IInjector : IInitializable
+    public interface IWeaver : IInitializable
     {
         byte Priority { get; }
 

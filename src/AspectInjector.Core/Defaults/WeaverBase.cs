@@ -6,7 +6,7 @@ using System;
 
 namespace AspectInjector.Core.Defaults
 {
-    public abstract class InjectorBase<T> : IInjector
+    public abstract class WeaverBase<T> : IWeaver
         where T : Effect
     {
         protected ILogger Log { get; private set; }

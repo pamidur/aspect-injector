@@ -13,7 +13,7 @@ using System.Text;
 
 namespace AspectInjector.Core.Processing
 {
-    public class EmbeddedResourceInjectionProvider : IAspectCacheProvider
+    public class EmbeddedResourceAspectCache : IAspectCache
     {
         //todo:: better static cache with assembly update check
         private readonly ConcurrentDictionary<string, object> _injectionCache = new ConcurrentDictionary<string, object>();
@@ -30,12 +30,12 @@ namespace AspectInjector.Core.Processing
             Log = context.Services.Log;
         }
 
-        public IEnumerable<Effect> GetEffects(TypeReference type)
+        public AspectDefinition Read(TypeReference type)
         {
             return ReadInjectionsFromModule(type.Module).Where(a => a.Aspect.IsTypeOf(type));
         }
 
-        public void CacheEffects(ModuleDefinition toModule, IEnumerable<Effect> injections)
+        public void Cache(ModuleDefinition toModule, IEnumerable<Effect> injections)
         {
             var serializerSettings = new JsonSerializerSettings
             {

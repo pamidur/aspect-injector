@@ -8,15 +8,20 @@ namespace AspectInjector.Core.Mixin
     {
         public TypeReference InterfaceType { get; set; }
 
-        protected override bool IsApplicableForAspect(Injection aspect)
+        public override bool IsApplicableFor(Injection aspect)
         {
-            return aspect.TargetKind == InjectionTargetType.TypeDefinition;
+            return aspect.TargetKind == InjectionTargetKind.TypeDefinition;
         }
 
-        protected override bool IsEqualTo(Effect injection)
+        public override bool Equals(Effect injection)
         {
             var other = (Mixin)injection;
             return other.InterfaceType.GetFQN() == InterfaceType.GetFQN();
+        }
+
+        public override int GetHashCode()
+        {
+            return InterfaceType.GetFQN().GetHashCode();
         }
     }
 }

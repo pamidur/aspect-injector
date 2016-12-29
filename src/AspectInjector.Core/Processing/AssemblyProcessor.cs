@@ -1,8 +1,6 @@
 ﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Processing.EqualityComparers;
 using Mono.Cecil;
-using System;
 using System.Linq;
 
 namespace AspectInjector.Core.Processing
@@ -20,15 +18,12 @@ namespace AspectInjector.Core.Processing
 
         public void ProcessAssembly(AssemblyDefinition assembly)
         {
-            var aspects = _context.Services.AspectReader.ReadAspects(assembly).ToList();
+            var injections = _context.Services.InjectionCollector.Collect(assembly).ToList();
 
             foreach (var module in assembly.Modules)
             {
-                foreach (var extrator in _context.Services.InjectionReaders)
-                {
-                    var injections = extrator.ReadEffects(module);
-                    _context.Services.InjectionCacheProvider.CacheEffects(module, injections);
-                }
+                var aspects = _context.Services.AspectReader.Read(module);
+                _context.Services.AspectCache.Cache(module, aspects);
             }
 
             if (Log.IsErrorThrown)
@@ -37,17 +32,19 @@ namespace AspectInjector.Core.Processing
                 return;
             }
 
-            foreach (var injector in _context.Services.Injectors.OrderByDescending(i => i.Priority))
+            foreach (var injector in _context.Services.Weavers.OrderByDescending(i => i.Priority))
             {
                 Log.LogInformation($"Executing {injector.GetType().Name}");
 
-                foreach (var aspect in aspects.OrderByDescending(a => a.Priority))
+                foreach (var injection in injections.OrderByDescending(a => a.Priority))
                 {
-                    var matchednjections = _context.Services.InjectionCacheProvider.GetEffects(aspect.Aspect).Where(i => i.IsApplicableFor(aspect)).ToList();
+                    var aspect = _context.Services.AspectCache.GetAspect(injection.Source);
 
-                    foreach (var injection in matchednjections.OrderByDescending(i => i.Priority))
-                        if (injector.CanApply(injection))
-                            injector.Apply(aspect, injection);
+                    var effects = aspect.Effects.Where(i => i.IsApplicableFor(injection)).ToList();
+
+                    foreach (var effect in effects.OrderByDescending(i => i.Priority))
+                        if (injector.CanApply(effect))
+                            injector.Apply(injection, effect);
                 }
             }
         }

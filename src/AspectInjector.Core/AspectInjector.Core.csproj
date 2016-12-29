@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\IEffectReader.cs" />
     <Compile Include="Extensions\GenericProcessingExtension.cs" />
     <Compile Include="Extensions\MemberReferenceExtensions.cs" />
     <Compile Include="Fluent\AspectFactory.cs" />
@@ -79,25 +80,25 @@
     <Compile Include="Fluent\TypeEditor.cs" />
     <Compile Include="Fluent\Models\ExtendedTypeSystem.cs" />
     <Compile Include="Fluent\PointCut.cs" />
-    <Compile Include="Models\AspectCreationScope.cs" />
     <Compile Include="Models\AspectDefinition.cs" />
     <Compile Include="Models\Effect.cs" />
     <Compile Include="Contracts\IAspectReader.cs" />
-    <Compile Include="Contracts\IInjectionReader.cs" />
+    <Compile Include="Contracts\IInjectionCollector.cs" />
     <Compile Include="Contracts\IInitializable.cs" />
     <Compile Include="Contracts\ILogger.cs" />
-    <Compile Include="Contracts\IInjector.cs" />
-    <Compile Include="Contracts\IAspectCacheProvider.cs" />
+    <Compile Include="Contracts\IWeaver.cs" />
+    <Compile Include="Contracts\IAspectCache.cs" />
     <Compile Include="Models\ChildrenFilter.cs" />
-    <Compile Include="Models\InjectionTargetType.cs" />
+    <Compile Include="Models\InjectionTargetKind.cs" />
     <Compile Include="Models\CompilationError.cs" />
+    <Compile Include="Processing\AspectReader.cs" />
     <Compile Include="Processing\Converters\TypeReferenceConverter.cs" />
-    <Compile Include="Defaults\InjectionReaderBase.cs" />
-    <Compile Include="Defaults\InjectorBase.cs" />
+    <Compile Include="Defaults\EffectReaderBase.cs" />
+    <Compile Include="Defaults\WeaverBase.cs" />
     <Compile Include="Contracts\IModuleProcessor.cs" />
     <Compile Include="Defaults\TraceLogger.cs" />
-    <Compile Include="Processing\AspectReader.cs" />
-    <Compile Include="Processing\EmbeddedResourceInjectionProvider.cs" />
+    <Compile Include="Processing\InjectionCollector.cs" />
+    <Compile Include="Processing\EmbeddedResourceAspectCache.cs" />
     <Compile Include="Processing\AssemblyProcessor.cs" />
     <Compile Include="Extensions\CustomAttributeExtensions.cs" />
     <Compile Include="Extensions\TypeReferenceExtensions.cs" />

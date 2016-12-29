@@ -3,7 +3,7 @@ using System;
 
 namespace AspectInjector.Core.MethodCall
 {
-    public class AroundAdviceInjector : InjectorBase<Advice>
+    public class AroundAdviceInjector : WeaverBase<Advice>
     {
         public AroundAdviceInjector()
         {
