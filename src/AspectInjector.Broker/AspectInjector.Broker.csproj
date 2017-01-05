@@ -52,14 +52,11 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AspectBase.cs" />
     <Compile Include="Advice\AdviceArgument.cs" />
     <Compile Include="Advice\Advice.cs" />
     <Compile Include="AspectUsage.cs" />
     <Compile Include="Mixin\Mixin.cs" />
-    <Compile Include="Incut.cs" />
-    <Compile Include="AspectFactory.cs" />
-    <Compile Include="IncutSpecification.cs" />
+    <Compile Include="Cut.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

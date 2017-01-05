@@ -8,11 +8,11 @@ namespace AspectInjector.CLI
     {
         private static int Main(string[] args)
         {
-#if DEBUG
-            Debugger.Launch();
-#endif
-
-            return Parser.Default.ParseArguments<ProcessCommand>(args)
+            return Parser.Default.ParseArguments<ProcessCommand, CommonOptions>(args)
+                .WithParsed<CommonOptions>(co =>
+                {
+                    if (co.Debug) Debugger.Launch();
+                })
                 .MapResult(
                   (ProcessCommand cmd) => cmd.Execute(),
                   errs => 1);

@@ -9,5 +9,7 @@ namespace AspectInjector.Core.Contracts
         AspectDefinition GetAspect(TypeReference host);
 
         void Cache(ModuleDefinition toModule, IEnumerable<AspectDefinition> aspect);
+
+        //todo:: cache cutspecs
     }
 }

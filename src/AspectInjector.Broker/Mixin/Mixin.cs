@@ -5,7 +5,7 @@ namespace AspectInjector.Broker
     /// <summary>
     /// Mixes in an interface implementation trough creating proxy methods.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class Mixin : Attribute
     {
         /// <summary>

@@ -20,7 +20,7 @@ namespace AspectInjector.CLI.Commands
         {
             if (!File.Exists(Filename))
             {
-                Log.LogError($"File {Filename} does not exists.");
+                Log.LogError($"File {Filename} does not exist.");
                 return 1;
             }
 

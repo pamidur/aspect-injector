@@ -1,5 +1,5 @@
 ﻿using AspectInjector.Broker;
-using static AspectInjector.Broker.AspectBase;
+using static AspectInjector.Broker.Cut;
 
 namespace AspectInjector.Core.Models
 {

@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System;
 
 namespace AspectInjector.Core.Processing
 {
@@ -67,8 +68,10 @@ namespace AspectInjector.Core.Processing
             _injectionCache.TryRemove(cacheKey, out temp);
         }
 
-        private IEnumerable<Effect> ReadInjectionsFromModule(ModuleDefinition module)
+        private IEnumerable<Effect> ReadInjectionsFromModule(TypeDefinition type)
         {
+            var module = type.Module;
+
             var serializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
@@ -101,6 +104,16 @@ namespace AspectInjector.Core.Processing
         private string GetCacheKey(ModuleDefinition module)
         {
             return $"{module.FullyQualifiedName}";
+        }
+
+        public AspectDefinition GetAspect(TypeReference host)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Cache(ModuleDefinition toModule, IEnumerable<AspectDefinition> aspect)
+        {
+            throw new NotImplementedException();
         }
     }
 }

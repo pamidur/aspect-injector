@@ -61,7 +61,7 @@ namespace AspectInjector.Tests.Advices
 
     public class AsyncTests_Target
     {
-        [Incut(typeof(AsyncTests_SimpleAspect))]
+        [Cut(typeof(AsyncTests_SimpleAspect))]
         public async Task Do()
         {
             await Task.Delay(1);
@@ -69,7 +69,7 @@ namespace AspectInjector.Tests.Advices
             AsyncTests.Data = true;
         }
 
-        [Incut(typeof(AsyncTests_SimpleAspect))]
+        [Cut(typeof(AsyncTests_SimpleAspect))]
         public async Task<string> Do2()
         {
             await Task.Delay(1);
@@ -79,7 +79,7 @@ namespace AspectInjector.Tests.Advices
             return "test";
         }
 
-        [Incut(typeof(AsyncTests_SimpleAspect))]
+        [Cut(typeof(AsyncTests_SimpleAspect))]
         public async void Do3()
         {
             await Task.Delay(1);
@@ -87,7 +87,7 @@ namespace AspectInjector.Tests.Advices
             AsyncTests.Data = true;
         }
 
-        [Incut(typeof(AsyncTests_ArgumentsAspect))]
+        [Cut(typeof(AsyncTests_ArgumentsAspect))]
         public async Task<string> Do4(string testData)
         {
             await Task.Delay(1);

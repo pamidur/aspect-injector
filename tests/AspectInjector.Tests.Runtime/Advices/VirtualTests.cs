@@ -22,7 +22,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
-    [Incut(typeof(VirtualTests_Aspect))]
+    [Cut(typeof(VirtualTests_Aspect))]
     internal class VirtualTests_Base
     {
         public virtual void Test()
@@ -30,7 +30,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
-    [Incut(typeof(VirtualTests_Aspect))]
+    [Cut(typeof(VirtualTests_Aspect))]
     internal class VirtualTests_Inherited : VirtualTests_Base
     {
         public override void Test()

@@ -73,8 +73,8 @@ namespace AspectInjector.Tests.Advices
 
         internal class AroundTests_Target
         {
-            [Incut(typeof(AroundTests_Aspect1))]
-            [Incut(typeof(AroundTests_Aspect2))] //fire first
+            [Cut(typeof(AroundTests_Aspect1))]
+            [Cut(typeof(AroundTests_Aspect2))] //fire first
             public object Do2(object data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
             {
                 Checker.Passed = passed && passed2;
@@ -85,8 +85,8 @@ namespace AspectInjector.Tests.Advices
                 return new object();
             }
 
-            [Incut(typeof(AroundTests_Aspect1))]
-            [Incut(typeof(AroundTests_Aspect2))] //fire first
+            [Cut(typeof(AroundTests_Aspect1))]
+            [Cut(typeof(AroundTests_Aspect2))] //fire first
             public int Do1(object data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
             {
                 Checker.Passed = passed && passed2;
@@ -120,7 +120,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class AroundTests_ArgumentsModificationTarget
         {
-            [Incut(typeof(AroundTests_ArgumentsModificationAspect))]
+            [Cut(typeof(AroundTests_ArgumentsModificationAspect))]
             public void TestMethod(ref int i)
             {
                 if (i == 2)
@@ -148,7 +148,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class AroundTests_StackTraceTarget
         {
-            [Incut(typeof(AroundTests_StackTraceAspect))]
+            [Cut(typeof(AroundTests_StackTraceAspect))]
             public void Do()
             {
                 throw new Exception("Test Exception");

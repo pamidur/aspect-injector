@@ -28,7 +28,7 @@ namespace AspectInjector.Core.Processing
 
             foreach (var reader in _context.Services.EffectReaders)
             {
-                var injections = reader.ReadEffects(module);
+                var injections = reader.ReadEffects(type);
             }
 
             result = result.Concat(type.NestedTypes.SelectMany(ReadAspects));

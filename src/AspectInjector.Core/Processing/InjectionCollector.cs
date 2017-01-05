@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using static AspectInjector.Broker.AspectBase;
+using static AspectInjector.Broker.Cut;
 
 namespace AspectInjector.Core.Processing
 {
@@ -64,9 +64,9 @@ namespace AspectInjector.Core.Processing
         {
             //to much linq in this method, be careful!
 
-            var aspectAndFilterPairs = source.CustomAttributes.Where(a => a.AttributeType.IsTypeOf(typeof(Broker.Incut))).Select(a => ParseAspectAttribute(source, a));
+            var aspectAndFilterPairs = source.CustomAttributes.Where(a => a.AttributeType.IsTypeOf(typeof(Broker.Cut))).Select(a => ParseAspectAttribute(source, a));
 
-            var aspectDefinitions = source.CustomAttributes.GroupBy(ca => ca, ca => ca.AttributeType.Resolve().CustomAttributes.Where(ad => ad.AttributeType.IsTypeOf(typeof(Broker.IncutSpecification)))).Where(g => g.Any());
+            var aspectDefinitions = source.CustomAttributes.GroupBy(ca => ca, ca => ca.AttributeType.Resolve().CustomAttributes.Where(ad => ad.AttributeType.IsTypeOf(typeof(Broker.CutSpecification)))).Where(g => g.Any());
 
             aspectAndFilterPairs = aspectAndFilterPairs.Concat(aspectDefinitions.SelectMany(g => g.SelectMany(ads => ads.Select(ad => ParseAspectAttribute(source, ad, g.Key)))));
 

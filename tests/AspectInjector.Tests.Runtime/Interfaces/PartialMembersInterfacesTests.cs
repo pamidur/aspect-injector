@@ -11,7 +11,7 @@ namespace AspectInjector.Tests.Interfaces
     [TestClass]
     public class PartialMembersInterfacesTests
     {
-        [Broker.Incut(typeof(Aspect))]
+        [Broker.Cut(typeof(Aspect))]
         public class TestClass
         {
         }

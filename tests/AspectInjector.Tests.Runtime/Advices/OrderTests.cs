@@ -23,9 +23,9 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
-    [Incut(typeof(OrderTests_Aspect1))]
-    [Incut(typeof(OrderTests_Aspect2))]
-    [Incut(typeof(OrderTests_Aspect3))]
+    [Cut(typeof(OrderTests_Aspect1))]
+    [Cut(typeof(OrderTests_Aspect2))]
+    [Cut(typeof(OrderTests_Aspect3))]
     internal class OrderTests_Target
     {
         public void TestMethod()
