@@ -1,15 +1,20 @@
-﻿using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Defaults;
-using AspectInjector.Core.Models;
+﻿using AspectInjector.Core.Models;
+using AspectInjector.Core.Services.Extraction;
+using AspectInjector.Core.Services.Injection;
 using Mono.Cecil;
 using System.Linq;
 
-namespace AspectInjector.Core.Processing
+namespace AspectInjector.Core.Services
 {
-    public class AssemblyProcessor : ServiceBase, IAssemblyProcessor
+    public class AssemblyProcessor : ServiceBase
     {
-        public AssemblyProcessor()
+        private readonly Extractor _extractor;
+        private readonly Injector _injector;
+
+        protected AssemblyProcessor(Extractor extractor, Injector injector, Logger logger) : base(logger)
         {
+            _extractor = extractor;
+            _injector = injector;
         }
 
         public void ProcessAssembly(AssemblyDefinition assembly)

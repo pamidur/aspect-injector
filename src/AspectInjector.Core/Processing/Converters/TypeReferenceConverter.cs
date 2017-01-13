@@ -1,5 +1,4 @@
-﻿using AspectInjector.Core.Contexts;
-using AspectInjector.Core.Models;
+﻿using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,12 +8,10 @@ namespace AspectInjector.Core.Processing.Converters
 {
     internal class TypeReferenceConverter : JsonConverter
     {
-        private readonly Context _context;
         private readonly ModuleDefinition _reference;
 
-        public TypeReferenceConverter(Context context, ModuleDefinition reference)
+        public TypeReferenceConverter(ModuleDefinition reference)
         {
-            _context = context;
             _reference = reference;
         }
 
@@ -28,7 +25,7 @@ namespace AspectInjector.Core.Processing.Converters
             var jt = JToken.Load(reader);
             var fqn = FQN.FromString(jt.ToObject<string>());
 
-            return fqn?.ToTypeReference(_context.Resolver, _reference);
+            return fqn?.ToTypeReference(_reference);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

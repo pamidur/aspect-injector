@@ -1,8 +1,8 @@
 ﻿using Mono.Cecil;
 
-namespace AspectInjector.Core.Contracts
+namespace AspectInjector.Core.Services.Extraction
 {
-    public interface IJanitor
+    public interface Janitor
     {
         void Visit(AssemblyDefinition assembly);
 

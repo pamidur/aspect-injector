@@ -1,5 +1,4 @@
-﻿using AspectInjector.Core.Contexts;
-using AspectInjector.Core.Contracts;
+﻿using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Core.Processing.Converters;
@@ -14,22 +13,21 @@ using System.Text;
 
 namespace AspectInjector.Core.Processing
 {
-    public class EmbeddedResourceAspectCache : ICache
+    public class Cache
     {
+        private static readonly string _aspectsResourceName = $"{Constants.Prefix}aspects";
+        private static readonly string _cutSpecsResourceName = $"{Constants.Prefix}cut-specs";
+
+        private AspectDefinition GetAspectDefinition(TypeReference host);
+
+        private IEnumerable<CutSpecDefinition> GetCutSpecDefinitions(TypeReference host);
+
+        private void Cache(IEnumerable<AspectDefinition> aspects);
+
+        private void Cache(IEnumerable<CutDefinition> cuts);
+
         //todo:: better static cache with assembly update check
         private readonly ConcurrentDictionary<string, object> _injectionCache = new ConcurrentDictionary<string, object>();
-
-        private Context _context;
-        private string _resourceName;
-
-        protected ILogger Log { get; private set; }
-
-        public void Init(Context context)
-        {
-            _context = context;
-            _resourceName = $"{context.Services.Prefix}injections";
-            Log = context.Services.Log;
-        }
 
         public AspectDefinition Read(TypeReference type)
         {
@@ -46,7 +44,7 @@ namespace AspectInjector.Core.Processing
                 TypeNameHandling = TypeNameHandling.Auto,
             };
 
-            serializerSettings.Converters.Add(new TypeReferenceConverter(_context, toModule));
+            serializerSettings.Converters.Add(new TypeReferenceConverter(toModule));
 
             var existingInjections = ReadInjectionsFromModule(toModule);
 
@@ -80,7 +78,7 @@ namespace AspectInjector.Core.Processing
                 TypeNameHandling = TypeNameHandling.Auto,
             };
 
-            serializerSettings.Converters.Add(new TypeReferenceConverter(_context, module));
+            serializerSettings.Converters.Add(new TypeReferenceConverter(module));
 
             var cacheKey = GetCacheKey(module);
 
@@ -88,7 +86,7 @@ namespace AspectInjector.Core.Processing
 
             if (!_injectionCache.TryGetValue(cacheKey, out result))
             {
-                var resource = module.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == _resourceName);
+                var resource = module.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == _aspectsResourceName);
 
                 if (resource == null)
                     return new List<Effect>();

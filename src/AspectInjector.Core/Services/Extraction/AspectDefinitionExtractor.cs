@@ -1,20 +1,22 @@
 ﻿using AspectInjector.Core.Contexts;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
+using AspectInjector.Core.Services;
+using AspectInjector.Core.Services.Abstract;
+using AspectInjector.Core.Services.Extraction;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AspectInjector.Core.Processing
+namespace AspectInjector.Core.Extraction
 {
-    public class AspectReader : IAspectDefinitionExtractor
+    public class AspectDefinitionExtractor : ServiceBase
     {
-        private Context _context;
+        private IEnumerable<AspectDefinition> Extract(TypeDefinition host);
 
-        public void Init(Context context)
+        public AspectDefinitionExtractor(IEnumerable<EffectExtractorBase> effectExtractors, Logger logger) : base(logger)
         {
-            _context = context;
         }
 
         public IEnumerable<AspectDefinition> Extract(ModuleDefinition module)

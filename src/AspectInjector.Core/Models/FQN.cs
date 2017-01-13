@@ -60,9 +60,9 @@ namespace AspectInjector.Core.Models
             return fqn;
         }
 
-        public TypeReference ToTypeReference(IAssemblyResolver resolver, ModuleDefinition reference)
+        public TypeReference ToTypeReference(ModuleDefinition reference)
         {
-            var asm = resolver.Resolve(AssemblyName);
+            var asm = reference.AssemblyResolver.Resolve(AssemblyName);
 
             var nestedPath = Name.Split(new[] { '+' });
 
@@ -96,7 +96,7 @@ namespace AspectInjector.Core.Models
                 if (!tr.HasGenericParameters)
                     throw new Exception("Wrong!");
 
-                var args = Arguments.Select(a => a.ToTypeReference(resolver, reference)).ToList();
+                var args = Arguments.Select(a => a.ToTypeReference(reference)).ToList();
 
                 if (!args.All(a => a is GenericParameter))
                 {

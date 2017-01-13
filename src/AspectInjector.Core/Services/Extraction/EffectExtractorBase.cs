@@ -1,14 +1,15 @@
 ﻿using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using AspectInjector.Core.Services.Abstract;
 using Mono.Cecil;
 using System.Collections.Generic;
 
-namespace AspectInjector.Core.Services.Abstract
+namespace AspectInjector.Core.Services.Extraction
 {
     public abstract class EffectExtractorBase : ServiceBase
     {
-        public EffectExtractorBase(string prefix, ILogger logger) : base(prefix, logger)
+        public EffectExtractorBase(Logger logger) : base(logger)
         {
         }
 
@@ -18,7 +19,7 @@ namespace AspectInjector.Core.Services.Abstract
     public abstract class EffectExtractorBase<T> : EffectExtractorBase
         where T : Effect
     {
-        public EffectExtractorBase(string prefix, ILogger logger) : base(prefix, logger)
+        public EffectExtractorBase(Logger logger) : base(logger)
         {
         }
 
@@ -28,7 +29,7 @@ namespace AspectInjector.Core.Services.Abstract
 
             foreach (var attribute in host.CustomAttributes)
             {
-                if (attribute.AttributeType.IsTypeOf(typeof(Broker.Mixin)))
+                if (HasEffect(attribute))
                 {
                     effects.Add(ReadEffect(attribute));
                     host.CustomAttributes.Remove(attribute);
@@ -38,7 +39,7 @@ namespace AspectInjector.Core.Services.Abstract
             return effects;
         }
 
-        protected abstract bool HasEffect
+        protected abstract bool HasEffect(CustomAttribute attribute);
 
         protected abstract T ReadEffect(CustomAttribute attribute);
     }

@@ -55,8 +55,9 @@
     <Compile Include="Advice\AdviceArgument.cs" />
     <Compile Include="Advice\Advice.cs" />
     <Compile Include="AspectUsage.cs" />
-    <Compile Include="Mixin\Mixin.cs" />
     <Compile Include="Cut.cs" />
+    <Compile Include="Mixin\Mixin.cs" />
+    <Compile Include="CutSpecification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

@@ -71,7 +71,7 @@ namespace AspectInjector.Broker
             ReturnType,
 
             /// <summary>
-            /// Set of Attributes that define <see cref="Cut.IsSpec" />.
+            /// Set of Attributes that define <see cref="CutSpecification" />.
             /// Should be of type <c>Attribute[]</c>.
             /// </summary>
             RoutableData

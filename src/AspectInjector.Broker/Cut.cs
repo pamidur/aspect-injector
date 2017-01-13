@@ -37,11 +37,6 @@ namespace AspectInjector.Broker
         public ushort Priority { get; set; }
 
         /// <summary>
-        /// Specifies that this cut is a cut specification. Cut specification can mark only class that derived from Attribute.
-        /// </summary>
-        public bool IsSpec { get; set; }
-
-        /// <summary>
         /// Member access modifier enumeration.
         /// </summary>
         [Flags]
