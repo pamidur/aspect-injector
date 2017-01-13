@@ -1,28 +1,35 @@
-﻿using AspectInjector.Core.Contexts;
-using AspectInjector.Core.Contracts;
+﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Defaults;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Linq;
 
 namespace AspectInjector.Core.Processing
 {
-    public class AssemblyProcessor : IAssemblyProcessor
+    public class AssemblyProcessor : ServiceBase, IAssemblyProcessor
     {
-        private ProcessingContext _context;
-        protected ILogger Log { get; private set; }
-
-        public void Init(ProcessingContext context)
+        public AssemblyProcessor()
         {
-            _context = context;
-            Log = context.Services.Log;
         }
 
         public void ProcessAssembly(AssemblyDefinition assembly)
+        {
+            var cuts = Enumerable.Empty<CutDefinition>();
+            var aspects = Enumerable.Empty<AspectDefinition>();
+
+            foreach (var module in assembly.Modules)
+            {
+                cuts = cuts.Concat(Context.Services.)
+            }
+        }
+
+        public void ProcessAssembly1(AssemblyDefinition assembly)
         {
             var injections = _context.Services.InjectionCollector.Collect(assembly).ToList();
 
             foreach (var module in assembly.Modules)
             {
-                var aspects = _context.Services.AspectReader.Read(module);
+                var aspects = _context.Services.AspectReader.Extract(module);
                 _context.Services.AspectCache.Cache(module, aspects);
             }
 

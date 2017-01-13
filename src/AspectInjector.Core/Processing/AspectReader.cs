@@ -8,16 +8,16 @@ using System.Linq;
 
 namespace AspectInjector.Core.Processing
 {
-    public class AspectReader : IAspectReader
+    public class AspectReader : IAspectDefinitionExtractor
     {
-        private ProcessingContext _context;
+        private Context _context;
 
-        public void Init(ProcessingContext context)
+        public void Init(Context context)
         {
             _context = context;
         }
 
-        public IEnumerable<AspectDefinition> Read(ModuleDefinition module)
+        public IEnumerable<AspectDefinition> Extract(ModuleDefinition module)
         {
             return Validate(module.Types.SelectMany(ReadAspects));
         }

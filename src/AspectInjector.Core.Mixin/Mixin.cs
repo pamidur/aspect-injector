@@ -8,9 +8,9 @@ namespace AspectInjector.Core.Mixin
     {
         public TypeReference InterfaceType { get; set; }
 
-        public override bool IsApplicableFor(Injection aspect)
+        public override bool IsApplicableFor(CutDefinition cut)
         {
-            return aspect.TargetKind == InjectionTargetKind.TypeDefinition;
+            return cut.Target is TypeDefinition;
         }
 
         public override bool Equals(Effect injection)

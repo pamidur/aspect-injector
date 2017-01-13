@@ -2,7 +2,7 @@
 
 namespace AspectInjector.Core.Contracts
 {
-    public interface IAssemblyProcessor : IInitializable
+    public interface IAssemblyProcessor
     {
         void ProcessAssembly(AssemblyDefinition assembly);
     }

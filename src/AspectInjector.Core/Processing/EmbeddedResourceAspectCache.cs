@@ -6,25 +6,25 @@ using AspectInjector.Core.Processing.Converters;
 using Mono.Cecil;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System;
 
 namespace AspectInjector.Core.Processing
 {
-    public class EmbeddedResourceAspectCache : IAspectCache
+    public class EmbeddedResourceAspectCache : ICache
     {
         //todo:: better static cache with assembly update check
         private readonly ConcurrentDictionary<string, object> _injectionCache = new ConcurrentDictionary<string, object>();
 
-        private ProcessingContext _context;
+        private Context _context;
         private string _resourceName;
 
         protected ILogger Log { get; private set; }
 
-        public void Init(ProcessingContext context)
+        public void Init(Context context)
         {
             _context = context;
             _resourceName = $"{context.Services.Prefix}injections";

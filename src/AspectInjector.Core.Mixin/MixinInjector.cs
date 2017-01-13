@@ -10,23 +10,23 @@ using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
-    internal class MixinInjector : WeaverBase<Mixin>
+    internal class MixinInjector : WeaverBase<TypeDefinition, Mixin>
     {
         public MixinInjector()
         {
             Priority = 10;
         }
 
-        protected override void Apply(Injection<TypeDefinition> injection, Mixin mixin)
+        protected override void Weave(TypeDefinition target, Mixin mixin, Injection injection)
         {
-            var ts = Context.Editors.GetContext(injection.Target.Module).TypeSystem;
+            var ts = Context.Editors.GetContext(target.Module).TypeSystem;
 
             var ifaceTree = GetInterfacesTree(mixin.InterfaceType);
 
             foreach (var iface in ifaceTree)
-                if (injection.Target.Interfaces.All(i => !i.IsTypeOf(iface)))
+                if (target.Interfaces.All(i => !i.IsTypeOf(iface)))
                 {
-                    injection.Target.Interfaces.Add(ts.Import(iface));
+                    target.Interfaces.Add(ts.Import(iface));
 
                     var ifaceDefinition = iface.Resolve();
 
@@ -41,9 +41,9 @@ namespace AspectInjector.Core.Mixin
                 }
         }
 
-        protected MethodDefinition GetOrCreateMethodProxy(MethodReference ifaceMethod, Injection<TypeDefinition> aspect, ExtendedTypeSystem ts)
+        protected MethodDefinition GetOrCreateMethodProxy(MethodReference ifaceMethod, Injection injection, ExtendedTypeSystem ts)
         {
-            var targetType = aspect.Target;
+            var targetType = injection.Target;
 
             var methodName = $"{ifaceMethod.DeclaringType.FullName}.{ifaceMethod.Name}";
 
@@ -74,7 +74,7 @@ namespace AspectInjector.Core.Mixin
                 Context.Editors.GetEditor(proxy).Instead(
                         e =>
                         e.Return(ret =>
-                        ret.Load(aspect).Call(callingMethod, args => proxy.Parameters.ToList().ForEach(p => args.Load(p))))
+                        ret.Load(injection).Call(callingMethod, args => proxy.Parameters.ToList().ForEach(p => args.Load(p))))
                     );
             }
 

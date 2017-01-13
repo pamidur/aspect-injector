@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Mono.Cecil;
+using System;
 
 namespace AspectInjector.Core.Models
 {
     public abstract class Effect : IEquatable<Effect>
     {
         public uint Priority { get; protected set; }
+
+        public TypeReference Aspect { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -16,7 +19,7 @@ namespace AspectInjector.Core.Models
             return Equals((Effect)obj);
         }
 
-        public abstract bool IsApplicableFor(Injection aspect);
+        public abstract bool IsApplicableFor(CutDefinition cut);
 
         public abstract bool Equals(Effect other);
 

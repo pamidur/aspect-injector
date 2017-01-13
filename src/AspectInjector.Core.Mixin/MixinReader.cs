@@ -2,14 +2,25 @@
 using AspectInjector.Core.Defaults;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using AspectInjector.Core.Services.Abstract;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using AspectInjector.Core.Contracts;
 
 namespace AspectInjector.Core.Mixin
 {
-    internal class MixinReader : EffectReaderBase<Mixin>
+    internal class MixinReader : EffectExtractorBase<Mixin>
     {
+        public MixinReader(string prefix, ILogger logger) : base(prefix, logger)
+        {
+        }
+
+        protected override IEnumerable<Mixin> ReadEffects(CustomAttribute attribute)
+        {
+        }
+
         protected override IEnumerable<Mixin> ReadInjections(ModuleDefinition module)
 
         {

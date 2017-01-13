@@ -14,10 +14,10 @@ namespace AspectInjector.Core.Processing
 {
     public class InjectionCollector : IInjectionCollector
     {
-        private ProcessingContext _context;
+        private Context _context;
         protected ILogger Log { get; private set; }
 
-        public void Init(ProcessingContext context)
+        public void Init(Context context)
         {
             _context = context;
             Log = context.Services.Log;

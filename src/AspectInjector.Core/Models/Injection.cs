@@ -1,19 +1,20 @@
 ﻿using AspectInjector.Core.Extensions;
 using Mono.Cecil;
-using System;
 using System.Collections.Generic;
 
 namespace AspectInjector.Core.Models
 {
-    public class Injection<TTarget> : Injection, IEquatable<Injection>
-        where TTarget : class, ICustomAttributeProvider
+    public class Injection
     {
-        public Injection()
-        {
-            TargetKind = (InjectionTargetKind)Enum.Parse(typeof(InjectionTargetKind), typeof(TTarget).Name);
-        }
+        public ICustomAttributeProvider Target { get; set; }
 
-        public TTarget Target { get; set; }
+        public uint Priority { get; internal set; }
+
+        public TypeReference Source { get; internal set; }
+
+        public Effect Effect { get; internal set; }
+
+        public IEnumerable<CustomAttribute> RoutableData { get; internal set; }
 
         public bool Equals(Injection other)
         {
@@ -31,18 +32,5 @@ namespace AspectInjector.Core.Models
         {
             return Source.GetFQN().GetHashCode();
         }
-    }
-
-    public abstract class Injection
-    {
-        public InjectionTargetKind TargetKind { get; protected set; }
-
-        public MethodReference AspectFactory { get; internal set; }
-
-        public uint Priority { get; internal set; }
-
-        public TypeReference Source { get; internal set; }
-
-        public IEnumerable<CustomAttribute> RoutableData { get; internal set; }
     }
 }

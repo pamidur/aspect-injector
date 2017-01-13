@@ -8,7 +8,7 @@ namespace AspectInjector.Core.Models
 {
     public class AspectDefinition : IEquatable<AspectDefinition>
     {
-        public TypeReference Host { get; set; }
+        public TypeDefinition Host { get; set; }
 
         public List<Effect> Effects { get; set; }
 

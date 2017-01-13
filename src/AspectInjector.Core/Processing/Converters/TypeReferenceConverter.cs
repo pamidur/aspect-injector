@@ -9,10 +9,10 @@ namespace AspectInjector.Core.Processing.Converters
 {
     internal class TypeReferenceConverter : JsonConverter
     {
-        private readonly ProcessingContext _context;
+        private readonly Context _context;
         private readonly ModuleDefinition _reference;
 
-        public TypeReferenceConverter(ProcessingContext context, ModuleDefinition reference)
+        public TypeReferenceConverter(Context context, ModuleDefinition reference)
         {
             _context = context;
             _reference = reference;

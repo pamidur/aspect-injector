@@ -2,12 +2,12 @@
 
 namespace AspectInjector.Core.Contracts
 {
-    public interface IWeaver : IInitializable
+    public interface IWeaver
     {
         byte Priority { get; }
 
-        void Apply(Injection aspect, Effect injection);
+        void Weave(Injection injection);
 
-        bool CanApply(Effect injection);
+        bool CanWeave(Injection injection);
     }
 }

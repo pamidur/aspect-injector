@@ -1,6 +1,4 @@
 ﻿using AspectInjector.Core.Configuration;
-using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Utils;
 using Mono.Cecil;
 using System.IO;
 
@@ -20,9 +18,10 @@ namespace AspectInjector.Core
             _config.Log.LogInformation($"Aspect Injector has started for {Path.GetFileName(assemblyFile)}");
 
             var pdbPresent = AreSymbolsFound(assemblyFile);
+            var assembly = ReadAssembly(assemblyFile, resolver, pdbPresent);
 
-            var context = _config.CreateContext(ReadAssembly(assemblyFile, resolver, pdbPresent), resolver);
-            context.Services.AssemblyProcessor.ProcessAssembly(context.Assembly);
+            var context = _config.CreateContext(, resolver);
+            context.Services.AssemblyProcessor.ProcessAssembly(assembly);
 
             if (!context.Services.Log.IsErrorThrown)
             {
