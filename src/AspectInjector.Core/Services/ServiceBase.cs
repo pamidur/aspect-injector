@@ -1,6 +1,4 @@
-﻿using AspectInjector.Core.Contracts;
-
-namespace AspectInjector.Core.Services
+﻿namespace AspectInjector.Core.Services
 {
     public abstract class ServiceBase
     {

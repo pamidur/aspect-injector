@@ -21,14 +21,14 @@ namespace AspectInjector.CLI
             IsErrorThrown = true;
         }
 
-        public void LogError(CompilationError error)
+        public void LogError(CompilationMessage error)
         {
             Console.ForegroundColor = ConsoleColor.Red;
 
             if (error.SequencePoint?.Document != null)
                 Console.Write($"{error.SequencePoint.Document.Url}({error.SequencePoint.StartLine},{error.SequencePoint.StartColumn}): ");
 
-            Console.WriteLine($"error: { error.Message}");
+            Console.WriteLine($"error: { error.Text}");
 
             Console.ResetColor();
             IsErrorThrown = true;

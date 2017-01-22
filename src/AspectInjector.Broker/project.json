@@ -1,0 +1,10 @@
+﻿{
+  "supports": {},
+  "dependencies": {
+    "BuildTools.StyleCop": "4.7.49",
+    "NETStandard.Library": "1.6.1"
+  },
+  "frameworks": {
+    "netstandard1.0": {}
+  }
+}

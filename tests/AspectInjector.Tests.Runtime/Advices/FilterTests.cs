@@ -17,10 +17,10 @@ namespace AspectInjector.Tests.Advices
             Assert.IsTrue(Checker.Passed);
         }
 
-        [Cut(typeof(FilterTests_Aspect))]
+        [Inject(typeof(FilterTests_Aspect))]
         public class FilterTests_Target
         {
-            [Cut(typeof(FilterTests_Aspect), NameFilter = "Do")]
+            [Inject(typeof(FilterTests_Aspect), NameFilter = "Do")]
             public void Do123()
             {
             }

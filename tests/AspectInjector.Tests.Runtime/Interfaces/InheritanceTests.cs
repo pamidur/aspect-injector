@@ -18,10 +18,10 @@ namespace AspectInjector.Tests.Interfaces
             Assert.AreEqual(r1, r2);
         }
 
-        [Cut(typeof(InheritanceTests_Aspect))]
+        [Inject(typeof(InheritanceTests_Aspect))]
         public class InheritanceTests_Base { }
 
-        [Cut(typeof(InheritanceTests_Aspect))]
+        [Inject(typeof(InheritanceTests_Aspect))]
         public class InheritanceTests_Target : InheritanceTests_Base { }
 
         public interface IInheritanceTests

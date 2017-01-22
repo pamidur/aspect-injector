@@ -1,10 +1,10 @@
-﻿using AspectInjector.Core.Models;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
 
-namespace AspectInjector.Core.Processing.Converters
+namespace AspectInjector.Core.Models.Converters
 {
     internal class TypeReferenceConverter : JsonConverter
     {
@@ -23,18 +23,21 @@ namespace AspectInjector.Core.Processing.Converters
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var jt = JToken.Load(reader);
-            var fqn = FQN.FromString(jt.ToObject<string>());
+            var token = new MetadataToken(jt.ToObject<uint>());
 
-            return fqn?.ToTypeReference(_reference);
+            if (token.TokenType == TokenType.TypeDef)
+                return _reference.GetTypes().First(td => td.MetadataToken == token);
+
+            return _reference.GetTypeReferences().First(td => td.MetadataToken == token);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var tr = (TypeReference)value;
+            var td = (TypeReference)value;
 
-            var fqn = FQN.FromTypeReference(tr).ToString();
+            var token = td.MetadataToken.ToUInt32();
 
-            JToken.FromObject(fqn, serializer).WriteTo(writer);
+            JToken.FromObject(token, serializer).WriteTo(writer);
         }
     }
 }

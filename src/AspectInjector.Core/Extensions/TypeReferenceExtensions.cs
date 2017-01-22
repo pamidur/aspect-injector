@@ -1,6 +1,5 @@
 ﻿using AspectInjector.Core.Models;
 using Mono.Cecil;
-using Mono.Cecil.Rocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +16,21 @@ namespace AspectInjector.Core.Extensions
         public static bool IsTypeOf(this TypeReference tr, Type type)
         {
             return FQN.FromTypeReference(tr).Equals(FQN.FromType(type));
+        }
+
+        public static bool IsSubTypeOf(this TypeDefinition tr, Type type)
+        {
+            var subTypeFqn = FQN.FromType(type);
+
+            var isSubType = false;
+
+            do
+            {
+                isSubType = FQN.FromTypeReference(tr).Equals(subTypeFqn);
+                tr = tr.BaseType.Resolve();
+            } while (tr != null);
+
+            return isSubType;
         }
 
         public static FQN GetFQN(this TypeReference type)

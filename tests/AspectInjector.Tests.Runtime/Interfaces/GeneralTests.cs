@@ -75,7 +75,7 @@ namespace AspectInjector.Tests.Interfaces
             Assert.IsTrue(Checker.Passed);
         }
 
-        [Cut(typeof(GeneralTests_Aspect))]
+        [Inject(typeof(GeneralTests_Aspect))]
         //[Aspect(typeof(INotifyPropertyChanged_Aspect))]
         internal class GeneralTests_Target
         {

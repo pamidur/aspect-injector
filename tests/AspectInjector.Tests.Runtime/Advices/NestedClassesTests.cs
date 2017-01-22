@@ -15,7 +15,7 @@ namespace AspectInjector.Tests.Advices
             Assert.IsTrue(Checker.Passed);
         }
 
-        [Cut(typeof(NestedClassesTests_Aspect))]
+        [Inject(typeof(NestedClassesTests_Aspect))]
         private class NestedClassesTests_Target
         {
             public void Do()

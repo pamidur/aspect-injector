@@ -1,32 +1,31 @@
-﻿using AspectInjector.Core.Configuration;
+﻿using AspectInjector.Core.Services;
 using Mono.Cecil;
 using System.IO;
 
 namespace AspectInjector.Core
 {
-    public class Processor
+    public class Processor : ServiceBase
     {
-        private readonly ProcessingConfiguration _config;
+        private readonly AssemblyProcessor _asmProcessor;
 
-        public Processor(ProcessingConfiguration config)
+        protected Processor(Logger logger, AssemblyProcessor asmProcessor) : base(logger)
         {
-            _config = config;
+            _asmProcessor = asmProcessor;
         }
 
         public void Process(string assemblyFile, IAssemblyResolver resolver)
         {
-            _config.Log.LogInformation($"Aspect Injector has started for {Path.GetFileName(assemblyFile)}");
+            Log.LogInformation($"Aspect Injector has started for {Path.GetFileName(assemblyFile)}");
 
             var pdbPresent = AreSymbolsFound(assemblyFile);
             var assembly = ReadAssembly(assemblyFile, resolver, pdbPresent);
 
-            var context = _config.CreateContext(, resolver);
-            context.Services.AssemblyProcessor.ProcessAssembly(assembly);
+            _asmProcessor.ProcessAssembly(assembly);
 
-            if (!context.Services.Log.IsErrorThrown)
+            if (!Log.IsErrorThrown)
             {
-                _config.Log.LogInformation("Assembly has been patched.");
-                WriteAssembly(context.Assembly, assemblyFile, pdbPresent);
+                Log.LogInformation("Assembly has been patched.");
+                WriteAssembly(assembly, assemblyFile, pdbPresent);
             }
         }
 
@@ -45,7 +44,7 @@ namespace AspectInjector.Core
                 ReadSymbols = readSymbols
             });
 
-            _config.Log.LogInformation("Assembly has been read.");
+            Log.LogInformation("Assembly has been read.");
 
             return assembly;
         }
@@ -59,7 +58,7 @@ namespace AspectInjector.Core
                     ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
                 });
 
-            _config.Log.LogInformation("Assembly has been written.");
+            Log.LogInformation("Assembly has been written.");
         }
 
         private bool AreSymbolsFound(string dllPath)
@@ -69,7 +68,7 @@ namespace AspectInjector.Core
             if (File.Exists(pdbPath))
                 return true;
 
-            _config.Log.LogInformation($"Symbols not found on {pdbPath}. Proceeding without...");
+            Log.LogInformation($"Symbols not found on {pdbPath}. Proceeding without...");
             return false;
         }
     }

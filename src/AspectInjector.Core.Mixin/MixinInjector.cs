@@ -1,9 +1,7 @@
-﻿using AspectInjector.Core.Defaults;
-using AspectInjector.Core.Extensions;
+﻿using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
-using Mono.Cecil.Rocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +51,7 @@ namespace AspectInjector.Core.Mixin
                 var callingMethod = ifaceMethod.ParametrizeGenericChild(ifaceMethod);
 
                 var returnValue = ts.Import(callingMethod.SafeReturnType());
-
+                TypeAttributes
                 proxy = new MethodDefinition(methodName,
                     MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
                      returnValue);

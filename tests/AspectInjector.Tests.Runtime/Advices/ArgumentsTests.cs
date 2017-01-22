@@ -109,7 +109,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_InstanceTarget
         {
-            [Cut(typeof(ArgumentsTests_InstanceAspect))]
+            [Inject(typeof(ArgumentsTests_InstanceAspect))]
             public void TestMethod()
             {
             }
@@ -126,7 +126,7 @@ namespace AspectInjector.Tests.Advices
 
         internal static class ArgumentsTests_StaticInstanceTarget
         {
-            [Cut(typeof(ArgumentsTests_StaticInstanceAspect))]
+            [Inject(typeof(ArgumentsTests_StaticInstanceAspect))]
             public static void TestMethod()
             {
             }
@@ -141,7 +141,7 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Cut(typeof(ArgumentsTests_ReturnTypeAspect))]
+        [Inject(typeof(ArgumentsTests_ReturnTypeAspect))]
         internal static class ArgumentsTests_ReturnTypeTarget
         {
             public static void TestMethod()
@@ -160,7 +160,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_StaticMethodTarget
         {
-            [Cut(typeof(ArgumentsTests_StaticMethodAspect))]
+            [Inject(typeof(ArgumentsTests_StaticMethodAspect))]
             public void TestMethod()
             {
             }
@@ -168,7 +168,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_StaticConstructorTarget
         {
-            [Cut(typeof(ArgumentsTests_StaticMethodAspect))]
+            [Inject(typeof(ArgumentsTests_StaticMethodAspect))]
             static ArgumentsTests_StaticConstructorTarget()
             {
             }
@@ -185,7 +185,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_MethodTarget
         {
-            [Cut(typeof(ArgumentsTests_MethodAspect))]
+            [Inject(typeof(ArgumentsTests_MethodAspect))]
             public void TestMethod()
             {
             }
@@ -205,7 +205,7 @@ namespace AspectInjector.Tests.Advices
             {
             }
 
-            [Cut(typeof(ArgumentsTests_MethodAspect))]
+            [Inject(typeof(ArgumentsTests_MethodAspect))]
             public void TestMethod()
             {
             }
@@ -213,7 +213,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_ConstructorTarget
         {
-            [Cut(typeof(ArgumentsTests_MethodAspect))]
+            [Inject(typeof(ArgumentsTests_MethodAspect))]
             public ArgumentsTests_ConstructorTarget()
             {
             }
@@ -230,7 +230,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_ArgumentsTarget
         {
-            [Cut(typeof(ArgumentsTests_ArgumentsAspect))]
+            [Inject(typeof(ArgumentsTests_ArgumentsAspect))]
             public void TestMethod(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut)
             {
                 valueOut = 1;
@@ -251,7 +251,7 @@ namespace AspectInjector.Tests.Advices
 
         internal static class ArgumentsTests_StaticArgumentsTarget
         {
-            [Cut(typeof(ArgumentsTests_StaticArgumentsAspect))]
+            [Inject(typeof(ArgumentsTests_StaticArgumentsAspect))]
             public static void TestMethod(int a, string b)
             {
             }
@@ -268,7 +268,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_AroundMethodTarget
         {
-            [Cut(typeof(ArgumentsTests_AroundMethodAspect))]
+            [Inject(typeof(ArgumentsTests_AroundMethodAspect))]
             public void TestMethod()
             {
             }

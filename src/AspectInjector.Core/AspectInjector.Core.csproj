@@ -66,8 +66,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
-    <Compile Include="Services\Extraction\CutSpecificationExtractor.cs" />
-    <Compile Include="Services\Extraction\Janitor.cs" />
+    <Compile Include="Models\EqualityComparers\AspectDefinitionComparer.cs" />
+    <Compile Include="Models\Assets.cs" />
+    <Compile Include="Models\Converters\MethodDefinitionConverter.cs" />
+    <Compile Include="Services\Janitor.cs" />
     <Compile Include="Extensions\GenericProcessingExtension.cs" />
     <Compile Include="Extensions\MemberReferenceExtensions.cs" />
     <Compile Include="Fluent\AspectFactory.cs" />
@@ -80,34 +82,27 @@
     <Compile Include="Fluent\Models\ExtendedTypeSystem.cs" />
     <Compile Include="Fluent\PointCut.cs" />
     <Compile Include="Models\AspectDefinition.cs" />
-    <Compile Include="Models\Config.cs" />
-    <Compile Include="Models\CutDefinition.cs" />
-    <Compile Include="Models\CutSpecDefinition.cs" />
     <Compile Include="Models\Effect.cs" />
-    <Compile Include="Services\IInjectionCollector.cs" />
-    <Compile Include="Models\ChildrenFilter.cs" />
-    <Compile Include="Models\CompilationError.cs" />
-    <Compile Include="Services\Extraction\CutDefinitionExtractor.cs" />
-    <Compile Include="Services\Extraction\AspectDefinitionExtractor.cs" />
-    <Compile Include="Processing\Converters\TypeReferenceConverter.cs" />
-    <Compile Include="Services\Extraction\EffectExtractorBase.cs" />
-    <Compile Include="Services\Injection\AspectAssetsInjector.cs" />
-    <Compile Include="Services\Injection\WeaverBase.cs" />
+    <Compile Include="Models\CompilationMessage.cs" />
+    <Compile Include="Services\AspectExtractor.cs" />
+    <Compile Include="Models\Converters\TypeReferenceConverter.cs" />
+    <Compile Include="Services\EffectExtractorBase.cs" />
+    <Compile Include="Services\AspectWeaver.cs" />
+    <Compile Include="Services\EffectWeaverBase.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="Processing\InjectionCollector.cs" />
-    <Compile Include="Services\Cache.cs" />
+    <Compile Include="Services\InjectionCollector.cs" />
+    <Compile Include="Services\AssetsCache.cs" />
     <Compile Include="Services\AssemblyProcessor.cs" />
     <Compile Include="Extensions\CustomAttributeExtensions.cs" />
     <Compile Include="Extensions\TypeReferenceExtensions.cs" />
     <Compile Include="Models\Injection.cs" />
     <Compile Include="Models\FQN.cs" />
-    <Compile Include="Processing\EqualityComparers\TypeReferenceEqualityComparer.cs" />
-    <Compile Include="Processing\EqualityComparers\CustomAttribureEqualityComparer.cs" />
+    <Compile Include="Models\EqualityComparers\TypeReferenceEqualityComparer.cs" />
+    <Compile Include="Models\EqualityComparers\CustomAttribureEqualityComparer.cs" />
     <Compile Include="Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ServiceBase.cs" />
     <Compile Include="Utils\CachedAssemblyResolver.cs" />
-    <Compile Include="Configuration.cs" />
     <Compile Include="Utils\StrictAssemblyResolver.cs" />
   </ItemGroup>
   <ItemGroup>

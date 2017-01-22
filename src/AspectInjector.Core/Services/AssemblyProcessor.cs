@@ -1,56 +1,52 @@
-﻿using AspectInjector.Core.Models;
-using AspectInjector.Core.Services.Extraction;
-using AspectInjector.Core.Services.Injection;
-using Mono.Cecil;
+﻿using Mono.Cecil;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.Core.Services
 {
     public class AssemblyProcessor : ServiceBase
     {
-        private readonly Extractor _extractor;
-        private readonly Injector _injector;
+        private readonly AspectExtractor _aspectExtractor;
+        private readonly AspectWeaver _assectWeaver;
+        private readonly AssetsCache _cache;
+        private readonly IEnumerable<EffectWeaverBase> _effectWeavers;
+        private readonly InjectionCollector _injectionCollector;
+        private readonly Janitor _janitor;
 
-        protected AssemblyProcessor(Extractor extractor, Injector injector, Logger logger) : base(logger)
+        public AssemblyProcessor(Janitor janitor, AspectExtractor aspectExtractor, AssetsCache cache, InjectionCollector injectionCollector, AspectWeaver assectWeaver, IEnumerable<EffectWeaverBase> effectWeavers, Logger logger) : base(logger)
         {
-            _extractor = extractor;
-            _injector = injector;
+            _aspectExtractor = aspectExtractor;
+            _injectionCollector = injectionCollector;
+            _cache = cache;
+            _assectWeaver = assectWeaver;
+            _effectWeavers = effectWeavers;
+            _janitor = janitor;
         }
 
         public void ProcessAssembly(AssemblyDefinition assembly)
         {
-            var cuts = Enumerable.Empty<CutDefinition>();
-            var aspects = Enumerable.Empty<AspectDefinition>();
+            var aspects = _aspectExtractor.Extract(assembly);
 
-            foreach (var module in assembly.Modules)
-            {
-                cuts = cuts.Concat(Context.Services.)
-            }
-        }
+            _cache.Cache(aspects);
 
-        public void ProcessAssembly1(AssemblyDefinition assembly)
-        {
-            var injections = _context.Services.InjectionCollector.Collect(assembly).ToList();
+            var injections = _injectionCollector.Collect(assembly);
 
-            foreach (var module in assembly.Modules)
-            {
-                var aspects = _context.Services.AspectReader.Extract(module);
-                _context.Services.AspectCache.Cache(module, aspects);
-            }
+            _janitor.CleanupAssembly(assembly);
 
             if (Log.IsErrorThrown)
-            {
-                Log.LogError("Preprocessing assembly fails. Terminating compilation...");
                 return;
-            }
 
-            foreach (var injector in _context.Services.Weavers.OrderByDescending(i => i.Priority))
+            _cache.FlushCache(assembly);
+
+            //inject singletons into aspects
+
+            foreach (var injector in _effectWeavers.OrderByDescending(i => i.Priority))
             {
                 Log.LogInformation($"Executing {injector.GetType().Name}");
 
                 foreach (var injection in injections.OrderByDescending(a => a.Priority))
                 {
-                    var aspect = _context.Services.AspectCache.GetAspect(injection.Source);
+                    var aspect = _cache.ReadAspect(injection.Source.Resolve());
 
                     var effects = aspect.Effects.Where(i => i.IsApplicableFor(injection)).ToList();
 

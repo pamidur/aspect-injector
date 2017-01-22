@@ -6,12 +6,15 @@ namespace AspectInjector.Broker
     /// Configures aspect usage scenarios.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public sealed class AspectUsage : Attribute
+    public sealed class Aspect : Attribute
     {
         /// <summary>
-        /// Scope in which aspect is instantiated.
+        /// Initializes a new instance of the <see cref="Aspect" /> class.
         /// </summary>
-        public CreationScope Scope { get; set; }
+        /// <param name="scope">Scope in which aspect is instantiated.</param>
+        public Aspect(Scope scope)
+        {
+        }
 
         /// <summary>
         /// Type that is used as aspect factory. Type should contain <code>public static object GetInstance(Type)</code> method. <code>null</code> represents original parameter-less constructor.
@@ -21,7 +24,7 @@ namespace AspectInjector.Broker
         /// <summary>
         /// Advice creation scope enumeration.
         /// </summary>
-        public enum CreationScope
+        public enum Scope
         {
             /// <summary>
             /// Aspect is created and used as singleton. Default value.

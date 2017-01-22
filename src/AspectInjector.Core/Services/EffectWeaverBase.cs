@@ -1,12 +1,11 @@
-﻿using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Models;
+﻿using AspectInjector.Core.Models;
 using Mono.Cecil;
 
-namespace AspectInjector.Core.Services.Injection
+namespace AspectInjector.Core.Services
 {
-    public abstract class WeaverBase : ServiceBase
+    public abstract class EffectWeaverBase : ServiceBase
     {
-        public WeaverBase(Logger logger) : base(logger)
+        public EffectWeaverBase(Logger logger) : base(logger)
         {
         }
 
@@ -17,11 +16,11 @@ namespace AspectInjector.Core.Services.Injection
         public abstract bool CanWeave(Models.Injection injection);
     }
 
-    public abstract class WeaverBase<TTarget, TEffect> : WeaverBase
+    public abstract class EffectWeaverBase<TTarget, TEffect> : EffectWeaverBase
         where TTarget : ICustomAttributeProvider
         where TEffect : Effect
     {
-        public WeaverBase(Logger logger) : base(logger)
+        public EffectWeaverBase(Logger logger) : base(logger)
         {
         }
 

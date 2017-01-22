@@ -1,37 +1,20 @@
-﻿using AspectInjector.Core.Extensions;
-using Mono.Cecil;
-using System;
+﻿using Mono.Cecil;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
-using static AspectInjector.Broker.AspectUsage;
+using static AspectInjector.Broker.Aspect;
 
 namespace AspectInjector.Core.Models
 {
-    public class AspectDefinition : IEquatable<AspectDefinition>
+    public class AspectDefinition
     {
         public TypeDefinition Host { get; set; }
 
         public List<Effect> Effects { get; set; }
 
-        public CreationScope Scope { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public Scope Scope { get; set; }
 
-        public bool Equals(AspectDefinition other)
-        {
-            return other.Host.GetFQN() == Host.GetFQN();
-        }
-
-        public override int GetHashCode()
-        {
-            return Host.GetFQN().GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
-                return false;
-            if (obj.GetType() != GetType())
-                return false;
-
-            return Equals((AspectDefinition)obj);
-        }
+        public TypeReference Factory { get; set; }
     }
 }

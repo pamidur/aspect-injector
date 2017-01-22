@@ -1,6 +1,4 @@
-﻿using AspectInjector.Core.Contexts;
-using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Extensions;
+﻿using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Core.Processing.EqualityComparers;
 using Mono.Cecil;
@@ -8,19 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using static AspectInjector.Broker.Cut;
 
-namespace AspectInjector.Core.Processing
+namespace AspectInjector.Core.Services
 {
-    public class InjectionCollector : IInjectionCollector
+    public class InjectionCollector : ServiceBase
     {
-        private Context _context;
-        protected ILogger Log { get; private set; }
-
-        public void Init(Context context)
+        public InjectionCollector(Logger logger) : base(logger)
         {
-            _context = context;
-            Log = context.Services.Log;
         }
 
         public IEnumerable<Models.Injection> Collect(AssemblyDefinition assembly)
@@ -62,11 +54,11 @@ namespace AspectInjector.Core.Processing
 
         protected virtual IEnumerable<Models.Injection> ExtractAspectsFrom<T>(T source) where T : class, ICustomAttributeProvider
         {
-            //to much linq in this method, be careful!
+            //too much linq in this method, be careful!
 
-            var aspectAndFilterPairs = source.CustomAttributes.Where(a => a.AttributeType.IsTypeOf(typeof(Broker.Cut))).Select(a => ParseAspectAttribute(source, a));
+            var aspectAndFilterPairs = source.CustomAttributes.Where(a => a.AttributeType.IsTypeOf(typeof(Broker.Inject))).Select(a => ParseAspectAttribute(source, a));
 
-            var aspectDefinitions = source.CustomAttributes.GroupBy(ca => ca, ca => ca.AttributeType.Resolve().CustomAttributes.Where(ad => ad.AttributeType.IsTypeOf(typeof(Broker.CutSpecification)))).Where(g => g.Any());
+            var aspectDefinitions = source.CustomAttributes.GroupBy(ca => ca, ca => ca.AttributeType.Resolve().CustomAttributes.Where(ad => ad.AttributeType.IsTypeOf(typeof(Broker.NamedCut)))).Where(g => g.Any());
 
             aspectAndFilterPairs = aspectAndFilterPairs.Concat(aspectDefinitions.SelectMany(g => g.SelectMany(ads => ads.Select(ad => ParseAspectAttribute(source, ad, g.Key)))));
 
@@ -81,10 +73,10 @@ namespace AspectInjector.Core.Processing
             var injectionHost = attr.GetConstructorValue<TypeReference>(0).Resolve();
 
             if (!injectionHost.IsClass)
-                Log.LogError(CompilationError.From($"Aspect {injectionHost.FullName} should be a class.", source));
+                Log.LogError(CompilationMessage.From($"Aspect {injectionHost.FullName} should be a class.", source));
 
             if (injectionHost.HasGenericParameters)
-                Log.LogError(CompilationError.From($"Aspect {injectionHost.FullName} should not have generic parameters.", source));
+                Log.LogError(CompilationMessage.From($"Aspect {injectionHost.FullName} should not have generic parameters.", source));
 
             var aspectFactory = injectionHost.Methods
                 .Where(c => c.IsConstructor && !c.IsStatic && !c.Parameters.Any())
@@ -95,13 +87,13 @@ namespace AspectInjector.Core.Processing
             foreach (var af in aspectFactories)
             {
                 if (aspectFactories.Count > 1)
-                    Log.LogError(CompilationError.From("Cannot have aspect factories.", af));
+                    Log.LogError(CompilationMessage.From("Cannot have aspect factories.", af));
 
                 if (af.Parameters.Any())
-                    Log.LogError(CompilationError.From("Aspect factory cannot have parameters.", af));
+                    Log.LogError(CompilationMessage.From("Aspect factory cannot have parameters.", af));
 
                 if (af.GenericParameters.Any())
-                    Log.LogError(CompilationError.From("Aspect factory cannot have generic parameters.", af));
+                    Log.LogError(CompilationMessage.From("Aspect factory cannot have generic parameters.", af));
             }
 
             if (aspectFactories.Any())

@@ -19,6 +19,18 @@ namespace AspectInjector.Core.Extensions
             return (TR)prop[0].Argument.Value;
         }
 
+        public static object GetPropertyValue<TA>(this CustomAttribute ca, Expression<Func<TA, object>> getter)
+        {
+            var body = getter.Body as MemberExpression;
+
+            var prop = ca.Properties.Where(p => p.Name == body.Member.Name).ToList();
+
+            if (prop.Count != 1)
+                return null;
+
+            return prop[0].Argument.Value;
+        }
+
         public static TR GetFieldValue<TA, TR>(this CustomAttribute ca, Expression<Func<TA, TR>> getter)
         {
             var body = getter.Body as MemberExpression;
