@@ -1,13 +1,19 @@
 ﻿using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AspectInjector.Core.Services
 {
     public class Janitor : ServiceBase
     {
+        private readonly IEnumerable<byte[]> _compileTimeDependenciesTokens;
+
         public Janitor(IEnumerable<byte[]> compileTimeDependenciesTokens, Logger logger) : base(logger)
         {
+            _compileTimeDependenciesTokens = compileTimeDependenciesTokens;
         }
 
         public void CleanupModule(ModuleDefinition module)

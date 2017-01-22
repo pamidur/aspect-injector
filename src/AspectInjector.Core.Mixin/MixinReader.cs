@@ -11,20 +11,20 @@ using AspectInjector.Core.Contracts;
 
 namespace AspectInjector.Core.Mixin
 {
-    internal class MixinReader : EffectExtractorBase<Mixin>
+    internal class MixinReader : EffectExtractorBase<MixinEffect>
     {
         public MixinReader(string prefix, ILogger logger) : base(prefix, logger)
         {
         }
 
-        protected override IEnumerable<Mixin> ReadEffects(CustomAttribute attribute)
+        protected override IEnumerable<MixinEffect> ReadEffects(CustomAttribute attribute)
         {
         }
 
-        protected override IEnumerable<Mixin> ReadInjections(ModuleDefinition module)
+        protected override IEnumerable<MixinEffect> ReadInjections(ModuleDefinition module)
 
         {
-            var result = Enumerable.Empty<Mixin>();
+            var result = Enumerable.Empty<MixinEffect>();
 
             foreach (var type in module.Types)
                 result = result.Concat(ReadMixins(type));
@@ -34,11 +34,11 @@ namespace AspectInjector.Core.Mixin
             return result;
         }
 
-        private IEnumerable<Mixin> ReadMixins(TypeDefinition type)
+        private IEnumerable<MixinEffect> ReadMixins(TypeDefinition type)
         {
             var advices = from ca in type.CustomAttributes
                           where ca.AttributeType.IsTypeOf(typeof(Broker.Mixin))
-                          select new Mixin { InterfaceType = ca.GetConstructorValue<TypeReference>(0), Aspect = type };
+                          select new MixinEffect { InterfaceType = ca.GetConstructorValue<TypeReference>(0), Aspect = type };
 
             foreach (var nestedType in type.NestedTypes)
                 advices = advices.Concat(ReadMixins(nestedType));
@@ -46,7 +46,7 @@ namespace AspectInjector.Core.Mixin
             return advices;
         }
 
-        private IEnumerable<Mixin> Validate(IEnumerable<Mixin> mixins)
+        private IEnumerable<MixinEffect> Validate(IEnumerable<MixinEffect> mixins)
         {
             foreach (var mixin in mixins)
             {

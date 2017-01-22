@@ -8,14 +8,14 @@ using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
-    internal class MixinInjector : WeaverBase<TypeDefinition, Mixin>
+    internal class MixinInjector : WeaverBase<TypeDefinition, MixinEffect>
     {
         public MixinInjector()
         {
             Priority = 10;
         }
 
-        protected override void Weave(TypeDefinition target, Mixin mixin, Injection injection)
+        protected override void Weave(TypeDefinition target, MixinEffect mixin, Injection injection)
         {
             var ts = Context.Editors.GetContext(target.Module).TypeSystem;
 
