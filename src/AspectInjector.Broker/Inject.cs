@@ -5,7 +5,7 @@ namespace AspectInjector.Broker
     /// <summary>
     /// Marks member to be injection target for specific Aspect.
     /// </summary>
-    [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event | AttributeTargets.Method, AllowMultiple = true)]
     public sealed class Inject : Attribute
     {
         /// <summary>
@@ -21,9 +21,9 @@ namespace AspectInjector.Broker
         ///// </summary>
         //public string NameFilter { get; set; }
 
-        /// <summary>
-        /// Specifies subsequent members filter by access modifier. The aspect will be applied to selected members as well.
-        /// </summary>
+        ///// <summary>
+        ///// Specifies subsequent members filter by access modifier. The aspect will be applied to selected members as well.
+        ///// </summary>
         //public To ChildFilter { get; set; }
 
         /// <summary>

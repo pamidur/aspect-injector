@@ -38,21 +38,17 @@ namespace AspectInjector.Core.Services
 
             _cache.FlushCache(assembly);
 
-            //inject singletons into aspects
+            //todo:: inject singletons into aspects
 
             foreach (var injector in _effectWeavers.OrderByDescending(i => i.Priority))
             {
                 Log.LogInformation($"Executing {injector.GetType().Name}");
 
-                foreach (var injection in injections.OrderByDescending(a => a.Priority))
+                foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key))
                 {
-                    var aspect = _cache.ReadAspect(injection.Source.Resolve());
-
-                    var effects = aspect.Effects.Where(i => i.IsApplicableFor(injection)).ToList();
-
-                    foreach (var effect in effects.OrderByDescending(i => i.Priority))
-                        if (injector.CanApply(effect))
-                            injector.Apply(injection, effect);
+                    foreach (var injection in prioritizedInjections.OrderByDescending(i => i.Effect.Priority))
+                        if (injector.CanWeave(injection))
+                            injector.Weave(injection);
                 }
             }
         }

@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
+using AspectInjector.Core.Services;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
-    internal class MixinInjector : WeaverBase<TypeDefinition, MixinEffect>
+    internal class MixinInjector : EffectWeaverBase<TypeDefinition, MixinEffect>
     {
         public MixinInjector()
         {

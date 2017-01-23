@@ -69,6 +69,7 @@
     <Compile Include="Models\EqualityComparers\AspectDefinitionComparer.cs" />
     <Compile Include="Models\Assets.cs" />
     <Compile Include="Models\Converters\MethodDefinitionConverter.cs" />
+    <Compile Include="Models\InjectionChildFilter.cs" />
     <Compile Include="Services\Janitor.cs" />
     <Compile Include="Extensions\GenericProcessingExtension.cs" />
     <Compile Include="Extensions\MemberReferenceExtensions.cs" />
