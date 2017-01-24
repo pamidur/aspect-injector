@@ -1,7 +1,8 @@
 ﻿using AspectInjector.Core;
-using AspectInjector.Core.Configuration;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Mixin;
+using AspectInjector.Core.Models;
+using AspectInjector.Core.Services;
 using AspectInjector.Core.Utils;
 using CommandLine;
 using System.IO;
@@ -20,7 +21,7 @@ namespace AspectInjector.CLI.Commands
         {
             if (!File.Exists(Filename))
             {
-                Log.LogError($"File {Filename} does not exist.");
+                Log.LogError(CompilationMessage.From($"File {Filename} does not exist."));
                 return 1;
             }
 
@@ -36,6 +37,24 @@ namespace AspectInjector.CLI.Commands
             processor.Process(Filename, resolver);
 
             return Log.IsErrorThrown ? 1 : 0;
+        }
+
+        private Processor CreateProcessor()
+        {
+            var cache = new AssetsCache();
+
+            return new Processor(
+                new Janitor(null, Log),
+                new AspectExtractor(new[] {
+                    new MixinReader
+                }, Log),
+                cache,
+                new InjectionCollector(cache, Log),
+                new AspectWeaver(Log),
+                new[] {
+                },
+                Log
+                );
         }
     }
 }

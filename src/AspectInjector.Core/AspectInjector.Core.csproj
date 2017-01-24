@@ -70,6 +70,14 @@
     <Compile Include="Models\Assets.cs" />
     <Compile Include="Models\Converters\MethodDefinitionConverter.cs" />
     <Compile Include="Models\InjectionChildFilter.cs" />
+    <Compile Include="Contracts\IAspectExtractor.cs" />
+    <Compile Include="Contracts\ILogger.cs" />
+    <Compile Include="Contracts\IAspectWeaver.cs" />
+    <Compile Include="Contracts\IAssetsCache.cs" />
+    <Compile Include="Contracts\IEffectExtractor.cs" />
+    <Compile Include="Contracts\IEffectWeaver.cs" />
+    <Compile Include="Contracts\IInjectionCollector.cs" />
+    <Compile Include="Contracts\IJanitor.cs" />
     <Compile Include="Services\Janitor.cs" />
     <Compile Include="Extensions\GenericProcessingExtension.cs" />
     <Compile Include="Extensions\MemberReferenceExtensions.cs" />
@@ -90,10 +98,9 @@
     <Compile Include="Services\EffectExtractorBase.cs" />
     <Compile Include="Services\AspectWeaver.cs" />
     <Compile Include="Services\EffectWeaverBase.cs" />
-    <Compile Include="Logger.cs" />
+    <Compile Include="Services\Logger.cs" />
     <Compile Include="Services\InjectionCollector.cs" />
     <Compile Include="Services\AssetsCache.cs" />
-    <Compile Include="Services\AssemblyProcessor.cs" />
     <Compile Include="Extensions\CustomAttributeExtensions.cs" />
     <Compile Include="Extensions\TypeReferenceExtensions.cs" />
     <Compile Include="Models\Injection.cs" />
@@ -102,7 +109,6 @@
     <Compile Include="Models\EqualityComparers\CustomAttribureEqualityComparer.cs" />
     <Compile Include="Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\ServiceBase.cs" />
     <Compile Include="Utils\CachedAssemblyResolver.cs" />
     <Compile Include="Utils\StrictAssemblyResolver.cs" />
   </ItemGroup>

@@ -1,39 +1,33 @@
-﻿using AspectInjector.Core.Models;
+﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 
 namespace AspectInjector.Core.Services
 {
-    public abstract class EffectWeaverBase : ServiceBase
+    public abstract class EffectWeaverBase<TTarget, TEffect> : IEffectWeaver
+        where TTarget : ICustomAttributeProvider
+        where TEffect : Effect
     {
-        public EffectWeaverBase(Logger logger) : base(logger)
+        protected readonly ILogger _log;
+
+        public EffectWeaverBase(ILogger logger)
         {
+            _log = logger;
         }
 
         public byte Priority { get; protected set; }
 
-        public abstract void Weave(Models.Injection injection);
-
-        public abstract bool CanWeave(Models.Injection injection);
-    }
-
-    public abstract class EffectWeaverBase<TTarget, TEffect> : EffectWeaverBase
-        where TTarget : ICustomAttributeProvider
-        where TEffect : Effect
-    {
-        public EffectWeaverBase(Logger logger) : base(logger)
+        public void Weave(Injection injection)
         {
+            if (CanWeave(injection))
+                Weave((TTarget)injection.Target, (TEffect)injection.Effect, injection);
         }
 
-        public override void Weave(Models.Injection injection)
-        {
-            Weave((TTarget)injection.Target, (TEffect)injection.Effect, injection);
-        }
-
-        public override bool CanWeave(Models.Injection injection)
+        protected virtual bool CanWeave(Injection injection)
         {
             return injection.Target is TTarget && injection.Effect is TEffect;
         }
 
-        protected abstract void Weave(TTarget target, TEffect effect, Models.Injection injection);
+        protected abstract void Weave(TTarget target, TEffect effect, Injection injection);
     }
 }

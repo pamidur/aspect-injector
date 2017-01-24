@@ -2,7 +2,7 @@
 
 namespace AspectInjector.Core.Models
 {
-    public class Assets
+    internal class Assets
     {
         public List<AspectDefinition> Aspects { get; set; } = new List<AspectDefinition>();
     }

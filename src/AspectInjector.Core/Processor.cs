@@ -1,30 +1,44 @@
-﻿using AspectInjector.Core.Services;
+﻿using AspectInjector.Core.Contracts;
 using Mono.Cecil;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace AspectInjector.Core
 {
-    public class Processor : ServiceBase
+    public class Processor
     {
-        private readonly AssemblyProcessor _asmProcessor;
+        private readonly IAspectExtractor _aspectExtractor;
+        private readonly IAspectWeaver _assectWeaver;
+        private readonly IAssetsCache _cache;
+        private readonly IEnumerable<IEffectWeaver> _effectWeavers;
+        private readonly IInjectionCollector _injectionCollector;
+        private readonly IJanitor _janitor;
+        private readonly ILogger _log;
 
-        protected Processor(Logger logger, AssemblyProcessor asmProcessor) : base(logger)
+        public Processor(IJanitor janitor, IAspectExtractor aspectExtractor, IAssetsCache cache, IInjectionCollector injectionCollector, IAspectWeaver assectWeaver, IEnumerable<IEffectWeaver> effectWeavers, ILogger logger)
         {
-            _asmProcessor = asmProcessor;
+            _aspectExtractor = aspectExtractor;
+            _injectionCollector = injectionCollector;
+            _cache = cache;
+            _assectWeaver = assectWeaver;
+            _effectWeavers = effectWeavers;
+            _janitor = janitor;
+            _log = logger;
         }
 
         public void Process(string assemblyFile, IAssemblyResolver resolver)
         {
-            Log.LogInformation($"Aspect Injector has started for {Path.GetFileName(assemblyFile)}");
+            _log.LogInfo($"Aspect Injector has started for {Path.GetFileName(assemblyFile)}");
 
             var pdbPresent = AreSymbolsFound(assemblyFile);
             var assembly = ReadAssembly(assemblyFile, resolver, pdbPresent);
 
-            _asmProcessor.ProcessAssembly(assembly);
+            ProcessAssembly(assembly);
 
-            if (!Log.IsErrorThrown)
+            if (!_log.IsErrorThrown)
             {
-                Log.LogInformation("Assembly has been patched.");
+                _log.LogInfo("Assembly has been patched.");
                 WriteAssembly(assembly, assemblyFile, pdbPresent);
             }
         }
@@ -44,7 +58,7 @@ namespace AspectInjector.Core
                 ReadSymbols = readSymbols
             });
 
-            Log.LogInformation("Assembly has been read.");
+            _log.LogInfo("Assembly has been read.");
 
             return assembly;
         }
@@ -58,7 +72,7 @@ namespace AspectInjector.Core
                     ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
                 });
 
-            Log.LogInformation("Assembly has been written.");
+            _log.LogInfo("Assembly has been written.");
         }
 
         private bool AreSymbolsFound(string dllPath)
@@ -68,8 +82,37 @@ namespace AspectInjector.Core
             if (File.Exists(pdbPath))
                 return true;
 
-            Log.LogInformation($"Symbols not found on {pdbPath}. Proceeding without...");
+            _log.LogInfo($"Symbols not found on {pdbPath}. Proceeding without...");
             return false;
+        }
+
+        private void ProcessAssembly(AssemblyDefinition assembly)
+        {
+            var aspects = _aspectExtractor.Extract(assembly).ToList();
+
+            foreach (var aspect in aspects)
+                _cache.Cache(aspect);
+
+            var injections = _injectionCollector.Collect(assembly);
+
+            _janitor.Cleanup(assembly);
+
+            if (_log.IsErrorThrown)
+                return;
+
+            _cache.FlushCache(assembly);
+
+            foreach (var aspect in aspects)
+                _assectWeaver.WeaveGlobalAssests(aspect);
+
+            foreach (var injector in _effectWeavers.OrderByDescending(i => i.Priority))
+            {
+                _log.LogInfo($"Executing {injector.GetType().Name}");
+
+                foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key))
+                    foreach (var injection in prioritizedInjections.OrderByDescending(i => i.Effect.Priority))
+                        injector.Weave(injection);
+            }
         }
     }
 }

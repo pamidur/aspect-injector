@@ -1,7 +1,7 @@
 ﻿using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
-using AspectInjector.Core.Services;
+using AspectInjector.Core.Contracts;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;

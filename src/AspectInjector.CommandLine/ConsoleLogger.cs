@@ -1,55 +1,21 @@
-﻿using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Models;
+﻿using AspectInjector.Core.Services;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.CLI
 {
-    public class ConsoleLogger : ILogger
+    public class ConsoleLogger : Logger
     {
-        public bool IsErrorThrown { get; private set; }
-
-        public void LogError(string message)
+        protected override void Write(string text, MessageType type)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(message);
-            Console.ResetColor();
-            IsErrorThrown = true;
-        }
+            switch (type)
+            {
+                case MessageType.Warning: Console.ForegroundColor = ConsoleColor.Yellow; break;
+                case MessageType.Error: Console.ForegroundColor = ConsoleColor.Red; break;
+                case MessageType.Info: Console.ForegroundColor = ConsoleColor.Green; break;
+            }
 
-        public void LogError(CompilationMessage error)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write(text);
 
-            if (error.SequencePoint?.Document != null)
-                Console.Write($"{error.SequencePoint.Document.Url}({error.SequencePoint.StartLine},{error.SequencePoint.StartColumn}): ");
-
-            Console.WriteLine($"error: { error.Text}");
-
-            Console.ResetColor();
-            IsErrorThrown = true;
-        }
-
-        public void LogInformation(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(message);
-            Console.ResetColor();
-        }
-
-        public void LogMessage(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void LogWarning(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(message);
             Console.ResetColor();
         }
     }

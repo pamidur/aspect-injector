@@ -1,21 +1,21 @@
-﻿using AspectInjector.Core.Extensions;
+﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
-using AspectInjector.Core.Processing.EqualityComparers;
 using Mono.Cecil;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace AspectInjector.Core.Services
 {
-    public class InjectionCollector : ServiceBase
+    public class InjectionCollector : IInjectionCollector
     {
-        private readonly AssetsCache _cache;
+        private readonly IAssetsCache _cache;
+        private readonly ILogger _log;
 
-        public InjectionCollector(AssetsCache cache, Logger logger) : base(logger)
+        public InjectionCollector(IAssetsCache cache, ILogger logger)
         {
             _cache = cache;
+            _log = logger;
         }
 
         public IEnumerable<Injection> Collect(AssemblyDefinition assembly)
@@ -62,12 +62,12 @@ namespace AspectInjector.Core.Services
 
             if (aspect == null)
             {
-                Log.LogError(CompilationMessage.From($"Aspect {aspectRef.FullName} should be an aspect class.", target));
+                _log.LogError(CompilationMessage.From($"Aspect {aspectRef.FullName} should be an aspect class.", target));
                 return Enumerable.Empty<Injection>();
             }
 
             if (aspectRef.HasGenericParameters)
-                Log.LogError(CompilationMessage.From($"Aspect {aspectRef.FullName} should not have generic parameters.", target));
+                _log.LogError(CompilationMessage.From($"Aspect {aspectRef.FullName} should not have generic parameters.", target));
 
             var priority = attr.GetPropertyValue<Broker.Inject, ushort>(i => i.Priority);
 

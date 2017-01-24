@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Broker;
+using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
@@ -7,13 +8,15 @@ using System.Linq;
 
 namespace AspectInjector.Core.Services
 {
-    public class AspectExtractor : ServiceBase
+    public class AspectExtractor : IAspectExtractor
     {
-        private readonly IEnumerable<EffectExtractorBase> _effectExtractors;
+        private readonly IEnumerable<IEffectExtractor> _effectExtractors;
+        private readonly ILogger _log;
 
-        public AspectExtractor(IEnumerable<EffectExtractorBase> effectExtractors, Logger logger) : base(logger)
+        public AspectExtractor(IEnumerable<IEffectExtractor> effectExtractors, ILogger logger)
         {
             _effectExtractors = effectExtractors;
+            _log = logger;
         }
 
         public IEnumerable<AspectDefinition> Extract(AssemblyDefinition assembly)
@@ -29,7 +32,7 @@ namespace AspectInjector.Core.Services
             if (effects.Any())
             {
                 if (aspect == null)
-                    Log.LogError(CompilationMessage.From($"Type {type.FullName} has the effects, but is not marked as an aspect. Concider using [Aspect] attribute.", type));
+                    _log.LogError(CompilationMessage.From($"Type {type.FullName} has the effects, but is not marked as an aspect. Concider using [Aspect] attribute.", type));
                 else
                     return new AspectDefinition
                     {
@@ -80,10 +83,10 @@ namespace AspectInjector.Core.Services
             foreach (var aspect in result)
             {
                 if (!aspect.Effects.Any())
-                    Log.LogWarning(CompilationMessage.From($"Type {aspect.Host.FullName} has defined as an aspect, but lacks any effect.", aspect.Host));
+                    _log.LogWarning(CompilationMessage.From($"Type {aspect.Host.FullName} has defined as an aspect, but lacks any effect.", aspect.Host));
 
                 if (!aspect.Host.IsPublic)
-                    Log.LogWarning(CompilationMessage.From($"Type {aspect.Host.FullName} is not public.", aspect.Host));
+                    _log.LogWarning(CompilationMessage.From($"Type {aspect.Host.FullName} is not public.", aspect.Host));
 
                 yield return aspect;
             }

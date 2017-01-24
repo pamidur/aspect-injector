@@ -1,4 +1,5 @@
-﻿using AspectInjector.Core.Models;
+﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Models;
 using AspectInjector.Core.Models.Converters;
 using Mono.Cecil;
 using Newtonsoft.Json;
@@ -9,23 +10,13 @@ using System.Text;
 
 namespace AspectInjector.Core.Services
 {
-    public class AssetsCache : ServiceBase
+    public class AssetsCache : IAssetsCache
     {
         private readonly Dictionary<string, Assets> _assetsCache = new Dictionary<string, Assets>();
-
-        public AssetsCache(Logger logger) : base(logger)
-        {
-        }
 
         public AspectDefinition ReadAspect(TypeDefinition type)
         {
             return GetAssets(type.Module).Aspects.FirstOrDefault(a => a.Host == type);
-        }
-
-        public void Cache(IEnumerable<AspectDefinition> aspects)
-        {
-            foreach (var aspect in aspects)
-                Cache(aspect);
         }
 
         public void Cache(AspectDefinition aspect)

@@ -2,7 +2,7 @@
 using AspectInjector.Core.Defaults;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
-using AspectInjector.Core.Services.Abstract;
+using AspectInjector.Core.Contracts.Abstract;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;

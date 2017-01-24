@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.Core.Contracts;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 using System;
@@ -7,13 +8,15 @@ using System.Linq;
 
 namespace AspectInjector.Core.Services
 {
-    public class Janitor : ServiceBase
+    public class Janitor : IJanitor
     {
-        private readonly IEnumerable<byte[]> _compileTimeDependenciesTokens;
+        private readonly IEnumerable<byte[]> _compileTimeDependencyTokens;
+        private readonly ILogger _log;
 
-        public Janitor(IEnumerable<byte[]> compileTimeDependenciesTokens, Logger logger) : base(logger)
+        public Janitor(IEnumerable<byte[]> compileTimeDependencyTokens, ILogger logger)
         {
-            _compileTimeDependenciesTokens = compileTimeDependenciesTokens;
+            _compileTimeDependencyTokens = compileTimeDependencyTokens;
+            _log = logger;
         }
 
         public void CleanupModule(ModuleDefinition module)
@@ -56,7 +59,7 @@ namespace AspectInjector.Core.Services
                 RemoveBrokerAttributes(@event.CustomAttributes);
         }
 
-        internal void CleanupAssembly(AssemblyDefinition assembly)
+        public void Cleanup(AssemblyDefinition assembly)
         {
             throw new NotImplementedException();
         }
