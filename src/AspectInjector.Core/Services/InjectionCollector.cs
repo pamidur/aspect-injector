@@ -77,7 +77,6 @@ namespace AspectInjector.Core.Services
             {
                 Target = target,
                 Source = aspect,
-                SourceReference = aspectRef,
                 Priority = priority,
                 Effect = e
             });

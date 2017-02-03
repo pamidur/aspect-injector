@@ -4,10 +4,7 @@ using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.Core.Fluent
 {
@@ -64,40 +61,40 @@ namespace AspectInjector.Core.Fluent
         private MethodDefinition CreateMethod(TypeDefinition td, string name, MethodAttributes attrs, TypeReference returnType)
         {
             var method = new MethodDefinition(name, attrs, _ctx.TypeSystem.Import(returnType));
-            var processor = _ctx.Factory.GetProcessor(method.Body);
+            var processor = _ctx.Factory.GetEditor(method.Body);
             processor.Append(processor.Create(OpCodes.Ret));
             td.Methods.Add(method);
             return method;
         }
 
-        public FieldDefinition Get(Core.Models.Injection aspect, TypeDefinition target)
+        public FieldDefinition Get(Injection injection, TypeDefinition target)
         {
             MethodDefinition initMethod = null;
             FieldAttributes fieldAttrs = FieldAttributes.Private;
             string aspectPropertyName = null;
 
-            //if (aspect.Scope == AspectCreationScope.Instance)
-            //{
-            //    fieldAttrs = FieldAttributes.Private;
-            //    initMethod = GetInstanсeAspectsInitializer(target);
-            //    aspectPropertyName = $"{_ctx.Factory.Prefix}i_{aspect.Source.Name}";
-            //}
-            //else if (aspect.Scope == AspectCreationScope.Type)
-            //{
-            //    fieldAttrs = FieldAttributes.Private | FieldAttributes.Static;
-            //    initMethod = GetTypeAspectsInitializer(target);
-            //    aspectPropertyName = $"{_ctx.Factory.Prefix}t_{aspect.Source.Name}";
-            //}
-            //else throw new NotSupportedException("Scope " + aspect.Scope.ToString() + " is not supported (yet).");
+            if (injection.Source.Scope == Aspect.Scope.PerInstance)
+            {
+                fieldAttrs = FieldAttributes.Private;
+                initMethod = GetInstanсeAspectsInitializer(target);
+                aspectPropertyName = $"{_ctx.Factory.Prefix}i_{injection.Source.Host.Name}";
+            }
+            else if (injection.Source.Scope == Aspect.Scope.Global)
+            {
+                fieldAttrs = FieldAttributes.Private | FieldAttributes.Static;
+                initMethod = GetTypeAspectsInitializer(target);
+                aspectPropertyName = $"{_ctx.Factory.Prefix}t_{injection.Source.Name}";
+            }
+            else throw new NotSupportedException("Scope " + injection.Source.Scope.ToString() + " is not supported (yet).");
 
-            var existingField = target.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(aspect.Source));
+            var existingField = target.Fields.FirstOrDefault(f => f.Name == aspectPropertyName && f.FieldType.IsTypeOf(injection.Source));
             if (existingField != null)
                 return existingField;
 
-            var field = new FieldDefinition(aspectPropertyName, fieldAttrs, _ctx.TypeSystem.Import(aspect.Source));
+            var field = new FieldDefinition(aspectPropertyName, fieldAttrs, _ctx.TypeSystem.Import(injection.Source));
             target.Fields.Add(field);
 
-            InjectInitialization(initMethod, field, aspect.AspectFactory.Resolve());
+            InjectInitialization(initMethod, field, injection.AspectFactory.Resolve());
 
             return field;
         }

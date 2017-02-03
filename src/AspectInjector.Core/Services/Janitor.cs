@@ -1,15 +1,18 @@
-﻿using AspectInjector.Core.Contracts;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.Core.Services
 {
     public class Janitor : IJanitor
     {
+        private static readonly byte[] BrokerKeyToken = typeof(Aspect).Assembly.GetName().GetPublicKeyToken();
+
         private readonly ILogger _log;
 
         public Janitor(ILogger logger)
@@ -17,16 +20,20 @@ namespace AspectInjector.Core.Services
             _log = logger;
         }
 
-        public void CleanupModule(ModuleDefinition module)
+        public void Cleanup(AssemblyDefinition assembly)
+        {
+            foreach (var module in assembly.Modules)
+                CleanupModule(module);
+        }
+
+        private void CleanupModule(ModuleDefinition module)
         {
             RemoveBrokerAttributes(module.CustomAttributes);
 
             foreach (var type in module.Types)
                 RemoveBrokerAttributes(type);
 
-            var reference = module.AssemblyReferences.FirstOrDefault(
-                ar => BitConverter.ToString(ar.PublicKeyToken)
-                    .Replace("-", string.Empty).ToLowerInvariant() == BrokerAssemblyPublicKeyToken.ToLowerInvariant());
+            var reference = module.AssemblyReferences.FirstOrDefault(ar => ar.PublicKeyToken.SequenceEqual(BrokerKeyToken));
 
             if (reference != null)
                 module.AssemblyReferences.Remove(reference);
@@ -60,7 +67,7 @@ namespace AspectInjector.Core.Services
         private void RemoveBrokerAttributes(Collection<CustomAttribute> collection)
         {
             foreach (var attr in collection.ToList())
-                if (attr.AttributeType.BelongsToAssembly(BrokerAssemblyPublicKeyToken))
+                if (attr.AttributeType.BelongsToAssembly(BrokerKeyToken))
                     collection.Remove(attr);
         }
 
@@ -68,11 +75,11 @@ namespace AspectInjector.Core.Services
         {
             type.Methods.ToList().ForEach(CheckMethodReferencesBroker);
 
-            if ((type.BaseType != null && (type.BaseType.BelongsToAssembly(BrokerAssemblyPublicKeyToken) || IsGenericInstanceArgumentsReferenceBroker(type.BaseType as IGenericInstance)))
-                || type.Fields.Any(f => f.FieldType.BelongsToAssembly(BrokerAssemblyPublicKeyToken) || IsGenericInstanceArgumentsReferenceBroker(f.FieldType as IGenericInstance))
+            if ((type.BaseType != null && (type.BaseType.BelongsToAssembly(BrokerKeyToken) || IsGenericInstanceArgumentsReferenceBroker(type.BaseType as IGenericInstance)))
+                || type.Fields.Any(f => f.FieldType.BelongsToAssembly(BrokerKeyToken) || IsGenericInstanceArgumentsReferenceBroker(f.FieldType as IGenericInstance))
                 || IsGenericParametersReferenceBroker(type))
             {
-                throw new CompilationException("Types from AspectInjector.Broker can't be referenced", type);
+                _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", type));
             }
 
             type.NestedTypes.ToList().ForEach(CheckTypeReferencesBroker);
@@ -80,20 +87,20 @@ namespace AspectInjector.Core.Services
 
         private void CheckMethodReferencesBroker(MethodDefinition method)
         {
-            if (method.Parameters.Any(p => p.ParameterType.BelongsToAssembly(BrokerAssemblyPublicKeyToken) || IsGenericInstanceArgumentsReferenceBroker(p.ParameterType as IGenericInstance))
+            if (method.Parameters.Any(p => p.ParameterType.BelongsToAssembly(BrokerKeyToken) || IsGenericInstanceArgumentsReferenceBroker(p.ParameterType as IGenericInstance))
                 || (method.Body != null && IsMethodBodyReferencesBroker(method.Body))
-                || method.ReturnType.BelongsToAssembly(BrokerAssemblyPublicKeyToken)
+                || method.ReturnType.BelongsToAssembly(BrokerKeyToken)
                 || IsGenericParametersReferenceBroker(method)
                 || IsGenericInstanceArgumentsReferenceBroker(method.ReturnType as IGenericInstance))
             {
-                throw new CompilationException("Types from AspectInjector.Broker can't be referenced", method);
+                _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", method));
             }
         }
 
         private bool IsGenericParametersReferenceBroker(IGenericParameterProvider genericParameters)
         {
             return genericParameters.GenericParameters.Any(p =>
-                p.Constraints.Any(c => c.BelongsToAssembly(BrokerAssemblyPublicKeyToken)
+                p.Constraints.Any(c => c.BelongsToAssembly(BrokerKeyToken)
                     || IsGenericInstanceArgumentsReferenceBroker(c as IGenericInstance)));
         }
 
@@ -101,7 +108,7 @@ namespace AspectInjector.Core.Services
         {
             if (genericInstance != null)
             {
-                return genericInstance.GenericArguments.Any(a => a.BelongsToAssembly(BrokerAssemblyPublicKeyToken) ||
+                return genericInstance.GenericArguments.Any(a => a.BelongsToAssembly(BrokerKeyToken) ||
                     IsGenericInstanceArgumentsReferenceBroker(a as IGenericInstance));
             }
 
@@ -110,7 +117,7 @@ namespace AspectInjector.Core.Services
 
         private bool IsMethodBodyReferencesBroker(MethodBody methodBody)
         {
-            return methodBody.Variables.Any(v => v.VariableType.BelongsToAssembly(BrokerAssemblyPublicKeyToken))
+            return methodBody.Variables.Any(v => v.VariableType.BelongsToAssembly(BrokerKeyToken))
                 || methodBody.Instructions.Any(IsInstructionReferencesBroker);
         }
 
@@ -124,7 +131,7 @@ namespace AspectInjector.Core.Services
                 TypeReference type = instruction.Operand as TypeReference;
                 if (type != null)
                 {
-                    return type.BelongsToAssembly(BrokerAssemblyPublicKeyToken) ||
+                    return type.BelongsToAssembly(BrokerKeyToken) ||
                         IsGenericInstanceArgumentsReferenceBroker(type as GenericInstanceType);
                 }
             }
@@ -137,7 +144,7 @@ namespace AspectInjector.Core.Services
                 MethodReference method = instruction.Operand as MethodReference;
                 if (method != null)
                 {
-                    return method.DeclaringType.BelongsToAssembly(BrokerAssemblyPublicKeyToken) ||
+                    return method.DeclaringType.BelongsToAssembly(BrokerKeyToken) ||
                         IsGenericInstanceArgumentsReferenceBroker(method as GenericInstanceMethod);
                 }
             }

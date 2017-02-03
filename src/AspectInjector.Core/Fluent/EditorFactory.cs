@@ -1,24 +1,17 @@
-﻿using AspectInjector.Core.Fluent;
-using AspectInjector.Core.Fluent.Models;
+﻿using AspectInjector.Core.Fluent.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Collections.Generic;
 
 namespace AspectInjector.Core.Fluent
 {
-    public class EditorFactory
+    public static class EditorFactory
     {
-        private readonly Dictionary<MethodBody, ILProcessor> Processors = new Dictionary<MethodBody, ILProcessor>();
-        private readonly Dictionary<ModuleDefinition, EditorContext> EditorContexts = new Dictionary<ModuleDefinition, EditorContext>();
-        private readonly Dictionary<MethodDefinition, MethodEditor> MethodEditors = new Dictionary<MethodDefinition, MethodEditor>();
-        public string Prefix { get; private set; }
+        private static readonly Dictionary<MethodBody, ILProcessor> Processors = new Dictionary<MethodBody, ILProcessor>();
+        private static readonly Dictionary<ModuleDefinition, ExtendedTypeSystem> TypeSystems = new Dictionary<ModuleDefinition, ExtendedTypeSystem>();
+        private static readonly Dictionary<MethodDefinition, MethodEditor> MethodEditors = new Dictionary<MethodDefinition, MethodEditor>();
 
-        public EditorFactory(string prefix)
-        {
-            Prefix = prefix;
-        }
-
-        public ILProcessor GetProcessor(MethodBody mb)
+        public static ILProcessor GetEditor(this MethodBody mb)
         {
             lock (Processors)
             {
@@ -34,7 +27,7 @@ namespace AspectInjector.Core.Fluent
             }
         }
 
-        public MethodEditor GetEditor(MethodDefinition md)
+        public static MethodEditor GetEditor(this MethodDefinition md)
         {
             lock (MethodEditors)
             {
@@ -45,7 +38,7 @@ namespace AspectInjector.Core.Fluent
                     //if (md.CustomAttributes.HasAttributeOfType<AsyncStateMachineAttribute>() /* && md.ReturnType != md.Module.TypeSystem.Void*/)
                     //    result = new TargetAsyncMethodContext(md, ModuleContext.GetOrCreateContext(md.Module));
                     //else
-                    result = new MethodEditor(GetContext(md.Module), md);
+                    result = new MethodEditor(md);
 
                     MethodEditors.Add(md, result);
                 }
@@ -54,16 +47,16 @@ namespace AspectInjector.Core.Fluent
             }
         }
 
-        public EditorContext GetContext(ModuleDefinition md)
+        public static ExtendedTypeSystem GetTypeSystem(this ModuleDefinition md)
         {
-            lock (EditorContexts)
+            lock (TypeSystems)
             {
-                EditorContext result;
+                ExtendedTypeSystem result;
 
-                if (!EditorContexts.TryGetValue(md, out result))
+                if (!TypeSystems.TryGetValue(md, out result))
                 {
-                    result = new EditorContext(md, this);
-                    EditorContexts.Add(md, result);
+                    result = new ExtendedTypeSystem(md);
+                    TypeSystems.Add(md, result);
                 }
 
                 return result;

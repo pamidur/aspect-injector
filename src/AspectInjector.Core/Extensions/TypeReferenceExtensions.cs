@@ -8,6 +8,19 @@ namespace AspectInjector.Core.Extensions
 {
     public static class TypeReferenceExtensions
     {
+        public static bool BelongsToAssembly(this TypeReference tr, byte[] publicKey)
+        {
+            var td = tr.Resolve();
+            if (td == null)
+                return false;
+
+            var token = td.Module.Assembly.Name.PublicKeyToken;
+            if (token == null)
+                return false;
+
+            return token.SequenceEqual(publicKey);
+        }
+
         public static bool IsTypeOf(this TypeReference tr1, TypeReference tr2)
         {
             return FQN.FromTypeReference(tr1).Equals(FQN.FromTypeReference(tr2));

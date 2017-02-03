@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MixinEffect.cs" />
-    <Compile Include="MixinReader.cs" />
+    <Compile Include="MixinExtractor.cs" />
     <Compile Include="MixinInjector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

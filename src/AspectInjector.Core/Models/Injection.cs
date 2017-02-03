@@ -7,21 +7,23 @@ namespace AspectInjector.Core.Models
     public class Injection : IEquatable<Injection>
     {
         public ICustomAttributeProvider Target { get; set; }
+
         public uint Priority { get; internal set; }
+
         public AspectDefinition Source { get; internal set; }
+
         public Effect Effect { get; internal set; }
-        public TypeReference SourceReference { get; internal set; }
 
         public bool Equals(Injection other)
         {
-            return SourceReference.GetFQN() == other.SourceReference.GetFQN()
+            return Source.Host.GetFQN() == other.Source.Host.GetFQN()
                 && Target == other.Target
                 && Effect.Equals(other.Effect);
         }
 
         public override int GetHashCode()
         {
-            return SourceReference.GetFQN().GetHashCode();
+            return Source.Host.GetFQN().GetHashCode();
         }
     }
 }

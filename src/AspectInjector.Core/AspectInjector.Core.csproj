@@ -82,7 +82,6 @@
     <Compile Include="Extensions\GenericProcessingExtension.cs" />
     <Compile Include="Extensions\MemberReferenceExtensions.cs" />
     <Compile Include="Fluent\AspectFactory.cs" />
-    <Compile Include="Fluent\EditorContext.cs" />
     <Compile Include="Fluent\EditorFactory.cs" />
     <Compile Include="Extensions\ILProcessorExtension.cs" />
     <Compile Include="Fluent\Constructors\FluentMemberConstructor.cs" />

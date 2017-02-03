@@ -1,14 +1,10 @@
-﻿using AspectInjector.Broker;
-using AspectInjector.Core.Extensions;
+﻿using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
-using AspectInjector.Core.Models;
+using AspectInjector.Core.Fluent.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.Core.Models
 {
@@ -16,13 +12,13 @@ namespace AspectInjector.Core.Models
     {
         private readonly ILProcessor _proc;
         private readonly Instruction _refInst;
-        private readonly EditorContext _ctx;
+        private readonly ExtendedTypeSystem _typeSystem;
 
-        public PointCut(EditorContext ctx, ILProcessor proc, Instruction instruction)
+        public PointCut(ILProcessor proc, Instruction instruction)
         {
             _proc = proc;
             _refInst = instruction;
-            _ctx = ctx;
+            _typeSystem = proc.Body.Method.Module.GetTypeSystem();
         }
 
         private PointCut Chain(Instruction inst)
@@ -32,7 +28,7 @@ namespace AspectInjector.Core.Models
 
         public virtual PointCut CreatePointCut(Instruction instruction)
         {
-            return new PointCut(_ctx, _proc, instruction);
+            return new PointCut(_proc, instruction);
         }
 
         public void Return(Action<PointCut> arg)
@@ -44,7 +40,7 @@ namespace AspectInjector.Core.Models
         {
             args?.Invoke(this);
 
-            var methodRef = _ctx.TypeSystem.Import(method);// */(MethodReference)method.CreateReference(_ctx.TypeSystem);
+            var methodRef = _typeSystem.Import(method);// */(MethodReference)method.CreateReference(_typeSystem);
             var def = method.Resolve();
 
             var code = OpCodes.Call;
@@ -72,13 +68,13 @@ namespace AspectInjector.Core.Models
         {
             val(this);
 
-            var fieldRef = _ctx.TypeSystem.Import(field);// */(FieldReference)field.CreateReference(_ctx.TypeSystem);
+            var fieldRef = _typeSystem.Import(field);// */(FieldReference)field.CreateReference(_typeSystem);
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
         }
 
-        public PointCut Load(Injection aspect)
+        public PointCut LoadAspect(Injection aspect)
         {
             var aspectField = _ctx.Aspects.Get(aspect, _proc.Body.Method.DeclaringType);
 
@@ -92,7 +88,7 @@ namespace AspectInjector.Core.Models
 
         public PointCut Load(FieldReference field)
         {
-            var fieldRef = _ctx.TypeSystem.Import(field);//*/(FieldReference)field.CreateReference(_ctx.TypeSystem);
+            var fieldRef = _typeSystem.Import(field);//*/(FieldReference)field.CreateReference(_typeSystem);
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, fieldRef));
@@ -113,7 +109,7 @@ namespace AspectInjector.Core.Models
 
             if (elementtype.IsValueType)
             {
-                var opcode = _ctx.TypeSystem.LoadIndirectMap.First(kv => elementtype.IsTypeOf(kv.Key)).Value;
+                var opcode = _typeSystem.LoadIndirectMap.First(kv => elementtype.IsTypeOf(kv.Key)).Value;
                 _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
             }
             else

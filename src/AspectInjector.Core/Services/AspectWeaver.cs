@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using AspectInjector.Core.Contracts;
+﻿using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
+using System;
 
 namespace AspectInjector.Core.Services
 {
@@ -16,7 +15,7 @@ namespace AspectInjector.Core.Services
 
         public void WeaveGlobalAssests(AspectDefinition target)
         {
-            throw new NotImplementedException();
+            new NotImplementedException();
         }
     }
 }

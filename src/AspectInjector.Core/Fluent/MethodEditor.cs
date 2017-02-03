@@ -1,11 +1,9 @@
-﻿using AspectInjector.Core.Contexts;
-using AspectInjector.Core.Extensions;
+﻿using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.Core.Fluent
@@ -13,12 +11,12 @@ namespace AspectInjector.Core.Fluent
     public class MethodEditor
     {
         private readonly MethodDefinition _md;
-        private readonly EditorContext _ctx;
+        private readonly ExtendedTypeSystem _typeSystem;
 
-        internal MethodEditor(EditorContext context, MethodDefinition md)
+        internal MethodEditor(MethodDefinition md)
         {
-            _ctx = context;
             _md = md;
+            _typeSystem = md.Module.GetTypeSystem();
         }
 
         public void OnInit(Action<PointCut> action)
@@ -27,12 +25,12 @@ namespace AspectInjector.Core.Fluent
                 FindBaseClassCtorCall() :
                 GetMethodOriginalEntryPoint();
 
-            var proc = _ctx.Factory.GetProcessor(_md.Body);
+            var proc = _md.Body.GetEditor();
 
             if (instruction.OpCode != OpCodes.Nop) //add nop
                 instruction = proc.SafeInsertBefore(instruction, proc.Create(OpCodes.Nop));
 
-            action(new PointCut(_ctx, proc, instruction));
+            action(new PointCut(proc, instruction));
         }
 
         public void OnEntry(Action<PointCut> action)
@@ -44,7 +42,7 @@ namespace AspectInjector.Core.Fluent
             while (instruction.OpCode == OpCodes.Nop) //skip all nops
                 instruction = instruction.Next;
 
-            action(new PointCut(_ctx, _ctx.Factory.GetProcessor(_md.Body), instruction));
+            action(new PointCut(_md.Body.GetEditor(), instruction));
         }
 
         public void OnExit(Action<PointCut> action)
@@ -60,12 +58,12 @@ namespace AspectInjector.Core.Fluent
             if (!_md.Body.Instructions.Contains(instruction))
                 throw new ArgumentException("Wrong instruction.");
 
-            action(new PointCut(_ctx, _ctx.Factory.GetProcessor(_md.Body), instruction));
+            action(new PointCut(_md.Body.GetEditor(), instruction));
         }
 
         public void Instead(Action<PointCut> action)
         {
-            var proc = _ctx.Factory.GetProcessor(_md.Body);
+            var proc = _md.Body.GetEditor();
             var instruction = proc.Create(OpCodes.Nop);
 
             _md.Body.Instructions.Clear();
@@ -78,7 +76,7 @@ namespace AspectInjector.Core.Fluent
 
         protected Instruction FindBaseClassCtorCall()
         {
-            var proc = _ctx.Factory.GetProcessor(_md.Body);
+            var proc = _md.Body.GetEditor();
 
             if (!_md.IsConstructor)
                 throw new Exception(_md.ToString() + " is not ctor.");
@@ -108,10 +106,10 @@ namespace AspectInjector.Core.Fluent
             if (_md.CustomAttributes.Any(ca => ca.AttributeType.IsTypeOf(typeof(T))))
                 return;
 
-            var constructor = _ctx.TypeSystem.CompilerGeneratedAttribute.Resolve()
+            var constructor = _typeSystem.CompilerGeneratedAttribute.Resolve()
                 .Methods.First(m => m.IsConstructor && !m.IsStatic);
 
-            _md.CustomAttributes.Add(new CustomAttribute(_ctx.TypeSystem.Import(constructor)));
+            _md.CustomAttributes.Add(new CustomAttribute(_typeSystem.Import(constructor)));
         }
     }
 }
