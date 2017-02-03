@@ -5,6 +5,7 @@ using AspectInjector.Core.Models;
 using AspectInjector.Core.Services;
 using AspectInjector.Core.Utils;
 using CommandLine;
+using DryIoc;
 using System.IO;
 
 namespace AspectInjector.CLI.Commands
@@ -25,11 +26,7 @@ namespace AspectInjector.CLI.Commands
                 return 1;
             }
 
-            var processor = new Processor(
-                ProcessingConfiguration.Default
-                .SetLogger(Log)
-                .UseMixinInjections()
-                );
+            var processor = CreateProcessor();
 
             var resolver = new CachedAssemblyResolver();
             resolver.AddSearchDirectory(Path.GetDirectoryName(Filename));
@@ -41,20 +38,18 @@ namespace AspectInjector.CLI.Commands
 
         private Processor CreateProcessor()
         {
-            var cache = new AssetsCache();
+            var container = new Container();
+            container.Register<IAspectExtractor, AspectExtractor>(Reuse.Singleton);
+            container.Register<IAspectWeaver, AspectWeaver>(Reuse.Singleton);
+            container.Register<IAssetsCache, AssetsCache>(Reuse.Singleton);
+            container.Register<IInjectionCollector, InjectionCollector>(Reuse.Singleton);
+            container.Register<IJanitor, Janitor>(Reuse.Singleton);
 
-            return new Processor(
-                new Janitor(null, Log),
-                new AspectExtractor(new[] {
-                    new MixinReader
-                }, Log),
-                cache,
-                new InjectionCollector(cache, Log),
-                new AspectWeaver(Log),
-                new[] {
-                },
-                Log
-                );
+            //register weavers
+
+            container.UseInstance(Log, true);
+
+            return container.Resolve<Processor>();
         }
     }
 }

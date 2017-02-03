@@ -41,6 +41,10 @@
       <HintPath>..\packages\CommandLineParser.2.1.1-beta\lib\net45\CommandLine.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="DryIoc, Version=2.10.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DryIoc.dll.2.10.0\lib\net45\DryIoc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.9.6.4\lib\net45\Mono.Cecil.dll</HintPath>
       <Private>True</Private>
@@ -58,6 +62,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />

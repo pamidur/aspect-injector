@@ -10,12 +10,10 @@ namespace AspectInjector.Core.Services
 {
     public class Janitor : IJanitor
     {
-        private readonly IEnumerable<byte[]> _compileTimeDependencyTokens;
         private readonly ILogger _log;
 
-        public Janitor(IEnumerable<byte[]> compileTimeDependencyTokens, ILogger logger)
+        public Janitor(ILogger logger)
         {
-            _compileTimeDependencyTokens = compileTimeDependencyTokens;
             _log = logger;
         }
 
@@ -57,11 +55,6 @@ namespace AspectInjector.Core.Services
 
             foreach (var @event in type.Events)
                 RemoveBrokerAttributes(@event.CustomAttributes);
-        }
-
-        public void Cleanup(AssemblyDefinition assembly)
-        {
-            throw new NotImplementedException();
         }
 
         private void RemoveBrokerAttributes(Collection<CustomAttribute> collection)
