@@ -104,6 +104,7 @@ namespace AspectInjector.Tests.Interfaces
         }*/
 
         [Mixin(typeof(IGeneralTests))]
+        [Aspect(Aspect.Scope.Global)]
         internal class GeneralTests_Aspect : IGeneralTests
         {
             string IGeneralTests.TestMethod(string data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue)

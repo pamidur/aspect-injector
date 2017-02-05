@@ -1,11 +1,5 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.Build.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mono.Cecil;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 
 namespace AspectInjector.CompileTimeTests
 {
@@ -31,7 +25,7 @@ namespace AspectInjector.CompileTimeTests
         public class AspectImplementation
         {
             [Advice(Advice.Type.Before, Advice.Target.Method)]
-            public void BeforeMethod([AdviceArgument(AdviceArgument.Source.Arguments)] object[] args)
+            public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Arguments)] object[] args)
             {
             }
         }

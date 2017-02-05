@@ -2,7 +2,6 @@
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AspectInjector.Core.Services
 {
@@ -17,16 +16,16 @@ namespace AspectInjector.Core.Services
             _log = logger;
         }
 
-        public IEnumerable<Effect> Extract(ICustomAttributeProvider host)
+        public IReadOnlyCollection<Effect> Extract(ICustomAttributeProvider host)
         {
             var source = host as TSource;
 
             if (source != null)
                 return Extract(source);
 
-            return Enumerable.Empty<Effect>();
+            return new List<Effect>();
         }
 
-        protected abstract IEnumerable<TEffect> Extract(TSource host);
+        protected abstract IReadOnlyCollection<TEffect> Extract(TSource host);
     }
 }

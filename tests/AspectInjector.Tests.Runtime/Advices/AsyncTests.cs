@@ -97,22 +97,24 @@ namespace AspectInjector.Tests.Advices
             return testData;
         }
 
+        [Aspect(Aspect.Scope.Global)]
         public class AsyncTests_ArgumentsAspect
         {
             [Advice(Advice.Type.After, Advice.Target.Method)]
-            public void AfterMethod([AdviceArgument(AdviceArgument.Source.ReturnValue)] object value,
-                [AdviceArgument(AdviceArgument.Source.Arguments)] object[] args
+            public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object value,
+                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args
                 )
             {
                 Checker.Passed = args[0].ToString() == "args_test";
             }
         }
 
+        [Aspect(Aspect.Scope.Global)]
         public class AsyncTests_SimpleAspect
         {
             [Advice(Advice.Type.After, Advice.Target.Method)]
-            public void AfterMethod([AdviceArgument(AdviceArgument.Source.ReturnValue)] object value,
-                [AdviceArgument(AdviceArgument.Source.Arguments)] object[] args
+            public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object value,
+                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args
                 )
             {
                 Checker.Passed = AsyncTests.Data;

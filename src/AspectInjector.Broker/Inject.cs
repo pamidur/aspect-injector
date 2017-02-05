@@ -5,7 +5,7 @@ namespace AspectInjector.Broker
     /// <summary>
     /// Marks member to be injection target for specific Aspect.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event | AttributeTargets.Method, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Module | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Event | AttributeTargets.Method | AttributeTargets.Constructor, AllowMultiple = true)]
     public sealed class Inject : Attribute
     {
         /// <summary>

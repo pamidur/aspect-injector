@@ -6,6 +6,6 @@ namespace AspectInjector.Core.Contracts
 {
     public interface IAspectExtractor
     {
-        IEnumerable<AspectDefinition> Extract(AssemblyDefinition assembly);
+        IReadOnlyCollection<AspectDefinition> Extract(AssemblyDefinition assembly);
     }
 }

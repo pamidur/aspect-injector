@@ -24,6 +24,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     public class NestedClassesTests_Aspect
     {
         [Advice(Advice.Type.Before, Advice.Target.Method)]

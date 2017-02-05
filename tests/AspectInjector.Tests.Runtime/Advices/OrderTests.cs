@@ -33,6 +33,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class OrderTests_Aspect1
     {
         [Advice(Advice.Type.Before, Advice.Target.Method)]
@@ -41,6 +42,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class OrderTests_Aspect2
     {
         [Advice(Advice.Type.Before, Advice.Target.Method)]
@@ -50,6 +52,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class OrderTests_Aspect3
     {
         [Advice(Advice.Type.Before, Advice.Target.Method)]

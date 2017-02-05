@@ -12,6 +12,7 @@ namespace AspectInjector.Tests.General
         public static extern int MessageBox(IntPtr hWnd, String text, String caption, int options);
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class UnmanagedTests_Aspect
     {
         [Advice(Advice.Type.After, Advice.Target.Method)]

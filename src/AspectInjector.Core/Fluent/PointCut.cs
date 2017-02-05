@@ -1,4 +1,5 @@
-﻿using AspectInjector.Core.Extensions;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Fluent.Models;
 using Mono.Cecil;
@@ -34,6 +35,11 @@ namespace AspectInjector.Core.Models
         public void Return(Action<PointCut> arg)
         {
             arg(Chain(CreateInstruction(OpCodes.Ret)));
+        }
+
+        public void Return()
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ret));
         }
 
         public PointCut Call(MethodReference method, Action<PointCut> args = null)
@@ -74,16 +80,100 @@ namespace AspectInjector.Core.Models
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
         }
 
-        public PointCut LoadAspect(Injection aspect)
+        public PointCut LoadAspect(AspectDefinition aspect)
         {
-            var aspectField = _ctx.Aspects.Get(aspect, _proc.Body.Method.DeclaringType);
+            FieldReference aspectField;
 
-            if (!aspectField.IsStatic)
+            if (_proc.Body.Method.IsStatic || aspect.Scope == Aspect.Scope.Global)
+                aspectField = GetGlobalAspectField(aspect);
+            else
+            {
+                aspectField = GetInstanceAspectField(aspect);
                 This();
+            }
 
             Load(aspectField);
 
             return this;
+        }
+
+        private FieldReference GetInstanceAspectField(AspectDefinition aspect)
+        {
+            var type = _proc.Body.Method.DeclaringType;
+            var ts = type.Module.GetTypeSystem();
+            var fieldName = $"{Constants.AspectInstanceFieldPrefix}{aspect.Host.FullName}";
+
+            var field = FindField(type, fieldName);
+            if (field == null)
+            {
+                field = new FieldDefinition(fieldName, FieldAttributes.Family | FieldAttributes.InitOnly, ts.Import(aspect.Host));
+                type.Fields.Add(field);
+
+                InjectInitialization(GetInstanсeAspectsInitializer(type), field, aspect.GetFactory());
+            }
+
+            return field;
+        }
+
+        private FieldDefinition FindField(TypeDefinition type, string name)
+        {
+            if (type == null)
+                return null;
+
+            var field = type.Fields.FirstOrDefault(f => f.Name == name);
+            return field ?? FindField(type.BaseType.Resolve(), name);
+        }
+
+        private void InjectInitialization(MethodDefinition initMethod,
+            FieldDefinition field,
+            MethodReference factoryMethod)
+        {
+            initMethod.GetEditor().OnEntry(e =>
+            {
+                e.If(c => // (this.)aspect == null
+                {
+                    c.This().Load(field);
+                    c.Value((object)null);
+                },
+                pos => // (this.)aspect = new aspect()
+                {
+                    pos.This().Store(field, val => val.Call(factoryMethod));
+                });
+            });
+        }
+
+        private MethodDefinition GetInstanсeAspectsInitializer(TypeDefinition type)
+        {
+            var ts = type.Module.GetTypeSystem();
+
+            var instanceAspectsInitializer = type.Methods.FirstOrDefault(m => m.Name == Constants.InstanceAspectsMethodName);
+
+            if (instanceAspectsInitializer == null)
+            {
+                instanceAspectsInitializer = new MethodDefinition(Constants.InstanceAspectsMethodName,
+                    MethodAttributes.Private | MethodAttributes.HideBySig, ts.Void);
+
+                type.Methods.Add(instanceAspectsInitializer);
+
+                instanceAspectsInitializer.GetEditor().Instead(i => i.Return());
+
+                var ctors = type.Methods.Where(c => c.IsConstructor && !c.IsStatic).ToList();
+
+                foreach (var ctor in ctors)
+                    ctor.GetEditor().OnInit(i => i.This().Call(instanceAspectsInitializer));
+            }
+
+            return instanceAspectsInitializer;
+        }
+
+        private FieldReference GetGlobalAspectField(AspectDefinition aspect)
+        {
+            var singleton = aspect.Host.Fields.FirstOrDefault(f => f.Name == Constants.AspectGlobalField);
+
+            if (singleton == null)
+                throw new Exception("Missed aspect global singleton.");
+
+            return singleton;
         }
 
         public PointCut Load(FieldReference field)

@@ -1,57 +1,57 @@
-﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.ComponentModel;
+﻿//using AspectInjector.Broker;
+//using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using System;
+//using System.ComponentModel;
 
-namespace AspectInjector.Tests.General
-{
-    [TestClass]
-    public class ImportingTypesTests
-    {
-    }
+//namespace AspectInjector.Tests.General
+//{
+//    [TestClass]
+//    public class ImportingTypesTests
+//    {
+//    }
 
-    [Notify]
-    public class AppViewModel
-    {
-        public string FirstName { get; set; }
+//    [Notify]
+//    public class AppViewModel
+//    {
+//        public string FirstName { get; set; }
 
-        public string LastName { get; set; }
+//        public string LastName { get; set; }
 
-        public string FullName
-        {
-            get
-            {
-                return FirstName + " " + LastName;
-            }
-        }
-    }
+//        public string FullName
+//        {
+//            get
+//            {
+//                return FirstName + " " + LastName;
+//            }
+//        }
+//    }
 
-    [NamedCut(typeof(NotifyPropertyChangedAspect))]
-    internal class NotifyAttribute : Attribute
-    {
-        public string NotifyAlso { get; set; }
-    }
+//    [NamedCut(typeof(NotifyPropertyChangedAspect))]
+//    internal class NotifyAttribute : Attribute
+//    {
+//        public string NotifyAlso { get; set; }
+//    }
 
-    [Mixin(typeof(INotifyPropertyChanged))]
-    internal class NotifyPropertyChangedAspect : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
+//    [Mixin(typeof(INotifyPropertyChanged))]
+//    internal class NotifyPropertyChangedAspect : INotifyPropertyChanged
+//    {
+//        public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
 
-        [Advice(Advice.Type.After, Advice.Target.Setter)]
-        public void AfterSetter(
-            [AdviceArgument(AdviceArgument.Source.Instance)] object source,
-            [AdviceArgument(AdviceArgument.Source.Name)] string propName,
-            [AdviceArgument(AdviceArgument.Source.RoutableData)] Attribute[] data
-            )
-        {
-            PropertyChanged(source, new PropertyChangedEventArgs(propName));
+//        [Advice(Advice.Type.After, Advice.Target.Setter)]
+//        public void AfterSetter(
+//            [Advice.Argument(Advice.Argument.Source.Instance)] object source,
+//            [Advice.Argument(Advice.Argument.Source.Name)] string propName,
+//            [Advice.Argument(Advice.Argument.Source.RoutableData)] Attribute[] data
+//            )
+//        {
+//            PropertyChanged(source, new PropertyChangedEventArgs(propName));
 
-            var additionalPropName = (data[0] as NotifyAttribute).NotifyAlso;
+//            var additionalPropName = (data[0] as NotifyAttribute).NotifyAlso;
 
-            if (!string.IsNullOrEmpty(additionalPropName))
-            {
-                PropertyChanged(source, new PropertyChangedEventArgs(additionalPropName));
-            }
-        }
-    }
-}
+//            if (!string.IsNullOrEmpty(additionalPropName))
+//            {
+//                PropertyChanged(source, new PropertyChangedEventArgs(additionalPropName));
+//            }
+//        }
+//    }
+//}

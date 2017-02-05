@@ -88,7 +88,7 @@ namespace AspectInjector.Core
 
         private void ProcessAssembly(AssemblyDefinition assembly)
         {
-            var aspects = _aspectExtractor.Extract(assembly).ToList();
+            var aspects = _aspectExtractor.Extract(assembly);
 
             foreach (var aspect in aspects)
                 _cache.Cache(aspect);

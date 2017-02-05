@@ -117,7 +117,7 @@ namespace AspectInjector.Tests.Advices
     }
 
     //aspects
-
+    [Aspect(Aspect.Scope.Global)]
     internal class BeforeTests_Aspect
     {
         //Property
@@ -139,10 +139,11 @@ namespace AspectInjector.Tests.Advices
         public void BeforeMethod() { Checker.Passed = true; }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class BeforeTests_BeforeConstructorAspect
     {
         [Advice(Advice.Type.Before, Advice.Target.Constructor)]
-        public void BeforeConstructor([AdviceArgument(AdviceArgument.Source.Instance)] object instance)
+        public void BeforeConstructor([Advice.Argument(Advice.Argument.Source.Instance)] object instance)
         {
             if (instance != null)
                 Checker.Passed = true;
@@ -150,6 +151,7 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Mixin(typeof(IDisposable))]
+    [Aspect(Aspect.Scope.Global)]
     internal class BeforeTests_BeforeConstructorWithInterfaceAspect : IDisposable
     {
         [Advice(Advice.Type.Before, Advice.Target.Constructor)]
@@ -169,11 +171,12 @@ namespace AspectInjector.Tests.Advices
         public int Data { get; set; }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class BeforeTests_SetterValueAspect
     {
         [Advice(Advice.Type.Before, Advice.Target.Setter)]
         public void AfterMethod(
-            [AdviceArgument(AdviceArgument.Source.ReturnValue)] object old
+            [Advice.Argument(Advice.Argument.Source.ReturnValue)] object old
             )
         {
             Checker.Passed = (int)old == BeforeTests_SetterValueTarget.GlobalData;

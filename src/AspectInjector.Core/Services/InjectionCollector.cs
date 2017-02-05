@@ -18,7 +18,7 @@ namespace AspectInjector.Core.Services
             _log = logger;
         }
 
-        public IEnumerable<Injection> Collect(AssemblyDefinition assembly)
+        public IReadOnlyCollection<Injection> Collect(AssemblyDefinition assembly)
         {
             var aspects = ExtractInjections(assembly);
 
@@ -39,14 +39,14 @@ namespace AspectInjector.Core.Services
 
             aspects = aspects.GroupBy(a => a).Select(g => g.Aggregate(MergeAspects)).ToList();
 
-            return aspects;
+            return aspects.ToList();
         }
 
         protected virtual IEnumerable<Injection> ExtractInjections(ICustomAttributeProvider target)
         {
             var injections = Enumerable.Empty<Injection>();
 
-            foreach (var attr in target.CustomAttributes.Where(a => a.AttributeType.IsTypeOf(typeof(Broker.Inject))))
+            foreach (var attr in target.CustomAttributes.Where(a => a.AttributeType.IsTypeOf(typeof(Broker.Inject))).ToList())
             {
                 injections = injections.Concat(ParseAspectAttribute(target, attr));
                 target.CustomAttributes.Remove(attr);
@@ -62,12 +62,9 @@ namespace AspectInjector.Core.Services
 
             if (aspect == null)
             {
-                _log.LogError(CompilationMessage.From($"Aspect {aspectRef.FullName} should be an aspect class.", target));
+                _log.LogError(CompilationMessage.From($"Type {aspectRef.FullName} should be an aspect class.", target));
                 return Enumerable.Empty<Injection>();
             }
-
-            if (aspectRef.HasGenericParameters)
-                _log.LogError(CompilationMessage.From($"Aspect {aspectRef.FullName} should not have generic parameters.", target));
 
             var priority = attr.GetPropertyValue<Broker.Inject, ushort>(i => i.Priority);
 

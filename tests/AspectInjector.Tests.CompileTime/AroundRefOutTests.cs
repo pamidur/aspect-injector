@@ -15,7 +15,7 @@ namespace AspectInjector.CompileTimeTests
 
         public class TestClass
         {
-            [Inject(typeof(TestAspectImplementation), ChildFilter = Inject.To. | Inject.To.Static)]
+            [Inject(typeof(TestAspectImplementation))]
             public object Do2(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut, ref long longRef, ref double doubleRef, ref char charRef)
             {
                 objOut = new object();
@@ -37,8 +37,8 @@ namespace AspectInjector.CompileTimeTests
         public class TestAspectImplementation
         {
             [Advice(Advice.Type.Around, Advice.Target.Method)]
-            public object AroundMethod([AdviceArgument(AdviceArgument.Source.Target)] Func<object[], object> target,
-                [AdviceArgument(AdviceArgument.Source.Arguments)] object[] arguments)
+            public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
+                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
             {
                 return new object();
             }

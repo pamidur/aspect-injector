@@ -42,7 +42,7 @@
 //        }
 
 //        [Advice(Advice.Type.Before, Advice.Target.Getter)]
-//        public int GetCounter([AdviceArgument(AdviceArgument.Source.AbortFlag)] ref bool abort)
+//        public int GetCounter([Advice.Argument(Advice.Argument.Source.AbortFlag)] ref bool abort)
 //        {
 //            abort = true;
 //            return _counter;
@@ -61,7 +61,7 @@
 //        }
 
 //        [Advice(Advice.Type.Before, Advice.Target.Getter)]
-//        public int GetCounter([AdviceArgument(AdviceArgument.Source.AbortFlag)] ref bool abort)
+//        public int GetCounter([Advice.Argument(Advice.Argument.Source.AbortFlag)] ref bool abort)
 //        {
 //            abort = true;
 //            return _counter;

@@ -39,16 +39,17 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class VirtualTests_Aspect
     {
         private int counter = 0;
 
         [Advice(Advice.Type.Around, Advice.Target.Method)]
         public object Trace(
-            [AdviceArgument(AdviceArgument.Source.Type)] Type type,
-            [AdviceArgument(AdviceArgument.Source.Name)] string methodName,
-            [AdviceArgument(AdviceArgument.Source.Target)] Func<object[], object> target,
-            [AdviceArgument(AdviceArgument.Source.Arguments)] object[] arguments)
+            [Advice.Argument(Advice.Argument.Source.Type)] Type type,
+            [Advice.Argument(Advice.Argument.Source.Name)] string methodName,
+            [Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
+            [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
         {
             if (counter > 0)
             {

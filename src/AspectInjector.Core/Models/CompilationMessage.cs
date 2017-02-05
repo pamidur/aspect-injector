@@ -18,7 +18,7 @@ namespace AspectInjector.Core.Models
 
         public static CompilationMessage From(string text, Instruction inst)
         {
-            return new CompilationMessage(text, inst.SequencePoint);
+            return new CompilationMessage(text, inst?.SequencePoint);
         }
 
         public static CompilationMessage From(string text)
@@ -32,7 +32,7 @@ namespace AspectInjector.Core.Models
             if (source is TypeDefinition)
             {
                 var td = (TypeDefinition)(object)source;
-                return From(text, td.Methods.FirstOrDefault(m => m.Body.Instructions.Any(i => i.SequencePoint != null)));
+                return From(text, td.Methods.FirstOrDefault(m => m.HasBody && m.Body.Instructions.Any(i => i.SequencePoint != null)));
             }
 
             if (source is MethodDefinition)

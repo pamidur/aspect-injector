@@ -19,9 +19,9 @@ namespace AspectInjector.Core.Services
             _log = logger;
         }
 
-        public IEnumerable<AspectDefinition> Extract(AssemblyDefinition assembly)
+        public IReadOnlyCollection<AspectDefinition> Extract(AssemblyDefinition assembly)
         {
-            return Validate(assembly.Modules.SelectMany(m => m.GetTypes().Select(ReadAspect).Where(a => a != null)));
+            return assembly.Modules.SelectMany(m => m.GetTypes().Select(ReadAspect).Where(a => a != null)).Where(a => a.Validate(_log)).ToList();
         }
 
         public AspectDefinition ReadAspect(TypeDefinition type)
@@ -29,19 +29,17 @@ namespace AspectInjector.Core.Services
             var effects = ExtractEffects(type).ToList();
             var aspect = ExtractAspectAttribute(type);
 
+            if (aspect != null)
+                return new AspectDefinition
+                {
+                    Host = type,
+                    Scope = aspect.GetConstructorValue<Aspect.Scope>(0),
+                    Factory = aspect.GetPropertyValue<Aspect>(au => au.Factory) as TypeReference,
+                    Effects = effects
+                };
+
             if (effects.Any())
-            {
-                if (aspect == null)
-                    _log.LogError(CompilationMessage.From($"Type {type.FullName} has the effects, but is not marked as an aspect. Concider using [Aspect] attribute.", type));
-                else
-                    return new AspectDefinition
-                    {
-                        Host = type,
-                        Scope = aspect.GetConstructorValue<Aspect.Scope>(0),
-                        Factory = aspect.GetPropertyValue<Aspect>(au => au.Factory) as TypeReference,
-                        Effects = effects
-                    };
-            }
+                _log.LogError(CompilationMessage.From($"Type {type.FullName} has effects, but is not marked as an aspect. Concider using [Aspect] attribute.", type));
 
             return null;
         }
@@ -60,36 +58,20 @@ namespace AspectInjector.Core.Services
         {
             var effects = Enumerable.Empty<Effect>();
 
-            effects.Concat(ExtractEffectsFromProvider(type));
-            effects.Concat(type.Methods.SelectMany(ExtractEffectsFromProvider));
-
-            effects.Concat(type.NestedTypes.SelectMany(ExtractEffects));
+            effects = effects.Concat(ExtractEffectsFromProvider(type));
+            effects = effects.Concat(type.Methods.SelectMany(ExtractEffectsFromProvider));
 
             return effects;
         }
 
-        private IEnumerable<Effect> ExtractEffectsFromProvider(ICustomAttributeProvider host)
+        private List<Effect> ExtractEffectsFromProvider(ICustomAttributeProvider host)
         {
-            var effects = Enumerable.Empty<Effect>();
+            var effects = new List<Effect>();
 
             foreach (var extractor in _effectExtractors)
-                effects.Concat(extractor.Extract(host));
+                effects.AddRange(extractor.Extract(host));
 
             return effects;
-        }
-
-        private IEnumerable<AspectDefinition> Validate(IEnumerable<AspectDefinition> result)
-        {
-            foreach (var aspect in result)
-            {
-                if (!aspect.Effects.Any())
-                    _log.LogWarning(CompilationMessage.From($"Type {aspect.Host.FullName} has defined as an aspect, but lacks any effect.", aspect.Host));
-
-                if (!aspect.Host.IsPublic)
-                    _log.LogWarning(CompilationMessage.From($"Type {aspect.Host.FullName} is not public.", aspect.Host));
-
-                yield return aspect;
-            }
         }
     }
 }

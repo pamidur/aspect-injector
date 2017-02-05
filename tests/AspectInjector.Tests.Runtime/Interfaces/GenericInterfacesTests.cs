@@ -1,10 +1,6 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.Tests.Interfaces
 {
@@ -23,10 +19,12 @@ namespace AspectInjector.Tests.Interfaces
         public interface ITestInterface<in TI, out TO>
         {
             TO Get { get; }
+
             TI Set { set; }
         }
 
         [Mixin(typeof(ITestInterface<string, int>))]
+        [Broker.Aspect(Broker.Aspect.Scope.Global)]
         public class Aspect : ITestInterface<string, int>
         {
             public int Get

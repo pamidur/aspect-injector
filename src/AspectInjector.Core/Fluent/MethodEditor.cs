@@ -19,6 +19,10 @@ namespace AspectInjector.Core.Fluent
             _typeSystem = md.Module.GetTypeSystem();
         }
 
+        /// <summary>
+        /// After Entry, Base Ctor Call anb before Aspect inits. Put aspect inits here.
+        /// </summary>
+        /// <param name="action"></param>
         public void OnInit(Action<PointCut> action)
         {
             var instruction = _md.IsConstructor && !_md.IsStatic ?
@@ -33,6 +37,10 @@ namespace AspectInjector.Core.Fluent
             action(new PointCut(proc, instruction));
         }
 
+        /// <summary>
+        /// After Entry, Base Ctor Call and Aspect inits.
+        /// </summary>
+        /// <param name="action"></param>
         public void OnEntry(Action<PointCut> action)
         {
             var instruction = _md.IsConstructor && !_md.IsStatic ?

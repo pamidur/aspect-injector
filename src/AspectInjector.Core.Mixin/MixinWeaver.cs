@@ -11,9 +11,9 @@ using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
-    internal class MixinInjector : EffectWeaverBase<TypeDefinition, MixinEffect>
+    public class MixinWeaver : EffectWeaverBase<TypeDefinition, MixinEffect>
     {
-        public MixinInjector(ILogger log) : base(log)
+        public MixinWeaver(ILogger log) : base(log)
         {
             Priority = 10;
         }
@@ -72,7 +72,7 @@ namespace AspectInjector.Core.Mixin
                 proxy.GetEditor().Instead(
                         e =>
                         e.Return(ret =>
-                        ret.LoadAspect(injection).Call(callingMethod, args => proxy.Parameters.ToList().ForEach(p => args.Load(p))))
+                        ret.LoadAspect(injection.Source).Call(callingMethod, args => proxy.Parameters.ToList().ForEach(p => args.Load(p))))
                     );
             }
 

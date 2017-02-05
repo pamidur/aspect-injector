@@ -6,6 +6,6 @@ namespace AspectInjector.Core.Contracts
 {
     public interface IInjectionCollector
     {
-        IEnumerable<Injection> Collect(AssemblyDefinition assembly);
+        IReadOnlyCollection<Injection> Collect(AssemblyDefinition assembly);
     }
 }

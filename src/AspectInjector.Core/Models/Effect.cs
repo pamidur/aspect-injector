@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.Core.Contracts;
+using Mono.Cecil;
 using System;
 
 namespace AspectInjector.Core.Models
@@ -26,5 +27,7 @@ namespace AspectInjector.Core.Models
         }
 
         public abstract bool IsApplicableFor(ICustomAttributeProvider target);
+
+        public abstract bool Validate(AspectDefinition aspect, ILogger log);
     }
 }

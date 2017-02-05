@@ -141,7 +141,10 @@ namespace AspectInjector.Tests.Advices
 
         public int TestCustomSetterProperty
         {
-            get { return 1; }
+            get
+            {
+                return 1;
+            }
             set
             {
                 {
@@ -152,7 +155,7 @@ namespace AspectInjector.Tests.Advices
     }
 
     //aspects
-
+    [Aspect(Aspect.Scope.Global)]
     internal class AfterTests_AfterMethodAspect
     {
         //Property
@@ -174,6 +177,7 @@ namespace AspectInjector.Tests.Advices
         public void AfterMethod() { Checker.Passed = true; }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class AfterTests_AfterConstructorAspect
     {
         [Advice(Advice.Type.After, Advice.Target.Constructor)]
@@ -188,10 +192,11 @@ namespace AspectInjector.Tests.Advices
         public int Data { get; set; }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class AfterTests_SetterValueAspect
     {
         [Advice(Advice.Type.After, Advice.Target.Setter)]
-        public void AfterMethod([AdviceArgument(AdviceArgument.Source.ReturnValue)] object old)
+        public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object old)
         {
             Checker.Passed = (int)old == AfterTests_SetterValueTarget.GlobalData;
         }

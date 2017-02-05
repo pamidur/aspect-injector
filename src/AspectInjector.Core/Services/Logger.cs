@@ -26,7 +26,7 @@ namespace AspectInjector.Core.Services
             if (message.SequencePoint?.Document != null)
                 Write($"{message.SequencePoint.Document.Url}({message.SequencePoint.StartLine},{message.SequencePoint.StartColumn}): ", MessageType.Warning);
 
-            WriteLine($"Error: { message.Text}", MessageType.Warning);
+            WriteLine($"Warning: { message.Text}", MessageType.Warning);
         }
 
         public virtual void LogError(CompilationMessage message)
@@ -34,7 +34,7 @@ namespace AspectInjector.Core.Services
             if (message.SequencePoint?.Document != null)
                 Write($"{message.SequencePoint.Document.Url}({message.SequencePoint.StartLine},{message.SequencePoint.StartColumn}): ", MessageType.Error);
 
-            WriteLine($"Warning: { message.Text}", MessageType.Error);
+            WriteLine($"Error: { message.Text}", MessageType.Error);
 
             IsErrorThrown = true;
         }

@@ -53,6 +53,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class GenericTests_Aspect
     {
         [Advice(Advice.Type.Before, Advice.Target.Method)]
@@ -72,6 +73,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
+    [Aspect(Aspect.Scope.Global)]
     internal class GenericTests_OpenGenericAspect
     {
         [Advice(Advice.Type.Before, Advice.Target.Method)]

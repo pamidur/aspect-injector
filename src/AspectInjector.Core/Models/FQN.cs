@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.Core.Extensions;
+using Mono.Cecil;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,9 @@ namespace AspectInjector.Core.Models
 {
     public class FQN : IEquatable<FQN>, IEquatable<string>
     {
+        public static readonly FQN Object = typeof(object).GetFQN();
+        public static readonly FQN Type = typeof(Type).GetFQN();
+
         private static readonly Regex _fqnMatch = new Regex(@"^([^\,\[]+)(\[.+\])?,\s?(.+)$", RegexOptions.Compiled);
 
         [JsonProperty("asm")]

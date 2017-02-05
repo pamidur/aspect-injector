@@ -20,12 +20,13 @@ namespace AspectInjector.Tests.Advices
         [Inject(typeof(FilterTests_Aspect))]
         public class FilterTests_Target
         {
-            [Inject(typeof(FilterTests_Aspect), NameFilter = "Do")]
+            [Inject(typeof(FilterTests_Aspect)/*, NameFilter = "Do"*/)]
             public void Do123()
             {
             }
         }
 
+        [Aspect(Aspect.Scope.Global)]
         public class FilterTests_Aspect
         {
             public int Counter = 0;

@@ -43,21 +43,23 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
+        [Aspect(Aspect.Scope.Global)]
         internal class StaticTests_AroundAspect1
         {
             [Advice(Advice.Type.Around, Advice.Target.Method)]
-            public object AroundMethod([AdviceArgument(AdviceArgument.Source.Target)] Func<object[], object> target,
-                [AdviceArgument(AdviceArgument.Source.Arguments)] object[] arguments)
+            public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
+                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
             {
                 return target(new object[] { arguments[0], arguments[1], arguments[2], true, arguments[4] });
             }
         }
 
+        [Aspect(Aspect.Scope.Global)]
         internal class StaticTests_AroundAspect2
         {
             [Advice(Advice.Type.Around, Advice.Target.Method)]
-            public object AroundMethod([AdviceArgument(AdviceArgument.Source.Target)] Func<object[], object> target,
-                [AdviceArgument(AdviceArgument.Source.Arguments)] object[] arguments)
+            public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
+                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
             {
                 return target(new object[] { arguments[0], arguments[1], arguments[2], arguments[3], true });
             }
@@ -75,6 +77,7 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
+        [Aspect(Aspect.Scope.Global)]
         internal class StaticTests_BeforeAspect
         {
             //Property
