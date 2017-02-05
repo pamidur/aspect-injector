@@ -98,56 +98,56 @@ namespace AspectInjector.Broker
                 /// Target's instance or <c>null</c> if target is static.
                 /// Should be of type <see cref="object" />.
                 /// </summary>
-                Instance,
+                Instance = 1,
 
                 /// <summary>
                 /// Target's class type.
                 /// Should be of type <see cref="System.Type" />.
                 /// </summary>
-                Type,
+                Type = 2,
 
                 /// <summary>
                 /// Target method.
                 /// Should be of type <see cref="System.Reflection.MethodBase" />.
                 /// </summary>
-                Method,
+                Method = 3,
 
                 /// <summary>
                 /// Target method delegate. Usage <example>Target(<see cref="Arguments"/>)</example> for chaining methods.
                 /// Should be of type <c>Func&lt;object[],object&gt;</c>.
                 /// Works only with <see cref="Advice.Type.Around" />.
                 /// </summary>
-                Target,
+                Target = 4,
 
                 /// <summary>
                 /// Target name.
                 /// Should be of type <see cref="string" />.
                 /// </summary>
-                Name,
+                Name = 5,
 
                 /// <summary>
                 /// Target method arguments.
                 /// Should be of type <c>object[]</c>.
                 /// </summary>
-                Arguments,
+                Arguments = 6,
 
                 /// <summary>
                 /// Target method result.
                 /// Should be of type <see cref="object" />.
                 /// </summary>
-                ReturnValue,
+                ReturnValue = 7,
 
                 /// <summary>
                 /// Target method result type.
                 /// Should be of type <see cref="System.Type" />.
                 /// </summary>
-                ReturnType,
+                ReturnType = 8,
 
                 /// <summary>
                 /// Set of Attributes that target was tagged with. Methods inherit type's attributes. />.
                 /// Should be of type <c>Attribute[]</c> or derived.
                 /// </summary>
-                Attributes
+                Attributes = 9
             }
         }
     }

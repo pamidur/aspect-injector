@@ -1,8 +1,6 @@
 ﻿using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using Mono.Cecil;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using System.Linq;
 using static AspectInjector.Broker.Aspect;
@@ -17,7 +15,6 @@ namespace AspectInjector.Core.Models
 
         public List<Effect> Effects { get; set; }
 
-        [JsonConverter(typeof(StringEnumConverter))]
         public Scope Scope { get; set; }
 
         public TypeReference Factory { get; set; }
@@ -44,15 +41,18 @@ namespace AspectInjector.Core.Models
 
         public bool Validate(ILogger log)
         {
-            //if (!Host.Is)
-            //    log.LogWarning(CompilationMessage.From($"Aspect {Host.FullName} is not public.", Host));
-
             if (!Effects.Any())
                 log.LogWarning(CompilationMessage.From($"Type {Host.FullName} has defined as an aspect, but lacks any effect.", Host));
 
             if (Host.HasGenericParameters)
             {
                 log.LogError(CompilationMessage.From($"Aspect {Host.FullName} should not have generic parameters.", Host));
+                return false;
+            }
+
+            if (Host.IsAbstract)
+            {
+                log.LogError(CompilationMessage.From($"Aspect {Host.FullName} cannot be static nor abstract.", Host));
                 return false;
             }
 

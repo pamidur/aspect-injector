@@ -29,12 +29,12 @@ namespace AspectInjector.Broker
             /// <summary>
             /// Aspect is created and used as singleton. Default value.
             /// </summary>
-            Global,
+            Global = 1,
 
             /// <summary>
             /// Instance of an aspect is created per target class instance.
             /// </summary>
-            PerInstance
+            PerInstance = 2
         }
     }
 }

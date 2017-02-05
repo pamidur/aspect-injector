@@ -2,14 +2,11 @@
 
 namespace AspectInjector.Core.Advice.Advices
 {
-    public class AroundAdvice : AdviceBase
+    public class AfterAdvice : AdviceBase
     {
         public override bool IsApplicableFor(ICustomAttributeProvider target)
         {
-            //check args
-
-            if (target is MethodDefinition && ((MethodDefinition)target).IsConstructor)
-                return false;
+            // check args
 
             return base.IsApplicableFor(target);
         }

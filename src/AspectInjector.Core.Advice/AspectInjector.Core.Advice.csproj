@@ -7,8 +7,8 @@
     <ProjectGuid>{1A96AA51-2CBC-4901-91D1-53208AD5E6B6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AspectInjector.Core.MethodCall</RootNamespace>
-    <AssemblyName>AspectInjector.Core.MethodCall</AssemblyName>
+    <RootNamespace>AspectInjector.Core.Advice</RootNamespace>
+    <AssemblyName>AspectInjector.Core.Advice</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StyleCopOverrideSettingsFile>Settings.StyleCop</StyleCopOverrideSettingsFile>
@@ -61,15 +61,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Advice.cs" />
     <Compile Include="AdviceExtractor.cs" />
-    <Compile Include="AdviceMethodWeaver.cs" />
-    <Compile Include="AdviceEventWeaver.cs" />
-    <Compile Include="AdvicePropertyWeaver.cs" />
+    <Compile Include="Weavers\AdviceMethodWeaver.cs" />
+    <Compile Include="Weavers\AdviceEventWeaver.cs" />
+    <Compile Include="Weavers\AdvicePropertyWeaver.cs" />
+    <Compile Include="Advices\AdviceArgument.cs" />
+    <Compile Include="Advices\AfterAdvice.cs" />
+    <Compile Include="Advices\BeforeAdvice.cs" />
     <Compile Include="Advices\AroundAdvice.cs" />
-    <Compile Include="Advices\InnerAdviceBase.cs" />
-    <Compile Include="AroundAdviceInjector.cs" />
-    <Compile Include="AdviceInjectorBase.cs" />
+    <Compile Include="Advices\AdviceBase.cs" />
+    <Compile Include="Weavers\AroundAdviceInjector.cs" />
+    <Compile Include="Weavers\AdviceInjectorBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
