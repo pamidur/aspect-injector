@@ -62,17 +62,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdviceExtractor.cs" />
-    <Compile Include="Weavers\AdviceMethodWeaver.cs" />
-    <Compile Include="Weavers\AdviceEventWeaver.cs" />
-    <Compile Include="Weavers\AdvicePropertyWeaver.cs" />
     <Compile Include="Effects\AdviceArgument.cs" />
     <Compile Include="Effects\AfterAdviceEffect.cs" />
     <Compile Include="Effects\BeforeAdviceEffect.cs" />
     <Compile Include="Effects\AroundAdviceEffect.cs" />
     <Compile Include="Effects\AdviceEffectBase.cs" />
-    <Compile Include="Weavers\AroundAdviceInjector.cs" />
-    <Compile Include="Weavers\AdviceInjectorBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Weavers\AdviceWeaverBase.cs" />
+    <Compile Include="Weavers\AsyncAdviceAfterWeaver.cs" />
+    <Compile Include="Weavers\AdviceAroundWeaver.cs" />
+    <Compile Include="Weavers\AdviceAfterWeaver.cs" />
+    <Compile Include="Weavers\AsyncAdviceBeforeWeaver.cs" />
+    <Compile Include="Weavers\AdviceBeforeWeaver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
