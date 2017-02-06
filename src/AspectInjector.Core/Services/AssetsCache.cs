@@ -61,6 +61,7 @@ namespace AspectInjector.Core.Services
             };
 
             serializerSettings.Converters.Add(new TypeReferenceConverter(module));
+            serializerSettings.Converters.Add(new ParameterDefinitionConverter(module));
             serializerSettings.Converters.Add(new MethodDefinitionConverter(module));
 
             var json = JsonConvert.SerializeObject(assets, serializerSettings);
@@ -80,6 +81,7 @@ namespace AspectInjector.Core.Services
             };
 
             serializerSettings.Converters.Add(new TypeReferenceConverter(module));
+            serializerSettings.Converters.Add(new ParameterDefinitionConverter(module));
             serializerSettings.Converters.Add(new MethodDefinitionConverter(module));
 
             var resource = module.Resources.FirstOrDefault(r => r.ResourceType == ResourceType.Embedded && r.Name == Constants.AssetsResourceName);

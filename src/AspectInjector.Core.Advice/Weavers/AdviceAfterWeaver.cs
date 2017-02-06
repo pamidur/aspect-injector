@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
+using AspectInjector.Core.Fluent;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
@@ -19,7 +20,11 @@ namespace AspectInjector.Core.Advice.Weavers
 
         protected override void WeaveMethod(MethodDefinition target, AfterAdviceEffect effect, Injection injection)
         {
-            throw new NotImplementedException();
+            target.GetEditor().OnExit(
+                e => e
+                .LoadAspect(injection.Source)
+                .Call(effect.Method, c => LoadAdviceArgs(c, target, effect, injection))
+            );
         }
     }
 }

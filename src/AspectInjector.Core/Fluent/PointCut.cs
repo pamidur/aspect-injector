@@ -22,19 +22,9 @@ namespace AspectInjector.Core.Models
             _typeSystem = proc.Body.Method.Module.GetTypeSystem();
         }
 
-        private PointCut Chain(Instruction inst)
-        {
-            return CreatePointCut(inst == null ? _refInst : _proc.SafeInsertBefore(_refInst, inst));
-        }
-
         public virtual PointCut CreatePointCut(Instruction instruction)
         {
             return new PointCut(_proc, instruction);
-        }
-
-        public void Return(Action<PointCut> arg)
-        {
-            arg(Chain(CreateInstruction(OpCodes.Ret)));
         }
 
         public void Return()
@@ -59,7 +49,7 @@ namespace AspectInjector.Core.Models
             var inst = _proc.Create(code, methodRef);
             _proc.SafeInsertBefore(_refInst, inst);
 
-            return CreatePointCut(inst);
+            return this;// CreatePointCut(inst);
         }
 
         public PointCut This()
@@ -128,18 +118,22 @@ namespace AspectInjector.Core.Models
             FieldDefinition field,
             MethodReference factoryMethod)
         {
-            initMethod.GetEditor().OnEntry(e =>
-            {
-                e.If(c => // (this.)aspect == null
-                {
-                    c.This().Load(field);
-                    c.Value((object)null);
-                },
-                pos => // (this.)aspect = new aspect()
-                {
-                    pos.This().Store(field, val => val.Call(factoryMethod));
-                });
-            });
+            initMethod.GetEditor().OnEntry(
+                e => e
+                .If(
+                    l => l.This().Load(field),
+                    r => r.Null(),// (this.)aspect == null
+                    pos => pos.This().Store(field, val => val.Call(factoryMethod))// (this.)aspect = new aspect()
+                )
+            );
+        }
+
+        public PointCut TypeOf(TypeReference type)
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _typeSystem.Import(type)));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.Import(_typeSystem.Type.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle"))));
+
+            return this;
         }
 
         private MethodDefinition GetInstanсeAspectsInitializer(TypeDefinition type)
@@ -224,9 +218,16 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
-        public PointCut If(Action<PointCut> compare, Action<PointCut> pos = null, Action<PointCut> neg = null)
+        public PointCut Null()
         {
-            compare(this);
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldnull));
+            return this;
+        }
+
+        public PointCut If(Action<PointCut> left, Action<PointCut> right, Action<PointCut> pos = null, Action<PointCut> neg = null)
+        {
+            left(this);
+            right(this);
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ceq));
 
@@ -256,6 +257,20 @@ namespace AspectInjector.Core.Models
                 _proc.SafeInsertBefore(_refInst, continuePoint);
             }
 
+            return this;
+        }
+
+        public PointCut MethodOf(MethodReference method)
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _typeSystem.Import(method)));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.Import(_typeSystem.MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle"))));
+
+            return this;
+        }
+
+        public PointCut Cast(TypeReference type)
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Castclass, _typeSystem.Import(type)));
             return this;
         }
 

@@ -4,6 +4,7 @@ using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace AspectInjector.Core.Services
 {
@@ -33,11 +34,11 @@ namespace AspectInjector.Core.Services
                     aspects = aspects.Concat(type.Events.SelectMany(ExtractInjections));
                     aspects = aspects.Concat(type.Properties.SelectMany(ExtractInjections));
                     //aspects = aspects.Concat(type.Fields.SelectMany(ExtractInjections));
-                    aspects = aspects.Concat(type.Methods.SelectMany(ExtractInjections));
+                    aspects = aspects.Concat(type.Methods.Where(m => !m.IsSetter && !m.IsGetter && !m.IsRemoveOn && !m.IsAddOn).SelectMany(ExtractInjections));
                 }
             }
 
-            aspects = aspects.GroupBy(a => a).Select(g => g.Aggregate(MergeAspects)).ToList();
+            aspects = aspects.GroupBy(a => a).Select(g => g.Aggregate(MergeInjections)).ToList();
 
             return aspects.ToList();
         }
@@ -70,30 +71,46 @@ namespace AspectInjector.Core.Services
 
             // var childFilter = attr.GetPropertyValue<Broker.Inject, InjectionChildFilter>(i => i.Filter);
 
-            var injections = aspect.Effects.Where(e => e.IsApplicableFor(target)).Select(e => new Injection()
+            var injections = CreateInjections(target, aspect, priority);
+
+            injections = injections.Concat(FindApplicableChildren(target, aspect, priority/*, childFilter*/));
+
+            return injections;
+        }
+
+        private IEnumerable<Injection> FindApplicableChildren(ICustomAttributeProvider target, AspectDefinition aspect, ushort priority)
+        {
+            var result = Enumerable.Empty<Injection>();
+
+            var type = target as TypeDefinition;
+
+            if (type != null)
+            {
+                result = result.Concat(type.Methods.Where(m => !m.IsSetter && !m.IsGetter && !m.IsRemoveOn && !m.IsAddOn)
+                    .SelectMany(m => CreateInjections(m, aspect, priority)));
+                result = result.Concat(type.Events.SelectMany(m => CreateInjections(m, aspect, priority)));
+                result = result.Concat(type.Properties.SelectMany(m => CreateInjections(m, aspect, priority)));
+            }
+
+            return result;
+        }
+
+        private IEnumerable<Injection> CreateInjections(ICustomAttributeProvider target, AspectDefinition aspect, ushort priority)
+        {
+            return aspect.Effects.Where(e => e.IsApplicableFor(target)).Select(e => new Injection()
             {
                 Target = target,
                 Source = aspect,
                 Priority = priority,
                 Effect = e
             });
-
-            //injections = injections.Concat (FindApplicableChildren(target, childFilter));
-
-            return injections;
         }
 
-        private Injection MergeAspects(Injection a1, Injection a2)
+        private Injection MergeInjections(Injection a1, Injection a2)
         {
             a1.Priority = Enumerable.Max(new[] { a1.Priority, a2.Priority });
             return a1;
         }
-
-        //private IEnumerable<Models.Injection> FindApplicableChildren<T>(Injection<T> arg, ChildrenFilter filter) where T : class, ICustomAttributeProvider
-        //{
-        //    //todo:: here goes applicable children lookup, below is exaple fot T : TypeDefinition looking gor applicable methods
-        //    return Enumerable.Empty<Models.Injection>();
-        //}
 
         //private static bool CheckFilter(MethodDefinition targetMethod,
         //    string targetName,

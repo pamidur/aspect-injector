@@ -1,4 +1,5 @@
-﻿using static AspectInjector.Broker.Advice;
+﻿using Mono.Cecil;
+using static AspectInjector.Broker.Advice;
 
 namespace AspectInjector.Core.Advice.Effects
 {
@@ -6,6 +7,6 @@ namespace AspectInjector.Core.Advice.Effects
     {
         public Argument.Source Source { get; set; }
 
-        public int Index { get; set; }
+        public ParameterDefinition Parameter { get; set; }
     }
 }

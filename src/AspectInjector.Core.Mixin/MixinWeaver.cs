@@ -70,9 +70,10 @@ namespace AspectInjector.Core.Mixin
                     proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, ts.Import(callingMethod.ResolveGenericType(parameter.ParameterType))));
 
                 proxy.GetEditor().Instead(
-                        e =>
-                        e.Return(ret =>
-                        ret.LoadAspect(injection.Source).Call(callingMethod, args => proxy.Parameters.ToList().ForEach(p => args.Load(p))))
+                        e => e
+                        .LoadAspect(injection.Source)
+                        .Call(callingMethod, args => proxy.Parameters.ToList().ForEach(p => args.Load(p)))
+                        .Return()
                     );
             }
 

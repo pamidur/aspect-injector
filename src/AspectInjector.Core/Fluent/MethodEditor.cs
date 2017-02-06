@@ -55,6 +55,12 @@ namespace AspectInjector.Core.Fluent
 
         public void OnExit(Action<PointCut> action)
         {
+            if (!_md.HasBody) return;
+
+            foreach (var ret in _md.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList())
+            {
+                action(new PointCut(_md.Body.GetEditor(), ret));
+            }
         }
 
         public void OnException(Action<PointCut> action)

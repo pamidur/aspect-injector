@@ -65,7 +65,7 @@ namespace AspectInjector.Core.Advice
                 args.Add(new AdviceArgument
                 {
                     Source = argAttr.GetConstructorValue<Argument.Source>(0),
-                    Index = par.Index
+                    Parameter = par
                 });
             }
 

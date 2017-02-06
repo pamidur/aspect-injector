@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Core;
 using AspectInjector.Core.Advice;
+using AspectInjector.Core.Advice.Weavers;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Mixin;
 using AspectInjector.Core.Models;
@@ -57,7 +58,10 @@ namespace AspectInjector.CLI.Commands
 
             container.Register<IEffectExtractor, MixinExtractor>(Reuse.Singleton);
             container.Register<IEffectExtractor, AdviceExtractor>(Reuse.Singleton);
+
             container.Register<IEffectWeaver, MixinWeaver>(Reuse.Singleton);
+            container.Register<IEffectWeaver, AdviceAfterWeaver>(Reuse.Singleton);
+            container.Register<IEffectWeaver, AdviceBeforeWeaver>(Reuse.Singleton);
 
             //done registration
 

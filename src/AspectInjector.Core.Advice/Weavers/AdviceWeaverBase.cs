@@ -8,6 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
+using static AspectInjector.Broker.Advice.Argument;
+using AspectInjector.Core.Fluent;
+using static AspectInjector.Broker.Advice;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
@@ -28,19 +31,19 @@ namespace AspectInjector.Core.Advice.Weavers
         {
             if (target is EventDefinition)
             {
-                WeaveEvent((EventDefinition)target, effect, injection);
+                WeaveTargetEvent((EventDefinition)target, effect, injection);
                 return;
             }
 
             if (target is PropertyDefinition)
             {
-                WeaveProperty((PropertyDefinition)target, effect, injection);
+                WeaveTargetProperty((PropertyDefinition)target, effect, injection);
                 return;
             }
 
             if (target is MethodDefinition)
             {
-                WeaveMethod((MethodDefinition)target, effect, injection);
+                WeaveTargetMethod((MethodDefinition)target, effect, injection);
                 return;
             }
 
@@ -49,22 +52,99 @@ namespace AspectInjector.Core.Advice.Weavers
 
         protected abstract void WeaveMethod(MethodDefinition target, TEffect effect, Injection injection);
 
-        protected virtual void WeaveProperty(PropertyDefinition target, TEffect effect, Injection injection)
+        protected virtual void WeaveTargetProperty(PropertyDefinition target, TEffect effect, Injection injection)
         {
-            if (target.SetMethod != null)
+            if (target.SetMethod != null && effect.Target.HasFlag(Target.Setter))
                 WeaveMethod(target.SetMethod, effect, injection);
 
-            if (target.GetMethod != null)
+            if (target.GetMethod != null && effect.Target.HasFlag(Target.Getter))
                 WeaveMethod(target.GetMethod, effect, injection);
         }
 
-        protected virtual void WeaveEvent(EventDefinition target, TEffect effect, Injection injection)
+        protected virtual void WeaveTargetMethod(MethodDefinition target, TEffect effect, Injection injection)
         {
-            if (target.AddMethod != null)
+            if (target.IsConstructor && effect.Target.HasFlag(Target.Constructor))
+                WeaveMethod(target, effect, injection);
+
+            if (!target.IsConstructor && !target.IsSetter && !target.IsGetter && !target.IsAddOn && !target.IsRemoveOn && effect.Target.HasFlag(Target.Method))
+                WeaveMethod(target, effect, injection);
+        }
+
+        protected virtual void WeaveTargetEvent(EventDefinition target, TEffect effect, Injection injection)
+        {
+            if (target.AddMethod != null && effect.Target.HasFlag(Target.EventAdd))
                 WeaveMethod(target.AddMethod, effect, injection);
 
-            if (target.RemoveMethod != null)
+            if (target.RemoveMethod != null && effect.Target.HasFlag(Target.EventRemove))
                 WeaveMethod(target.RemoveMethod, effect, injection);
+        }
+
+        protected void LoadAdviceArgs(PointCut pc, MethodDefinition target, AdviceEffectBase effect, Injection injection)
+        {
+            foreach (var arg in effect.Arguments.OrderBy(a => a.Parameter.Index))
+            {
+                switch (arg.Source)
+                {
+                    case Source.Arguments: LoadArgumentsArgument(pc, effect, target, arg.Parameter, injection); break;
+                    case Source.Attributes: LoadAttributesArgument(pc, effect, target, arg.Parameter, injection); break;
+                    case Source.Instance: LoadInstanceArgument(pc, effect, target, arg.Parameter, injection); break;
+                    case Source.Method: LoadMethodArgument(pc, effect, target, arg.Parameter, injection); break;
+                    case Source.Name: LoadNameArgument(pc, effect, target, arg.Parameter, injection); break;
+                    case Source.ReturnType: LoadReturnTypeArgument(pc, effect, target, arg.Parameter, injection); break;
+                    case Source.ReturnValue: LoadReturnValueArgument(pc, effect, target, arg.Parameter, injection); break;
+                    case Source.Target: LoadTargetArgument(pc, effect, target, arg.Parameter, injection); break;
+                    case Source.Type: LoadTypeArgument(pc, effect, target, arg.Parameter, injection); break;
+                    default: _log.LogError(CompilationMessage.From($"Unknown argument source {arg.Source.ToString()}", target)); break;
+                }
+            }
+        }
+
+        protected virtual void LoadTypeArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        {
+            pc.TypeOf(target.DeclaringType);
+        }
+
+        protected virtual void LoadTargetArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        {
+            pc.Null();
+        }
+
+        protected virtual void LoadReturnValueArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        {
+            pc.Null();
+        }
+
+        protected virtual void LoadReturnTypeArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        {
+            pc.TypeOf(target.ReturnType);
+        }
+
+        protected virtual void LoadMethodArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        {
+            pc.MethodOf(target).Cast(target.Module.GetTypeSystem().MethodBase);
+        }
+
+        protected virtual void LoadInstanceArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        {
+            if (target.IsStatic)
+                pc.Null();
+            else
+                pc.This();
+        }
+
+        protected virtual void LoadAttributesArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        {
+            pc.Null();
+        }
+
+        protected virtual void LoadArgumentsArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        {
+            pc.Null();
+        }
+
+        protected virtual void LoadNameArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        {
+            pc.Value(((IMemberDefinition)injection.Target).Name);
         }
     }
 }
