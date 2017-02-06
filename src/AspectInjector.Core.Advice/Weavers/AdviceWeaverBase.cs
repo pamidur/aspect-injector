@@ -1,16 +1,13 @@
 ﻿using AspectInjector.Core.Advice.Effects;
+using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
+using AspectInjector.Core.Fluent;
+using AspectInjector.Core.Models;
 using AspectInjector.Core.Services;
 using Mono.Cecil;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Models;
-using static AspectInjector.Broker.Advice.Argument;
-using AspectInjector.Core.Fluent;
 using static AspectInjector.Broker.Advice;
+using static AspectInjector.Broker.Advice.Argument;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
@@ -23,8 +20,17 @@ namespace AspectInjector.Core.Advice.Weavers
 
         protected override bool CanWeave(Injection injection)
         {
-            return base.CanWeave(injection) &&
+            var result = base.CanWeave(injection) &&
                 (injection.Target is EventDefinition || injection.Target is PropertyDefinition || injection.Target is MethodDefinition);
+
+            if (injection.Target is MethodDefinition && injection.Effect is AfterAdviceEffect)
+            {
+                var md = (MethodDefinition)injection.Target;
+                if (md.IsAsync() || md.IsIterator())
+                    result = false;
+            }
+
+            return result;
         }
 
         protected override void Weave(IMemberDefinition target, TEffect effect, Injection injection)

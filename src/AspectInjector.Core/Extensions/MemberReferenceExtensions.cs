@@ -1,13 +1,23 @@
 ﻿using AspectInjector.Core.Fluent.Models;
 using Mono.Cecil;
-using Mono.Cecil.Rocks;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AspectInjector.Core.Extensions
 {
     public static class MemberReferenceExtensions
     {
+        public static bool IsAsync(this MethodDefinition m)
+        {
+            return m.CustomAttributes.Any(a => a.AttributeType.IsTypeOf(typeof(AsyncStateMachineAttribute)));
+        }
+
+        public static bool IsIterator(this MethodDefinition m)
+        {
+            return m.CustomAttributes.Any(a => a.AttributeType.IsTypeOf(typeof(IteratorStateMachineAttribute)));
+        }
+
         public static bool IsImplementationOf(this MethodDefinition m, MethodReference ifaceMethod)
         {
             if (m.IsExplicitImplementationOf(ifaceMethod))
