@@ -72,6 +72,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\ProcessCommand.cs" />
     <Compile Include="ConsoleLogger.cs" />
     <Compile Include="Program.cs" />

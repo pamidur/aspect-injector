@@ -1,8 +1,8 @@
 ﻿using Mono.Cecil;
 
-namespace AspectInjector.Core.Advice.Advices
+namespace AspectInjector.Core.Advice.Effects
 {
-    public class BeforeAdvice : AdviceBase
+    public class BeforeAdviceEffect : AdviceEffectBase
     {
         public override bool IsApplicableFor(ICustomAttributeProvider target)
         {

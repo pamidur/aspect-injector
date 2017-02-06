@@ -28,10 +28,10 @@ namespace AspectInjector.Core.Services
 
         private void CleanupModule(ModuleDefinition module)
         {
-            RemoveBrokerAttributes(module.CustomAttributes);
+            CheckAttributesReferencesBrocker(module);
 
             foreach (var type in module.Types)
-                RemoveBrokerAttributes(type);
+                CheckTypeMembersReferencesBroker(type);
 
             var reference = module.AssemblyReferences.FirstOrDefault(ar => ar.PublicKeyToken.SequenceEqual(BrokerKeyToken));
 
@@ -41,34 +41,36 @@ namespace AspectInjector.Core.Services
             module.Types.ToList().ForEach(CheckTypeReferencesBroker);
         }
 
-        private void RemoveBrokerAttributes(TypeDefinition type)
+        private void CheckTypeMembersReferencesBroker(TypeDefinition type)
         {
             foreach (var nestedType in type.NestedTypes)
-                RemoveBrokerAttributes(nestedType);
+                CheckAttributesReferencesBrocker(nestedType);
 
-            RemoveBrokerAttributes(type.CustomAttributes);
+            CheckAttributesReferencesBrocker(type);
 
             foreach (var method in type.Methods)
             {
-                RemoveBrokerAttributes(method.CustomAttributes);
-                RemoveBrokerAttributes(method.MethodReturnType.CustomAttributes);
+                CheckAttributesReferencesBrocker(method);
+                CheckAttributesReferencesBrocker(method.MethodReturnType);
 
                 foreach (var parameter in method.Parameters)
-                    RemoveBrokerAttributes(parameter.CustomAttributes);
+                    CheckAttributesReferencesBrocker(parameter);
             }
 
             foreach (var property in type.Properties)
-                RemoveBrokerAttributes(property.CustomAttributes);
+                CheckAttributesReferencesBrocker(property);
 
             foreach (var @event in type.Events)
-                RemoveBrokerAttributes(@event.CustomAttributes);
+                CheckAttributesReferencesBrocker(@event);
         }
 
-        private void RemoveBrokerAttributes(Collection<CustomAttribute> collection)
+        private void CheckAttributesReferencesBrocker(ICustomAttributeProvider provider)
         {
-            foreach (var attr in collection.ToList())
+            //todo:: check constructors, firlds, properties
+
+            foreach (var attr in provider.CustomAttributes)
                 if (attr.AttributeType.BelongsToAssembly(BrokerKeyToken))
-                    collection.Remove(attr);
+                    _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", provider));
         }
 
         private void CheckTypeReferencesBroker(TypeDefinition type)

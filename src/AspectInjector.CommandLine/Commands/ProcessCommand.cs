@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Core;
+using AspectInjector.Core.Advice;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Mixin;
 using AspectInjector.Core.Models;
@@ -6,25 +7,21 @@ using AspectInjector.Core.Services;
 using AspectInjector.Core.Utils;
 using CommandLine;
 using DryIoc;
-using System.Diagnostics;
 using System.IO;
 
 namespace AspectInjector.CLI.Commands
 {
     [Verb("process", HelpText = "Instructs Aspect Injector to process injections")]
-    public class ProcessCommand
+    public class ProcessCommand : CommandBase
     {
-        [Option('d', "debug", HelpText = "Launches debugger.")]
-        public bool Debug { get; set; }
-
         [Option('f', "file", Required = true, HelpText = ".net assembly file for processing (typically exe or dll)")]
         public string Filename { get; set; }
 
-        private ILogger Log { get; } = new ConsoleLogger();
-
-        public int Execute()
+        public override int Execute()
         {
-            if (Debug) Debugger.Launch();
+            var result = base.Execute();
+            if (result != 0)
+                return result;
 
             if (!File.Exists(Filename))
             {
@@ -39,25 +36,30 @@ namespace AspectInjector.CLI.Commands
 
             processor.Process(Filename, resolver);
 
-            return Log.IsErrorThrown ? 1 : 0;
+            return Log.IsErrorThrown ? 1 : result;
         }
 
         private Processor CreateProcessor()
         {
             var container = new Container();
+
+            //register main services
+
             container.Register<Processor>(Reuse.Singleton);
             container.Register<IAspectExtractor, AspectExtractor>(Reuse.Singleton);
             container.Register<IAspectWeaver, AspectWeaver>(Reuse.Singleton);
             container.Register<IAssetsCache, AssetsCache>(Reuse.Singleton);
             container.Register<IInjectionCollector, InjectionCollector>(Reuse.Singleton);
             container.Register<IJanitor, Janitor>(Reuse.Singleton);
-
-            container.Register<IEffectExtractor, MixinExtractor>();
-            container.Register<IEffectWeaver, MixinWeaver>();
+            container.UseInstance(Log, true);
 
             //register weavers
 
-            container.UseInstance(Log, true);
+            container.Register<IEffectExtractor, MixinExtractor>(Reuse.Singleton);
+            container.Register<IEffectExtractor, AdviceExtractor>(Reuse.Singleton);
+            container.Register<IEffectWeaver, MixinWeaver>(Reuse.Singleton);
+
+            //done registration
 
             return container.Resolve<Processor>();
         }

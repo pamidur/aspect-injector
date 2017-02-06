@@ -65,11 +65,11 @@
     <Compile Include="Weavers\AdviceMethodWeaver.cs" />
     <Compile Include="Weavers\AdviceEventWeaver.cs" />
     <Compile Include="Weavers\AdvicePropertyWeaver.cs" />
-    <Compile Include="Advices\AdviceArgument.cs" />
-    <Compile Include="Advices\AfterAdvice.cs" />
-    <Compile Include="Advices\BeforeAdvice.cs" />
-    <Compile Include="Advices\AroundAdvice.cs" />
-    <Compile Include="Advices\AdviceBase.cs" />
+    <Compile Include="Effects\AdviceArgument.cs" />
+    <Compile Include="Effects\AfterAdviceEffect.cs" />
+    <Compile Include="Effects\BeforeAdviceEffect.cs" />
+    <Compile Include="Effects\AroundAdviceEffect.cs" />
+    <Compile Include="Effects\AdviceEffectBase.cs" />
     <Compile Include="Weavers\AroundAdviceInjector.cs" />
     <Compile Include="Weavers\AdviceInjectorBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

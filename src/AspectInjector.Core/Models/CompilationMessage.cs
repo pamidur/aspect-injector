@@ -41,6 +41,12 @@ namespace AspectInjector.Core.Models
                 return From(text, md.Body.Instructions.FirstOrDefault(i => i.SequencePoint != null));
             }
 
+            //if (source is ParameterDefinition)
+            //{
+            //    var pd = (ParameterDefinition)(object)source;
+            //    return From(text, pd..Body.Instructions.FirstOrDefault(i => i.SequencePoint != null));
+            //}
+
             return new CompilationMessage(text, null);
         }
     }

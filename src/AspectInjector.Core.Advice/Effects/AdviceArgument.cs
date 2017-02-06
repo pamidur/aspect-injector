@@ -1,10 +1,10 @@
 ﻿using static AspectInjector.Broker.Advice;
 
-namespace AspectInjector.Core.Advice.Advices
+namespace AspectInjector.Core.Advice.Effects
 {
     public class AdviceArgument
     {
-        public Argument Argument { get; set; }
+        public Argument.Source Source { get; set; }
 
         public int Index { get; set; }
     }

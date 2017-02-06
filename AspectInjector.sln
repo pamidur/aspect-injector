@@ -20,7 +20,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
-		Scheme.txt = Scheme.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core", "src\AspectInjector.Core\AspectInjector.Core.csproj", "{ACCC10D0-D079-4B9C-8269-71796A0EF822}"

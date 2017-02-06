@@ -4,9 +4,9 @@ using Mono.Cecil;
 using System.Collections.Generic;
 using static AspectInjector.Broker.Advice;
 
-namespace AspectInjector.Core.Advice.Advices
+namespace AspectInjector.Core.Advice.Effects
 {
-    public class AdviceBase : Effect
+    public class AdviceEffectBase : Effect
     {
         public Target Target { get; set; }
 
