@@ -19,7 +19,7 @@ namespace AspectInjector.Core.Models
 
         public TypeReference Factory { get; set; }
 
-        public MethodReference GetFactory()
+        private MethodReference GetFactoryMethod()
         {
             if (_factoryMethod == null)
             {
@@ -39,6 +39,18 @@ namespace AspectInjector.Core.Models
             return _factoryMethod;
         }
 
+        public void CreateAspectInstance(PointCut c)
+        {
+            c = c.Call(GetFactoryMethod(), arg =>
+            {
+                if (Factory != null)
+                    arg.TypeOf(Host);
+            });
+
+            if (Factory != null)
+                c.Cast(Host);
+        }
+
         public bool Validate(ILogger log)
         {
             if (!Effects.Any())
@@ -56,7 +68,7 @@ namespace AspectInjector.Core.Models
                 return false;
             }
 
-            if (GetFactory() == null)
+            if (GetFactoryMethod() == null)
             {
                 if (Factory != null)
                     log.LogError(CompilationMessage.From($"Type {Factory.FullName} should have 'public static object GetInstance(Type)' method in order to be aspect factory.", Host));

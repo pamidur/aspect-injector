@@ -114,15 +114,16 @@ namespace AspectInjector.Core.Models
         {
             var type = _proc.Body.Method.DeclaringType;
             var ts = type.Module.GetTypeSystem();
+
             var fieldName = $"{Constants.AspectInstanceFieldPrefix}{aspect.Host.FullName}";
 
             var field = FindField(type, fieldName);
             if (field == null)
             {
-                field = new FieldDefinition(fieldName, FieldAttributes.Family | FieldAttributes.InitOnly, ts.Import(aspect.Host));
+                field = new FieldDefinition(fieldName, FieldAttributes.Family, ts.Import(aspect.Host));
                 type.Fields.Add(field);
 
-                InjectInitialization(GetInstanсeAspectsInitializer(type), field, aspect.GetFactory());
+                InjectInitialization(GetInstanсeAspectsInitializer(type), field, aspect.CreateAspectInstance);
             }
 
             return field;
@@ -134,19 +135,20 @@ namespace AspectInjector.Core.Models
                 return null;
 
             var field = type.Fields.FirstOrDefault(f => f.Name == name);
-            return field ?? FindField(type.BaseType.Resolve(), name);
+            return field ?? FindField(type.BaseType?.Resolve(), name);
         }
 
         private void InjectInitialization(MethodDefinition initMethod,
             FieldDefinition field,
-            MethodReference factoryMethod)
+            Action<PointCut> factory
+            )
         {
             initMethod.GetEditor().OnEntry(
                 e => e
                 .If(
                     l => l.This().Load(field),
                     r => r.Null(),// (this.)aspect == null
-                    pos => pos.This().Store(field, val => val.Call(factoryMethod))// (this.)aspect = new aspect()
+                    pos => pos.This().Store(field, factory)// (this.)aspect = new aspect()
                 )
             );
         }

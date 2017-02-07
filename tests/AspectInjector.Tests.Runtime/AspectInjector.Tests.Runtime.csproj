@@ -76,7 +76,6 @@
     <Compile Include="General\AspectScopeTests.cs" />
     <Compile Include="General\UnmanagedTests.cs" />
     <Compile Include="Advices\GenericTests.cs" />
-    <Compile Include="General\ImportingTypesTests.cs" />
     <Compile Include="Advices\AsyncTests.cs" />
     <Compile Include="Advices\FilterTests.cs" />
     <Compile Include="Interfaces\InheritanceTests.cs" />

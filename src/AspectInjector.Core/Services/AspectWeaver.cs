@@ -44,7 +44,7 @@ namespace AspectInjector.Core.Services
                     cctor.GetEditor().Instead(i => i.Return());
                 }
 
-                cctor.GetEditor().OnInit(i => i.Store(singletonField, v => v.Call(aspect.GetFactory())));
+                cctor.GetEditor().OnInit(i => i.Store(singletonField, aspect.CreateAspectInstance));
             }
 
             aspect.Host.IsBeforeFieldInit = false;

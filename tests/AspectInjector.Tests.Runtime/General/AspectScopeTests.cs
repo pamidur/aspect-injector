@@ -1,96 +1,72 @@
-﻿//using System;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using AspectInjector.Broker;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using AspectInjector.Broker;
 
-//namespace AspectInjector.Tests.General
-//{
-//    [TestClass]
-//    public class AspectScopeTests
-//    {
-//        [TestMethod]
-//        public void Create_Aspect_Per_Instance()
-//        {
-//            for(int i = 0; i < 10; i++)
-//            {
-//                var t = new AspectScopeTests_PerInstanceTarget();
-//                t.TestMethod();
-//                Assert.AreEqual(1, t.Counter);
-//            }
-//        }
+namespace AspectInjector.Tests.General
+{
+    [TestClass]
+    public class AspectScopeTests
+    {
+        [TestMethod]
+        public void SCOPE_Create_Aspect_Per_Instance()
+        {
+            AspectScopeTests_PerInstanceAspect._counter = 0;
+            for (int i = 0; i < 10; i++)
+            {
+                var t = new AspectScopeTests_Target();
+                Assert.AreEqual(i + 1, AspectScopeTests_PerInstanceAspect._counter);
+            }
+        }
 
-//        [TestMethod]
-//        public void Create_Aspect_Per_Type()
-//        {
-//            for (int i = 0; i < 10; i++)
-//            {
-//                var t = new AspectScopeTests_PerTypeTarget();
-//                t.TestMethod();
-//                Assert.AreEqual(i + 1, t.Counter);
-//            }
-//        }
-//    }
+        [TestMethod]
+        public void SCOPE_Create_Global_Aspect()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                var t = new AspectScopeTests_Target();
+                Assert.AreEqual(1, AspectScopeTests_GlobalAspect._counter);
+            }
+        }
+    }
 
-//    [AspectScope(AspectScope.Instance)]
-//    internal class AspectScopeTests_PerInstanceAspect
-//    {
-//        private int _counter;
+    [Aspect(Aspect.Scope.PerInstance)]
+    internal class AspectScopeTests_PerInstanceAspect
+    {
+        public static int _counter;
 
-//        [Advice(Advice.Type.Before, Advice.Target.Method)]
-//        public void IncrementCounter()
-//        {
-//            _counter++;
-//        }
+        public AspectScopeTests_PerInstanceAspect()
+        {
+            _counter++;
+        }
 
-//        [Advice(Advice.Type.Before, Advice.Target.Getter)]
-//        public int GetCounter([Advice.Argument(Advice.Argument.Source.AbortFlag)] ref bool abort)
-//        {
-//            abort = true;
-//            return _counter;
-//        }
-//    }
+        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        public void Do()
+        {
+        }
+    }
 
-//    [AspectScope(AspectScope.Type)]
-//    internal class AspectScopeTests_PerTypeAspect
-//    {
-//        private int _counter;
+    [Aspect(Aspect.Scope.Global)]
+    internal class AspectScopeTests_GlobalAspect
+    {
+        public static int _counter;
 
-//        [Advice(Advice.Type.Before, Advice.Target.Method)]
-//        public void IncrementCounter()
-//        {
-//            _counter++;
-//        }
+        public AspectScopeTests_GlobalAspect()
+        {
+            _counter++;
+        }
 
-//        [Advice(Advice.Type.Before, Advice.Target.Getter)]
-//        public int GetCounter([Advice.Argument(Advice.Argument.Source.AbortFlag)] ref bool abort)
-//        {
-//            abort = true;
-//            return _counter;
-//        }
-//    }
+        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        public void Do()
+        {
+        }
+    }
 
-//    [Aspect(typeof(AspectScopeTests_PerInstanceAspect))]
-//    internal class AspectScopeTests_PerInstanceTarget
-//    {
-//        public int Counter
-//        {
-//            get { return 0; }
-//        }
-
-//        public void TestMethod()
-//        {
-//        }
-//    }
-
-//    [Aspect(typeof(AspectScopeTests_PerTypeAspect))]
-//    internal class AspectScopeTests_PerTypeTarget
-//    {
-//        public int Counter
-//        {
-//            get { return 0; }
-//        }
-
-//        public void TestMethod()
-//        {
-//        }
-//    }
-//}
+    [Inject(typeof(AspectScopeTests_PerInstanceAspect))]
+    [Inject(typeof(AspectScopeTests_GlobalAspect))]
+    internal class AspectScopeTests_Target
+    {
+        public void TestMethod()
+        {
+        }
+    }
+}

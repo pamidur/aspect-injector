@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.ComponentModel;
 
 namespace AspectInjector.Tests.Interfaces
 {
@@ -76,7 +77,6 @@ namespace AspectInjector.Tests.Interfaces
         }
 
         [Inject(typeof(GeneralTests_Aspect))]
-        //[Aspect(typeof(INotifyPropertyChanged_Aspect))]
         internal class GeneralTests_Target
         {
             public GeneralTests_Target()
@@ -104,9 +104,12 @@ namespace AspectInjector.Tests.Interfaces
         }*/
 
         [Mixin(typeof(IGeneralTests))]
+        [Mixin(typeof(INotifyPropertyChanged))]
         [Aspect(Aspect.Scope.Global)]
-        internal class GeneralTests_Aspect : IGeneralTests
+        internal class GeneralTests_Aspect : IGeneralTests, INotifyPropertyChanged
         {
+            public event PropertyChangedEventHandler PropertyChanged;
+
             string IGeneralTests.TestMethod(string data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue)
             {
                 Checker.Passed = true;
