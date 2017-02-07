@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace AspectInjector.Tests.Advices
 {
@@ -39,6 +40,16 @@ namespace AspectInjector.Tests.Advices
             _openGenericTarget.TestMethod();
             Assert.IsTrue(Checker.Passed);
         }
+
+        [TestMethod]
+        public void Advices_InjectAroundMethod_GenericMethod()
+        {
+            Checker.Passed = false;
+            var target = new GenericAroundTests_Target();
+            target.TestMethod<string>(string.Empty);
+            Assert.IsTrue(Checker.Passed);
+        }
+
     }
 
     [Inject(typeof(GenericTests_Aspect))]
@@ -79,4 +90,25 @@ namespace AspectInjector.Tests.Advices
         [Advice(Advice.Type.Before, Advice.Target.Method)]
         public void BeforeMethod() { Checker.Passed = true; }
     }
+
+    [Inject(typeof(GenericAroundTests_Aspect))]
+    internal class GenericAroundTests_Target
+    {
+        public void TestMethod<T>(T value)
+        {
+        }
+    }
+
+    [Aspect(Aspect.Scope.Global)]
+    internal class GenericAroundTests_Aspect
+    {
+        [Advice(Advice.Type.Around, Advice.Target.Method)]
+        public object AroundAdvice([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
+            [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
+        {
+            Checker.Passed = true;
+            return target(arguments);
+        }
+    }
+
 }
