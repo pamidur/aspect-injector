@@ -5,6 +5,7 @@ using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
 using AspectInjector.Core.Services;
 using Mono.Cecil;
+using System;
 using System.Linq;
 using static AspectInjector.Broker.Advice;
 using static AspectInjector.Broker.Advice.Argument;
@@ -91,46 +92,48 @@ namespace AspectInjector.Core.Advice.Weavers
             {
                 switch (arg.Source)
                 {
-                    case Source.Arguments: LoadArgumentsArgument(pc, effect, target, arg.Parameter, injection); break;
-                    case Source.Attributes: LoadAttributesArgument(pc, effect, target, arg.Parameter, injection); break;
-                    case Source.Instance: LoadInstanceArgument(pc, effect, target, arg.Parameter, injection); break;
-                    case Source.Method: LoadMethodArgument(pc, effect, target, arg.Parameter, injection); break;
-                    case Source.Name: LoadNameArgument(pc, effect, target, arg.Parameter, injection); break;
-                    case Source.ReturnType: LoadReturnTypeArgument(pc, effect, target, arg.Parameter, injection); break;
-                    case Source.ReturnValue: LoadReturnValueArgument(pc, effect, target, arg.Parameter, injection); break;
-                    case Source.Target: LoadTargetArgument(pc, effect, target, arg.Parameter, injection); break;
-                    case Source.Type: LoadTypeArgument(pc, effect, target, arg.Parameter, injection); break;
+                    case Source.Arguments: LoadArgumentsArgument(pc, effect, target, arg, injection); break;
+                    case Source.Attributes: LoadAttributesArgument(pc, effect, target, arg, injection); break;
+                    case Source.Instance: LoadInstanceArgument(pc, effect, target, arg, injection); break;
+                    case Source.Method: LoadMethodArgument(pc, effect, target, arg, injection); break;
+                    case Source.Name: LoadNameArgument(pc, effect, target, arg, injection); break;
+                    case Source.ReturnType: LoadReturnTypeArgument(pc, effect, target, arg, injection); break;
+                    case Source.ReturnValue: LoadReturnValueArgument(pc, effect, target, arg, injection); break;
+                    case Source.Target: LoadTargetArgument(pc, effect, target, arg, injection); break;
+                    case Source.Type: LoadTypeArgument(pc, effect, target, arg, injection); break;
                     default: _log.LogError(CompilationMessage.From($"Unknown argument source {arg.Source.ToString()}", target)); break;
                 }
             }
         }
 
-        protected virtual void LoadTypeArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        protected virtual void LoadTypeArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
         {
             pc.TypeOf(target.DeclaringType);
         }
 
-        protected virtual void LoadTargetArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        protected virtual void LoadTargetArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
         {
+            _log.LogWarning(CompilationMessage.From($"Advice {effect.Type.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", effect.Method));
             pc.Null();
         }
 
-        protected virtual void LoadReturnValueArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        protected virtual void LoadReturnValueArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
         {
+            _log.LogWarning(CompilationMessage.From($"Advice {effect.Type.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", effect.Method));
             pc.Null();
         }
 
-        protected virtual void LoadReturnTypeArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        protected virtual void LoadReturnTypeArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
         {
             pc.TypeOf(target.ReturnType);
         }
 
-        protected virtual void LoadMethodArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        protected virtual void LoadMethodArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
         {
             pc.MethodOf(target).Cast(target.Module.GetTypeSystem().MethodBase);
         }
 
-        protected virtual void LoadInstanceArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        protected virtual void LoadInstanceArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
         {
             if (target.IsStatic)
                 pc.Null();
@@ -138,17 +141,21 @@ namespace AspectInjector.Core.Advice.Weavers
                 pc.This();
         }
 
-        protected virtual void LoadAttributesArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        protected virtual void LoadAttributesArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
         {
             pc.Null();
         }
 
-        protected virtual void LoadArgumentsArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        protected virtual void LoadArgumentsArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
         {
-            pc.Null();
+            var elements = target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
+                il.Load(p).ByVal(p.ParameterType)
+            ).ToArray();
+
+            pc.CreateArray<object>(elements);
         }
 
-        protected virtual void LoadNameArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, ParameterDefinition parameter, Injection injection)
+        protected virtual void LoadNameArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
         {
             pc.Value(((IMemberDefinition)injection.Target).Name);
         }

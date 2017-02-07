@@ -32,6 +32,29 @@ namespace AspectInjector.Core.Models
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ret));
         }
 
+        public PointCut CreateArray<T>(params Action<PointCut>[] elements)
+        {
+            return CreateArray(_typeSystem.Import(typeof(T)), elements);
+        }
+
+        public PointCut CreateArray(TypeReference elementType, params Action<PointCut>[] elements)
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, elements.Length));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Newarr, _typeSystem.Import(elementType)));
+
+            for (var i = 0; i < elements.Length; i++)
+            {
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Dup));
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, i));
+
+                elements[i](this);
+
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stelem_Ref));
+            }
+
+            return this;
+        }
+
         public PointCut Call(MethodReference method, Action<PointCut> args = null)
         {
             args?.Invoke(this);
@@ -187,17 +210,23 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
-        public PointCut ByVal(ByReferenceType refType)
+        public PointCut ByVal(TypeReference refType)
         {
-            var elementtype = refType.ElementType;
-
-            if (elementtype.IsValueType)
+            if (refType.IsByReference)
             {
-                var opcode = _typeSystem.LoadIndirectMap.First(kv => elementtype.IsTypeOf(kv.Key)).Value;
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
+                refType = ((ByReferenceType)refType).ElementType;
+
+                if (refType.IsValueType)
+                {
+                    var opcode = _typeSystem.LoadIndirectMap.First(kv => refType.IsTypeOf(kv.Key)).Value;
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
+                }
+                else
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldind_Ref));
             }
-            else
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldind_Ref));
+
+            if (refType.IsValueType)
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Box, _typeSystem.Import(refType)));
 
             return this;
         }

@@ -1,50 +1,53 @@
 ﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
 using static AspectInjector.Broker.Advice;
+using System;
+using System.Linq;
 
 namespace AspectInjector.Core.Advice.Effects
 {
     public abstract class AdviceEffectBase : Effect
     {
         public Target Target { get; set; }
-
+        public abstract Broker.Advice.Type Type { get; }
         public MethodDefinition Method { get; set; }
 
         public List<AdviceArgument> Arguments { get; set; } = new List<AdviceArgument>();
 
         public override bool IsApplicableFor(ICustomAttributeProvider target)
         {
-            if ((Target & Target.Method) != 0)
-                return target is MethodDefinition && !((MethodDefinition)target).IsConstructor;
+            if (Target.HasFlag(Target.Method) && target is MethodDefinition && ((MethodDefinition)target).IsNormalMethod())
+                return true;
 
-            if ((Target & Target.Constructor) != 0)
-                return target is MethodDefinition && ((MethodDefinition)target).IsConstructor;
+            if (Target.HasFlag(Target.Constructor) && target is MethodDefinition && ((MethodDefinition)target).IsConstructor)
+                return true;
 
-            if ((Target & Target.Setter) != 0)
-                return target is PropertyDefinition;
+            if (Target.HasFlag(Target.Setter) && target is PropertyDefinition && ((PropertyDefinition)target).SetMethod != null)
+                return true;
 
-            if ((Target & Target.Getter) != 0)
-                return target is PropertyDefinition;
+            if (Target.HasFlag(Target.Getter) && target is PropertyDefinition && ((PropertyDefinition)target).GetMethod != null)
+                return true;
 
-            if ((Target & Target.EventAdd) != 0)
-                return target is EventDefinition;
+            if (Target.HasFlag(Target.EventAdd) && target is EventDefinition && ((EventDefinition)target).AddMethod != null)
+                return true;
 
-            if ((Target & Target.EventRemove) != 0)
-                return target is EventDefinition;
+            if (Target.HasFlag(Target.EventRemove) && target is EventDefinition && ((EventDefinition)target).RemoveMethod != null)
+                return true;
 
             return false;
         }
 
         protected override bool IsEqualTo(Effect effect)
         {
-            if (effect.GetType() != GetType())
-                return false;
-
             var other = effect as AdviceEffectBase;
 
-            return other.Target == Target && other.Method == Method;
+            if (other == null)
+                return false;
+
+            return other.Target == Target && other.Type == Type && other.Method == Method;
         }
 
         public override bool Validate(AspectDefinition aspect, ILogger log)

@@ -59,7 +59,17 @@ namespace AspectInjector.Core.Fluent
 
             foreach (var ret in _md.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList())
             {
-                action(new PointCut(_md.Body.GetEditor(), ret));
+                var il = _md.Body.GetEditor();
+                var newRet = il.Create(OpCodes.Ret);
+                var tempNop = il.Create(OpCodes.Nop);
+
+                il.InsertAfter(ret, newRet);
+
+                il.Replace(ret, tempNop);
+
+                action(new PointCut(_md.Body.GetEditor(), newRet));
+
+                il.Remove(tempNop);
             }
         }
 

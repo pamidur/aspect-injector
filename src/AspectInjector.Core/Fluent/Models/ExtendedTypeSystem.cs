@@ -127,6 +127,15 @@ namespace AspectInjector.Core.Fluent.Models
             return _module.Import(type, context);
         }
 
+        public TypeReference Import(Type type)
+        {
+            IGenericParameterProvider context = null;
+            //if (type.IsGenericParameter)
+            //    context = ((GenericParameter)type).Owner;
+
+            return _module.Import(type, context);
+        }
+
         public MethodReference Import(MethodReference method)
         {
             return _module.Import(method);

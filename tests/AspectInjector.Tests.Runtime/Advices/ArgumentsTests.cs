@@ -215,6 +215,7 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
+        [Inject(typeof(ArgumentsTests_MethodAspect))]
         internal class ArgumentsTests_ConstructorTarget
         {
             [Inject(typeof(ArgumentsTests_MethodAspect))]

@@ -86,7 +86,7 @@ namespace AspectInjector.Core
             return false;
         }
 
-        private void ProcessAssembly(AssemblyDefinition assembly)
+        public void ProcessAssembly(AssemblyDefinition assembly)
         {
             var aspects = _aspectExtractor.Extract(assembly);
 

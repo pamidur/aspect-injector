@@ -72,7 +72,7 @@ namespace AspectInjector.Core.Advice
             return args;
         }
 
-        private AdviceEffectBase CreateEffect(Broker.Advice.Type adviceType)
+        internal static AdviceEffectBase CreateEffect(Broker.Advice.Type adviceType)
         {
             switch (adviceType)
             {

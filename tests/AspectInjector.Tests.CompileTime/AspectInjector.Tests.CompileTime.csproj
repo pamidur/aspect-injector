@@ -35,6 +35,10 @@
     <StyleCopTreatErrorsAsWarnings>False</StyleCopTreatErrorsAsWarnings>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DryIoc, Version=2.10.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DryIoc.dll.2.10.0\lib\net45\DryIoc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
@@ -54,6 +58,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -73,6 +78,18 @@
     <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj">
       <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
       <Name>AspectInjector.Broker</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj">
+      <Project>{1A96AA51-2CBC-4901-91D1-53208AD5E6B6}</Project>
+      <Name>AspectInjector.Core.Advice</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj">
+      <Project>{3FBD73F5-6098-45A8-A236-6CC2F093B804}</Project>
+      <Name>AspectInjector.Core.Mixin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\AspectInjector.Core\AspectInjector.Core.csproj">
+      <Project>{accc10d0-d079-4b9c-8269-71796a0ef822}</Project>
+      <Name>AspectInjector.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

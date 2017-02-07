@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Core.Contracts;
 using Mono.Cecil;
 using System;
+using System.Linq;
 
 namespace AspectInjector.Core.Models
 {
