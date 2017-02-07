@@ -3,11 +3,22 @@ using Mono.Cecil;
 using Mono.Cecil.Rocks;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AspectInjector.Core.Extensions
 {
     public static class MemberReferenceExtensions
     {
+        public static bool IsAsync(this MethodDefinition m)
+        {
+            return m.CustomAttributes.Any(a => a.AttributeType.IsTypeOf(typeof(AsyncStateMachineAttribute)));
+        }
+
+        public static bool IsIterator(this MethodDefinition m)
+        {
+            return m.CustomAttributes.Any(a => a.AttributeType.IsTypeOf(typeof(IteratorStateMachineAttribute)));
+        }
+
         public static bool IsNormalMethod(this MethodDefinition m)
         {
             return !m.IsAddOn && !m.IsRemoveOn && !m.IsSetter && !m.IsGetter && !m.IsConstructor;
