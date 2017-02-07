@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
-    public class MixinWeaver : EffectWeaverBase<TypeDefinition, MixinEffect>
+    internal class MixinWeaver : EffectWeaverBase<TypeDefinition, MixinEffect>
     {
         public MixinWeaver(ILogger log) : base(log)
         {

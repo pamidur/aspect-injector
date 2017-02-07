@@ -6,7 +6,7 @@ using Mono.Cecil;
 
 namespace AspectInjector.Core.Mixin
 {
-    public class MixinEffect : Effect
+    internal class MixinEffect : Effect
     {
         public TypeReference InterfaceType { get; set; }
 

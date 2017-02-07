@@ -12,7 +12,7 @@ using static AspectInjector.Broker.Advice.Argument;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
-    public abstract class AdviceWeaverBase<TEffect> : EffectWeaverBase<IMemberDefinition, TEffect>
+    internal abstract class AdviceWeaverBase<TEffect> : EffectWeaverBase<IMemberDefinition, TEffect>
         where TEffect : AdviceEffectBase
     {
         public AdviceWeaverBase(ILogger logger) : base(logger)

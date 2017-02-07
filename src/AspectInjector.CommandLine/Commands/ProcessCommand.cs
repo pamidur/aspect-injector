@@ -54,14 +54,10 @@ namespace AspectInjector.CLI.Commands
             container.Register<IJanitor, Janitor>(Reuse.Singleton);
             container.UseInstance(Log, true);
 
-            //register weavers
+            //register effects
 
-            container.Register<IEffectExtractor, MixinExtractor>(Reuse.Singleton);
-            container.Register<IEffectExtractor, AdviceExtractor>(Reuse.Singleton);
-
-            container.Register<IEffectWeaver, MixinWeaver>(Reuse.Singleton);
-            container.Register<IEffectWeaver, AdviceAfterWeaver>(Reuse.Singleton);
-            container.Register<IEffectWeaver, AdviceBeforeWeaver>(Reuse.Singleton);
+            AdviceConfiguration.Configure((s, i) => container.Register(s, i, Reuse.Singleton));
+            MixinConfiguration.Configure((s, i) => container.Register(s, i, Reuse.Singleton));
 
             //done registration
 

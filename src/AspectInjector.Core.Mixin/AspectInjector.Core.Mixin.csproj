@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MixinConfiguration.cs" />
     <Compile Include="MixinEffect.cs" />
     <Compile Include="MixinExtractor.cs" />
     <Compile Include="MixinWeaver.cs" />

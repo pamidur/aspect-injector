@@ -11,7 +11,7 @@ using System;
 
 namespace AspectInjector.Core.Advice
 {
-    public class AdviceExtractor : EffectExtractorBase<MethodDefinition, AdviceEffectBase>
+    internal class AdviceExtractor : EffectExtractorBase<MethodDefinition, AdviceEffectBase>
     {
         public AdviceExtractor(ILogger logger) : base(logger)
         {

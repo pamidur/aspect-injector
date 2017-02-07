@@ -3,7 +3,7 @@ using static AspectInjector.Broker.Advice;
 
 namespace AspectInjector.Core.Advice.Effects
 {
-    public class AdviceArgument
+    internal class AdviceArgument
     {
         public Argument.Source Source { get; set; }
 

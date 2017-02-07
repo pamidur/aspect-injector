@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace AspectInjector.Core.Advice.Effects
 {
-    public abstract class AdviceEffectBase : Effect
+    internal abstract class AdviceEffectBase : Effect
     {
         public Target Target { get; set; }
         public abstract Broker.Advice.Type Type { get; }

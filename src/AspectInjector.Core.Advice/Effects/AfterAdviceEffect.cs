@@ -4,7 +4,7 @@ using Mono.Cecil;
 
 namespace AspectInjector.Core.Advice.Effects
 {
-    public class AfterAdviceEffect : AdviceEffectBase
+    internal class AfterAdviceEffect : AdviceEffectBase
     {
         public override Broker.Advice.Type Type => Broker.Advice.Type.After;
 

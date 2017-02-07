@@ -12,7 +12,7 @@ using AspectInjector.Core.Fluent;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
-    public class AdviceBeforeWeaver : AdviceWeaverBase<BeforeAdviceEffect>
+    internal class AdviceBeforeWeaver : AdviceWeaverBase<BeforeAdviceEffect>
     {
         public AdviceBeforeWeaver(ILogger logger) : base(logger)
         {

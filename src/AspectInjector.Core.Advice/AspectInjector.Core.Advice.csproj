@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdviceExtractor.cs" />
+    <Compile Include="AdviceConfiguration.cs" />
     <Compile Include="Effects\AdviceArgument.cs" />
     <Compile Include="Effects\AfterAdviceEffect.cs" />
     <Compile Include="Effects\BeforeAdviceEffect.cs" />

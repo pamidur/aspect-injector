@@ -2,7 +2,7 @@
 
 namespace AspectInjector.Core.Advice.Effects
 {
-    public class AroundAdviceEffect : AdviceEffectBase
+    internal class AroundAdviceEffect : AdviceEffectBase
     {
         public override Broker.Advice.Type Type => Broker.Advice.Type.Around;
 

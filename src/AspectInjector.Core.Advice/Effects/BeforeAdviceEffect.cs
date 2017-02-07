@@ -2,7 +2,7 @@
 
 namespace AspectInjector.Core.Advice.Effects
 {
-    public class BeforeAdviceEffect : AdviceEffectBase
+    internal class BeforeAdviceEffect : AdviceEffectBase
     {
         public override Broker.Advice.Type Type => Broker.Advice.Type.Before;
 

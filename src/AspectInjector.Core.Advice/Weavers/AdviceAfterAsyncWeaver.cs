@@ -7,7 +7,7 @@ using System;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
-    public class AdviceAfterAsyncWeaver : AdviceWeaverBase<AfterAdviceEffect>
+    internal class AdviceAfterAsyncWeaver : AdviceWeaverBase<AfterAdviceEffect>
     {
         public AdviceAfterAsyncWeaver(ILogger logger) : base(logger)
         {

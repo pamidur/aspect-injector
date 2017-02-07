@@ -11,7 +11,7 @@ using AspectInjector.Core.Models;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
-    public class AdviceAroundWeaver : AdviceWeaverBase<AroundAdviceEffect>
+    internal class AdviceAroundWeaver : AdviceWeaverBase<AroundAdviceEffect>
     {
         public AdviceAroundWeaver(ILogger logger) : base(logger)
         {

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
-    public class MixinExtractor : EffectExtractorBase<TypeDefinition, MixinEffect>
+    internal class MixinExtractor : EffectExtractorBase<TypeDefinition, MixinEffect>
     {
         public MixinExtractor(ILogger logger) : base(logger)
         {
