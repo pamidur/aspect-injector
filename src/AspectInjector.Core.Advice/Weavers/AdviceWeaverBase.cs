@@ -1,16 +1,13 @@
 ﻿using AspectInjector.Core.Advice.Effects;
+using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
+using AspectInjector.Core.Fluent;
+using AspectInjector.Core.Models;
 using AspectInjector.Core.Services;
 using Mono.Cecil;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Models;
-using static AspectInjector.Broker.Advice.Argument;
-using AspectInjector.Core.Fluent;
 using static AspectInjector.Broker.Advice;
+using static AspectInjector.Broker.Advice.Argument;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
@@ -66,7 +63,7 @@ namespace AspectInjector.Core.Advice.Weavers
             if (target.IsConstructor && effect.Target.HasFlag(Target.Constructor))
                 WeaveMethod(target, effect, injection);
 
-            if (!target.IsConstructor && !target.IsSetter && !target.IsGetter && !target.IsAddOn && !target.IsRemoveOn && effect.Target.HasFlag(Target.Method))
+            if (target.IsNormalMethod() && effect.Target.HasFlag(Target.Method))
                 WeaveMethod(target, effect, injection);
         }
 

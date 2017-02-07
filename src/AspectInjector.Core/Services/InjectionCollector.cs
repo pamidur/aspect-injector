@@ -34,7 +34,7 @@ namespace AspectInjector.Core.Services
                     aspects = aspects.Concat(type.Events.SelectMany(ExtractInjections));
                     aspects = aspects.Concat(type.Properties.SelectMany(ExtractInjections));
                     //aspects = aspects.Concat(type.Fields.SelectMany(ExtractInjections));
-                    aspects = aspects.Concat(type.Methods.Where(m => !m.IsSetter && !m.IsGetter && !m.IsRemoveOn && !m.IsAddOn).SelectMany(ExtractInjections));
+                    aspects = aspects.Concat(type.Methods.Where(m => m.IsNormalMethod() || m.IsConstructor).SelectMany(ExtractInjections));
                 }
             }
 
@@ -86,7 +86,7 @@ namespace AspectInjector.Core.Services
 
             if (type != null)
             {
-                result = result.Concat(type.Methods.Where(m => !m.IsSetter && !m.IsGetter && !m.IsRemoveOn && !m.IsAddOn)
+                result = result.Concat(type.Methods.Where(m => m.IsNormalMethod() || m.IsConstructor)
                     .SelectMany(m => CreateInjections(m, aspect, priority)));
                 result = result.Concat(type.Events.SelectMany(m => CreateInjections(m, aspect, priority)));
                 result = result.Concat(type.Properties.SelectMany(m => CreateInjections(m, aspect, priority)));

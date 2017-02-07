@@ -31,7 +31,7 @@ namespace AspectInjector.Core.Mixin
 
                     var ifaceDefinition = iface.Resolve();
 
-                    foreach (var method in ifaceDefinition.Methods.Where(m => !m.IsAddOn && !m.IsRemoveOn && !m.IsSetter && !m.IsGetter))
+                    foreach (var method in ifaceDefinition.Methods.Where(m => m.IsNormalMethod() || m.IsConstructor))
                         CreateMethodProxy(target, method, iface, injection, ts);
 
                     foreach (var @event in ifaceDefinition.Events)
