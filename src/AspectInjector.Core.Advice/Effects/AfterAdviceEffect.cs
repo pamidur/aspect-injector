@@ -8,7 +8,7 @@ namespace AspectInjector.Core.Advice.Effects
     {
         public override Broker.Advice.Type Type => Broker.Advice.Type.After;
 
-        public override bool IsApplicableFor(ICustomAttributeProvider target)
+        public override bool IsApplicableFor(IMemberDefinition target)
         {
             // check args
 

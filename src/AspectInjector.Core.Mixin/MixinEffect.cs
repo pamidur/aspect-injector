@@ -10,7 +10,7 @@ namespace AspectInjector.Core.Mixin
     {
         public TypeReference InterfaceType { get; set; }
 
-        public override bool IsApplicableFor(ICustomAttributeProvider target)
+        public override bool IsApplicableFor(IMemberDefinition target)
         {
             return target is TypeDefinition;
         }
@@ -40,6 +40,11 @@ namespace AspectInjector.Core.Mixin
             }
 
             return true;
+        }
+
+        public override string ToString()
+        {
+            return $"Mixin::{InterfaceType.Name}";
         }
     }
 }

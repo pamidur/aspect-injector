@@ -17,7 +17,7 @@ namespace AspectInjector.Core.Advice.Weavers
         {
         }
 
-        protected override void WeaveMethod(MethodDefinition target, AroundAdviceEffect effect, Injection injection)
+        protected override void WeaveMethod(MethodDefinition target, ResolvedInjection injection)
         {
             throw new NotImplementedException();
         }

@@ -16,14 +16,15 @@ namespace AspectInjector.Core.Advice.Weavers
     {
         public AdviceBeforeWeaver(ILogger logger) : base(logger)
         {
+            Priority = 90;
         }
 
-        protected override void WeaveMethod(MethodDefinition target, BeforeAdviceEffect effect, Injection injection)
+        protected override void WeaveMethod(MethodDefinition method, ResolvedInjection injection)
         {
-            target.GetEditor().OnEntry(
+            method.GetEditor().OnEntry(
                 e => e
                 .LoadAspect(injection.Source)
-                .Call(effect.Method, c => LoadAdviceArgs(c, target, effect, injection))
+                .Call(injection.Effect.Method, c => LoadAdviceArgs(c, method, injection))
             );
         }
     }

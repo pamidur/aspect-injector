@@ -113,14 +113,13 @@ namespace AspectInjector.Core.Models
         private FieldReference GetInstanceAspectField(AspectDefinition aspect)
         {
             var type = _proc.Body.Method.DeclaringType;
-            var ts = type.Module.GetTypeSystem();
 
             var fieldName = $"{Constants.AspectInstanceFieldPrefix}{aspect.Host.FullName}";
 
             var field = FindField(type, fieldName);
             if (field == null)
             {
-                field = new FieldDefinition(fieldName, FieldAttributes.Family, ts.Import(aspect.Host));
+                field = new FieldDefinition(fieldName, FieldAttributes.Family, _typeSystem.Import(aspect.Host));
                 type.Fields.Add(field);
 
                 InjectInitialization(GetInstanсeAspectsInitializer(type), field, aspect.CreateAspectInstance);
@@ -163,14 +162,12 @@ namespace AspectInjector.Core.Models
 
         private MethodDefinition GetInstanсeAspectsInitializer(TypeDefinition type)
         {
-            var ts = type.Module.GetTypeSystem();
-
             var instanceAspectsInitializer = type.Methods.FirstOrDefault(m => m.Name == Constants.InstanceAspectsMethodName);
 
             if (instanceAspectsInitializer == null)
             {
                 instanceAspectsInitializer = new MethodDefinition(Constants.InstanceAspectsMethodName,
-                    MethodAttributes.Private | MethodAttributes.HideBySig, ts.Void);
+                    MethodAttributes.Private | MethodAttributes.HideBySig, _typeSystem.Void);
 
                 type.Methods.Add(instanceAspectsInitializer);
 

@@ -6,7 +6,7 @@ namespace AspectInjector.Core.Models
 {
     public class Injection : IEquatable<Injection>
     {
-        public ICustomAttributeProvider Target { get; set; }
+        public IMemberDefinition Target { get; set; }
 
         public uint Priority { get; internal set; }
 
@@ -24,6 +24,11 @@ namespace AspectInjector.Core.Models
         public override int GetHashCode()
         {
             return Source.Host.GetFQN().GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"{Effect.ToString()} => {Target.MetadataToken.TokenType.ToString()} ::{Target.FullName}";
         }
     }
 }

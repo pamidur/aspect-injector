@@ -49,14 +49,14 @@ namespace AspectInjector.Core.Services
 
             foreach (var attr in target.CustomAttributes.Where(a => a.AttributeType.IsTypeOf(typeof(Broker.Inject))).ToList())
             {
-                injections = injections.Concat(ParseAspectAttribute(target, attr));
+                injections = injections.Concat(ParseInjectionAttribute(target, attr));
                 target.CustomAttributes.Remove(attr);
             }
 
             return injections;
         }
 
-        private IEnumerable<Injection> ParseAspectAttribute(ICustomAttributeProvider target, CustomAttribute attr)
+        private IEnumerable<Injection> ParseInjectionAttribute(ICustomAttributeProvider target, CustomAttribute attr)
         {
             var aspectRef = attr.GetConstructorValue<TypeReference>(0);
             var aspect = _cache.ReadAspect(aspectRef.Resolve());
@@ -71,31 +71,41 @@ namespace AspectInjector.Core.Services
 
             // var childFilter = attr.GetPropertyValue<Broker.Inject, InjectionChildFilter>(i => i.Filter);
 
-            var injections = CreateInjections(target, aspect, priority);
-
-            injections = injections.Concat(FindApplicableChildren(target, aspect, priority/*, childFilter*/));
+            var injections = FindApplicableMembers(target, aspect, priority/*, childFilter*/);
 
             return injections;
         }
 
-        private IEnumerable<Injection> FindApplicableChildren(ICustomAttributeProvider target, AspectDefinition aspect, ushort priority)
+        private IEnumerable<Injection> FindApplicableMembers(ICustomAttributeProvider target, AspectDefinition aspect, ushort priority)
         {
             var result = Enumerable.Empty<Injection>();
 
-            var type = target as TypeDefinition;
+            var assm = target as AssemblyDefinition;
+            if (assm != null)
+                result = result.Concat(assm.Modules.SelectMany(nt => FindApplicableMembers(nt, aspect, priority)));
 
+            var module = target as ModuleDefinition;
+            if (module != null)
+                result = result.Concat(module.Types.SelectMany(nt => FindApplicableMembers(nt, aspect, priority)));
+
+            var member = target as IMemberDefinition;
+            if (member != null)
+                result = result.Concat(CreateInjections(member, aspect, priority));
+
+            var type = target as TypeDefinition;
             if (type != null)
             {
                 result = result.Concat(type.Methods.Where(m => m.IsNormalMethod() || m.IsConstructor)
-                    .SelectMany(m => CreateInjections(m, aspect, priority)));
-                result = result.Concat(type.Events.SelectMany(m => CreateInjections(m, aspect, priority)));
-                result = result.Concat(type.Properties.SelectMany(m => CreateInjections(m, aspect, priority)));
+                    .SelectMany(m => FindApplicableMembers(m, aspect, priority)));
+                result = result.Concat(type.Events.SelectMany(m => FindApplicableMembers(m, aspect, priority)));
+                result = result.Concat(type.Properties.SelectMany(m => FindApplicableMembers(m, aspect, priority)));
+                result = result.Concat(type.NestedTypes.SelectMany(nt => FindApplicableMembers(nt, aspect, priority)));
             }
 
             return result;
         }
 
-        private IEnumerable<Injection> CreateInjections(ICustomAttributeProvider target, AspectDefinition aspect, ushort priority)
+        private IEnumerable<Injection> CreateInjections(IMemberDefinition target, AspectDefinition aspect, ushort priority)
         {
             return aspect.Effects.Where(e => e.IsApplicableFor(target)).Select(e => new Injection()
             {

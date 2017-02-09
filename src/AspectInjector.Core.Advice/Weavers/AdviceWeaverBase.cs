@@ -24,7 +24,7 @@ namespace AspectInjector.Core.Advice.Weavers
             var result = base.CanWeave(injection) &&
                 (injection.Target is EventDefinition || injection.Target is PropertyDefinition || injection.Target is MethodDefinition);
 
-            if (injection.Target is MethodDefinition && injection.Effect is AfterAdviceEffect)
+            if (result && injection.Target is MethodDefinition && injection.Effect is AfterAdviceEffect)
             {
                 var md = (MethodDefinition)injection.Target;
                 if (md.IsAsync() || md.IsIterator())
@@ -34,106 +34,106 @@ namespace AspectInjector.Core.Advice.Weavers
             return result;
         }
 
-        protected override void Weave(IMemberDefinition target, TEffect effect, Injection injection)
+        protected override void Weave(ResolvedInjection injection)
         {
-            if (target is EventDefinition)
+            if (injection.Target is EventDefinition)
             {
-                WeaveTargetEvent((EventDefinition)target, effect, injection);
+                WeaveTargetEvent((EventDefinition)injection.Target, injection);
                 return;
             }
 
-            if (target is PropertyDefinition)
+            if (injection.Target is PropertyDefinition)
             {
-                WeaveTargetProperty((PropertyDefinition)target, effect, injection);
+                WeaveTargetProperty((PropertyDefinition)injection.Target, injection);
                 return;
             }
 
-            if (target is MethodDefinition)
+            if (injection.Target is MethodDefinition)
             {
-                WeaveTargetMethod((MethodDefinition)target, effect, injection);
+                WeaveTargetMethod((MethodDefinition)injection.Target, injection);
                 return;
             }
 
-            _log.LogError(CompilationMessage.From($"Unsupported target {target.GetType().Name}", target));
+            _log.LogError(CompilationMessage.From($"Unsupported target {injection.Target.GetType().Name}", injection.Target));
         }
 
-        protected abstract void WeaveMethod(MethodDefinition target, TEffect effect, Injection injection);
+        protected abstract void WeaveMethod(MethodDefinition method, ResolvedInjection injection);
 
-        protected virtual void WeaveTargetProperty(PropertyDefinition target, TEffect effect, Injection injection)
+        protected virtual void WeaveTargetProperty(PropertyDefinition target, ResolvedInjection injection)
         {
-            if (target.SetMethod != null && effect.Target.HasFlag(Target.Setter))
-                WeaveMethod(target.SetMethod, effect, injection);
+            if (target.SetMethod != null && injection.Effect.Target.HasFlag(Target.Setter))
+                WeaveMethod(target.SetMethod, injection);
 
-            if (target.GetMethod != null && effect.Target.HasFlag(Target.Getter))
-                WeaveMethod(target.GetMethod, effect, injection);
+            if (target.GetMethod != null && injection.Effect.Target.HasFlag(Target.Getter))
+                WeaveMethod(target.GetMethod, injection);
         }
 
-        protected virtual void WeaveTargetMethod(MethodDefinition target, TEffect effect, Injection injection)
+        protected virtual void WeaveTargetMethod(MethodDefinition target, ResolvedInjection injection)
         {
-            if (target.IsConstructor && effect.Target.HasFlag(Target.Constructor))
-                WeaveMethod(target, effect, injection);
+            if (target.IsConstructor && injection.Effect.Target.HasFlag(Target.Constructor))
+                WeaveMethod(target, injection);
 
-            if (target.IsNormalMethod() && effect.Target.HasFlag(Target.Method))
-                WeaveMethod(target, effect, injection);
+            if (target.IsNormalMethod() && injection.Effect.Target.HasFlag(Target.Method))
+                WeaveMethod(target, injection);
         }
 
-        protected virtual void WeaveTargetEvent(EventDefinition target, TEffect effect, Injection injection)
+        protected virtual void WeaveTargetEvent(EventDefinition target, ResolvedInjection injection)
         {
-            if (target.AddMethod != null && effect.Target.HasFlag(Target.EventAdd))
-                WeaveMethod(target.AddMethod, effect, injection);
+            if (target.AddMethod != null && injection.Effect.Target.HasFlag(Target.EventAdd))
+                WeaveMethod(target.AddMethod, injection);
 
-            if (target.RemoveMethod != null && effect.Target.HasFlag(Target.EventRemove))
-                WeaveMethod(target.RemoveMethod, effect, injection);
+            if (target.RemoveMethod != null && injection.Effect.Target.HasFlag(Target.EventRemove))
+                WeaveMethod(target.RemoveMethod, injection);
         }
 
-        protected void LoadAdviceArgs(PointCut pc, MethodDefinition target, AdviceEffectBase effect, Injection injection)
+        protected void LoadAdviceArgs(PointCut pc, MethodDefinition method, ResolvedInjection injection)
         {
-            foreach (var arg in effect.Arguments.OrderBy(a => a.Parameter.Index))
+            foreach (var arg in injection.Effect.Arguments.OrderBy(a => a.Parameter.Index))
             {
                 switch (arg.Source)
                 {
-                    case Source.Arguments: LoadArgumentsArgument(pc, effect, target, arg, injection); break;
-                    case Source.Attributes: LoadAttributesArgument(pc, effect, target, arg, injection); break;
-                    case Source.Instance: LoadInstanceArgument(pc, effect, target, arg, injection); break;
-                    case Source.Method: LoadMethodArgument(pc, effect, target, arg, injection); break;
-                    case Source.Name: LoadNameArgument(pc, effect, target, arg, injection); break;
-                    case Source.ReturnType: LoadReturnTypeArgument(pc, effect, target, arg, injection); break;
-                    case Source.ReturnValue: LoadReturnValueArgument(pc, effect, target, arg, injection); break;
-                    case Source.Target: LoadTargetArgument(pc, effect, target, arg, injection); break;
-                    case Source.Type: LoadTypeArgument(pc, effect, target, arg, injection); break;
-                    default: _log.LogError(CompilationMessage.From($"Unknown argument source {arg.Source.ToString()}", target)); break;
+                    case Source.Arguments: LoadArgumentsArgument(pc, method, arg, injection); break;
+                    case Source.Attributes: LoadAttributesArgument(pc, method, arg, injection); break;
+                    case Source.Instance: LoadInstanceArgument(pc, method, arg, injection); break;
+                    case Source.Method: LoadMethodArgument(pc, method, arg, injection); break;
+                    case Source.Name: LoadNameArgument(pc, method, arg, injection); break;
+                    case Source.ReturnType: LoadReturnTypeArgument(pc, method, arg, injection); break;
+                    case Source.ReturnValue: LoadReturnValueArgument(pc, method, arg, injection); break;
+                    case Source.Target: LoadTargetArgument(pc, method, arg, injection); break;
+                    case Source.Type: LoadTypeArgument(pc, method, arg, injection); break;
+                    default: _log.LogError(CompilationMessage.From($"Unknown argument source {arg.Source.ToString()}", method)); break;
                 }
             }
         }
 
-        protected virtual void LoadTypeArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
+        protected virtual void LoadTypeArgument(PointCut pc, MethodDefinition target, AdviceArgument parameter, ResolvedInjection injection)
         {
             pc.TypeOf(target.DeclaringType);
         }
 
-        protected virtual void LoadTargetArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
+        protected virtual void LoadTargetArgument(PointCut pc, MethodDefinition target, AdviceArgument parameter, ResolvedInjection injection)
         {
-            _log.LogWarning(CompilationMessage.From($"Advice {effect.Type.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", effect.Method));
+            _log.LogWarning(CompilationMessage.From($"Advice {injection.Effect.Type.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", injection.Effect.Method));
             pc.Null();
         }
 
-        protected virtual void LoadReturnValueArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
+        protected virtual void LoadReturnValueArgument(PointCut pc, MethodDefinition target, AdviceArgument parameter, ResolvedInjection injection)
         {
-            _log.LogWarning(CompilationMessage.From($"Advice {effect.Type.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", effect.Method));
+            _log.LogWarning(CompilationMessage.From($"Advice {injection.Effect.Type.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", injection.Effect.Method));
             pc.Null();
         }
 
-        protected virtual void LoadReturnTypeArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
+        protected virtual void LoadReturnTypeArgument(PointCut pc, MethodDefinition target, AdviceArgument parameter, ResolvedInjection injection)
         {
             pc.TypeOf(target.ReturnType);
         }
 
-        protected virtual void LoadMethodArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
+        protected virtual void LoadMethodArgument(PointCut pc, MethodDefinition target, AdviceArgument parameter, ResolvedInjection injection)
         {
-            pc.MethodOf(target).Cast(target.Module.GetTypeSystem().MethodBase);
+            pc.MethodOf(target).Cast(injection.TypeSystem.MethodBase);
         }
 
-        protected virtual void LoadInstanceArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
+        protected virtual void LoadInstanceArgument(PointCut pc, MethodDefinition target, AdviceArgument parameter, ResolvedInjection injection)
         {
             if (target.IsStatic)
                 pc.Null();
@@ -141,12 +141,12 @@ namespace AspectInjector.Core.Advice.Weavers
                 pc.This();
         }
 
-        protected virtual void LoadAttributesArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
+        protected virtual void LoadAttributesArgument(PointCut pc, MethodDefinition target, AdviceArgument parameter, ResolvedInjection injection)
         {
             pc.Null();
         }
 
-        protected virtual void LoadArgumentsArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
+        protected virtual void LoadArgumentsArgument(PointCut pc, MethodDefinition target, AdviceArgument parameter, ResolvedInjection injection)
         {
             var elements = target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
                 il.Load(p).ByVal(p.ParameterType)
@@ -155,9 +155,9 @@ namespace AspectInjector.Core.Advice.Weavers
             pc.CreateArray<object>(elements);
         }
 
-        protected virtual void LoadNameArgument(PointCut pc, AdviceEffectBase effect, MethodDefinition target, AdviceArgument parameter, Injection injection)
+        protected virtual void LoadNameArgument(PointCut pc, MethodDefinition target, AdviceArgument parameter, ResolvedInjection injection)
         {
-            pc.Value(((IMemberDefinition)injection.Target).Name);
+            pc.Value(injection.Target.Name);
         }
     }
 }

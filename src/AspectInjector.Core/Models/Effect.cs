@@ -27,8 +27,13 @@ namespace AspectInjector.Core.Models
             return this == other;
         }
 
-        public abstract bool IsApplicableFor(ICustomAttributeProvider target);
+        public abstract bool IsApplicableFor(IMemberDefinition target);
 
         public abstract bool Validate(AspectDefinition aspect, ILogger log);
+
+        public override string ToString()
+        {
+            return GetType().Name;
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace AspectInjector.Core.Advice.Effects
 
         public List<AdviceArgument> Arguments { get; set; } = new List<AdviceArgument>();
 
-        public override bool IsApplicableFor(ICustomAttributeProvider target)
+        public override bool IsApplicableFor(IMemberDefinition target)
         {
             if (Target.HasFlag(Target.Method) && target is MethodDefinition && ((MethodDefinition)target).IsNormalMethod())
                 return true;
@@ -65,6 +65,11 @@ namespace AspectInjector.Core.Advice.Effects
             }
 
             return true;
+        }
+
+        public override string ToString()
+        {
+            return $"{Type.ToString()}{Target.ToString()}";
         }
     }
 }
