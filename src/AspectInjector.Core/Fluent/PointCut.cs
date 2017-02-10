@@ -84,7 +84,7 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
-        public PointCut ThisOrNothing()
+        public PointCut ThisOrStatic()
         {
             if (_proc.Body.Method.HasThis)
                 return This();

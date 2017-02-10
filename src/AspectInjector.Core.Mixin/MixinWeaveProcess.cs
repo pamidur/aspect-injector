@@ -53,12 +53,9 @@ namespace AspectInjector.Core.Mixin
             var proxy = _target.Methods.FirstOrDefault(m => m.IsExplicitImplementationOf(ifaceMethod));
             if (proxy == null)
             {
-                var callingMethod = ifaceMethod.ParametrizeGenericChild(ifaceMethod);
-
-                var returnValue = _ts.Import(callingMethod.SafeReturnType());
                 proxy = new MethodDefinition(methodName,
                     MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
-                     returnValue);
+                     _ts.Import(ifaceMethod.ResolveGenericType(ifaceMethod.ReturnType)));
 
                 _target.Methods.Add(proxy);
 
@@ -70,10 +67,10 @@ namespace AspectInjector.Core.Mixin
 
                 proxy.Overrides.Add(_ts.Import(ifaceMethod));
 
-                foreach (var parameter in callingMethod.Parameters)
-                    proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _ts.Import(callingMethod.ResolveGenericType(parameter.ParameterType))));
+                foreach (var parameter in ifaceMethod.Parameters)
+                    proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _ts.Import(ifaceMethod.ResolveGenericType(parameter.ParameterType))));
 
-                callingMethod = proxy.ParametrizeGenericChild(ifaceMethod);
+                var callingMethod = proxy.ParametrizeGenericChild(ifaceMethod);
 
                 proxy.GetEditor().Instead(
                         e => e
@@ -91,7 +88,7 @@ namespace AspectInjector.Core.Mixin
             var method = _ts.Import(originalMethod);
 
             if (@interface.IsGenericInstance)
-                method = originalMethod.MakeHostInstanceGeneric((IGenericInstance)@interface);
+                method = originalMethod.MakeHostInstanceGeneric(@interface);
 
             GetOrCreateMethodProxy(method);
         }
@@ -109,7 +106,7 @@ namespace AspectInjector.Core.Mixin
                 if (originalEvent.AddMethod != null)
                 {
                     MethodReference method = originalEvent.AddMethod;
-                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric((IGenericInstance)@interface);
+                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric(@interface);
 
                     ed.AddMethod = GetOrCreateMethodProxy(method);
                 }
@@ -117,7 +114,7 @@ namespace AspectInjector.Core.Mixin
                 if (originalEvent.RemoveMethod != null)
                 {
                     MethodReference method = originalEvent.RemoveMethod;
-                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric((IGenericInstance)@interface);
+                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric(@interface);
 
                     ed.RemoveMethod = GetOrCreateMethodProxy(method);
                 }
@@ -139,7 +136,7 @@ namespace AspectInjector.Core.Mixin
                 if (originalProperty.GetMethod != null)
                 {
                     MethodReference method = originalProperty.GetMethod;
-                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric((IGenericInstance)@interface);
+                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric(@interface);
 
                     pd.GetMethod = GetOrCreateMethodProxy(method);
                 }
@@ -147,7 +144,7 @@ namespace AspectInjector.Core.Mixin
                 if (originalProperty.SetMethod != null)
                 {
                     MethodReference method = originalProperty.SetMethod;
-                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric((IGenericInstance)@interface);
+                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric(@interface);
 
                     pd.SetMethod = GetOrCreateMethodProxy(method);
                 }
@@ -162,7 +159,7 @@ namespace AspectInjector.Core.Mixin
             if (!definition.IsInterface)
                 throw new NotSupportedException(typeReference.Name + " should be an interface");
 
-            var nestedIfaces = definition.Interfaces.Select(typeReference.ParametrizeGenericChild);
+            var nestedIfaces = definition.Interfaces.Select(i => typeReference.IsGenericInstance ? (typeReference).ParametrizeGenericChild(i) : i);
 
             return new[] { typeReference }.Concat(nestedIfaces);
         }

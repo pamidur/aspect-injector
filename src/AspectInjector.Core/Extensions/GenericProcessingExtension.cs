@@ -8,7 +8,7 @@ namespace AspectInjector.Core.Extensions
     {
         public static MethodReference MakeHostInstanceGeneric(
                                   this MethodReference self,
-                                  IGenericInstance context)
+                                  TypeReference context)
         {
             var reference = new MethodReference(
                 self.Name,
@@ -33,67 +33,7 @@ namespace AspectInjector.Core.Extensions
             return reference;
         }
 
-        public static TypeReference ParametrizeGenericChild(this MethodReference method, TypeReference child)
-        {
-            if (method.IsGenericInstance)
-                return ((IGenericInstance)method).ParametrizeGenericChild(child);
-
-            if (method.DeclaringType.IsGenericInstance)
-                return ((IGenericInstance)method.DeclaringType).ParametrizeGenericChild(child);
-
-            return child;
-        }
-
-        public static MethodReference ParametrizeGenericChild(this MethodReference method, MethodReference child)
-        {
-            if (method.IsGenericInstance)
-                return ((IGenericInstance)method).ParametrizeGenericChild(child);
-
-            if (method.DeclaringType.IsGenericInstance)
-                return ((IGenericInstance)method.DeclaringType).ParametrizeGenericChild(child);
-
-            if (method.HasGenericParameters)
-                return ((IGenericParameterProvider)method).ParametrizeGenericChild(child);
-
-            return child;
-        }
-
-        public static TypeReference ResolveGenericType(this MethodReference method, TypeReference mappingType)
-        {
-            var result = mappingType;
-
-            if (mappingType.IsGenericParameter)
-            {
-                var gp = (GenericParameter)mappingType;
-
-                if (gp.Owner == method.Resolve() && method.IsGenericInstance)
-                    result = ((IGenericInstance)method).GenericArguments[gp.Position];
-                else if (gp.Owner == method.DeclaringType.Resolve() && method.DeclaringType.IsGenericInstance)
-                    result = ((IGenericInstance)method.DeclaringType).GenericArguments[gp.Position];
-            }
-
-            result = method.ParametrizeGenericChild(result);
-
-            return result;
-        }
-
         public static TypeReference ParametrizeGenericChild(this TypeReference type, TypeReference child)
-        {
-            if (type.IsGenericInstance)
-                return ((IGenericInstance)type).ParametrizeGenericChild(child);
-
-            return child;
-        }
-
-        public static MethodReference ParametrizeGenericChild(this TypeReference type, MethodReference child)
-        {
-            if (type.IsGenericInstance)
-                return ((IGenericInstance)type).ParametrizeGenericChild(child);
-
-            return child;
-        }
-
-        public static TypeReference ParametrizeGenericChild(this IGenericInstance type, TypeReference child)
         {
             if (child.IsGenericInstance)
             {
@@ -115,37 +55,9 @@ namespace AspectInjector.Core.Extensions
             }
         }
 
-        public static MethodReference ParametrizeGenericChild(this IGenericInstance type, MethodReference child)
+        public static MethodReference ParametrizeGenericChild(this MethodReference method, MethodReference child)
         {
-            if (child.IsGenericInstance)
-            {
-                var nestedGeneric = (GenericInstanceMethod)child;
-
-                if (!nestedGeneric.ContainsGenericParameter)
-                    return nestedGeneric;
-
-                var args = nestedGeneric.GenericArguments.Select(ga => type.ResolveGenericType(ga)).ToArray();
-
-                var result = new GenericInstanceMethod(child.MakeHostInstanceGeneric(type));
-                args.ToList().ForEach(result.GenericArguments.Add);
-
-                return result;
-            }
-            else
-            {
-                if (!child.HasGenericParameters)
-                    return child;
-
-                var result = new GenericInstanceMethod(child.MakeHostInstanceGeneric(type));
-                child.GenericParameters.Select(type.ResolveGenericType).ToList().ForEach(result.GenericArguments.Add);
-
-                return result;
-            }
-        }
-
-        public static MethodReference ParametrizeGenericChild(this IGenericParameterProvider type, MethodReference child)
-        {
-            if (child.IsGenericInstance)
+            if (!method.HasGenericParameters || child.IsGenericInstance)
             {
                 return child;
             }
@@ -155,43 +67,44 @@ namespace AspectInjector.Core.Extensions
                     return child;
 
                 var result = new GenericInstanceMethod(child);
-                type.GenericParameters.ToList().ForEach(result.GenericArguments.Add);
+                method.GenericParameters.Select(method.ResolveGenericType).ToList().ForEach(result.GenericArguments.Add);
 
                 return result;
             }
         }
 
-        public static TypeReference ResolveGenericType(this TypeReference type, TypeReference mappingType)
+        public static TypeReference ResolveGenericType(this TypeReference member, TypeReference mappingType)
         {
-            var result = mappingType;
-
-            if (mappingType.IsGenericParameter)
-            {
-                var gp = (GenericParameter)mappingType;
-
-                if (gp.Owner == type.Resolve() && type.IsGenericInstance)
-                    result = ((IGenericInstance)type).GenericArguments[gp.Position];
-            }
-
-            result = type.ParametrizeGenericChild(result);
-
-            return result;
-        }
-
-        public static TypeReference ResolveGenericType(this IGenericInstance member, TypeReference mappingType)
-        {
-            if (member is TypeReference)
-                return ((TypeReference)member).ResolveGenericType(mappingType);
-
-            if (member is MethodReference)
-                return ((MethodReference)member).ResolveGenericType(mappingType);
-
+            if (member.IsGenericInstance && mappingType.IsGenericParameter)
+                return ((IGenericInstance)member).ResolveGenericType((GenericParameter)mappingType);
             return mappingType;
         }
 
-        public static TypeReference SafeReturnType(this MethodReference method)
+        public static TypeReference ResolveGenericType(this MethodReference member, TypeReference mappingType)
         {
-            return method.ResolveGenericType(method.ReturnType);
+            if (mappingType.IsGenericParameter)
+            {
+                if (member.IsGenericInstance)
+                    return ((IGenericInstance)member).ResolveGenericType((GenericParameter)mappingType);
+                else if (member.DeclaringType.IsGenericInstance)
+                    return ((IGenericInstance)member.DeclaringType).ResolveGenericType((GenericParameter)mappingType);
+            }
+            return mappingType;
+        }
+
+        public static TypeReference ResolveGenericType(this IGenericInstance member, GenericParameter param)
+        {
+            dynamic resolvedMember = ((dynamic)member).Resolve();
+
+            var owner = (IGenericParameterProvider)resolvedMember;
+            var parent = resolvedMember.DeclaringType as TypeReference;
+
+            if (param.Owner == owner)
+                return member.GenericArguments[param.Position];
+            else if (parent != null && parent.IsGenericInstance && param.Owner == parent.Resolve())
+                return ((IGenericInstance)parent).ResolveGenericType(param);
+            else
+                return param;
         }
     }
 }

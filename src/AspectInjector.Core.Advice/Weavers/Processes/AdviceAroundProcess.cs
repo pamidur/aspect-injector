@@ -100,7 +100,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 _ts.Object);
 
             unwrapper.IsPrivate = true;
-
             unwrapper.NoInlining = false;
 
             foreach (var gp in _target.GenericParameters)
@@ -118,7 +117,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             unwrapper.GetEditor().Instead(
                 e =>
                 {
-                    e = e.ThisOrNothing().Call(callingMethod, c =>
+                    e = e.ThisOrStatic().Call(callingMethod, c =>
                     {
                         for (int i = 0; i < original.Parameters.Count; i++)
                         {
@@ -169,7 +168,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             _target.GetEditor().Instead(
                 e =>
                 {
-                    e = e.ThisOrNothing().Call(callingMethod, args => base.LoadArgumentsArgument(args, null));
+                    e = e.ThisOrStatic().Call(callingMethod, args => base.LoadArgumentsArgument(args, null));
 
                     if (_target.ReturnType.IsTypeOf(_ts.Void))
                         e = e.Pop();

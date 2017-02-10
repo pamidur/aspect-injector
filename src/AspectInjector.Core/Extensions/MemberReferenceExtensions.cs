@@ -49,7 +49,7 @@ namespace AspectInjector.Core.Extensions
             return false;
         }
 
-        //public static MethodDefinition CopyDefinition(this MethodDefinition origin, ModuleDefinition module)
+        //public static MethodDefinition CopyDefinition(this MethodDefinition origin, TypeDefinition to)
         //{
         //    var ts = module.GetTypeSystem();
 
@@ -60,6 +60,12 @@ namespace AspectInjector.Core.Extensions
 
         //    if (method.ReturnType.IsGenericParameter)
         //        method.ReturnType = method.GenericParameters[origin.GenericParameters.IndexOf((GenericParameter)method.ReturnType)];
+
+        //    if (origin.IsSpecialName)
+        //        method.IsSpecialName = true;
+
+        //    foreach (var parameter in origin.Parameters)
+        //        method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, ts.Import(callingMethod.ResolveGenericType(parameter.ParameterType))));
         //}
 
         //public static MemberReference CreateReference(this MemberReference member, ExtendedTypeSystem ts)
