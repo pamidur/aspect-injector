@@ -79,8 +79,25 @@ namespace AspectInjector.Core.Models
         {
             if (_proc.Body.Method.HasThis)
                 _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldarg_0));
+            else throw new Exception("Attempt to load 'this' on static method.");
 
             return this;
+        }
+
+        public PointCut ThisOrNothing()
+        {
+            if (_proc.Body.Method.HasThis)
+                return This();
+
+            return this;
+        }
+
+        public PointCut ThisOrNull()
+        {
+            if (_proc.Body.Method.HasThis)
+                return This();
+            else
+                return Null();
         }
 
         public void Store(FieldReference field, Action<PointCut> val)
@@ -202,6 +219,13 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
+        public PointCut Pop()
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Pop));
+
+            return this;
+        }
+
         public PointCut Load(ParameterReference par)
         {
             var argIndex = _proc.Body.Method.HasThis ? par.Index + 1 : par.Index;
@@ -209,7 +233,35 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
-        public PointCut ByVal(TypeReference refType)
+        public PointCut GetByIndex(int index)
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, index));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldelem_Ref));
+            return this;
+        }
+
+        public PointCut ByVal(TypeReference typeOnStack)
+        {
+            if (typeOnStack.IsByReference)
+            {
+                typeOnStack = ((ByReferenceType)typeOnStack).ElementType;
+
+                if (typeOnStack.IsValueType)
+                {
+                    var opcode = _typeSystem.LoadIndirectMap.First(kv => typeOnStack.IsTypeOf(kv.Key)).Value;
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
+                }
+                else
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldind_Ref));
+            }
+
+            if (typeOnStack.IsValueType)
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Box, _typeSystem.Import(typeOnStack)));
+
+            return this;
+        }
+
+        public PointCut ByRef(TypeReference refType)
         {
             if (refType.IsByReference)
             {
@@ -223,9 +275,8 @@ namespace AspectInjector.Core.Models
                 else
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldind_Ref));
             }
-
-            if (refType.IsValueType)
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Box, _typeSystem.Import(refType)));
+            else if (refType.IsValueType)
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox, _typeSystem.Import(refType)));
 
             return this;
         }
@@ -238,6 +289,8 @@ namespace AspectInjector.Core.Models
                 _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
             else if (valueType.IsValueType)
                 _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, (int)(object)value));
+            else if (valueType == typeof(string))
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldstr, (string)(object)value));
             else if (valueType.IsClass && value == null)
                 _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldnull));
             else
@@ -305,6 +358,11 @@ namespace AspectInjector.Core.Models
         public Instruction CreateInstruction(OpCode opCode, int value)
         {
             return _proc.CreateOptimized(opCode, value);
+        }
+
+        public Instruction CreateInstruction(OpCode opCode, string value)
+        {
+            return _proc.Create(opCode, value);
         }
 
         public Instruction CreateInstruction(OpCode opCode, FieldReference value)

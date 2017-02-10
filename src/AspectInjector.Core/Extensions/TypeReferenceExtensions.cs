@@ -46,12 +46,12 @@ namespace AspectInjector.Core.Extensions
             return isSubType;
         }
 
-        public static FQN GetFQN(this TypeReference type)
+        internal static FQN GetFQN(this TypeReference type)
         {
             return FQN.FromTypeReference(type);
         }
 
-        public static FQN GetFQN(this Type type)
+        internal static FQN GetFQN(this Type type)
         {
             return FQN.FromType(type);
         }

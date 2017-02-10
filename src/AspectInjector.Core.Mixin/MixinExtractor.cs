@@ -1,19 +1,25 @@
 ﻿using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
-using AspectInjector.Core.Services;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
-    internal class MixinExtractor : EffectExtractorBase<TypeDefinition, MixinEffect>
+    public class MixinExtractor : IEffectExtractor
     {
-        public MixinExtractor(ILogger logger) : base(logger)
+        public IReadOnlyCollection<Effect> Extract(ICustomAttributeProvider host)
         {
+            var source = host as TypeDefinition;
+
+            if (source != null)
+                return Extract(source);
+
+            return new List<Effect>();
         }
 
-        protected override IReadOnlyCollection<MixinEffect> Extract(TypeDefinition type)
+        private IReadOnlyCollection<MixinEffect> Extract(TypeDefinition type)
         {
             var mixins = new List<MixinEffect>();
 

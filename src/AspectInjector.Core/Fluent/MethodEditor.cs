@@ -43,6 +43,8 @@ namespace AspectInjector.Core.Fluent
         /// <param name="action"></param>
         public void OnEntry(Action<PointCut> action)
         {
+            if (!_md.HasBody) return;
+
             var instruction = _md.IsConstructor && !_md.IsStatic ?
                 FindBaseClassCtorCall() :
                 GetMethodOriginalEntryPoint();

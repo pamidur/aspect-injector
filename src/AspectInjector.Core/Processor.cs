@@ -111,7 +111,8 @@ namespace AspectInjector.Core
 
                 foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key))
                     foreach (var injection in prioritizedInjections.OrderByDescending(i => i.Effect.Priority))
-                        injector.Weave(injection);
+                        if (injector.CanWeave(injection))
+                            injector.Weave(injection);
             }
         }
     }

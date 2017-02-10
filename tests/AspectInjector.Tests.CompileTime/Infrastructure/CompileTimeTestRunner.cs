@@ -69,8 +69,12 @@ namespace AspectInjector.CompileTimeTests
 
             //register weavers
 
-            AdviceConfiguration.Configure((s, i) => container.Register(s, i, Reuse.Singleton));
-            MixinConfiguration.Configure((s, i) => container.Register(s, i, Reuse.Singleton));
+            container.Register<IEffectExtractor, MixinExtractor>();
+            container.Register<IEffectExtractor, AdviceExtractor>();
+
+            container.Register<IEffectWeaver, MixinWeaver>();
+            container.Register<IEffectWeaver, AdviceInlineWeaver>();
+            container.Register<IEffectWeaver, AdviceAroundWeaver>();
 
             //done registration
 

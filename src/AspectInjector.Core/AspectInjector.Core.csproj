@@ -94,9 +94,7 @@
     <Compile Include="Models\CompilationMessage.cs" />
     <Compile Include="Services\AspectExtractor.cs" />
     <Compile Include="Models\Converters\TypeReferenceConverter.cs" />
-    <Compile Include="Services\EffectExtractorBase.cs" />
     <Compile Include="Services\AspectWeaver.cs" />
-    <Compile Include="Services\EffectWeaverBase.cs" />
     <Compile Include="Services\Logger.cs" />
     <Compile Include="Services\InjectionCollector.cs" />
     <Compile Include="Services\AssetsCache.cs" />

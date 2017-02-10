@@ -11,13 +11,26 @@ using System;
 
 namespace AspectInjector.Core.Advice
 {
-    internal class AdviceExtractor : EffectExtractorBase<MethodDefinition, AdviceEffectBase>
+    public class AdviceExtractor : IEffectExtractor
     {
-        public AdviceExtractor(ILogger logger) : base(logger)
+        private readonly ILogger _log;
+
+        public AdviceExtractor(ILogger log)
         {
+            _log = log;
         }
 
-        protected override IReadOnlyCollection<AdviceEffectBase> Extract(MethodDefinition method)
+        public IReadOnlyCollection<Effect> Extract(ICustomAttributeProvider host)
+        {
+            var source = host as MethodDefinition;
+
+            if (source != null)
+                return Extract(source);
+
+            return new List<Effect>();
+        }
+
+        private IReadOnlyCollection<AdviceEffectBase> Extract(MethodDefinition method)
         {
             var advices = new List<AdviceEffectBase>();
 
