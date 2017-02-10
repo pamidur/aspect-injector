@@ -13,10 +13,16 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
     internal class AdviceAroundProcess : AdviceWeaveProcessBase<AroundAdviceEffect>
     {
         private readonly AspectDefinition _aspect;
+        private readonly string _wrapperNamePrefix;
+        private readonly string _unWrapperName;
+        private readonly string _movedOriginalName;
 
         public AdviceAroundProcess(ILogger log, AspectDefinition aspect, MethodDefinition target, AroundAdviceEffect effect) : base(log, target, effect)
         {
             _aspect = aspect;
+            _wrapperNamePrefix = $"{GetAroundMethodPrefix(_target)}w_";
+            _unWrapperName = $"{GetAroundMethodPrefix(_target)}u";
+            _movedOriginalName = $"{GetAroundMethodPrefix(_target)}o";
         }
 
         public override void Execute()
@@ -60,12 +66,10 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public MethodDefinition GetNextWrapper()
         {
-            var wrapperNamePrefix = $"{GetAroundMethodPrefix(_target)}w_";
+            var wrapper = _target.DeclaringType.Methods.Where(m => m.Name.StartsWith(_wrapperNamePrefix))
+                .Select(m => new { m, i = ushort.Parse(m.Name.Substring(_wrapperNamePrefix.Length)) }).OrderByDescending(g => g.i).FirstOrDefault();
 
-            var wrapper = _target.DeclaringType.Methods.Where(m => m.Name.StartsWith(wrapperNamePrefix))
-                .Select(m => new { m, i = ushort.Parse(m.Name.Substring(wrapperNamePrefix.Length)) }).OrderByDescending(g => g.i).FirstOrDefault();
-
-            return ReplaceUnwrapper($"{wrapperNamePrefix}{(wrapper == null ? 0 : wrapper.i + 1)}");
+            return ReplaceUnwrapper($"{_wrapperNamePrefix}{(wrapper == null ? 0 : wrapper.i + 1)}");
         }
 
         private MethodDefinition ReplaceUnwrapper(string name)
@@ -73,7 +77,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var unwrapper = GetOrCreateUnwrapper();
             unwrapper.Name = name;
 
-            var newUnwrapper = new MethodDefinition($"{GetAroundMethodPrefix(_target)}u",
+            var newUnwrapper = new MethodDefinition(_unWrapperName,
                 _target.Attributes,
                 _ts.Object);
 
@@ -88,13 +92,11 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private MethodDefinition GetOrCreateUnwrapper()
         {
-            var unwrapperName = $"{GetAroundMethodPrefix(_target)}u";
-
-            var unwrapper = _target.DeclaringType.Methods.FirstOrDefault(m => m.Name == unwrapperName);
+            var unwrapper = _target.DeclaringType.Methods.FirstOrDefault(m => m.Name == _unWrapperName);
             if (unwrapper != null)
                 return unwrapper;
 
-            unwrapper = new MethodDefinition(unwrapperName,
+            unwrapper = new MethodDefinition(_unWrapperName,
                 _target.Attributes,
                 _ts.Object);
 
@@ -118,11 +120,20 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                         {
                             var p = original.Parameters[i];
 
-                            c = c.Load(argsParam).GetByIndex(i);
-                            if (p.ParameterType.IsValueType || p.ParameterType.IsByReference)
-                                c = c.ByRef(p.ParameterType);
-                            else if (p.ParameterType.IsGenericParameter || !p.ParameterType.IsTypeOf(_ts.Object))
-                                c = c.Cast(p.ParameterType);
+                            c = c.Load(argsParam);
+
+                            if (p.ParameterType.IsByReference)
+                                c = c.GetAddrByIndex(i, _ts.Object);
+                            else
+                            {
+                                c = c.GetByIndex(i);
+                                if (p.ParameterType.IsGenericParameter || !p.ParameterType.IsTypeOf(_ts.Object))
+                                    c = c.Cast(p.ParameterType);
+                            }
+
+                            //if (p.ParameterType.IsByReference)
+                            //c = c.ByRef(p.ParameterType);
+                            //else
                         }
                     });
 
@@ -139,7 +150,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private MethodDefinition WrapEntryPoint(MethodDefinition unwrapper)
         {
-            var original = new MethodDefinition($"{GetAroundMethodPrefix(_target)}o",
+            var original = new MethodDefinition(_movedOriginalName,
                 _target.Attributes,
                 _target.ReturnType);
 
@@ -156,8 +167,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                     if (_target.ReturnType.IsTypeOf(_ts.Void))
                         e = e.Pop();
-                    else if (_target.ReturnType.IsValueType)
-                        e = e.ByRef(_target.ReturnType);
+                    //else if (_target.ReturnType.IsValueType)
+                    //    e = e.ByRef(_target.ReturnType);
                     else if (!_target.ReturnType.IsTypeOf(_ts.Object))
                         e = e.Cast(_target.ReturnType);
                     e.Return();
@@ -188,7 +199,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             from.Body = new MethodBody(from);
         }
 
-        private string GetAroundMethodPrefix(MethodDefinition target)
+        private static string GetAroundMethodPrefix(MethodDefinition target)
         {
             return $"{Constants.Prefix}around_{target.Name}_{target.MetadataToken.ToUInt32()}_";
         }

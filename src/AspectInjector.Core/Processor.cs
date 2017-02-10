@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.IO;
@@ -93,7 +94,7 @@ namespace AspectInjector.Core
             foreach (var aspect in aspects)
                 _cache.Cache(aspect);
 
-            var injections = _injectionCollector.Collect(assembly);
+            var injections = _injectionCollector.Collect(assembly).ToList();
 
             _janitor.Cleanup(assembly);
 
@@ -109,11 +110,17 @@ namespace AspectInjector.Core
             {
                 _log.LogInfo($"Executing {injector.GetType().Name}");
 
-                foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key))
+                foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key).ToList())
                     foreach (var injection in prioritizedInjections.OrderByDescending(i => i.Effect.Priority))
                         if (injector.CanWeave(injection))
+                        {
                             injector.Weave(injection);
+                            injections.Remove(injection);
+                        }
             }
+
+            foreach (var injection in injections)
+                _log.LogError(CompilationMessage.From($"Couldn't find weaver for {injection.ToString()}", injection.Target));
         }
     }
 }

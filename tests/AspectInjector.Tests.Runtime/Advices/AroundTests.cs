@@ -96,6 +96,63 @@ namespace AspectInjector.Tests.Advices
 
                 return 1;
             }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public object Object(object data)
+            {
+                Checker.Passed = true;
+                return new object();
+            }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public object ObjectRef(ref object data)
+            {
+                Checker.Passed = true;
+                return new object();
+            }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public object ObjectOut(out object data)
+            {
+                Checker.Passed = true;
+                return data = new object();
+            }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public object Value(int data)
+            {
+                Checker.Passed = true;
+                return new object();
+            }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public object ValueRef(ref int data)
+            {
+                Checker.Passed = true;
+                return new object();
+            }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public object ValueOut(out int data)
+            {
+                Checker.Passed = true;
+                data = 1;
+                return new object();
+            }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public object ValueBoxed(ref Int32 data)
+            {
+                Checker.Passed = true;
+                return new object();
+            }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public object TypedObject(ref StrongNameKeyPair data)
+            {
+                Checker.Passed = true;
+                return new object();
+            }
         }
 
         [Aspect(Aspect.Scope.Global)]

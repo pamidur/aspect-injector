@@ -1,26 +1,28 @@
-﻿//using AspectInjector.Core.Advice.Effects;
-//using AspectInjector.Core.Contracts;
-//using AspectInjector.Core.Extensions;
-//using AspectInjector.Core.Models;
-//using Mono.Cecil;
-//using System;
+﻿using AspectInjector.Core.Advice.Effects;
+using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
+using AspectInjector.Core.Models;
+using Mono.Cecil;
+using System;
 
-//namespace AspectInjector.Core.Advice.Weavers
-//{
-//    internal class AdviceAfterIteratorWeaver : AdviceWeaverBase<AfterAdviceEffect>
-//    {
-//        public AdviceAfterIteratorWeaver(ILogger logger) : base(logger)
-//        {
-//        }
+namespace AspectInjector.Core.Advice.Weavers
+{
+    public class AdviceStateMachineWeaver : AdviceInlineWeaver
+    {
+        public override byte Priority => 30;
 
-//        protected override void WeaveMethod(MethodDefinition target, ResolvedInjection injection)
-//        {
-//            throw new NotImplementedException();
-//        }
+        public AdviceStateMachineWeaver(ILogger logger) : base(logger)
+        {
+        }
 
-//        protected override bool CanWeave(Injection injection)
-//        {
-//            return base.CanWeave(injection) && injection.Target is MethodDefinition && ((MethodDefinition)injection.Target).IsIterator();
-//        }
-//    }
-//}
+        public override bool CanWeave(Injection injection)
+        {
+            var target = injection.Target as MethodDefinition;
+            return injection.Effect is AfterAdviceEffect && target != null && (target.IsAsync() || target.IsIterator());
+        }
+
+        protected override void WeaveMethod(MethodDefinition method, Injection injection)
+        {
+        }
+    }
+}

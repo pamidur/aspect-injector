@@ -75,6 +75,7 @@ namespace AspectInjector.CompileTimeTests
             container.Register<IEffectWeaver, MixinWeaver>();
             container.Register<IEffectWeaver, AdviceInlineWeaver>();
             container.Register<IEffectWeaver, AdviceAroundWeaver>();
+            container.Register<IEffectWeaver, AdviceStateMachineWeaver>();
 
             //done registration
 

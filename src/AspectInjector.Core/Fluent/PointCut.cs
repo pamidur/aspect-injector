@@ -240,6 +240,13 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
+        public PointCut GetAddrByIndex(int index, TypeReference type)
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, index));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldelema, _typeSystem.Import(type)));
+            return this;
+        }
+
         public PointCut ByVal(TypeReference typeOnStack)
         {
             if (typeOnStack.IsByReference)
@@ -265,18 +272,19 @@ namespace AspectInjector.Core.Models
         {
             if (refType.IsByReference)
             {
+                if (!refType.IsValueType)
+                {
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stind_Ref));
+                }
+
                 refType = ((ByReferenceType)refType).ElementType;
 
                 if (refType.IsValueType)
                 {
-                    var opcode = _typeSystem.LoadIndirectMap.First(kv => refType.IsTypeOf(kv.Key)).Value;
+                    var opcode = _typeSystem.SaveIndirectMap.First(kv => refType.IsTypeOf(kv.Key)).Value;
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
                 }
-                else
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldind_Ref));
             }
-            else if (refType.IsValueType)
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox, _typeSystem.Import(refType)));
 
             return this;
         }
@@ -351,7 +359,11 @@ namespace AspectInjector.Core.Models
 
         public PointCut Cast(TypeReference type)
         {
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Castclass, _typeSystem.Import(type)));
+            if (type.IsValueType)
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, _typeSystem.Import(type)));
+            else
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Castclass, _typeSystem.Import(type)));
+
             return this;
         }
 
