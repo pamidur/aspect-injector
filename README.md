@@ -2,6 +2,9 @@ Aspect Injector Reference
 ========================
 **Aspect Injector** is a framework for creating and injecting aspects into your .net assemblies.
 
+### Build Status ###
+![status](https://ci.appveyor.com/api/projects/status/github/pamidur/aspect-injector?branch=master&svg=true)
+
 ### Download ###
 [Nuget Gallery](https://www.nuget.org/packages/AspectInjector/)
 ```ps
