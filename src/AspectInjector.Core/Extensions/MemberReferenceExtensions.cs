@@ -1,7 +1,5 @@
-﻿using AspectInjector.Core.Fluent.Models;
+﻿using AspectInjector.Core.Fluent;
 using Mono.Cecil;
-using Mono.Cecil.Rocks;
-using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -51,57 +49,70 @@ namespace AspectInjector.Core.Extensions
             return false;
         }
 
-        public static MemberReference CreateReference(this MemberReference member, ExtendedTypeSystem ts)
-        {
-            var module = ts.GetModule();
+        //public static MethodDefinition CopyDefinition(this MethodDefinition origin, ModuleDefinition module)
+        //{
+        //    var ts = module.GetTypeSystem();
 
-            if (member is TypeReference)
-            {
-                if (member is IGenericParameterProvider)
-                {
-                    ((IGenericParameterProvider)member).GenericParameters.ToList().ForEach(tr => CreateReference(tr, ts));
-                }
+        //    var method = new MethodDefinition(origin.Name, origin.Attributes, ts.Import(origin.ReturnType));
 
-                if (member.Module == module || ((TypeReference)member).IsGenericParameter)
-                    return member;
+        //    foreach (var gparam in origin.GenericParameters)
+        //        method.GenericParameters.Add(new GenericParameter(gparam.Name, method));
 
-                return ts.Import((TypeReference)member);
-            }
+        //    if (method.ReturnType.IsGenericParameter)
+        //        method.ReturnType = method.GenericParameters[origin.GenericParameters.IndexOf((GenericParameter)method.ReturnType)];
+        //}
 
-            var declaringType = (TypeReference)CreateReference(member.DeclaringType, ts);
-            var generic = member.DeclaringType as IGenericParameterProvider;
+        //public static MemberReference CreateReference(this MemberReference member, ExtendedTypeSystem ts)
+        //{
+        //    var module = ts.GetModule();
 
-            if (generic != null && generic.HasGenericParameters)
-            {
-                declaringType = new GenericInstanceType((TypeReference)CreateReference(member.DeclaringType, ts));
-                generic.GenericParameters.ToList()
-                    .ForEach(tr => ((IGenericInstance)declaringType).GenericArguments.Add((TypeReference)CreateReference(tr, ts)));
-            }
+        //    if (member is TypeReference)
+        //    {
+        //        if (member is IGenericParameterProvider)
+        //        {
+        //            ((IGenericParameterProvider)member).GenericParameters.ToList().ForEach(tr => CreateReference(tr, ts));
+        //        }
 
-            var fieldReference = member as FieldReference;
-            if (fieldReference != null)
-                return new FieldReference(member.Name, (TypeReference)CreateReference(fieldReference.FieldType, ts), declaringType);
+        //        if (member.Module == module || ((TypeReference)member).IsGenericParameter)
+        //            return member;
 
-            var methodReference = member as MethodReference;
-            if (methodReference != null)
-            {
-                //TODO: more fields may need to be copied
-                var methodReferenceCopy = new MethodReference(member.Name, (TypeReference)CreateReference(methodReference.SafeReturnType(), ts), declaringType)
-                {
-                    HasThis = methodReference.HasThis,
-                    ExplicitThis = methodReference.ExplicitThis,
-                    CallingConvention = methodReference.CallingConvention
-                };
+        //        return ts.Import((TypeReference)member);
+        //    }
 
-                foreach (var parameter in methodReference.Parameters)
-                {
-                    methodReferenceCopy.Parameters.Add(new ParameterDefinition((TypeReference)CreateReference(methodReference.ResolveGenericType(parameter.ParameterType), ts)));
-                }
+        //    var declaringType = (TypeReference)CreateReference(member.DeclaringType, ts);
+        //    var generic = member.DeclaringType as IGenericParameterProvider;
 
-                return methodReferenceCopy;
-            }
+        //    if (generic != null && generic.HasGenericParameters)
+        //    {
+        //        declaringType = new GenericInstanceType((TypeReference)CreateReference(member.DeclaringType, ts));
+        //        generic.GenericParameters.ToList()
+        //            .ForEach(tr => ((IGenericInstance)declaringType).GenericArguments.Add((TypeReference)CreateReference(tr, ts)));
+        //    }
 
-            throw new NotSupportedException("Not supported member type " + member.GetType().FullName);
-        }
+        //    var fieldReference = member as FieldReference;
+        //    if (fieldReference != null)
+        //        return new FieldReference(member.Name, (TypeReference)CreateReference(fieldReference.FieldType, ts), declaringType);
+
+        //    var methodReference = member as MethodReference;
+        //    if (methodReference != null)
+        //    {
+        //        //TODO: more fields may need to be copied
+        //        var methodReferenceCopy = new MethodReference(member.Name, (TypeReference)CreateReference(methodReference.SafeReturnType(), ts), declaringType)
+        //        {
+        //            HasThis = methodReference.HasThis,
+        //            ExplicitThis = methodReference.ExplicitThis,
+        //            CallingConvention = methodReference.CallingConvention
+        //        };
+
+        //        foreach (var parameter in methodReference.Parameters)
+        //        {
+        //            methodReferenceCopy.Parameters.Add(new ParameterDefinition((TypeReference)CreateReference(methodReference.ResolveGenericType(parameter.ParameterType), ts)));
+        //        }
+
+        //        return methodReferenceCopy;
+        //    }
+
+        //    throw new NotSupportedException("Not supported member type " + member.GetType().FullName);
+        //}
     }
 }

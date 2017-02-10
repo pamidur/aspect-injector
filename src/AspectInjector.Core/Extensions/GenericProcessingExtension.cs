@@ -1,10 +1,6 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Rocks;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.Core.Extensions
 {
@@ -55,6 +51,9 @@ namespace AspectInjector.Core.Extensions
 
             if (method.DeclaringType.IsGenericInstance)
                 return ((IGenericInstance)method.DeclaringType).ParametrizeGenericChild(child);
+
+            if (method.HasGenericParameters)
+                return ((IGenericParameterProvider)method).ParametrizeGenericChild(child);
 
             return child;
         }
@@ -139,6 +138,24 @@ namespace AspectInjector.Core.Extensions
 
                 var result = new GenericInstanceMethod(child.MakeHostInstanceGeneric(type));
                 child.GenericParameters.Select(type.ResolveGenericType).ToList().ForEach(result.GenericArguments.Add);
+
+                return result;
+            }
+        }
+
+        public static MethodReference ParametrizeGenericChild(this IGenericParameterProvider type, MethodReference child)
+        {
+            if (child.IsGenericInstance)
+            {
+                return child;
+            }
+            else
+            {
+                if (!child.HasGenericParameters)
+                    return child;
+
+                var result = new GenericInstanceMethod(child);
+                type.GenericParameters.ToList().ForEach(result.GenericArguments.Add);
 
                 return result;
             }

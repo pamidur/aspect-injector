@@ -1,12 +1,11 @@
 ﻿using AspectInjector.Core.Advice.Effects;
-using System;
 using AspectInjector.Core.Contracts;
-using Mono.Cecil;
-using AspectInjector.Core.Models;
-using AspectInjector.Core.Fluent;
-using System.Linq;
 using AspectInjector.Core.Extensions;
+using AspectInjector.Core.Fluent;
+using AspectInjector.Core.Models;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System.Linq;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
@@ -104,6 +103,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             unwrapper.NoInlining = false;
 
+            foreach (var gp in _target.GenericParameters)
+                unwrapper.GenericParameters.Add(new GenericParameter(gp.Name, unwrapper));
+
             var argsParam = new ParameterDefinition(_ts.ObjectArray);
             unwrapper.Parameters.Add(argsParam);
 
@@ -111,10 +113,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             var original = WrapEntryPoint(unwrapper);
 
+            var callingMethod = unwrapper.ParametrizeGenericChild(original);
+
             unwrapper.GetEditor().Instead(
                 e =>
                 {
-                    e = e.ThisOrNothing().Call(original, c =>
+                    e = e.ThisOrNothing().Call(callingMethod, c =>
                     {
                         for (int i = 0; i < original.Parameters.Count; i++)
                         {
@@ -160,10 +164,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             _target.DeclaringType.Methods.Add(original);
 
+            var callingMethod = _target.ParametrizeGenericChild(unwrapper);
+
             _target.GetEditor().Instead(
                 e =>
                 {
-                    e = e.ThisOrNothing().Call(unwrapper, args => base.LoadArgumentsArgument(args, null));
+                    e = e.ThisOrNothing().Call(callingMethod, args => base.LoadArgumentsArgument(args, null));
 
                     if (_target.ReturnType.IsTypeOf(_ts.Void))
                         e = e.Pop();
@@ -183,7 +189,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 to.Body.Instructions.Add(inst);
 
             foreach (var var in from.Body.Variables)
-                to.Body.Variables.Add(new VariableDefinition(var.Name, var.VariableType));
+                to.Body.Variables.Add(new VariableDefinition(var.Name, _ts.Import(var.VariableType)));
 
             if (to.Body.HasVariables)
                 to.Body.InitLocals = true;
@@ -193,6 +199,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             foreach (var parameter in from.Parameters)
                 to.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _ts.Import(parameter.ParameterType)));
+
+            foreach (var gparam in from.GenericParameters)
+                to.GenericParameters.Add(new GenericParameter(gparam.Name, to));
 
             //erase old body
             from.Body.Instructions.Clear();

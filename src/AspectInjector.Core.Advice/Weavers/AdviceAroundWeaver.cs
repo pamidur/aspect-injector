@@ -1,8 +1,8 @@
 ﻿using AspectInjector.Core.Advice.Effects;
-using Mono.Cecil;
+using AspectInjector.Core.Advice.Weavers.Processes;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
-using AspectInjector.Core.Advice.Weavers.Processes;
+using Mono.Cecil;
 using System;
 
 namespace AspectInjector.Core.Advice.Weavers
