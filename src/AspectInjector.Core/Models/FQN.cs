@@ -189,7 +189,7 @@ namespace AspectInjector.Core.Models
             }
 
             fqn.Namespace = type.Namespace;
-            fqn.AssemblyName = type.Assembly.GetName().FullName;
+            fqn.AssemblyName = type.Assembly.GetName().Name;
 
             return fqn;
         }
@@ -219,7 +219,7 @@ namespace AspectInjector.Core.Models
             }
 
             fqn.Namespace = type.Namespace;
-            fqn.AssemblyName = type.Resolve().Module.Assembly.Name.FullName;
+            fqn.AssemblyName = type.Scope.Name; /*type.IsGenericParameter ? ((GenericParameter)type).Owner.Module.Assembly.Name.FullName : *//*type.Resolve().Module.Assembly.Name.FullName*/;
 
             return fqn;
         }

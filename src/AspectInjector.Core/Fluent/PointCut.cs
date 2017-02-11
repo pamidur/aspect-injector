@@ -59,7 +59,7 @@ namespace AspectInjector.Core.Models
         {
             args?.Invoke(this);
 
-            var methodRef = _typeSystem.Import(method);// */(MethodReference)method.CreateReference(_typeSystem);
+            var methodRef = _typeSystem.Import(_proc.Body.Method.ParametrizeGenericChild(method));
             var def = method.Resolve();
 
             var code = OpCodes.Call;
@@ -265,7 +265,7 @@ namespace AspectInjector.Core.Models
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldind_Ref));
             }
 
-            if (typeOnStack.IsValueType)
+            if (typeOnStack.IsValueType || typeOnStack.IsGenericParameter)
                 _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Box, _typeSystem.Import(typeOnStack)));
 
             return this;
@@ -362,7 +362,7 @@ namespace AspectInjector.Core.Models
 
         public PointCut Cast(TypeReference type)
         {
-            if (type.IsValueType)
+            if (type.IsValueType || type.IsGenericParameter)
                 _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, _typeSystem.Import(type)));
             else
                 _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Castclass, _typeSystem.Import(type)));

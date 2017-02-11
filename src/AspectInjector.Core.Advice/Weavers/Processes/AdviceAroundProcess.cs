@@ -110,12 +110,10 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             var original = WrapEntryPoint(unwrapper);
 
-            var callingMethod = unwrapper.ParametrizeGenericChild(original);
-
             unwrapper.GetEditor().Instead(
                 e =>
                 {
-                    e = e.ThisOrStatic().Call(callingMethod, c =>
+                    e = e.ThisOrStatic().Call(original, c =>
                     {
                         for (int i = 0; i < original.Parameters.Count; i++)
                         {
@@ -140,7 +138,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                     if (original.ReturnType.IsTypeOf(_ts.Void))
                         e = e.Value((object)null);
-                    else if (original.ReturnType.IsValueType)
+                    else if (original.ReturnType.IsValueType || original.ReturnType.IsGenericParameter)
                         e = e.ByVal(original.ReturnType);
 
                     e.Return();
@@ -151,6 +149,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private MethodDefinition WrapEntryPoint(MethodDefinition unwrapper)
         {
+            var returnType = _target.ResolveGenericType(_target.ReturnType);
+
             var original = new MethodDefinition(_movedOriginalName,
                 _target.Attributes,
                 _target.ReturnType);
@@ -161,19 +161,22 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             _target.DeclaringType.Methods.Add(original);
 
-            var callingMethod = _target.ParametrizeGenericChild(unwrapper);
-
             _target.GetEditor().Instead(
                 e =>
                 {
-                    e = e.ThisOrStatic().Call(callingMethod, args => base.LoadArgumentsArgument(args, null));
+                    e = e.ThisOrStatic().Call(unwrapper, args => base.LoadArgumentsArgument(args, null));
 
-                    if (_target.ReturnType.IsTypeOf(_ts.Void))
+                    //if (_target.ReturnType.IsGenericParameter)
+                    //{
+                    //    e = e.Cast(returnType);
+                    //}
+                    //else
+                    if (returnType.IsTypeOf(_ts.Void))
                         e = e.Pop();
                     //else if (_target.ReturnType.IsValueType)
                     //    e = e.ByRef(_target.ReturnType);
-                    else if (!_target.ReturnType.IsTypeOf(_ts.Object))
-                        e = e.Cast(_target.ReturnType);
+                    else if (!returnType.IsTypeOf(_ts.Object))
+                        e = e.Cast(returnType);
                     e.Return();
                 });
 

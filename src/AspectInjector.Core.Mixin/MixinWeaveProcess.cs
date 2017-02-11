@@ -60,7 +60,7 @@ namespace AspectInjector.Core.Mixin
                 _target.Methods.Add(proxy);
 
                 foreach (var gp in ifaceMethod.GenericParameters)
-                    proxy.GenericParameters.Add(new GenericParameter(gp.Name, proxy));// (GenericParameter)_ts.Import(gp));
+                    proxy.GenericParameters.Add(new GenericParameter(gp.Name, proxy));
 
                 if (ifaceMethod.Resolve().IsSpecialName)
                     proxy.IsSpecialName = true;
@@ -70,12 +70,10 @@ namespace AspectInjector.Core.Mixin
                 foreach (var parameter in ifaceMethod.Parameters)
                     proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _ts.Import(ifaceMethod.ResolveGenericType(parameter.ParameterType))));
 
-                var callingMethod = proxy.ParametrizeGenericChild(ifaceMethod);
-
                 proxy.GetEditor().Instead(
                         e => e
                         .LoadAspect(_aspect)
-                        .Call(callingMethod, args => proxy.Parameters.ToList().ForEach(p => args.Load(p)))
+                        .Call(ifaceMethod, args => proxy.Parameters.ToList().ForEach(p => args.Load(p)))
                         .Return()
                     );
             }
