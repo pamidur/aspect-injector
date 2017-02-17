@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Threading.Tasks;
 
 namespace AspectInjector.Tests.Advices
@@ -132,6 +133,7 @@ namespace AspectInjector.Tests.Advices
 
                 )
             {
+                Console.WriteLine(th.ToString());
                 Checker.Passed = AsyncTests.Data;
             }
         }

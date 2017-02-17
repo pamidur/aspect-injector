@@ -1,16 +1,13 @@
 ﻿using AspectInjector.Core.Advice.Effects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AspectInjector.Core.Contracts;
-using Mono.Cecil;
-using AspectInjector.Core.Models;
 using AspectInjector.Core.Extensions;
-using System.Runtime.CompilerServices;
-using Mono.Cecil.Cil;
 using AspectInjector.Core.Fluent;
+using AspectInjector.Core.Models;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using System;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
@@ -55,7 +52,16 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
         {
-            pc.Value((object)null);
+            var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
+                il.ThisOrStatic().Load(FindField(p)).ByVal(p.ParameterType)
+            ).ToArray();
+
+            pc.CreateArray<object>(elements);
+        }
+
+        private FieldReference FindField(ParameterDefinition p)
+        {
+            return _stateMachine.Fields.First(f => f.IsPublic && f.Name == p.Name);
         }
 
         protected MethodDefinition FindOrCreateAfterStateMachineMethod()
@@ -73,7 +79,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                     var method = ((MethodReference)i.Operand).Resolve();
                     return method.Name == "SetResult" && _supportedMethodBuilders.Any(bt => method.DeclaringType.IsTypeOf(bt));
-                }).ToList();
+                }).Select(i => i.Previous).ToList();
 
                 afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _ts.Void);
                 _stateMachine.Methods.Add(afterMethod);

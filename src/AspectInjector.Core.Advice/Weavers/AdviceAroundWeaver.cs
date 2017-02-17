@@ -23,15 +23,15 @@ namespace AspectInjector.Core.Advice.Weavers
 
         protected override void WeaveMethod(MethodDefinition method, Injection injection)
         {
-            if (injection.Effect is AroundAdviceEffect)
-            {
-                var process = new AdviceAroundProcess(_log, injection.Source, method, (AroundAdviceEffect)injection.Effect);
-                process.Execute();
-            }
-            else
-            {
-                throw new Exception("Unknown advice type.");
-            }
+            //if (injection.Effect is AroundAdviceEffect)
+            //{
+            //    var process = new AdviceAroundProcess(_log, injection.Source, method, (AroundAdviceEffect)injection.Effect);
+            //    process.Execute();
+            //}
+            //else
+            //{
+            //    throw new Exception("Unknown advice type.");
+            //}
         }
     }
 }

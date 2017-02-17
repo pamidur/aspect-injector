@@ -174,6 +174,8 @@ namespace AspectInjector.Core.Models
 
         public static FQN FromType(Type type)
         {
+            //return FromTypeReference(_dummyModule.Import(type));
+
             var fqn = new FQN
             {
                 Name = type.Name
@@ -189,7 +191,13 @@ namespace AspectInjector.Core.Models
             }
 
             fqn.Namespace = type.Namespace;
-            fqn.AssemblyName = type.Assembly.GetName().Name;
+            fqn.AssemblyName = type.Module.ScopeName;
+
+            if (fqn.AssemblyName.EndsWith(".dll"))
+                fqn.AssemblyName = fqn.AssemblyName.Substring(0, fqn.AssemblyName.Length - 4);
+
+            if (fqn.AssemblyName == "mscorlib")
+                fqn.AssemblyName = "CommonLanguageRuntimeLibrary";
 
             return fqn;
         }
@@ -220,6 +228,12 @@ namespace AspectInjector.Core.Models
 
             fqn.Namespace = type.Namespace;
             fqn.AssemblyName = type.Scope.Name; /*type.IsGenericParameter ? ((GenericParameter)type).Owner.Module.Assembly.Name.FullName : *//*type.Resolve().Module.Assembly.Name.FullName*/;
+
+            if (fqn.AssemblyName.EndsWith(".dll"))
+                fqn.AssemblyName = fqn.AssemblyName.Substring(0, fqn.AssemblyName.Length - 4);
+
+            if (fqn.AssemblyName == "mscorlib")
+                fqn.AssemblyName = "CommonLanguageRuntimeLibrary";
 
             return fqn;
         }

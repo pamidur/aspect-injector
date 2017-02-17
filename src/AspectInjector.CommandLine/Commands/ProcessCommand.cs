@@ -8,6 +8,7 @@ using AspectInjector.Core.Services;
 using AspectInjector.Core.Utils;
 using CommandLine;
 using DryIoc;
+using System;
 using System.IO;
 
 namespace AspectInjector.CLI.Commands
@@ -35,7 +36,14 @@ namespace AspectInjector.CLI.Commands
             var resolver = new CachedAssemblyResolver();
             resolver.AddSearchDirectory(Path.GetDirectoryName(Filename));
 
-            processor.Process(Filename, resolver);
+            try
+            {
+                processor.Process(Filename, resolver);
+            }
+            catch (Exception e)
+            {
+                Log.LogError(CompilationMessage.From(e.ToString()));
+            }
 
             return Log.IsErrorThrown ? 1 : result;
         }
