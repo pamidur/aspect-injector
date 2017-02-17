@@ -20,12 +20,14 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         protected readonly TEffect _effect;
         protected readonly ExtendedTypeSystem _ts;
         protected readonly ILogger _log;
+        protected readonly AspectDefinition _aspect;
 
-        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, TEffect effect)
+        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, TEffect effect, AspectDefinition aspect)
         {
             _log = log;
             _target = target;
             _effect = effect;
+            _aspect = aspect;
 
             _ts = target.Module.GetTypeSystem();
         }

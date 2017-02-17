@@ -11,14 +11,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AdviceAroundProcess : AdviceWeaveProcessBase<AroundAdviceEffect>
     {
-        private readonly AspectDefinition _aspect;
         private readonly string _wrapperNamePrefix;
         private readonly string _unWrapperName;
         private readonly string _movedOriginalName;
 
-        public AdviceAroundProcess(ILogger log, AspectDefinition aspect, MethodDefinition target, AroundAdviceEffect effect) : base(log, target, effect)
+        public AdviceAroundProcess(ILogger log, AspectDefinition aspect, MethodDefinition target, AroundAdviceEffect effect) : base(log, target, effect, aspect)
         {
-            _aspect = aspect;
             _wrapperNamePrefix = $"{GetAroundMethodPrefix(_target)}w_";
             _unWrapperName = $"{GetAroundMethodPrefix(_target)}u";
             _movedOriginalName = $"{GetAroundMethodPrefix(_target)}o";

@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdviceExtractor.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Effects\AdviceArgument.cs" />
     <Compile Include="Effects\AfterAdviceEffect.cs" />
     <Compile Include="Effects\BeforeAdviceEffect.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Weavers\Processes\AdviceWeaveProcessBase.cs" />
     <Compile Include="Weavers\AdviceInlineWeaver.cs" />
     <Compile Include="Weavers\AdviceAroundWeaver.cs" />
+    <Compile Include="Weavers\Processes\AfterAsyncWeaveProcess.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

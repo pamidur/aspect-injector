@@ -110,16 +110,19 @@ namespace AspectInjector.Core.Models
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
         }
 
-        public PointCut LoadAspect(AspectDefinition aspect)
+        public PointCut LoadAspect(AspectDefinition aspect, Action<PointCut> overrideThis = null, TypeDefinition overrideSource = null)
         {
+            overrideThis = overrideThis ?? (pc => pc.This());
+            overrideSource = overrideSource ?? _proc.Body.Method.DeclaringType;
+
             FieldReference aspectField;
 
             if (_proc.Body.Method.IsStatic || aspect.Scope == Aspect.Scope.Global)
                 aspectField = GetGlobalAspectField(aspect);
             else
             {
-                aspectField = GetInstanceAspectField(aspect);
-                This();
+                aspectField = GetInstanceAspectField(aspect, overrideSource);
+                overrideThis(this);
             }
 
             Load(aspectField);
@@ -127,9 +130,9 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
-        private FieldReference GetInstanceAspectField(AspectDefinition aspect)
+        private FieldReference GetInstanceAspectField(AspectDefinition aspect, TypeDefinition source)
         {
-            var type = _proc.Body.Method.DeclaringType;
+            var type = source;
 
             var fieldName = $"{Constants.AspectInstanceFieldPrefix}{aspect.Host.FullName}";
 

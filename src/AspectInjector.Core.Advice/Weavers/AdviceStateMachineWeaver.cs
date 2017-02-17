@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Core.Advice.Effects;
+using AspectInjector.Core.Advice.Weavers.Processes;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
@@ -23,6 +24,8 @@ namespace AspectInjector.Core.Advice.Weavers
 
         protected override void WeaveMethod(MethodDefinition method, Injection injection)
         {
+            if (method.IsAsync())
+                new AfterAsyncWeaveProcess(_log, method, (AfterAdviceEffect)injection.Effect, injection.Source).Execute();
         }
     }
 }

@@ -8,12 +8,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AdviceBeforeProcess : AdviceWeaveProcessBase<BeforeAdviceEffect>
     {
-        private readonly AspectDefinition _aspect;
-
         public AdviceBeforeProcess(ILogger log, MethodDefinition target, AspectDefinition aspect, BeforeAdviceEffect effect)
-            : base(log, target, effect)
+            : base(log, target, effect, aspect)
         {
-            _aspect = aspect;
         }
 
         public override void Execute()

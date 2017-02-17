@@ -53,7 +53,7 @@ namespace AspectInjector.Tests.Advices
             Checker.Passed = false;
 
             var a = new AsyncTests_Target();
-            a.Do4("args_test").Wait();
+            a.Do4("args_test").ConfigureAwait(false).GetAwaiter().GetResult();
 
             Assert.IsTrue(Checker.Passed);
         }
@@ -69,7 +69,7 @@ namespace AspectInjector.Tests.Advices
             AsyncTests.Data = true;
         }
 
-        [Inject(typeof(AsyncTests_SimpleAspect))]
+        [Inject(typeof(AsyncTests_SimpleAspectGlobal))]
         public async Task<string> Do2()
         {
             await Task.Delay(1);
@@ -109,12 +109,27 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Aspect.Scope.PerInstance)]
         public class AsyncTests_SimpleAspect
         {
             [Advice(Advice.Type.After, Advice.Target.Method)]
             public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object value,
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args
+                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
+                [Advice.Argument(Advice.Argument.Source.Instance)] object th
+                )
+            {
+                Checker.Passed = AsyncTests.Data;
+            }
+        }
+
+        [Aspect(Aspect.Scope.Global)]
+        public class AsyncTests_SimpleAspectGlobal
+        {
+            [Advice(Advice.Type.After, Advice.Target.Method)]
+            public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object value,
+                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
+                [Advice.Argument(Advice.Argument.Source.Instance)] object th
+
                 )
             {
                 Checker.Passed = AsyncTests.Data;
