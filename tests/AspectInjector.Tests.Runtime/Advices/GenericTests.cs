@@ -46,7 +46,8 @@ namespace AspectInjector.Tests.Advices
         {
             Checker.Passed = false;
             var target = new GenericAroundTests_Target();
-            target.TestMethod<string>(string.Empty);
+            var rr = string.Empty;
+            target.TestMethod<string>(ref rr);
             Assert.IsTrue(Checker.Passed);
         }
     }
@@ -93,7 +94,7 @@ namespace AspectInjector.Tests.Advices
     [Inject(typeof(GenericAroundTests_Aspect))]
     internal class GenericAroundTests_Target
     {
-        public T TestMethod<T>(T value)
+        public T TestMethod<T>(ref T value)
         {
             var a = new object[] { value };
             return value;

@@ -72,17 +72,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         private MethodDefinition ReplaceUnwrapper(string name)
         {
             var unwrapper = GetOrCreateUnwrapper();
-            unwrapper.Name = name;
-
-            var newUnwrapper = new MethodDefinition(_unWrapperName,
-                _target.Attributes,
-                _ts.Object);
-
+            var newUnwrapper = DuplicateMethodDefinition(unwrapper);
             newUnwrapper.IsPrivate = true;
 
-            MoveBody(unwrapper, newUnwrapper);
+            unwrapper.Name = name;
 
-            _target.DeclaringType.Methods.Add(newUnwrapper);
+            MoveBody(unwrapper, newUnwrapper);
 
             return unwrapper;
         }
@@ -93,27 +88,20 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             if (unwrapper != null)
                 return unwrapper;
 
-            unwrapper = new MethodDefinition(_unWrapperName,
-                _target.Attributes,
-                _ts.Object);
-
+            unwrapper = DuplicateMethodDefinition(_target);
+            unwrapper.Name = _unWrapperName;
+            unwrapper.ReturnType = _ts.Object;
             unwrapper.IsPrivate = true;
-            unwrapper.NoInlining = false;
-
-            foreach (var gp in _target.GenericParameters)
-                unwrapper.GenericParameters.Add(new GenericParameter(gp.Name, unwrapper));
-
+            unwrapper.Parameters.Clear();
             var argsParam = new ParameterDefinition(_ts.ObjectArray);
             unwrapper.Parameters.Add(argsParam);
-
-            _target.DeclaringType.Methods.Add(unwrapper);
 
             var original = WrapEntryPoint(unwrapper);
 
             unwrapper.GetEditor().Instead(
-                e =>
+                il =>
                 {
-                    e = e.ThisOrStatic().Call(original, c =>
+                    il = il.ThisOrStatic().Call(original, c =>
                     {
                         for (int i = 0; i < original.Parameters.Count; i++)
                         {
@@ -121,13 +109,27 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                             c = c.Load(argsParam);
 
-                            if (p.ParameterType.IsByReference)
-                                c = c.GetAddrByIndex(i, _ts.Object);
+                            if (p.ParameterType.IsValueType || p.ParameterType.IsGenericParameter)
+                            {
+                                if (p.ParameterType.IsByReference)
+                                    c = c.GetAddrByIndex(i, _ts.Object);
+                                else
+                                    c = c.GetByIndex(i).Cast(p.ParameterType);
+                            }
                             else
                             {
-                                c = c.GetByIndex(i);
-                                if (p.ParameterType.IsGenericParameter || !p.ParameterType.IsTypeOf(_ts.Object))
-                                    c = c.Cast(p.ParameterType);
+                                if (p.ParameterType.IsByReference)
+                                {
+                                    c = c.GetAddrByIndex(i, _ts.Object);
+                                    c = c.Cast(((ByReferenceType)p.ParameterType).ElementType);
+                                }
+                                else
+                                {
+                                    c = c.GetByIndex(i);
+
+                                    if (p.ParameterType.IsGenericParameter || !p.ParameterType.IsTypeOf(_ts.Object))
+                                        c = c.Cast(p.ParameterType);
+                                }
                             }
 
                             //if (p.ParameterType.IsByReference)
@@ -137,11 +139,11 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     });
 
                     if (original.ReturnType.IsTypeOf(_ts.Void))
-                        e = e.Value((object)null);
+                        il = il.Value((object)null);
                     else if (original.ReturnType.IsValueType || original.ReturnType.IsGenericParameter)
-                        e = e.ByVal(original.ReturnType);
+                        il = il.ByVal(original.ReturnType);
 
-                    e.Return();
+                    il.Return();
                 });
 
             return unwrapper;
@@ -149,17 +151,13 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private MethodDefinition WrapEntryPoint(MethodDefinition unwrapper)
         {
-            var returnType = _target.ResolveGenericType(_target.ReturnType);
-
-            var original = new MethodDefinition(_movedOriginalName,
-                _target.Attributes,
-                _target.ReturnType);
-
+            var original = DuplicateMethodDefinition(_target);
+            original.Name = _movedOriginalName;
             original.IsPrivate = true;
 
-            MoveBody(_target, original);
+            var returnType = _target.ResolveGenericType(_target.ReturnType);
 
-            _target.DeclaringType.Methods.Add(original);
+            MoveBody(_target, original);
 
             _target.GetEditor().Instead(
                 e =>
@@ -197,15 +195,38 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             foreach (var handler in from.Body.ExceptionHandlers)
                 to.Body.ExceptionHandlers.Add(handler);
 
-            foreach (var parameter in from.Parameters)
-                to.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _ts.Import(parameter.ParameterType)));
-
-            foreach (var gparam in from.GenericParameters)
-                to.GenericParameters.Add(new GenericParameter(gparam.Name, to));
-
             //erase old body
             from.Body.Instructions.Clear();
             from.Body = new MethodBody(from);
+        }
+
+        private MethodDefinition DuplicateMethodDefinition(MethodDefinition origin)
+        {
+            var method = new MethodDefinition(origin.Name,
+               origin.Attributes,
+               origin.ReturnType);
+
+            foreach (var gparam in origin.GenericParameters)
+                method.GenericParameters.Add(new GenericParameter(gparam.Name, method));
+
+            if (origin.ReturnType.IsGenericParameter && ((GenericParameter)origin.ReturnType).Owner == origin)
+                method.ReturnType = method.GenericParameters[origin.GenericParameters.IndexOf((GenericParameter)origin.ReturnType)];
+
+            if (origin.IsSpecialName)
+                method.IsSpecialName = true;
+
+            foreach (var parameter in origin.Parameters)
+            {
+                var paramType = parameter.ParameterType;
+                if (paramType.IsGenericParameter && ((GenericParameter)paramType).Owner == origin)
+                    paramType = method.GenericParameters[origin.GenericParameters.IndexOf((GenericParameter)paramType)];
+
+                method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, paramType));
+            }
+
+            origin.DeclaringType.Methods.Add(method);
+
+            return method;
         }
 
         private static string GetAroundMethodPrefix(MethodDefinition target)

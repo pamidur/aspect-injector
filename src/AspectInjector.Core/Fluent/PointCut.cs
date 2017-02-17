@@ -261,6 +261,10 @@ namespace AspectInjector.Core.Models
                     var opcode = _typeSystem.LoadIndirectMap.First(kv => typeOnStack.IsTypeOf(kv.Key)).Value;
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
                 }
+                else if (typeOnStack.IsGenericParameter)
+                {
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldobj, typeOnStack));
+                }
                 else
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldind_Ref));
             }

@@ -141,17 +141,40 @@ namespace AspectInjector.Tests.Advices
             }
 
             [Inject(typeof(AroundTests_Aspect1))]
-            public object ValueBoxed(ref Int32 data)
+            public object ValueBoxed(Int32 data)
             {
                 Checker.Passed = true;
                 return new object();
             }
 
             [Inject(typeof(AroundTests_Aspect1))]
-            public object TypedObject(ref StrongNameKeyPair data)
+            public object TypedObjectRef(ref StrongNameKeyPair data)
             {
                 Checker.Passed = true;
                 return new object();
+            }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public T GenericRef<T>(ref T data)
+            {
+                Checker.Passed = true;
+                return data;
+            }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public T GenericOut<T>(out T data)
+            {
+                Checker.Passed = true;
+                data = default(T);
+                return data;
+            }
+
+            [Inject(typeof(AroundTests_Aspect1))]
+            public T Generic<T>(T data)
+            {
+                Checker.Passed = true;
+                data = default(T);
+                return data;
             }
         }
 
