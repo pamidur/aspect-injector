@@ -34,29 +34,24 @@ namespace AspectInjector.Core.Extensions
             return FQN.FromTypeReference(tr).Equals(FQN.FromType(type));
         }
 
-        public static bool IsSubTypeOf(this TypeDefinition tr, Type type)
-        {
-            var subTypeFqn = FQN.FromType(type);
+        //public static bool IsSubTypeOf(this TypeDefinition tr, Type type)
+        //{
+        //    var subTypeFqn = FQN.FromType(type);
 
-            var isSubType = false;
+        //    var isSubType = false;
 
-            do
-            {
-                isSubType = FQN.FromTypeReference(tr).Equals(subTypeFqn);
-                tr = tr.BaseType.Resolve();
-            } while (tr != null);
+        //    do
+        //    {
+        //        isSubType = FQN.FromTypeReference(tr).Equals(subTypeFqn);
+        //        tr = tr.BaseType.Resolve();
+        //    } while (tr != null);
 
-            return isSubType;
-        }
+        //    return isSubType;
+        //}
 
         internal static FQN GetFQN(this TypeReference type)
         {
             return FQN.FromTypeReference(type);
-        }
-
-        internal static FQN GetFQN(this Type type)
-        {
-            return FQN.FromType(type);
         }
 
         public static IEnumerable<TypeDefinition> GetTypesTree(this TypeDefinition type)
