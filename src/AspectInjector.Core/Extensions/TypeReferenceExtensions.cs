@@ -23,6 +23,9 @@ namespace AspectInjector.Core.Extensions
 
         public static bool IsTypeOf(this TypeReference tr1, TypeReference tr2)
         {
+            if (tr1 == null || tr2 == null)
+                return false;
+
             return FQN.FromTypeReference(tr1).Equals(FQN.FromTypeReference(tr2));
         }
 

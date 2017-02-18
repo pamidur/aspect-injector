@@ -26,6 +26,9 @@ namespace AspectInjector.Core.Advice.Weavers
         {
             if (method.IsAsync())
                 new AfterAsyncWeaveProcess(_log, method, (AfterAdviceEffect)injection.Effect, injection.Source).Execute();
+
+            if (method.IsIterator())
+                new AfterIteratorWeaveProcess(_log, method, (AfterAdviceEffect)injection.Effect, injection.Source).Execute();
         }
     }
 }

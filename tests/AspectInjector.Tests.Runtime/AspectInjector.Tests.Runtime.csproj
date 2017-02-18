@@ -69,6 +69,7 @@
     <Compile Include="Advices\ArgumentsTests.cs" />
     <Compile Include="Advices\AfterTests.cs" />
     <Compile Include="Advices\BeforeTests.cs" />
+    <Compile Include="Advices\IteratorTests.cs" />
     <Compile Include="Advices\OrderTests.cs" />
     <Compile Include="Advices\StaticTests.cs" />
     <Compile Include="Advices\AroundTests.cs" />
