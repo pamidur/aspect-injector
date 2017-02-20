@@ -100,14 +100,20 @@ namespace AspectInjector.Core.Models
                 return Null();
         }
 
-        public void Store(FieldReference field, Action<PointCut> val)
+        public void Store(FieldReference field, Action<PointCut> val = null)
         {
-            val(this);
+            val?.Invoke(this);
 
             var fieldRef = _typeSystem.Import(field);// */(FieldReference)field.CreateReference(_typeSystem);
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
+        }
+
+        public void Store(VariableDefinition variable, Action<PointCut> val = null)
+        {
+            val?.Invoke(this);
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stloc, variable));
         }
 
         public PointCut LoadAspect(AspectDefinition aspect, Action<PointCut> overrideThis = null, TypeDefinition overrideSource = null)
@@ -121,7 +127,7 @@ namespace AspectInjector.Core.Models
                 aspectField = GetGlobalAspectField(aspect);
             else
             {
-                aspectField = GetInstanceAspectField(aspect, overrideSource);
+                aspectField = GetInstanceAspectField(aspect, overrideSource.Resolve());
                 overrideThis(this);
             }
 
@@ -214,11 +220,23 @@ namespace AspectInjector.Core.Models
 
         public PointCut Load(FieldReference field)
         {
-            var fieldRef = _typeSystem.Import(field);//*/(FieldReference)field.CreateReference(_typeSystem);
+            var fieldRef = _proc.Body.Method.ParametrizeGenericChild(_typeSystem.Import(field));//*/(FieldReference)field.CreateReference(_typeSystem);
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, fieldRef));
 
+            return this;
+        }
+
+        public PointCut Load(VariableDefinition variable)
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldloc, variable));
+            return this;
+        }
+
+        public PointCut LoadRef(VariableDefinition variable)
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldloca, variable));
             return this;
         }
 

@@ -47,6 +47,11 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             LoadThis(pc);
         }
 
+        protected override void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
+        {
+            pc.This();
+        }
+
         protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
         {
             var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>

@@ -95,6 +95,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             unwrapper.Parameters.Clear();
             var argsParam = new ParameterDefinition(_ts.ObjectArray);
             unwrapper.Parameters.Add(argsParam);
+            unwrapper.Body.InitLocals = true;
 
             var original = WrapEntryPoint(unwrapper);
 
@@ -109,28 +110,56 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                             c = c.Load(argsParam);
 
-                            if (p.ParameterType.IsValueType || p.ParameterType.IsGenericParameter)
+                            if (p.ParameterType.IsByReference)
                             {
-                                if (p.ParameterType.IsByReference)
-                                    c = c.GetAddrByIndex(i, _ts.Object);
-                                else
-                                    c = c.GetByIndex(i).Cast(p.ParameterType);
+                                var elementType = ((ByReferenceType)p.ParameterType).ElementType;
+
+                                var tempVar = new VariableDefinition($"{Constants.Prefix}p_{p.Name}", elementType);
+                                unwrapper.Body.Variables.Add(tempVar);
+
+                                c.Store(tempVar, v => v.GetByIndex(i).Cast(elementType));
+                                c.LoadRef(tempVar);
+
+                                //if (p.ParameterType.IsValueType || p.ParameterType.IsGenericParameter)
+                                //{
+                                //    c.Value((object)null);
+                                //}
+                                //else
+                                //{
+                                //    c = c.GetAddrByIndex(i, _ts.Object);
+                                //    c = c.Cast(elementType);
+                                //}
                             }
                             else
                             {
-                                if (p.ParameterType.IsByReference)
-                                {
-                                    c = c.GetAddrByIndex(i, _ts.Object);
-                                    c = c.Cast(((ByReferenceType)p.ParameterType).ElementType);
-                                }
-                                else
-                                {
-                                    c = c.GetByIndex(i);
+                                c = c.GetByIndex(i);
 
-                                    if (p.ParameterType.IsGenericParameter || !p.ParameterType.IsTypeOf(_ts.Object))
-                                        c = c.Cast(p.ParameterType);
-                                }
+                                if (p.ParameterType.IsGenericParameter || !p.ParameterType.IsTypeOf(_ts.Object))
+                                    c = c.Cast(p.ParameterType);
                             }
+
+                            //if (p.ParameterType.IsValueType || p.ParameterType.IsGenericParameter)
+                            //{
+                            //    if (p.ParameterType.IsByReference)
+                            //        c = c.GetAddrByIndex(i, _ts.Object);
+                            //    else
+                            //        c = c.GetByIndex(i).Cast(p.ParameterType);
+                            //}
+                            //else
+                            //{
+                            //    if (p.ParameterType.IsByReference)
+                            //    {
+                            //        c = c.GetAddrByIndex(i, _ts.Object);
+                            //        c = c.Cast(((ByReferenceType)p.ParameterType).ElementType);
+                            //    }
+                            //    else
+                            //    {
+                            //        c = c.GetByIndex(i);
+
+                            //        if (p.ParameterType.IsGenericParameter || !p.ParameterType.IsTypeOf(_ts.Object))
+                            //            c = c.Cast(p.ParameterType);
+                            //    }
+                            //}
 
                             //if (p.ParameterType.IsByReference)
                             //c = c.ByRef(p.ParameterType);
