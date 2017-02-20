@@ -45,11 +45,7 @@ namespace AspectInjector.Core.Models
             for (var i = 0; i < elements.Length; i++)
             {
                 _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Dup));
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, i));
-
-                elements[i](this);
-
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stelem_Ref));
+                SetByIndex(i, elements[i]);
             }
 
             return this;
@@ -258,6 +254,14 @@ namespace AspectInjector.Core.Models
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, index));
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldelem_Ref));
+            return this;
+        }
+
+        public PointCut SetByIndex(int index, Action<PointCut> value)
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, index));
+            value(this);
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stelem_Ref));
             return this;
         }
 

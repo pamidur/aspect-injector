@@ -91,6 +91,12 @@ namespace AspectInjector.Tests.Runtime.Advices
             {
                 yield return null;
             }
+
+            [Inject(typeof(TestAspect))]
+            public IEnumerable<Tuple<T1>> Get3(int val, T1 t1, object o)
+            {
+                yield return null;
+            }
         }
 
         [Aspect(Aspect.Scope.PerInstance)]

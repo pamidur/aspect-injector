@@ -5,6 +5,7 @@ using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System;
 using System.Linq;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
@@ -108,8 +109,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                         {
                             var p = original.Parameters[i];
 
-                            c = c.Load(argsParam);
-
                             if (p.ParameterType.IsByReference)
                             {
                                 var elementType = ((ByReferenceType)p.ParameterType).ElementType;
@@ -117,55 +116,28 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                                 var tempVar = new VariableDefinition($"{Constants.Prefix}p_{p.Name}", elementType);
                                 unwrapper.Body.Variables.Add(tempVar);
 
-                                c.Store(tempVar, v => v.GetByIndex(i).Cast(elementType));
+                                c.Store(tempVar, v => v.Load(argsParam).GetByIndex(i).Cast(elementType));
                                 c.LoadRef(tempVar);
-
-                                //if (p.ParameterType.IsValueType || p.ParameterType.IsGenericParameter)
-                                //{
-                                //    c.Value((object)null);
-                                //}
-                                //else
-                                //{
-                                //    c = c.GetAddrByIndex(i, _ts.Object);
-                                //    c = c.Cast(elementType);
-                                //}
                             }
                             else
                             {
-                                c = c.GetByIndex(i);
+                                c = c.Load(argsParam).GetByIndex(i);
 
                                 if (p.ParameterType.IsGenericParameter || !p.ParameterType.IsTypeOf(_ts.Object))
                                     c = c.Cast(p.ParameterType);
                             }
-
-                            //if (p.ParameterType.IsValueType || p.ParameterType.IsGenericParameter)
-                            //{
-                            //    if (p.ParameterType.IsByReference)
-                            //        c = c.GetAddrByIndex(i, _ts.Object);
-                            //    else
-                            //        c = c.GetByIndex(i).Cast(p.ParameterType);
-                            //}
-                            //else
-                            //{
-                            //    if (p.ParameterType.IsByReference)
-                            //    {
-                            //        c = c.GetAddrByIndex(i, _ts.Object);
-                            //        c = c.Cast(((ByReferenceType)p.ParameterType).ElementType);
-                            //    }
-                            //    else
-                            //    {
-                            //        c = c.GetByIndex(i);
-
-                            //        if (p.ParameterType.IsGenericParameter || !p.ParameterType.IsTypeOf(_ts.Object))
-                            //            c = c.Cast(p.ParameterType);
-                            //    }
-                            //}
-
-                            //if (p.ParameterType.IsByReference)
-                            //c = c.ByRef(p.ParameterType);
-                            //else
                         }
                     });
+
+                    for (int i = 0; i < original.Parameters.Count; i++)
+                    {
+                        var p = original.Parameters[i];
+                        if (p.ParameterType.IsByReference)
+                        {
+                            var v = unwrapper.Body.Variables.First(varb => varb.Name == $"{Constants.Prefix}p_{p.Name}");
+                            il = il.Load(argsParam).SetByIndex(i, val => val.Load(v).ByVal(v.VariableType));
+                        }
+                    }
 
                     if (original.ReturnType.IsTypeOf(_ts.Void))
                         il = il.Value((object)null);
@@ -191,13 +163,28 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             _target.GetEditor().Instead(
                 e =>
                 {
-                    e = e.ThisOrStatic().Call(unwrapper, args => base.LoadArgumentsArgument(args, null));
+                    var argsVar = new VariableDefinition(_ts.ObjectArray);
+                    _target.Body.Variables.Add(argsVar);
+                    _target.Body.InitLocals = true;
+
+                    e.Store(argsVar, args => base.LoadArgumentsArgument(args, null));
+                    e.ThisOrStatic().Call(unwrapper, args => args.Load(argsVar));
 
                     //if (_target.ReturnType.IsGenericParameter)
                     //{
                     //    e = e.Cast(returnType);
                     //}
                     //else
+
+                    //for (int i = 0; i < _target.Parameters.Count; i++)
+                    //{
+                    //    var p = _target.Parameters[i];
+                    //    if (p.ParameterType.IsByReference)
+                    //    {
+                    //        e.Load(argsVar).SetByIndex(i, val => val.Load(v).ByVal(v.VariableType));
+                    //    }
+                    //}
+
                     if (returnType.IsTypeOf(_ts.Void))
                         e = e.Pop();
                     //else if (_target.ReturnType.IsValueType)
