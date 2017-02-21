@@ -64,6 +64,12 @@ namespace AspectInjector.Core.Advice.Effects
                 return false;
             }
 
+            if (Method.ReturnType != Method.Module.TypeSystem.Void)
+            {
+                log.LogError(CompilationMessage.From($"Advice {Method.FullName} should be void.", aspect.Host));
+                return false;
+            }
+
             return true;
         }
 

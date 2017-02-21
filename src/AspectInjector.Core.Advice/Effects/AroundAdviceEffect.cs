@@ -1,4 +1,6 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Models;
+using Mono.Cecil;
 
 namespace AspectInjector.Core.Advice.Effects
 {
@@ -14,6 +16,23 @@ namespace AspectInjector.Core.Advice.Effects
                 return false;
 
             return base.IsApplicableFor(target);
+        }
+
+        public override bool Validate(AspectDefinition aspect, ILogger log)
+        {
+            if (Method.IsStatic)
+            {
+                log.LogError(CompilationMessage.From($"Advice {Method.FullName} cannot be static.", aspect.Host));
+                return false;
+            }
+
+            if (!Method.IsPublic)
+            {
+                log.LogError(CompilationMessage.From($"Advice {Method.FullName} should be public.", aspect.Host));
+                return false;
+            }
+
+            return true;
         }
     }
 }

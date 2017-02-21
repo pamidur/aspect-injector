@@ -108,7 +108,7 @@ namespace AspectInjector.Tests.Interfaces
         [Aspect(Aspect.Scope.Global)]
         internal class GeneralTests_Aspect : IGeneralTests, INotifyPropertyChanged
         {
-            public event PropertyChangedEventHandler PropertyChanged;
+            public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
 
             string IGeneralTests.TestMethod(string data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue)
             {

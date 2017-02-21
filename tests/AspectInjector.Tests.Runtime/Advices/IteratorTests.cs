@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace AspectInjector.Tests.Runtime.Advices
@@ -114,10 +115,11 @@ namespace AspectInjector.Tests.Runtime.Advices
         {
             [Advice(Advice.Type.After, Advice.Target.Method)]
             public void After(
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args
+                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
+                [Advice.Argument(Advice.Argument.Source.ReturnValue)] object res
                 )
             {
-                Checker.Passed = args[0].ToString() == "ololo";
+                Checker.Passed = args[0].ToString() == "ololo" && res is IEnumerable;
             }
         }
     }

@@ -48,6 +48,14 @@ namespace AspectInjector.Tests.Advices
         }
 
         [TestMethod]
+        public void AdviceArguments_ReturnValue_AfterMethod()
+        {
+            Checker.Passed = false;
+            var temp = new ArgumentsTests_AroundRetValTarget().TestMethod();
+            Assert.IsTrue(Checker.Passed);
+        }
+
+        [TestMethod]
         public void AdviceArguments_Method_InjectBeforeMethod()
         {
             Checker.Passed = false;
@@ -290,6 +298,25 @@ namespace AspectInjector.Tests.Advices
             {
                 Checker.Passed = method.Name == "TestMethod";
                 return null;
+            }
+        }
+
+        internal class ArgumentsTests_AroundRetValTarget
+        {
+            [Inject(typeof(ArgumentsTests_AroundRetValAspect))]
+            public object TestMethod()
+            {
+                return new object();
+            }
+        }
+
+        [Aspect(Aspect.Scope.Global)]
+        internal class ArgumentsTests_AroundRetValAspect
+        {
+            [Advice(Advice.Type.After, Advice.Target.Method)]
+            public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object ret)
+            {
+                Checker.Passed = ret != null;
             }
         }
     }

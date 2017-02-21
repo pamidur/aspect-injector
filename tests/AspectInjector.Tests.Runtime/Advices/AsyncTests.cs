@@ -48,7 +48,7 @@ namespace AspectInjector.Tests.Advices
         }
 
         [TestMethod]
-        public void Advices_InjectAfterAsyncMethod_WithArguments()
+        public void Advices_InjectAfterAsyncMethod_WithArguments_And_Result()
         {
             AsyncTests.Data = false;
             Checker.Passed = false;
@@ -106,7 +106,7 @@ namespace AspectInjector.Tests.Advices
                 [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args
                 )
             {
-                Checker.Passed = args[0].ToString() == "args_test";
+                Checker.Passed = args[0].ToString() == "args_test" && value != null;
             }
         }
 
@@ -114,7 +114,7 @@ namespace AspectInjector.Tests.Advices
         public class AsyncTests_SimpleAspect
         {
             [Advice(Advice.Type.After, Advice.Target.Method)]
-            public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object value,
+            public void AfterMethod(
                 [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
                 [Advice.Argument(Advice.Argument.Source.Instance)] object th
                 )
@@ -127,7 +127,7 @@ namespace AspectInjector.Tests.Advices
         public class AsyncTests_SimpleAspectGlobal
         {
             [Advice(Advice.Type.After, Advice.Target.Method)]
-            public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object value,
+            public void AfterMethod(
                 [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
                 [Advice.Argument(Advice.Argument.Source.Instance)] object th
 

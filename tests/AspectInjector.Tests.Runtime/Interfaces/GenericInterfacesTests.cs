@@ -13,7 +13,6 @@ namespace AspectInjector.Tests.Interfaces
         {
             public TestClass()
             {
-                var a = 1;
             }
         }
 
@@ -67,7 +66,6 @@ namespace AspectInjector.Tests.Interfaces
         {
             public TestClass()
             {
-                var a = 1;
             }
         }
 
@@ -113,7 +111,6 @@ namespace AspectInjector.Tests.Interfaces
         {
             public TestClass()
             {
-                var a = 1;
             }
         }
 

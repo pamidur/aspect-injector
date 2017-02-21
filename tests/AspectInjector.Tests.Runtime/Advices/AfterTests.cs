@@ -100,7 +100,7 @@ namespace AspectInjector.Tests.Advices
             Assert.IsTrue(Checker.Passed);
         }
 
-        [TestMethod]
+        [TestMethod, Ignore]
         public void Advices_InjectAfterSetter_AccessOldValue()
         {
             Checker.Passed = false;

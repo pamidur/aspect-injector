@@ -7,7 +7,7 @@ namespace AspectInjector.Tests.Advices
     [TestClass]
     public class VirtualTests
     {
-        [TestMethod]
+        [TestMethod, Ignore]
         public void Advices_InjectAroundVirtualOverrideMethods()
         {
             VirtualTests_Base t = new VirtualTests_Inherited();

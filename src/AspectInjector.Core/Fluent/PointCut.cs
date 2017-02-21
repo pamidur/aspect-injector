@@ -22,6 +22,8 @@ namespace AspectInjector.Core.Models
             _typeSystem = proc.Body.Method.Module.GetTypeSystem();
         }
 
+        public MethodDefinition Method { get { return _proc.Body.Method; } }
+
         public virtual PointCut CreatePointCut(Instruction instruction)
         {
             return new PointCut(_proc, instruction);

@@ -21,11 +21,14 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private readonly TypeDefinition _stateMachine;
         private readonly FieldDefinition _this;
+        private readonly TypeReference _asyncResult;
 
         public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, AfterAdviceEffect effect, AspectDefinition aspect) : base(log, target, effect, aspect)
         {
             _stateMachine = target.CustomAttributes.First(ca => ca.AttributeType.IsTypeOf(typeof(AsyncStateMachineAttribute)))
                 .GetConstructorValue<TypeReference>(0).Resolve();
+
+            _asyncResult = _target.ReturnType.IsTypeOf(_ts.Void) ? null : (_target.ReturnType as IGenericInstance)?.GenericArguments.FirstOrDefault();
 
             _this = _target.IsStatic ? null : _stateMachine.Fields.First(f => f.IsPublic && f.FieldType.IsTypeOf(_target.DeclaringType) && f.Name.StartsWith("<>") && f.Name.EndsWith("_this"));
         }
@@ -79,23 +82,50 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                     var method = ((MethodReference)i.Operand).Resolve();
                     return method.Name == "SetResult" && _supportedMethodBuilders.Any(bt => method.DeclaringType.IsTypeOf(bt));
-                }).Select(i => i.Previous).ToList();
+                }).ToList();
 
                 afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _ts.Void);
+                afterMethod.Parameters.Add(new ParameterDefinition(_ts.Object));
+
                 _stateMachine.Methods.Add(afterMethod);
 
                 afterMethod.GetEditor().Instead(pc => pc.Return());
+
+                VariableDefinition resvar = null;
+
+                if (_asyncResult != null)
+                {
+                    resvar = new VariableDefinition(_asyncResult);
+                    moveNext.Body.Variables.Add(resvar);
+                    moveNext.Body.InitLocals = true;
+                }
 
                 foreach (var exit in exitPoints)
                 {
                     moveNext.GetEditor().OnInstruction(exit, il =>
                     {
-                        il.ThisOrStatic().Call(afterMethod);
+                        var loadArg = new Action<PointCut>(args => args.Value((object)null));
+
+                        if (_asyncResult != null)
+                        {
+                            il.Store(resvar);
+                            loadArg = new Action<PointCut>(args => args.Load(resvar).ByVal(_asyncResult));
+                        }
+
+                        il.ThisOrStatic().Call(afterMethod, loadArg);
+
+                        if (_asyncResult != null)
+                            il.Load(resvar);
                     });
                 }
             }
 
             return afterMethod;
+        }
+
+        protected override void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
+        {
+            pc.Load(pc.Method.Parameters[0]);
         }
     }
 }
