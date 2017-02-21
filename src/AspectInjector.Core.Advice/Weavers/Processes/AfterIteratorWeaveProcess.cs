@@ -31,12 +31,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         {
             FindOrCreateAfterStateMachineMethod().GetEditor().OnExit(
                 e => e
-                .LoadAspect(_aspect, LoadThis, _target.DeclaringType)
+                .LoadAspect(_aspect, LoadOriginalThis, _target.DeclaringType)
                 .Call(_effect.Method, LoadAdviceArgs)
             );
         }
 
-        private void LoadThis(PointCut pc)
+        private void LoadOriginalThis(PointCut pc)
         {
             if (_this != null)
                 pc.This().Load(_this);
@@ -44,7 +44,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void LoadInstanceArgument(PointCut pc, AdviceArgument parameter)
         {
-            LoadThis(pc);
+            LoadOriginalThis(pc);
         }
 
         protected override void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
