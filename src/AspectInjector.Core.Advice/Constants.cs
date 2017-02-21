@@ -4,5 +4,6 @@
     {
         public static readonly string Prefix = Core.Constants.Prefix;
         public static readonly string AfterStateMachineMethodName = $"{Prefix}after_state_machine";
+        public static readonly string ArgsArrayParameterName = $"{Prefix}args";
     }
 }

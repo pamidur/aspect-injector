@@ -60,9 +60,13 @@ namespace AspectInjector.Core.Extensions
             }
         }
 
-        public static MethodReference ParametrizeGenericChild(this MethodReference method, MethodReference child)
+        public static MethodReference ParametrizeGenericChild(this MemberReference member, MethodReference child)
         {
-            if (!method.HasGenericParameters || child.IsGenericInstance)
+            var paramProvider = member as IGenericParameterProvider;
+            if (paramProvider == null)
+                return child;
+
+            if (child.IsGenericInstance)
             {
                 return child;
             }
@@ -72,7 +76,7 @@ namespace AspectInjector.Core.Extensions
                     return child;
 
                 var result = new GenericInstanceMethod(child);
-                method.GenericParameters.Select(method.ResolveGenericType).ToList().ForEach(result.GenericArguments.Add);
+                paramProvider.GenericParameters.Select(member.ResolveGenericType).ToList().ForEach(result.GenericArguments.Add);
 
                 return result;
             }

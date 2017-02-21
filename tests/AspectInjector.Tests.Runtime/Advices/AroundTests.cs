@@ -129,6 +129,10 @@ namespace AspectInjector.Tests.Advices
             public object ValueRef(ref int data)
             {
                 Checker.Passed = true;
+
+                var a = new object[] { 1 };
+                data = (int)a[0];
+
                 return new object();
             }
 
@@ -151,6 +155,10 @@ namespace AspectInjector.Tests.Advices
             public object TypedObjectRef(ref StrongNameKeyPair data)
             {
                 Checker.Passed = true;
+
+                var a = new object[] { default(StrongNameKeyPair) };
+                data = (StrongNameKeyPair)a[0];
+
                 return new object();
             }
 
@@ -158,6 +166,10 @@ namespace AspectInjector.Tests.Advices
             public T GenericRef<T>(ref T data)
             {
                 Checker.Passed = true;
+
+                var a = new object[] { default(T) };
+                data = (T)a[0];
+
                 return data;
             }
 

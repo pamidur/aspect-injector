@@ -112,6 +112,13 @@ namespace AspectInjector.Core.Models
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stloc, variable));
         }
 
+        public void StoreByRef(ParameterReference par, Action<PointCut> val)
+        {
+            Load(par);
+            val.Invoke(this);
+            ByRef(par.ParameterType);
+        }
+
         public PointCut LoadAspect(AspectDefinition aspect, Action<PointCut> overrideThis = null, TypeDefinition overrideSource = null)
         {
             overrideThis = overrideThis ?? (pc => pc.This());
@@ -224,6 +231,12 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
+        public PointCut Load(MethodReference method)
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldftn, _typeSystem.Import(method)));
+            return this;
+        }
+
         public PointCut Load(VariableDefinition variable)
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldloc, variable));
@@ -301,17 +314,24 @@ namespace AspectInjector.Core.Models
         {
             if (refType.IsByReference)
             {
-                if (!refType.IsValueType)
-                {
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stind_Ref));
-                }
-
                 refType = ((ByReferenceType)refType).ElementType;
 
                 if (refType.IsValueType)
                 {
                     var opcode = _typeSystem.SaveIndirectMap.First(kv => refType.IsTypeOf(kv.Key)).Value;
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, _typeSystem.Import(refType)));
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
+                }
+                else if (refType.IsGenericParameter)
+                {
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, _typeSystem.Import(refType)));
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stobj, refType));
+                }
+                else
+                {
+                    if (!refType.IsTypeOf(_typeSystem.Object))
+                        Cast(refType);
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stind_Ref));
                 }
             }
 
