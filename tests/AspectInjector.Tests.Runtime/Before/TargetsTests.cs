@@ -1,11 +1,5 @@
-﻿using AspectInjector.Broker;
-using AspectInjector.Tests.Runtime.Before;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AspectInjector.Tests.Runtime.Before
 {
@@ -19,6 +13,33 @@ namespace AspectInjector.Tests.Runtime.Before
             CheckSequence(new List<string> {
                 BeforeAspectGlobal.Executed,
                 Events.TestConstructorEnter
+            });
+        }
+
+        [TestMethod]
+        public void AdvicesBefore_Methods()
+        {
+            ExecMethod();
+            EnterIteratorMethod();
+            ExecAsyncVoidMethod();
+            EnterAsyncTaskMethod();
+            EnterAsyncTypedTaskMethod();
+
+            CheckSequence(new List<string> {
+                BeforeAspectGlobal.Executed,
+                Events.TestMethodEnter,
+
+                BeforeAspectGlobal.Executed,
+                Events.TestIteratorMethodEnter,
+
+                BeforeAspectGlobal.Executed,
+                Events.TestAsyncMethodEnter,
+
+                BeforeAspectGlobal.Executed,
+                Events.TestAsyncMethodEnter,
+
+                BeforeAspectGlobal.Executed,
+                Events.TestAsyncMethodEnter,
             });
         }
     }

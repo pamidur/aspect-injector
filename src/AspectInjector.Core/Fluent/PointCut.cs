@@ -403,7 +403,8 @@ namespace AspectInjector.Core.Models
         public PointCut MethodOf(MethodReference method)
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _typeSystem.Import(method)));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.Import(_typeSystem.MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle"))));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _typeSystem.Import(method.DeclaringType)));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.Import(_typeSystem.MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2))));
 
             return this;
         }

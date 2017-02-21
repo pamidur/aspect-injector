@@ -1,6 +1,7 @@
-﻿using System;
+﻿using AspectInjector.Broker;
+using AspectInjector.Tests.Runtime.Before;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,11 @@ namespace AspectInjector.Tests.Runtime
     {
         public partial class TestClass<T2>
         {
+            public TestClass()
+            {
+            }
+
+            [Inject(typeof(BeforeAspectGlobal))]
             public TestClass(
                 int a1, StringBuilder a2, T1 a3, T2 a4,
                 ref int ar1, ref StringBuilder ar2, ref T1 ar3, ref T2 ar4,
@@ -26,6 +32,7 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestConstructorExit);
             }
 
+            [Inject(typeof(BeforeAspectGlobal))]
             public Tuple<int, StringBuilder, T1, T2, T3> TestMethod<T3>(
                 int a1, StringBuilder a2, T1 a3, T2 a4, T3 a5,
                 ref int ar1, ref StringBuilder ar2, ref T1 ar3, ref T2 ar4, ref T3 ar5,
@@ -45,6 +52,7 @@ namespace AspectInjector.Tests.Runtime
                 return new Tuple<int, StringBuilder, T1, T2, T3>(a1, a2, a3, a4, a5);
             }
 
+            [Inject(typeof(BeforeAspectGlobal))]
             public IEnumerable<Tuple<int, StringBuilder, T1, T2, T3>> TestIteratorMethod<T3>(int a1, StringBuilder a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestIteratorMethodEnter);
@@ -57,6 +65,7 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestIteratorMethodExit);
             }
 
+            [Inject(typeof(BeforeAspectGlobal))]
             public async Task<Tuple<int, StringBuilder, T1, T2, T3>> TestAsyncMethod1<T3>(int a1, StringBuilder a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestAsyncMethodEnter);
@@ -68,6 +77,7 @@ namespace AspectInjector.Tests.Runtime
                 return new Tuple<int, StringBuilder, T1, T2, T3>(a1, a2, a3, a4, a5);
             }
 
+            [Inject(typeof(BeforeAspectGlobal))]
             public async Task TestAsyncMethod2<T3>(int a1, StringBuilder a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestAsyncMethodEnter);
@@ -77,6 +87,7 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestAsyncMethodExit);
             }
 
+            [Inject(typeof(BeforeAspectGlobal))]
             public async void TestAsyncMethod3<T3>(int a1, StringBuilder a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestAsyncMethodEnter);
@@ -86,6 +97,7 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestAsyncMethodExit);
             }
 
+            [Inject(typeof(BeforeAspectGlobal))]
             public Tuple<T1, T2> TestProperty
             {
                 get
@@ -104,6 +116,7 @@ namespace AspectInjector.Tests.Runtime
                 }
             }
 
+            [Inject(typeof(BeforeAspectGlobal))]
             public event EventHandler<Tuple<T1, T2>> TestEvent
             {
                 add
