@@ -24,7 +24,7 @@ namespace AspectInjector.Core.Services
         public virtual void LogWarning(CompilationMessage message)
         {
             if (message.SequencePoint?.Document != null)
-                Write($"{message.SequencePoint.Document.Url}({message.SequencePoint.StartLine},{message.SequencePoint.StartColumn}): ", MessageType.Warning);
+                Write($"{message.SequencePoint.Document.Url}({message.SequencePoint.StartLine},{message.SequencePoint.StartColumn},{message.SequencePoint.EndLine},{message.SequencePoint.EndColumn}): ", MessageType.Warning);
 
             WriteLine($"Warning: { message.Text}", MessageType.Warning);
         }
@@ -32,7 +32,7 @@ namespace AspectInjector.Core.Services
         public virtual void LogError(CompilationMessage message)
         {
             if (message.SequencePoint?.Document != null)
-                Write($"{message.SequencePoint.Document.Url}({message.SequencePoint.StartLine},{message.SequencePoint.StartColumn}): ", MessageType.Error);
+                Write($"{message.SequencePoint.Document.Url}({message.SequencePoint.StartLine},{message.SequencePoint.StartColumn},{message.SequencePoint.EndLine},{message.SequencePoint.EndColumn}): ", MessageType.Error);
 
             WriteLine($"Error: { message.Text}", MessageType.Error);
 

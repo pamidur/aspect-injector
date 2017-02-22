@@ -26,7 +26,7 @@ namespace AspectInjector.Core.Fluent
         public void OnInit(Action<PointCut> action)
         {
             var instruction = _md.IsConstructor && !_md.IsStatic ?
-                FindBaseClassCtorCall() :
+                SkipCodeContracts(FindBaseClassCtorCall()) :
                 GetMethodOriginalEntryPoint();
 
             var proc = _md.Body.GetEditor();
@@ -43,9 +43,20 @@ namespace AspectInjector.Core.Fluent
             if (!_md.HasBody) return;
 
             var instruction = _md.IsConstructor && !_md.IsStatic ?
-                FindBaseClassCtorCall() :
+                SkipAspectInitializers(SkipCodeContracts(FindBaseClassCtorCall())) :
                 GetMethodOriginalEntryPoint();
 
+            action(new PointCut(_md.Body.GetEditor(), instruction));
+        }
+
+        private Instruction SkipCodeContracts(Instruction instruction)
+        {
+            //todo::
+            return instruction;
+        }
+
+        private Instruction SkipAspectInitializers(Instruction instruction)
+        {
             if (_md.IsConstructor && !_md.IsStatic)
             {
                 if (instruction.OpCode == OpCodes.Ldarg_0
@@ -53,11 +64,11 @@ namespace AspectInjector.Core.Fluent
                     && ((MethodReference)instruction.Next.Operand).Name == Constants.InstanceAspectsMethodName
                     )
                 {
-                    instruction = instruction.Next.Next;
+                    return instruction.Next.Next;
                 }
             }
 
-            action(new PointCut(_md.Body.GetEditor(), instruction));
+            return instruction;
         }
 
         public void OnExit(Action<PointCut> action)

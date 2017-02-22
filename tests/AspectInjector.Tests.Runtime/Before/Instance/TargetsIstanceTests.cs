@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
-namespace AspectInjector.Tests.Runtime.Before
+namespace AspectInjector.Tests.Runtime.Before.Instance
 {
     [TestClass]
     public class TargetsInstanceTests : TestRunner

@@ -2,12 +2,12 @@
 using System;
 using System.Reflection;
 
-namespace AspectInjector.Tests.Runtime.Before
+namespace AspectInjector.Tests.Runtime.Before.Instance
 {
-    [Aspect(Aspect.Scope.Global)]
-    internal class BeforeAspectGlobal
+    [Aspect(Aspect.Scope.PerInstance)]
+    internal class BeforeAspectInstance : TestAspectBase
     {
-        public static readonly string Executed = "BeforeAspectGlobalExecuted";
+        public static readonly string Executed = "BeforeAspectInstanceExecuted";
 
         [Advice(Advice.Type.Before, Advice.Target.Constructor | Advice.Target.EventAdd | Advice.Target.EventRemove | Advice.Target.Getter | Advice.Target.Method | Advice.Target.Setter)]
         public void Before(
@@ -22,6 +22,7 @@ namespace AspectInjector.Tests.Runtime.Before
             [Advice.Argument(Advice.Argument.Source.Type)] Type hostType
             )
         {
+            base.LogArgs(args);
             TestLog.Write(Executed);
         }
     }

@@ -1,5 +1,7 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Tests.Runtime.Before;
+using AspectInjector.Tests.Runtime.Before.Global;
+using AspectInjector.Tests.Runtime.Before.Instance;
 using System;
 using System.Collections.Generic;
 using System.Text;

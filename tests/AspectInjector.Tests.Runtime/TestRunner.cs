@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using AspectInjector.Broker;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,6 +38,31 @@ namespace AspectInjector.Tests.Runtime
             TestLog.Reset();
         }
 
+        public void ValidateConstructorArgs()
+        {
+            CheckSequence(new List<string> {
+                GetArgEvent(TestAssets.asset1),
+                GetArgEvent(TestAssets.asset2),
+                GetArgEvent(TestAssets.asset3),
+                GetArgEvent(TestAssets.asset4),
+                GetArgEvent(TestAssets.asset1),
+                GetArgEvent(TestAssets.asset2),
+                GetArgEvent(TestAssets.asset3),
+                GetArgEvent(TestAssets.asset4),
+                GetArgEvent(null),
+                GetArgEvent(null),
+                GetArgEvent(null),
+                GetArgEvent(null),
+            });
+        }
+
+        private string GetArgEvent(object o)
+        {
+            if (o == null)
+                return $"Arguments:null";
+            return $"Arguments:{o.GetType().Name}:{o.ToString()}";
+        }
+
         public void ExecConstructor()
         {
             int ao1;
@@ -45,7 +71,7 @@ namespace AspectInjector.Tests.Runtime
             IDisposable ao4;
 
             var test = new TestClassWrapper<short>.TestClass<IDisposable>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, out ao1, out ao2, out ao3, out ao4);
-
+            //ValidateConstructorArgs();
             Assert.AreEqual(TestAssets.asset1, ao1);
             Assert.AreEqual(TestAssets.asset2, ao2);
             Assert.AreEqual(TestAssets.asset3, ao3);

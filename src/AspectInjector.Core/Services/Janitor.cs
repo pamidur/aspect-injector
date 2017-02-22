@@ -89,14 +89,16 @@ namespace AspectInjector.Core.Services
 
         private void CheckMethodReferencesBroker(MethodDefinition method)
         {
-            if (method.Parameters.Any(p => p.ParameterType.BelongsToAssembly(BrokerKeyToken) || IsGenericInstanceArgumentsReferenceBroker(p.ParameterType as IGenericInstance))
-                || (method.Body != null && IsMethodBodyReferencesBroker(method.Body))
-                || method.ReturnType.BelongsToAssembly(BrokerKeyToken)
-                || IsGenericParametersReferenceBroker(method)
-                || IsGenericInstanceArgumentsReferenceBroker(method.ReturnType as IGenericInstance))
-            {
+            if (method.Parameters.Any(p => p.ParameterType.BelongsToAssembly(BrokerKeyToken)
+            || IsGenericInstanceArgumentsReferenceBroker(p.ParameterType as IGenericInstance))
+            || method.ReturnType.BelongsToAssembly(BrokerKeyToken)
+            || IsGenericParametersReferenceBroker(method)
+            || IsGenericInstanceArgumentsReferenceBroker(method.ReturnType as IGenericInstance)
+            )
                 _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", method));
-            }
+
+            if (method.Body != null)
+                CheckMethodBodyReferencesBroker(method.Body);
         }
 
         private bool IsGenericParametersReferenceBroker(IGenericParameterProvider genericParameters)
@@ -117,24 +119,28 @@ namespace AspectInjector.Core.Services
             return false;
         }
 
-        private bool IsMethodBodyReferencesBroker(MethodBody methodBody)
+        private void CheckMethodBodyReferencesBroker(MethodBody methodBody)
         {
-            return methodBody.Variables.Any(v => v.VariableType.BelongsToAssembly(BrokerKeyToken))
-                || methodBody.Instructions.Any(IsInstructionReferencesBroker);
+            if (methodBody.Variables.Any(v => v.VariableType.BelongsToAssembly(BrokerKeyToken)))
+                _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", methodBody.Method));
+
+            methodBody.Instructions.ToList().ForEach(CheckInstructionReferencesBroker);
         }
 
-        private bool IsInstructionReferencesBroker(Instruction instruction)
+        private void CheckInstructionReferencesBroker(Instruction instruction)
         {
             if (instruction.OpCode == OpCodes.Ldtoken ||
                 instruction.OpCode == OpCodes.Isinst ||
                 instruction.OpCode == OpCodes.Castclass ||
+                instruction.OpCode == OpCodes.Box ||
                 instruction.OpCode == OpCodes.Newarr)
             {
                 TypeReference type = instruction.Operand as TypeReference;
                 if (type != null)
                 {
-                    return type.BelongsToAssembly(BrokerKeyToken) ||
-                        IsGenericInstanceArgumentsReferenceBroker(type as GenericInstanceType);
+                    if (type.BelongsToAssembly(BrokerKeyToken) ||
+                        IsGenericInstanceArgumentsReferenceBroker(type as GenericInstanceType))
+                        _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", instruction));
                 }
             }
 
@@ -146,12 +152,11 @@ namespace AspectInjector.Core.Services
                 MethodReference method = instruction.Operand as MethodReference;
                 if (method != null)
                 {
-                    return method.DeclaringType.BelongsToAssembly(BrokerKeyToken) ||
-                        IsGenericInstanceArgumentsReferenceBroker(method as GenericInstanceMethod);
+                    if (method.DeclaringType.BelongsToAssembly(BrokerKeyToken) ||
+                        IsGenericInstanceArgumentsReferenceBroker(method as GenericInstanceMethod))
+                        _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", instruction));
                 }
             }
-
-            return false;
         }
     }
 }

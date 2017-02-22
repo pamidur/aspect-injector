@@ -18,6 +18,9 @@ namespace AspectInjector.Core.Models
 
         public static CompilationMessage From(string text, Instruction inst)
         {
+            while (inst != null && inst.SequencePoint == null && inst.Previous != null)
+                inst = inst.Previous;
+
             return new CompilationMessage(text, inst?.SequencePoint);
         }
 
