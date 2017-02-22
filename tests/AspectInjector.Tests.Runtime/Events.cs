@@ -18,5 +18,21 @@
         public static readonly string TestEventAddExit = "TestEventAddExit";
         public static readonly string TestEventRemoveEnter = "TestEventRemoveEnter";
         public static readonly string TestEventRemoveExit = "TestEventRemoveExit";
+        public static readonly string TestStaticConstructorEnter = "TestStaticConstructorEnter";
+        public static readonly string TestStaticConstructorExit = "TestStaticConstructorExit";
+        public static readonly string TestStaticMethodEnter = "TestStaticMethodEnter";
+        public static readonly string TestStaticMethodExit = "TestStaticMethodExit";
+        public static readonly string TestStaticIteratorMethodEnter = "TestStaticIteratorMethodEnter";
+        public static readonly string TestStaticIteratorMethodExit = "TestStaticIteratorMethodExit";
+        public static readonly string TestStaticAsyncMethodEnter = "TestStaticAsyncMethodEnter";
+        public static readonly string TestStaticAsyncMethodExit = "TestStaticAsyncMethodExit";
+        public static readonly string TestStaticPropertyGetterEnter = "TestStaticPropertyGetterEnter";
+        public static readonly string TestStaticPropertyGetterExit = "TestStaticPropertyGetterExit";
+        public static readonly string TestStaticPropertySetterEnter = "TestStaticPropertySetterEnter";
+        public static readonly string TestStaticPropertySetterExit = "TestStaticPropertySetterExit";
+        public static readonly string TestStaticEventAddEnter = "TestStaticEventAddEnter";
+        public static readonly string TestStaticEventAddExit = "TestStaticEventAddExit";
+        public static readonly string TestStaticEventRemoveEnter = "TestStaticEventRemoveEnter";
+        public static readonly string TestStaticEventRemoveExit = "TestStaticEventRemoveExit";
     }
 }

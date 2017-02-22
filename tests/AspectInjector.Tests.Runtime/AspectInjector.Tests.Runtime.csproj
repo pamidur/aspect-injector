@@ -73,8 +73,10 @@
     <Compile Include="Advices\OrderTests.cs" />
     <Compile Include="Advices\StaticTests.cs" />
     <Compile Include="Advices\AroundTests.cs" />
+    <Compile Include="Before\BeforeAspectInstance.cs" />
     <Compile Include="Before\BeforeAspectGlobal.cs" />
-    <Compile Include="Before\TargetsTests.cs" />
+    <Compile Include="Before\TargetsIstanceTests.cs" />
+    <Compile Include="Before\TargetsGlobalTests.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="General\AspectFactoryTests.cs" />
     <Compile Include="General\AspectScopeTests.cs" />
@@ -111,7 +113,9 @@
     <None Include="Settings.StyleCop" />
     <None Include="test.key.snk" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="After\" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

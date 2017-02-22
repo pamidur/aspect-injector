@@ -31,9 +31,6 @@ namespace AspectInjector.Core.Fluent
 
             var proc = _md.Body.GetEditor();
 
-            if (instruction.OpCode != OpCodes.Nop) //add nop
-                instruction = proc.SafeInsertBefore(instruction, proc.Create(OpCodes.Nop));
-
             action(new PointCut(proc, instruction));
         }
 
@@ -49,8 +46,16 @@ namespace AspectInjector.Core.Fluent
                 FindBaseClassCtorCall() :
                 GetMethodOriginalEntryPoint();
 
-            while (instruction.OpCode == OpCodes.Nop) //skip all nops
-                instruction = instruction.Next;
+            if (_md.IsConstructor && !_md.IsStatic)
+            {
+                if (instruction.OpCode == OpCodes.Ldarg_0
+                    && instruction.Next.OpCode == OpCodes.Call
+                    && ((MethodReference)instruction.Next.Operand).Name == Constants.InstanceAspectsMethodName
+                    )
+                {
+                    instruction = instruction.Next.Next;
+                }
+            }
 
             action(new PointCut(_md.Body.GetEditor(), instruction));
         }

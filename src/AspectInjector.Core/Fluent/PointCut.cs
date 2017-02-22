@@ -102,7 +102,7 @@ namespace AspectInjector.Core.Models
         {
             val?.Invoke(this);
 
-            var fieldRef = _typeSystem.Import(field);// */(FieldReference)field.CreateReference(_typeSystem);
+            var fieldRef = _proc.Body.Method.ParametrizeGenericChild(_typeSystem.Import(field));// */(FieldReference)field.CreateReference(_typeSystem);
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
@@ -207,7 +207,7 @@ namespace AspectInjector.Core.Models
                 var ctors = type.Methods.Where(c => c.IsConstructor && !c.IsStatic).ToList();
 
                 foreach (var ctor in ctors)
-                    ctor.GetEditor().OnInit(i => i.This().Call(instanceAspectsInitializer));
+                    ctor.GetEditor().OnInit(i => i.This().Call(instanceAspectsInitializer.MakeHostInstanceGeneric(_proc.Body.Method.DeclaringType)));
             }
 
             return instanceAspectsInitializer;
