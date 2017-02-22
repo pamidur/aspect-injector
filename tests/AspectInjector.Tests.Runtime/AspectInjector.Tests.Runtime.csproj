@@ -73,6 +73,7 @@
     <Compile Include="Advices\OrderTests.cs" />
     <Compile Include="Advices\StaticTests.cs" />
     <Compile Include="Advices\AroundTests.cs" />
+    <Compile Include="Before\Global\ArgumentsGlobalTests.cs" />
     <Compile Include="Before\Instance\BeforeAspectInstance.cs" />
     <Compile Include="Before\Global\BeforeAspectGlobal.cs" />
     <Compile Include="Before\Instance\TargetsIstanceTests.cs" />

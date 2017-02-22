@@ -38,22 +38,43 @@ namespace AspectInjector.Tests.Runtime
             TestLog.Reset();
         }
 
-        public void ValidateConstructorArgs()
+        public List<string> GetConstructorArgsSequence(string prefix)
         {
-            CheckSequence(new List<string> {
-                GetArgEvent(TestAssets.asset1),
-                GetArgEvent(TestAssets.asset2),
-                GetArgEvent(TestAssets.asset3),
-                GetArgEvent(TestAssets.asset4),
-                GetArgEvent(TestAssets.asset1),
-                GetArgEvent(TestAssets.asset2),
-                GetArgEvent(TestAssets.asset3),
-                GetArgEvent(TestAssets.asset4),
-                GetArgEvent(null),
-                GetArgEvent(null),
-                GetArgEvent(null),
-                GetArgEvent(null),
-            });
+            return new List<string> {
+                $"{prefix}:{GetArgEvent(TestAssets.asset1)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset2)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset3)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset4)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset1)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset2)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset3)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset4)}",
+                $"{prefix}:{GetArgEvent(default(int))}",
+                $"{prefix}:{GetArgEvent(null)}",
+                $"{prefix}:{GetArgEvent(default(short))}",
+                $"{prefix}:{GetArgEvent(null)}",
+            };
+        }
+
+        public List<string> GetMethodArgsSequence(string prefix)
+        {
+            return new List<string> {
+                $"{prefix}:{GetArgEvent(TestAssets.asset1)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset2)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset3)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset4)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset5)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset1)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset2)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset3)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset4)}",
+                $"{prefix}:{GetArgEvent(TestAssets.asset5)}",
+                $"{prefix}:{GetArgEvent(default(int))}",
+                $"{prefix}:{GetArgEvent(null)}",
+                $"{prefix}:{GetArgEvent(default(short))}",
+                $"{prefix}:{GetArgEvent(null)}",
+                $"{prefix}:{GetArgEvent(null)}",
+            };
         }
 
         private string GetArgEvent(object o)
@@ -71,7 +92,7 @@ namespace AspectInjector.Tests.Runtime
             IDisposable ao4;
 
             var test = new TestClassWrapper<short>.TestClass<IDisposable>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, out ao1, out ao2, out ao3, out ao4);
-            //ValidateConstructorArgs();
+
             Assert.AreEqual(TestAssets.asset1, ao1);
             Assert.AreEqual(TestAssets.asset2, ao2);
             Assert.AreEqual(TestAssets.asset3, ao3);
