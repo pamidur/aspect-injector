@@ -31,7 +31,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         {
             FindOrCreateAfterStateMachineMethod().GetEditor().OnExit(
                 e => e
-                .LoadAspect(_aspect, LoadOriginalThis, _target.DeclaringType)
+                .LoadAspect(_aspect, _target, LoadOriginalThis, _target.DeclaringType)
                 .Call(_effect.Method, LoadAdviceArgs)
             );
         }
@@ -40,25 +40,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         {
             if (_this != null)
                 pc.This().Load(_this);
-        }
-
-        protected override void LoadInstanceArgument(PointCut pc, AdviceArgument parameter)
-        {
-            LoadOriginalThis(pc);
-        }
-
-        protected override void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
-        {
-            pc.This();
-        }
-
-        protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
-        {
-            var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
-                il.ThisOrStatic().Load(FindField(p)).ByVal(p.ParameterType)
-            ).ToArray();
-
-            pc.CreateArray<object>(elements);
         }
 
         private FieldReference FindField(ParameterDefinition p)
@@ -85,12 +66,42 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 {
                     moveNext.GetEditor().OnInstruction(exit, il =>
                     {
-                        il.ThisOrStatic().Call(afterMethod);
+                        il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine));
                     });
                 }
             }
 
             return afterMethod;
+        }
+
+        protected override void LoadInstanceArgument(PointCut pc, AdviceArgument parameter)
+        {
+            if (_this != null)
+                LoadOriginalThis(pc);
+            else
+                pc.Value((object)null);
+        }
+
+        protected override void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
+        {
+            pc.This();
+        }
+
+        protected override void LoadReturnTypeArgument(PointCut pc, AdviceArgument parameter)
+        {
+            pc.TypeOf(_stateMachine.Interfaces.First(i => i.Name.StartsWith("IEnumerable`1")));
+        }
+
+        protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
+        {
+            var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
+            {
+                var field = FindField(p);
+                il.ThisOrStatic().Load(field).ByVal(field.FieldType);
+            }
+            ).ToArray();
+
+            pc.CreateArray<object>(elements);
         }
     }
 }

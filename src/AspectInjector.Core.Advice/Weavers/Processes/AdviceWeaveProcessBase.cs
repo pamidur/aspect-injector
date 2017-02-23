@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using AspectInjector.Core.Fluent.Models;
 using static AspectInjector.Broker.Advice.Argument;
 using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
@@ -56,7 +57,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected virtual void LoadTypeArgument(PointCut pc, AdviceArgument parameter)
         {
-            pc.TypeOf(_target.DeclaringType);
+            pc.TypeOf(_target.DeclaringType.ParametrizeGenericChild(_target.DeclaringType));
         }
 
         protected virtual void LoadTargetArgument(PointCut pc, AdviceArgument parameter)

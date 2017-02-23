@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AspectInjector.Tests.Runtime
 {
@@ -192,7 +193,7 @@ namespace AspectInjector.Tests.Runtime
 
         public void ExecIteratorMethod()
         {
-            var result = new TestClassWrapper<short>.TestClass<IDisposable>().TestIteratorMethod<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).First();
+            var result = new TestClassWrapper<short>.TestClass<IDisposable>().TestIteratorMethod<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Last();
 
             Assert.AreEqual(TestAssets.asset1, result.Item1);
             Assert.AreEqual(TestAssets.asset2, result.Item2);
@@ -203,7 +204,7 @@ namespace AspectInjector.Tests.Runtime
 
         public void ExecStaticIteratorMethod()
         {
-            var result = TestClassWrapper<short>.TestClass<IDisposable>.TestStaticIteratorMethod<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).First();
+            var result = TestClassWrapper<short>.TestClass<IDisposable>.TestStaticIteratorMethod<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Last();
 
             Assert.AreEqual(TestAssets.asset1, result.Item1);
             Assert.AreEqual(TestAssets.asset2, result.Item2);
@@ -247,11 +248,13 @@ namespace AspectInjector.Tests.Runtime
         public void ExecAsyncVoidMethod()
         {
             new TestClassWrapper<short>.TestClass<IDisposable>().TestAsyncMethod3<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5);
+            Task.Delay(100).Wait();
         }
 
         public void ExecStaticAsyncVoidMethod()
         {
             TestClassWrapper<short>.TestClass<IDisposable>.TestStaticAsyncMethod3<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5);
+            Task.Delay(100).Wait();
         }
 
         public void CheckSequence(IReadOnlyList<string> orderedEvents)

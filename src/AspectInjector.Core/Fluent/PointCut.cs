@@ -121,14 +121,15 @@ namespace AspectInjector.Core.Models
             ByRef(par.ParameterType);
         }
 
-        public PointCut LoadAspect(AspectDefinition aspect, Action<PointCut> overrideThis = null, TypeDefinition overrideSource = null)
+        public PointCut LoadAspect(AspectDefinition aspect, MethodDefinition overrideTarget = null, Action<PointCut> overrideThis = null, TypeDefinition overrideSource = null)
         {
+            overrideTarget = overrideTarget ?? _proc.Body.Method;
             overrideThis = overrideThis ?? (pc => pc.This());
-            overrideSource = overrideSource ?? _proc.Body.Method.DeclaringType;
+            overrideSource = overrideSource ?? overrideTarget.DeclaringType;
 
             FieldReference aspectField;
 
-            if (_proc.Body.Method.IsStatic || aspect.Scope == Aspect.Scope.Global)
+            if (overrideTarget.IsStatic || aspect.Scope == Aspect.Scope.Global)
                 aspectField = GetGlobalAspectField(aspect);
             else
             {
@@ -403,7 +404,7 @@ namespace AspectInjector.Core.Models
         public PointCut MethodOf(MethodReference method)
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _typeSystem.Import(method)));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _typeSystem.Import(method.DeclaringType)));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _typeSystem.Import(method.DeclaringType.ParametrizeGenericChild(method.DeclaringType))));
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.Import(_typeSystem.MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2))));
 
             return this;

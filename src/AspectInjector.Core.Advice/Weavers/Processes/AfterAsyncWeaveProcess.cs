@@ -28,16 +28,15 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             _stateMachine = target.CustomAttributes.First(ca => ca.AttributeType.IsTypeOf(typeof(AsyncStateMachineAttribute)))
                 .GetConstructorValue<TypeReference>(0).Resolve();
 
-            _asyncResult = _target.ReturnType.IsTypeOf(_ts.Void) ? null : (_target.ReturnType as IGenericInstance)?.GenericArguments.FirstOrDefault();
-
-            _this = _target.IsStatic ? null : _stateMachine.Fields.First(f => f.IsPublic && f.FieldType.IsTypeOf(_target.DeclaringType) && f.Name.StartsWith("<>") && f.Name.EndsWith("_this"));
+            _asyncResult = (_stateMachine.Fields.First(f => f.Name == "<>t__builder").FieldType as IGenericInstance)?.GenericArguments.FirstOrDefault();
+            _this = _target.IsStatic ? null : _stateMachine.Fields.First(f => f.IsPublic && f.FieldType.Resolve().IsTypeOf(_target.DeclaringType) && f.Name.StartsWith("<>") && f.Name.EndsWith("_this"));
         }
 
         public override void Execute()
         {
             FindOrCreateAfterStateMachineMethod().GetEditor().OnExit(
                 e => e
-                .LoadAspect(_aspect, LoadThis, _target.DeclaringType)
+                .LoadAspect(_aspect, _target, LoadThis, _target.DeclaringType)
                 .Call(_effect.Method, LoadAdviceArgs)
             );
         }
@@ -46,20 +45,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         {
             if (_this != null)
                 pc.This().Load(_this);
-        }
-
-        protected override void LoadInstanceArgument(PointCut pc, AdviceArgument parameter)
-        {
-            LoadThis(pc);
-        }
-
-        protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
-        {
-            var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
-                il.ThisOrStatic().Load(FindField(p)).ByVal(p.ParameterType)
-            ).ToArray();
-
-            pc.CreateArray<object>(elements);
         }
 
         private FieldReference FindField(ParameterDefinition p)
@@ -112,7 +97,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                             loadArg = new Action<PointCut>(args => args.Load(resvar).ByVal(_asyncResult));
                         }
 
-                        il.ThisOrStatic().Call(afterMethod, loadArg);
+                        il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine), loadArg);
 
                         if (_asyncResult != null)
                             il.Load(resvar);
@@ -126,6 +111,31 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         protected override void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
         {
             pc.Load(pc.Method.Parameters[0]);
+        }
+
+        protected override void LoadReturnTypeArgument(PointCut pc, AdviceArgument parameter)
+        {
+            pc.TypeOf(_asyncResult ?? _ts.Void);
+        }
+
+        protected override void LoadInstanceArgument(PointCut pc, AdviceArgument parameter)
+        {
+            if (_this != null)
+                LoadThis(pc);
+            else
+                pc.Value((object)null);
+        }
+
+        protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
+        {
+            var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
+            {
+                var field = FindField(p);
+                il.ThisOrStatic().Load(field).ByVal(field.FieldType);
+            }
+            ).ToArray();
+
+            pc.CreateArray<object>(elements);
         }
     }
 }
