@@ -8,29 +8,6 @@ namespace AspectInjector.Tests.Runtime.Around
     public class TargetsInstanceTests : TestRunner
     {
         [TestMethod]
-        public void AdviceAround_Instance_Consrtuctor()
-        {
-            ExecConstructor();
-            CheckSequence(new List<string> {
-                InstanceAspect.AroundEnter,
-                Events.TestConstructorExit,
-                InstanceAspect.AroundExit
-            });
-        }
-
-        [TestMethod]
-        public void AdviceAround_Instance_Static_Consrtuctor()
-        {
-            ExecStaticConstructor();
-            CheckSequence(new List<string> {
-                InstanceAspect.AroundEnter,
-
-                Events.TestStaticConstructorExit,
-                InstanceAspect.AroundExit
-            });
-        }
-
-        [TestMethod]
         public void AdviceAround_Instance_Setter()
         {
             ExecSetter();
@@ -140,21 +117,22 @@ namespace AspectInjector.Tests.Runtime.Around
                 Events.TestMethodExit,
                 InstanceAspect.AroundExit,
 
+                //state machine executes after around
                 InstanceAspect.AroundEnter,
+                InstanceAspect.AroundExit,
                 Events.TestIteratorMethodExit,
-                InstanceAspect.AroundExit,
 
                 InstanceAspect.AroundEnter,
-                Events.TestAsyncMethodExit,
                 InstanceAspect.AroundExit,
+                Events.TestAsyncMethodExit,
 
                 InstanceAspect.AroundEnter,
-                Events.TestAsyncMethodExit,
                 InstanceAspect.AroundExit,
+                Events.TestAsyncMethodExit,
 
                 InstanceAspect.AroundEnter,
+                InstanceAspect.AroundExit,
                 Events.TestAsyncMethodExit,
-                InstanceAspect.AroundExit
             });
         }
 
@@ -172,21 +150,22 @@ namespace AspectInjector.Tests.Runtime.Around
                 Events.TestStaticMethodExit,
                 InstanceAspect.AroundExit,
 
+                //state machine executes after around
                 InstanceAspect.AroundEnter,
+                InstanceAspect.AroundExit,
                 Events.TestStaticIteratorMethodExit,
-                InstanceAspect.AroundExit,
 
                 InstanceAspect.AroundEnter,
-                Events.TestStaticAsyncMethodExit,
                 InstanceAspect.AroundExit,
+                Events.TestStaticAsyncMethodExit,
 
                 InstanceAspect.AroundEnter,
-                Events.TestStaticAsyncMethodExit,
                 InstanceAspect.AroundExit,
+                Events.TestStaticAsyncMethodExit,
 
                 InstanceAspect.AroundEnter,
+                InstanceAspect.AroundExit,
                 Events.TestStaticAsyncMethodExit,
-                InstanceAspect.AroundExit
             });
         }
     }

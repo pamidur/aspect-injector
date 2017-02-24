@@ -57,23 +57,26 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public MethodDefinition GetNextWrapper()
         {
-            var wrapper = _target.DeclaringType.Methods.Where(m => m.Name.StartsWith(_wrapperNamePrefix))
+            var prevWrapper = _target.DeclaringType.Methods.Where(m => m.Name.StartsWith(_wrapperNamePrefix))
                 .Select(m => new { m, i = ushort.Parse(m.Name.Substring(_wrapperNamePrefix.Length)) }).OrderByDescending(g => g.i).FirstOrDefault();
 
-            return ReplaceUnwrapper($"{_wrapperNamePrefix}{(wrapper == null ? 0 : wrapper.i + 1)}");
+            var newWrapper = DuplicateMethodDefinition(GetOrCreateUnwrapper());
+            newWrapper.IsPrivate = true;
+            newWrapper.Name = $"{_wrapperNamePrefix}{(prevWrapper == null ? 0 : prevWrapper.i + 1)}";
+
+            RedirectPreviousWrapper(prevWrapper == null ? _target : prevWrapper.m, newWrapper);
+
+            return newWrapper;
         }
 
-        private MethodDefinition ReplaceUnwrapper(string name)
+        private void RedirectPreviousWrapper(MethodDefinition prev, MethodDefinition next)
         {
             var unwrapper = GetOrCreateUnwrapper();
-            var newUnwrapper = DuplicateMethodDefinition(unwrapper);
-            newUnwrapper.IsPrivate = true;
 
-            unwrapper.Name = name;
+            var instructions = prev.Body.Instructions.Where(i => i.Operand is MethodReference && ((MethodReference)i.Operand).Resolve() == unwrapper).ToList();
 
-            MoveBody(unwrapper, newUnwrapper);
-
-            return unwrapper;
+            foreach (var inst in instructions)
+                inst.Operand = prev.ParametrizeGenericChild(next.MakeHostInstanceGeneric(_target.DeclaringType));
         }
 
         private MethodDefinition GetOrCreateUnwrapper()

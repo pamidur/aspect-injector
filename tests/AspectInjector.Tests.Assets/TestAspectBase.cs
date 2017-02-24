@@ -70,10 +70,10 @@ namespace AspectInjector.Tests.Assets
 
         internal void LogTarget(Func<object[], object> target, string prefix)
         {
-            if (target == null)
-                TestLog.Write($"{prefix}:Target:null");
-            else
-                TestLog.Write($"{prefix}:Target:{target.Target.GetType().FullName}:{target.ToString()}");
+            //if (target == null)
+            //    TestLog.Write($"{prefix}:Target:null");
+            //else
+            //    TestLog.Write($"{prefix}:Target:{target.Target.GetType().FullName}:{target.ToString()}");
         }
 
         internal void LogType(Type hostType, string prefix)

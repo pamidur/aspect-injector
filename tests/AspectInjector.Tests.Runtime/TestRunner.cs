@@ -240,13 +240,13 @@ namespace AspectInjector.Tests.Runtime
         public void ExecAsyncVoidMethod()
         {
             new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestAsyncMethod3<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5);
-            Task.Delay(100).Wait();
+            Task.Delay(300).Wait();
         }
 
         public void ExecStaticAsyncVoidMethod()
         {
             TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticAsyncMethod3<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5);
-            Task.Delay(100).Wait();
+            Task.Delay(300).Wait();
         }
 
         public void CheckSequence(IReadOnlyList<string> orderedEvents)

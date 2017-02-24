@@ -8,29 +8,6 @@ namespace AspectInjector.Tests.Runtime.Around
     public class TargetsGlobalTests : TestRunner
     {
         [TestMethod]
-        public void AdviceAround_Global_Consrtuctor()
-        {
-            ExecConstructor();
-            CheckSequence(new List<string> {
-                GlobalAspect.AroundEnter,
-                Events.TestConstructorExit,
-                GlobalAspect.AroundExit
-            });
-        }
-
-        [TestMethod]
-        public void AdviceAround_Global_Static_Consrtuctor()
-        {
-            ExecStaticConstructor();
-            CheckSequence(new List<string> {
-                GlobalAspect.AroundEnter,
-
-                Events.TestStaticConstructorExit,
-                GlobalAspect.AroundExit
-            });
-        }
-
-        [TestMethod]
         public void AdviceAround_Global_Setter()
         {
             ExecSetter();
@@ -140,21 +117,22 @@ namespace AspectInjector.Tests.Runtime.Around
                 Events.TestMethodExit,
                 GlobalAspect.AroundExit,
 
+                //state machine executes after around
                 GlobalAspect.AroundEnter,
+                GlobalAspect.AroundExit,
                 Events.TestIteratorMethodExit,
-                GlobalAspect.AroundExit,
 
                 GlobalAspect.AroundEnter,
-                Events.TestAsyncMethodExit,
                 GlobalAspect.AroundExit,
+                Events.TestAsyncMethodExit,
 
                 GlobalAspect.AroundEnter,
-                Events.TestAsyncMethodExit,
                 GlobalAspect.AroundExit,
+                Events.TestAsyncMethodExit,
 
                 GlobalAspect.AroundEnter,
+                GlobalAspect.AroundExit,
                 Events.TestAsyncMethodExit,
-                GlobalAspect.AroundExit
             });
         }
 
@@ -172,21 +150,22 @@ namespace AspectInjector.Tests.Runtime.Around
                 Events.TestStaticMethodExit,
                 GlobalAspect.AroundExit,
 
+                //state machine executes after around
                 GlobalAspect.AroundEnter,
+                GlobalAspect.AroundExit,
                 Events.TestStaticIteratorMethodExit,
-                GlobalAspect.AroundExit,
 
                 GlobalAspect.AroundEnter,
-                Events.TestStaticAsyncMethodExit,
                 GlobalAspect.AroundExit,
+                Events.TestStaticAsyncMethodExit,
 
                 GlobalAspect.AroundEnter,
-                Events.TestStaticAsyncMethodExit,
                 GlobalAspect.AroundExit,
+                Events.TestStaticAsyncMethodExit,
 
                 GlobalAspect.AroundEnter,
+                GlobalAspect.AroundExit,
                 Events.TestStaticAsyncMethodExit,
-                GlobalAspect.AroundExit
             });
         }
     }
