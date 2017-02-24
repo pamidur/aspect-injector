@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
-namespace AspectInjector.Tests.Runtime.Before.Global
+namespace AspectInjector.Tests.Runtime.Before
 {
     [TestClass]
     public class TargetsGlobalTests : TestRunner

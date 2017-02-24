@@ -2,113 +2,132 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
-namespace AspectInjector.Tests.Runtime.After
+namespace AspectInjector.Tests.Runtime.Around
 {
     [TestClass]
     public class TargetsInstanceTests : TestRunner
     {
         [TestMethod]
-        public void AdviceAfter_Instance_Consrtuctor()
+        public void AdviceAround_Instance_Consrtuctor()
         {
             ExecConstructor();
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
                 Events.TestConstructorExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Consrtuctor()
+        public void AdviceAround_Instance_Static_Consrtuctor()
         {
             ExecStaticConstructor();
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
+
                 Events.TestStaticConstructorExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Setter()
+        public void AdviceAround_Instance_Setter()
         {
             ExecSetter();
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
+
                 Events.TestPropertySetterExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Setter()
+        public void AdviceAround_Instance_Static_Setter()
         {
             ExecStaticSetter();
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
+
                 Events.TestStaticPropertySetterExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Getter()
+        public void AdviceAround_Instance_Getter()
         {
             ExecGetter();
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
+
                 Events.TestPropertyGetterExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Getter()
+        public void AdviceAround_Instance_Static_Getter()
         {
             ExecStaticGetter();
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
+
                 Events.TestStaticPropertyGetterExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Add()
+        public void AdviceAround_Instance_Add()
         {
             ExecAdd();
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
+
                 Events.TestEventAddExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Add()
+        public void AdviceAround_Instance_Static_Add()
         {
             ExecStaticAdd();
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
+
                 Events.TestStaticEventAddExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Remove()
+        public void AdviceAround_Instance_Remove()
         {
             ExecRemove();
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
+
                 Events.TestEventRemoveExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Remove()
+        public void AdviceAround_Instance_Static_Remove()
         {
             ExecStaticRemove();
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
+
                 Events.TestStaticEventRemoveExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Methods()
+        public void AdviceAround_Instance_Methods()
         {
             ExecMethod();
             ExecIteratorMethod();
@@ -117,25 +136,30 @@ namespace AspectInjector.Tests.Runtime.After
             ExecAsyncTypedTaskMethod();
 
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
                 Events.TestMethodExit,
-                InstanceAspect.AfterExecuted,
+                InstanceAspect.AroundExit,
 
+                InstanceAspect.AroundEnter,
                 Events.TestIteratorMethodExit,
-                InstanceAspect.AfterExecuted,
+                InstanceAspect.AroundExit,
 
+                InstanceAspect.AroundEnter,
                 Events.TestAsyncMethodExit,
-                InstanceAspect.AfterExecuted,
+                InstanceAspect.AroundExit,
 
+                InstanceAspect.AroundEnter,
                 Events.TestAsyncMethodExit,
-                InstanceAspect.AfterExecuted,
+                InstanceAspect.AroundExit,
 
+                InstanceAspect.AroundEnter,
                 Events.TestAsyncMethodExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Methods()
+        public void AdviceAround_Instance_Static_Methods()
         {
             ExecStaticMethod();
             ExecStaticIteratorMethod();
@@ -144,20 +168,25 @@ namespace AspectInjector.Tests.Runtime.After
             ExecStaticAsyncTypedTaskMethod();
 
             CheckSequence(new List<string> {
+                InstanceAspect.AroundEnter,
                 Events.TestStaticMethodExit,
-                InstanceAspect.AfterExecuted,
+                InstanceAspect.AroundExit,
 
+                InstanceAspect.AroundEnter,
                 Events.TestStaticIteratorMethodExit,
-                InstanceAspect.AfterExecuted,
+                InstanceAspect.AroundExit,
 
+                InstanceAspect.AroundEnter,
                 Events.TestStaticAsyncMethodExit,
-                InstanceAspect.AfterExecuted,
+                InstanceAspect.AroundExit,
 
+                InstanceAspect.AroundEnter,
                 Events.TestStaticAsyncMethodExit,
-                InstanceAspect.AfterExecuted,
+                InstanceAspect.AroundExit,
 
+                InstanceAspect.AroundEnter,
                 Events.TestStaticAsyncMethodExit,
-                InstanceAspect.AfterExecuted
+                InstanceAspect.AroundExit
             });
         }
     }

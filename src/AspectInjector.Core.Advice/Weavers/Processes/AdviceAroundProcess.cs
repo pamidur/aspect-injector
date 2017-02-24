@@ -45,8 +45,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 _ts.Object);
 
             var targetFuncCtor = targetFuncType.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic).MakeHostInstanceGeneric(targetFuncType);
+            var targetMethod = _wrapper.ParametrizeGenericChild(GetOrCreateUnwrapper().MakeHostInstanceGeneric(_target.DeclaringType));
 
-            pc.ThisOrNull().Call(targetFuncCtor, args => args.Load(_wrapper.ParametrizeGenericChild(GetOrCreateUnwrapper())));
+            pc.ThisOrNull().Call(targetFuncCtor, args => args.Load(targetMethod));
         }
 
         protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
@@ -97,7 +98,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 {
                     var refList = new List<Tuple<int, VariableDefinition>>();
 
-                    il = il.ThisOrStatic().Call(original, c =>
+                    il = il.ThisOrStatic().Call(original.MakeHostInstanceGeneric(_target.DeclaringType), c =>
                     {
                         for (int i = 0; i < original.Parameters.Count; i++)
                         {
@@ -160,7 +161,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     e.Store(argsVar, args => base.LoadArgumentsArgument(args, null));
 
                     // Unwrapper(args);
-                    e.ThisOrStatic().Call(unwrapper, args => args.Load(argsVar));
+                    e.ThisOrStatic().Call(unwrapper.MakeHostInstanceGeneric(_target.DeclaringType), args => args.Load(argsVar));
 
                     // proxy ref and out params
                     for (int i = 0; i < _target.Parameters.Count; i++)

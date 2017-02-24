@@ -74,6 +74,8 @@
     <Compile Include="Advices\StaticTests.cs" />
     <Compile Include="Advices\AroundTests.cs" />
     <Compile Include="After\TargetsIstanceTests.cs" />
+    <Compile Include="Around\TargetsGlobalTests.cs" />
+    <Compile Include="Around\TargetsIstanceTests.cs" />
     <Compile Include="Before\ArgumentsGlobalTests.cs" />
     <Compile Include="Before\TargetsGlobalTests.cs" />
     <Compile Include="Before\TargetsIstanceTests.cs" />

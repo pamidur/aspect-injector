@@ -9,6 +9,8 @@ namespace AspectInjector.Tests.Assets
     {
         public static readonly string AfterExecuted = "AfterAspectGlobal";
         public static readonly string BeforeExecuted = "BeforeAspectGlobal";
+        public static readonly string AroundEnter = "AroundAspectGlobalEnter";
+        public static readonly string AroundExit = "AroundAspectGlobalExit";
 
         [Advice(Advice.Type.After, Advice.Target.Constructor | Advice.Target.EventAdd | Advice.Target.EventRemove | Advice.Target.Getter | Advice.Target.Method | Advice.Target.Setter)]
         public void After(
@@ -60,6 +62,35 @@ namespace AspectInjector.Tests.Assets
             base.LogType(hostType, BeforeExecuted);
 
             TestLog.Write(BeforeExecuted);
+        }
+
+        [Advice(Advice.Type.Around, Advice.Target.Constructor | Advice.Target.EventAdd | Advice.Target.EventRemove | Advice.Target.Getter | Advice.Target.Method | Advice.Target.Setter)]
+        public object Around(
+            [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
+            [Advice.Argument(Advice.Argument.Source.Attributes)] Attribute[] attrs,
+            [Advice.Argument(Advice.Argument.Source.Instance)] object _this,
+            [Advice.Argument(Advice.Argument.Source.Method)] MethodBase method,
+            [Advice.Argument(Advice.Argument.Source.Name)] string name,
+            [Advice.Argument(Advice.Argument.Source.ReturnType)] Type retType,
+            [Advice.Argument(Advice.Argument.Source.ReturnValue)] object retVal,
+            [Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
+            [Advice.Argument(Advice.Argument.Source.Type)] Type hostType
+            )
+        {
+            base.LogArguments(args, AroundEnter);
+            base.LogAttributes(args, AroundEnter);
+            base.LogInstance(_this, AroundEnter);
+            base.LogMethod(method, AroundEnter);
+            base.LogName(name, AroundEnter);
+            base.LogReturnType(retType, AroundEnter);
+            base.LogReturnValue(retVal, AroundEnter);
+            base.LogTarget(target, AroundEnter);
+            base.LogType(hostType, AroundEnter);
+
+            TestLog.Write(AroundEnter);
+            var result = target(args);
+            TestLog.Write(AroundExit);
+            return result;
         }
     }
 }
