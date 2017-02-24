@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AspectInjector.Tests.Assets.IAssetIface1Wrapper<AspectInjector.Tests.Assets.Asset1>;
 
 namespace AspectInjector.Tests.Runtime
 {
