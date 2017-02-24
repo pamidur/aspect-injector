@@ -40,7 +40,7 @@
     <StyleCopTreatErrorsAsWarnings>False</StyleCopTreatErrorsAsWarnings>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>test.key.snk</AssemblyOriginatorKeyFile>
@@ -73,15 +73,11 @@
     <Compile Include="Advices\OrderTests.cs" />
     <Compile Include="Advices\StaticTests.cs" />
     <Compile Include="Advices\AroundTests.cs" />
-    <Compile Include="After\Instance\AfterAspectInstance.cs" />
-    <Compile Include="After\Instance\TargetsIstanceTests.cs" />
-    <Compile Include="Before\Global\ArgumentsGlobalTests.cs" />
-    <Compile Include="Before\Global\BeforeAspectGlobal.cs" />
-    <Compile Include="Before\Global\TargetsGlobalTests.cs" />
-    <Compile Include="Before\Instance\BeforeAspectInstance.cs" />
-    <Compile Include="After\Global\AfterAspectGlobal.cs" />
-    <Compile Include="Before\Instance\TargetsIstanceTests.cs" />
-    <Compile Include="After\Global\TargetsGlobalTests.cs" />
+    <Compile Include="After\TargetsIstanceTests.cs" />
+    <Compile Include="Before\ArgumentsGlobalTests.cs" />
+    <Compile Include="Before\TargetsGlobalTests.cs" />
+    <Compile Include="Before\TargetsIstanceTests.cs" />
+    <Compile Include="After\TargetsGlobalTests.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="General\AspectFactoryTests.cs" />
     <Compile Include="General\AspectScopeTests.cs" />
@@ -96,11 +92,9 @@
     <Compile Include="General\CustomAttributesTests.cs" />
     <Compile Include="Interfaces\GenericInterfacesTests.cs" />
     <Compile Include="Interfaces\PartialMembersInterfacesTests.cs" />
-    <Compile Include="TestAspectBase.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Advices\VirtualTests.cs" />
-    <Compile Include="TestLog.cs" />
     <Compile Include="TestRunner.cs" />
     <Compile Include="Utils\Checker.cs" />
   </ItemGroup>
@@ -112,6 +106,10 @@
     <ProjectReference Include="..\..\src\AspectInjector.CommandLine\AspectInjector.CLI.csproj">
       <Project>{fc862191-9081-4a58-96ff-b57f17ac40a9}</Project>
       <Name>AspectInjector.CLI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AspectInjector.Tests.Assets\AspectInjector.Tests.Assets.csproj">
+      <Project>{47463727-ff34-4c9d-bef1-e6222936dfc8}</Project>
+      <Name>AspectInjector.Tests.Assets</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

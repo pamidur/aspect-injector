@@ -6,12 +6,12 @@ namespace AspectInjector.Tests.Runtime.Before.Global
     [TestClass]
     public class ArgumentsGlobalTests : TestRunner
     {
-        [TestMethod]
-        public void AdviceBefore_Global_Args_Consrtuctor()
-        {
-            ExecConstructor();
-            CheckSequence(GetConstructorArgsSequence(BeforeAspectGlobal.Executed));
-        }
+        //[TestMethod]
+        //public void AdviceBefore_Global_Args_Consrtuctor()
+        //{
+        //    ExecConstructor();
+        //    CheckSequence(GetConstructorArgsSequence(BeforeAspectGlobal.Executed));
+        //}
 
         //[TestMethod]
         //public void AdviceBefore_Global_Static_Consrtuctor()

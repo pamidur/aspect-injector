@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Broker;
+using AspectInjector.Tests.Assets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -9,15 +10,6 @@ using System.Threading.Tasks;
 
 namespace AspectInjector.Tests.Runtime
 {
-    public class TestAssets
-    {
-        public static int asset1 = 1;
-        public static StringBuilder asset2 = new StringBuilder();
-        public static short asset3 = 2;
-        public static IDisposable asset4 = new MemoryStream();
-        public static TextReader asset5 = new StreamReader((Stream)asset4);
-    }
-
     public class TestRunner
     {
         private static readonly List<string> _staticCtorEvents;
@@ -26,7 +18,7 @@ namespace AspectInjector.Tests.Runtime
         {
             TestLog.Reset();
 
-            var type = typeof(TestClassWrapper<short>.TestClass<IDisposable>);
+            var type = typeof(TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>);
             System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
 
             _staticCtorEvents = TestLog.Log.ToList();
@@ -88,11 +80,11 @@ namespace AspectInjector.Tests.Runtime
         public void ExecConstructor()
         {
             int ao1;
-            StringBuilder ao2;
+            Asset1 ao2;
             short ao3;
-            IDisposable ao4;
+            IAssetIface1<Asset1> ao4;
 
-            var test = new TestClassWrapper<short>.TestClass<IDisposable>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, out ao1, out ao2, out ao3, out ao4);
+            var test = new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, out ao1, out ao2, out ao3, out ao4);
 
             Assert.AreEqual(TestAssets.asset1, ao1);
             Assert.AreEqual(TestAssets.asset2, ao2);
@@ -108,12 +100,12 @@ namespace AspectInjector.Tests.Runtime
         public void ExecMethod()
         {
             int ao1;
-            StringBuilder ao2;
+            Asset1 ao2;
             short ao3;
-            IDisposable ao4;
-            TextReader ao5;
+            IAssetIface1<Asset1> ao4;
+            Asset2 ao5;
 
-            var result = new TestClassWrapper<short>.TestClass<IDisposable>().TestMethod<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, ref TestAssets.asset5, out ao1, out ao2, out ao3, out ao4, out ao5);
+            var result = new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestMethod<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, ref TestAssets.asset5, out ao1, out ao2, out ao3, out ao4, out ao5);
 
             Assert.AreEqual(TestAssets.asset1, ao1);
             Assert.AreEqual(TestAssets.asset2, ao2);
@@ -131,12 +123,12 @@ namespace AspectInjector.Tests.Runtime
         public void ExecStaticMethod()
         {
             int ao1;
-            StringBuilder ao2;
+            Asset1 ao2;
             short ao3;
-            IDisposable ao4;
-            TextReader ao5;
+            IAssetIface1<Asset1> ao4;
+            Asset2 ao5;
 
-            var result = TestClassWrapper<short>.TestClass<IDisposable>.TestStaticMethod<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, ref TestAssets.asset5, out ao1, out ao2, out ao3, out ao4, out ao5);
+            var result = TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticMethod<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, ref TestAssets.asset5, out ao1, out ao2, out ao3, out ao4, out ao5);
 
             Assert.AreEqual(TestAssets.asset1, ao1);
             Assert.AreEqual(TestAssets.asset2, ao2);
@@ -153,47 +145,47 @@ namespace AspectInjector.Tests.Runtime
 
         public void ExecSetter()
         {
-            new TestClassWrapper<short>.TestClass<IDisposable>().TestProperty = new Tuple<short, IDisposable>(TestAssets.asset3, TestAssets.asset4);
+            new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestProperty = new Tuple<short, IAssetIface1<Asset1>>(TestAssets.asset3, TestAssets.asset4);
         }
 
         public void ExecStaticSetter()
         {
-            TestClassWrapper<short>.TestClass<IDisposable>.TestStaticProperty = new Tuple<short, IDisposable>(TestAssets.asset3, TestAssets.asset4);
+            TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticProperty = new Tuple<short, IAssetIface1<Asset1>>(TestAssets.asset3, TestAssets.asset4);
         }
 
         public void ExecGetter()
         {
-            var result = new TestClassWrapper<short>.TestClass<IDisposable>().TestProperty;
+            var result = new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestProperty;
         }
 
         public void ExecStaticGetter()
         {
-            var result = TestClassWrapper<short>.TestClass<IDisposable>.TestStaticProperty;
+            var result = TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticProperty;
         }
 
         public void ExecAdd()
         {
-            new TestClassWrapper<short>.TestClass<IDisposable>().TestEvent += (s, e) => { };
+            new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestEvent += (s, e) => { };
         }
 
         public void ExecStaticAdd()
         {
-            TestClassWrapper<short>.TestClass<IDisposable>.TestStaticEvent += (s, e) => { };
+            TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticEvent += (s, e) => { };
         }
 
         public void ExecRemove()
         {
-            new TestClassWrapper<short>.TestClass<IDisposable>().TestEvent -= (s, e) => { };
+            new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestEvent -= (s, e) => { };
         }
 
         public void ExecStaticRemove()
         {
-            TestClassWrapper<short>.TestClass<IDisposable>.TestStaticEvent -= (s, e) => { };
+            TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticEvent -= (s, e) => { };
         }
 
         public void ExecIteratorMethod()
         {
-            var result = new TestClassWrapper<short>.TestClass<IDisposable>().TestIteratorMethod<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Last();
+            var result = new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestIteratorMethod<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Last();
 
             Assert.AreEqual(TestAssets.asset1, result.Item1);
             Assert.AreEqual(TestAssets.asset2, result.Item2);
@@ -204,7 +196,7 @@ namespace AspectInjector.Tests.Runtime
 
         public void ExecStaticIteratorMethod()
         {
-            var result = TestClassWrapper<short>.TestClass<IDisposable>.TestStaticIteratorMethod<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Last();
+            var result = TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticIteratorMethod<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Last();
 
             Assert.AreEqual(TestAssets.asset1, result.Item1);
             Assert.AreEqual(TestAssets.asset2, result.Item2);
@@ -215,7 +207,7 @@ namespace AspectInjector.Tests.Runtime
 
         public void ExecAsyncTypedTaskMethod()
         {
-            var result = new TestClassWrapper<short>.TestClass<IDisposable>().TestAsyncMethod1<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Result;
+            var result = new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestAsyncMethod1<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Result;
 
             Assert.AreEqual(TestAssets.asset1, result.Item1);
             Assert.AreEqual(TestAssets.asset2, result.Item2);
@@ -226,7 +218,7 @@ namespace AspectInjector.Tests.Runtime
 
         public void ExecStaticAsyncTypedTaskMethod()
         {
-            var result = TestClassWrapper<short>.TestClass<IDisposable>.TestStaticAsyncMethod1<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Result;
+            var result = TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticAsyncMethod1<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Result;
 
             Assert.AreEqual(TestAssets.asset1, result.Item1);
             Assert.AreEqual(TestAssets.asset2, result.Item2);
@@ -237,23 +229,23 @@ namespace AspectInjector.Tests.Runtime
 
         public void ExecAsyncTaskMethod()
         {
-            new TestClassWrapper<short>.TestClass<IDisposable>().TestAsyncMethod2<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Wait();
+            new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestAsyncMethod2<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Wait();
         }
 
         public void ExecStaticAsyncTaskMethod()
         {
-            TestClassWrapper<short>.TestClass<IDisposable>.TestStaticAsyncMethod2<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Wait();
+            TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticAsyncMethod2<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Wait();
         }
 
         public void ExecAsyncVoidMethod()
         {
-            new TestClassWrapper<short>.TestClass<IDisposable>().TestAsyncMethod3<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5);
+            new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestAsyncMethod3<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5);
             Task.Delay(100).Wait();
         }
 
         public void ExecStaticAsyncVoidMethod()
         {
-            TestClassWrapper<short>.TestClass<IDisposable>.TestStaticAsyncMethod3<TextReader>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5);
+            TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticAsyncMethod3<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5);
             Task.Delay(100).Wait();
         }
 

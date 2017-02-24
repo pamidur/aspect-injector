@@ -1,113 +1,114 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using AspectInjector.Tests.Assets;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
-namespace AspectInjector.Tests.Runtime.After.Instance
+namespace AspectInjector.Tests.Runtime.After.Global
 {
     [TestClass]
-    public class TargetsInstanceTests : TestRunner
+    public class TargetsGlobalTests : TestRunner
     {
         [TestMethod]
-        public void AdviceAfter_Instance_Consrtuctor()
+        public void AdviceAfter_Global_Consrtuctor()
         {
             ExecConstructor();
             CheckSequence(new List<string> {
                 Events.TestConstructorExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Consrtuctor()
+        public void AdviceAfter_Global_Static_Consrtuctor()
         {
             ExecStaticConstructor();
             CheckSequence(new List<string> {
                 Events.TestStaticConstructorExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Setter()
+        public void AdviceAfter_Global_Setter()
         {
             ExecSetter();
             CheckSequence(new List<string> {
                 Events.TestPropertySetterExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Setter()
+        public void AdviceAfter_Global_Static_Setter()
         {
             ExecStaticSetter();
             CheckSequence(new List<string> {
                 Events.TestStaticPropertySetterExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Getter()
+        public void AdviceAfter_Global_Getter()
         {
             ExecGetter();
             CheckSequence(new List<string> {
                 Events.TestPropertyGetterExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Getter()
+        public void AdviceAfter_Global_Static_Getter()
         {
             ExecStaticGetter();
             CheckSequence(new List<string> {
                 Events.TestStaticPropertyGetterExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Add()
+        public void AdviceAfter_Global_Add()
         {
             ExecAdd();
             CheckSequence(new List<string> {
                 Events.TestEventAddExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Add()
+        public void AdviceAfter_Global_Static_Add()
         {
             ExecStaticAdd();
             CheckSequence(new List<string> {
                 Events.TestStaticEventAddExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Remove()
+        public void AdviceAfter_Global_Remove()
         {
             ExecRemove();
             CheckSequence(new List<string> {
                 Events.TestEventRemoveExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Remove()
+        public void AdviceAfter_Global_Static_Remove()
         {
             ExecStaticRemove();
             CheckSequence(new List<string> {
                 Events.TestStaticEventRemoveExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Methods()
+        public void AdviceAfter_Global_Methods()
         {
             ExecMethod();
             ExecIteratorMethod();
@@ -117,24 +118,24 @@ namespace AspectInjector.Tests.Runtime.After.Instance
 
             CheckSequence(new List<string> {
                 Events.TestMethodExit,
-                AfterAspectInstance.Executed,
+                GlobalAspect.AfterExecuted,
 
                 Events.TestIteratorMethodExit,
-                AfterAspectInstance.Executed,
+                GlobalAspect.AfterExecuted,
 
                 Events.TestAsyncMethodExit,
-                AfterAspectInstance.Executed,
+                GlobalAspect.AfterExecuted,
 
                 Events.TestAsyncMethodExit,
-                AfterAspectInstance.Executed,
+                GlobalAspect.AfterExecuted,
 
                 Events.TestAsyncMethodExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
 
         [TestMethod]
-        public void AdviceAfter_Instance_Static_Methods()
+        public void AdviceAfter_Global_Static_Methods()
         {
             ExecStaticMethod();
             ExecStaticIteratorMethod();
@@ -144,19 +145,19 @@ namespace AspectInjector.Tests.Runtime.After.Instance
 
             CheckSequence(new List<string> {
                 Events.TestStaticMethodExit,
-                AfterAspectInstance.Executed,
+                GlobalAspect.AfterExecuted,
 
                 Events.TestStaticIteratorMethodExit,
-                AfterAspectInstance.Executed,
+                GlobalAspect.AfterExecuted,
 
                 Events.TestStaticAsyncMethodExit,
-                AfterAspectInstance.Executed,
+                GlobalAspect.AfterExecuted,
 
                 Events.TestStaticAsyncMethodExit,
-                AfterAspectInstance.Executed,
+                GlobalAspect.AfterExecuted,
 
                 Events.TestStaticAsyncMethodExit,
-                AfterAspectInstance.Executed
+                GlobalAspect.AfterExecuted
             });
         }
     }

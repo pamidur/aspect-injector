@@ -107,7 +107,7 @@
     <Compile Include="Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\CachedAssemblyResolver.cs" />
-    <Compile Include="Utils\StrictAssemblyResolver.cs" />
+    <Compile Include="Utils\KnownReferencesAssemblyResolver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

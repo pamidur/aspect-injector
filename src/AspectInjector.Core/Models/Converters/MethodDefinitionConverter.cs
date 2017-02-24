@@ -22,8 +22,11 @@ namespace AspectInjector.Core.Models.Converters
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var jt = JToken.Load(reader);
-            var tokenRefs = jt.ToObject<string>().Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+            var value = JToken.Load(reader).Value<string>();
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            var tokenRefs = value.Split(new[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
 
             var tdToken = new MetadataToken(uint.Parse(tokenRefs[0]));
             var mdToken = new MetadataToken(uint.Parse(tokenRefs[1]));

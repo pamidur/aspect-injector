@@ -4,22 +4,20 @@
   <PropertyGroup>
     <CompileDependsOn>
       $(CompileDependsOn);
-      AspectInjectionTasks
+      InjectAspects;
+      SignAssemblyAfterAspectInjection
     </CompileDependsOn>
   </PropertyGroup>
 
-  <Target Name="AspectInjectionTasks" DependsOnTargets="InjectAspects;SignAssembly">
-  </Target>
-
   <Target Name="InjectAspects">
     <PropertyGroup>
-      <ProcessCmd>&quot;$(MSBuildThisFileDirectory)aspectinjector.cli.exe&quot; process -f $(IntermediateOutputPath)$(TargetFileName)</ProcessCmd>
+      <ProcessCmd>&quot;$(MSBuildThisFileDirectory)aspectinjector.cli.exe&quot; process -f $(IntermediateOutputPath)$(TargetFileName) -r @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
     </PropertyGroup>
 
-    <Exec Command="$(ProcessCmd)" />
+    <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" />
   </Target>
 
-  <Target Name="SignAssembly" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySing)' != 'true'" DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
+  <Target Name="SignAssemblyAfterAspectInjection" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true'" DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
 
     <Message Text="SnTool found: $(SnTool)"/>
 

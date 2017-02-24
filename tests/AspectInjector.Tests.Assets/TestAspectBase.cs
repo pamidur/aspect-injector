@@ -1,12 +1,11 @@
-﻿using AspectInjector.Broker;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 
-namespace AspectInjector.Tests.Runtime
+namespace AspectInjector.Tests.Assets
 {
     public class TestAspectBase
     {
@@ -74,7 +73,7 @@ namespace AspectInjector.Tests.Runtime
             if (target == null)
                 TestLog.Write($"{prefix}:Target:null");
             else
-                TestLog.Write($"{prefix}:Target:{target.Target.GetType().FullName}:{target.Method.Name}");
+                TestLog.Write($"{prefix}:Target:{target.Target.GetType().FullName}:{target.ToString()}");
         }
 
         internal void LogType(Type hostType, string prefix)

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AspectInjector.Tests.Runtime
+namespace AspectInjector.Tests.Assets
 {
     public static class TestLog
     {

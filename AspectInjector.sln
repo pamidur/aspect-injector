@@ -40,6 +40,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Tests.Compil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core.Tests", "tests\AspectInjector.Tests.Core\AspectInjector.Core.Tests.csproj", "{9641A20D-A3A6-4A80-A839-D80950CE959A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Tests.Assets", "tests\AspectInjector.Tests.Assets\AspectInjector.Tests.Assets.csproj", "{47463727-FF34-4C9D-BEF1-E6222936DFC8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {FC862191-9081-4A58-96FF-B57F17AC40A9}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +83,10 @@ Global
 		{9641A20D-A3A6-4A80-A839-D80950CE959A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9641A20D-A3A6-4A80-A839-D80950CE959A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9641A20D-A3A6-4A80-A839-D80950CE959A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47463727-FF34-4C9D-BEF1-E6222936DFC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47463727-FF34-4C9D-BEF1-E6222936DFC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47463727-FF34-4C9D-BEF1-E6222936DFC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47463727-FF34-4C9D-BEF1-E6222936DFC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,5 +95,6 @@ Global
 		{EE475524-F971-49F1-B794-6B37B770AA23} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
 		{217FD2E2-0AB4-4D1B-9EF7-E7139D893A99} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
 		{9641A20D-A3A6-4A80-A839-D80950CE959A} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
+		{47463727-FF34-4C9D-BEF1-E6222936DFC8} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
 	EndGlobalSection
 EndGlobal

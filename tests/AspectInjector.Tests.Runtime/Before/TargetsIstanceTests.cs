@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using AspectInjector.Tests.Assets;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
 namespace AspectInjector.Tests.Runtime.Before.Instance
@@ -11,7 +12,7 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
         {
             ExecConstructor();
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestConstructorEnter
             });
         }
@@ -21,7 +22,7 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
         {
             ExecStaticConstructor();
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestStaticConstructorEnter
             });
         }
@@ -31,7 +32,7 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
         {
             ExecSetter();
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestPropertySetterEnter
             });
         }
@@ -41,7 +42,7 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
         {
             ExecStaticSetter();
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestStaticPropertySetterEnter
             });
         }
@@ -51,7 +52,7 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
         {
             ExecGetter();
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestPropertyGetterEnter
             });
         }
@@ -61,7 +62,7 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
         {
             ExecStaticGetter();
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestStaticPropertyGetterEnter
             });
         }
@@ -71,7 +72,7 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
         {
             ExecAdd();
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestEventAddEnter
             });
         }
@@ -81,7 +82,7 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
         {
             ExecStaticAdd();
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestStaticEventAddEnter
             });
         }
@@ -91,7 +92,7 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
         {
             ExecRemove();
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestEventRemoveEnter
             });
         }
@@ -101,7 +102,7 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
         {
             ExecStaticRemove();
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestStaticEventRemoveEnter
             });
         }
@@ -116,19 +117,19 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
             ExecAsyncTypedTaskMethod();
 
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestMethodEnter,
 
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestIteratorMethodEnter,
 
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestAsyncMethodEnter,
 
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestAsyncMethodEnter,
 
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestAsyncMethodEnter,
             });
         }
@@ -143,19 +144,19 @@ namespace AspectInjector.Tests.Runtime.Before.Instance
             ExecStaticAsyncTypedTaskMethod();
 
             CheckSequence(new List<string> {
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestStaticMethodEnter,
 
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestStaticIteratorMethodEnter,
 
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestStaticAsyncMethodEnter,
 
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestStaticAsyncMethodEnter,
 
-                BeforeAspectInstance.Executed,
+                InstanceAspect.BeforeExecuted,
                 Events.TestStaticAsyncMethodEnter,
             });
         }

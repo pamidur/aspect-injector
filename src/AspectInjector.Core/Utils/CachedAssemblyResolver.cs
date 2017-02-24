@@ -14,11 +14,16 @@ namespace AspectInjector.Core.Utils
 
             if (result == null)
             {
-                result = base.Resolve(name, parameters);
+                result = LookupAssembly(name, parameters);
                 _cache[name.FullName] = result;
             }
 
             return result;
+        }
+
+        protected virtual AssemblyDefinition LookupAssembly(AssemblyNameReference name, ReaderParameters parameters)
+        {
+            return base.Resolve(name, parameters);
         }
 
         protected internal void RegisterAssembly(AssemblyDefinition assembly)

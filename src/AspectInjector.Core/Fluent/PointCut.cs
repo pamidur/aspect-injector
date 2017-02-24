@@ -42,7 +42,7 @@ namespace AspectInjector.Core.Models
         public PointCut CreateArray(TypeReference elementType, params Action<PointCut>[] elements)
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, elements.Length));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Newarr, _typeSystem.Import(elementType)));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Newarr, elementType));
 
             for (var i = 0; i < elements.Length; i++)
             {
@@ -186,8 +186,8 @@ namespace AspectInjector.Core.Models
 
         public PointCut TypeOf(TypeReference type)
         {
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _typeSystem.Import(type)));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.Import(_typeSystem.Type.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle"))));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, type));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.Type.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle")));
 
             return this;
         }
@@ -226,7 +226,7 @@ namespace AspectInjector.Core.Models
 
         public PointCut Load(FieldReference field)
         {
-            var fieldRef = _proc.Body.Method.ParametrizeGenericChild(_typeSystem.Import(field));//*/(FieldReference)field.CreateReference(_typeSystem);
+            var fieldRef = _proc.Body.Method.ParametrizeGenericChild(field);//*/(FieldReference)field.CreateReference(_typeSystem);
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, fieldRef));
@@ -236,7 +236,7 @@ namespace AspectInjector.Core.Models
 
         public PointCut Load(MethodReference method)
         {
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldftn, _typeSystem.Import(method)));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldftn, method));
             return this;
         }
 
@@ -284,7 +284,7 @@ namespace AspectInjector.Core.Models
         public PointCut GetAddrByIndex(int index, TypeReference type)
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, index));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldelema, _typeSystem.Import(type)));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldelema, type));
             return this;
         }
 
@@ -308,7 +308,7 @@ namespace AspectInjector.Core.Models
             }
 
             if (typeOnStack.IsValueType || typeOnStack.IsGenericParameter)
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Box, _typeSystem.Import(typeOnStack)));
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Box, typeOnStack));
 
             return this;
         }
@@ -322,12 +322,12 @@ namespace AspectInjector.Core.Models
                 if (refType.IsValueType)
                 {
                     var opcode = _typeSystem.SaveIndirectMap.First(kv => refType.IsTypeOf(kv.Key)).Value;
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, _typeSystem.Import(refType)));
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, refType));
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
                 }
                 else if (refType.IsGenericParameter)
                 {
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, _typeSystem.Import(refType)));
+                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, refType));
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stobj, refType));
                 }
                 else
@@ -403,9 +403,9 @@ namespace AspectInjector.Core.Models
 
         public PointCut MethodOf(MethodReference method)
         {
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _typeSystem.Import(method)));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _typeSystem.Import(method.DeclaringType.ParametrizeGenericChild(method.DeclaringType))));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.Import(_typeSystem.MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2))));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, method));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, method.DeclaringType.ParametrizeGenericChild(method.DeclaringType)));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2)));
 
             return this;
         }
@@ -413,9 +413,9 @@ namespace AspectInjector.Core.Models
         public PointCut Cast(TypeReference type)
         {
             if (type.IsValueType || type.IsGenericParameter)
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, _typeSystem.Import(type)));
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, type));
             else
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Castclass, _typeSystem.Import(type)));
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Castclass, type));
 
             return this;
         }
@@ -432,7 +432,7 @@ namespace AspectInjector.Core.Models
 
         public Instruction CreateInstruction(OpCode opCode, FieldReference value)
         {
-            return _proc.Create(opCode, value);
+            return _proc.Create(opCode, _typeSystem.Import(value));
         }
 
         public Instruction CreateInstruction(OpCode opCode, VariableDefinition value)
@@ -442,12 +442,12 @@ namespace AspectInjector.Core.Models
 
         public Instruction CreateInstruction(OpCode opCode, TypeReference value)
         {
-            return _proc.Create(opCode, value);
+            return _proc.Create(opCode, _typeSystem.Import(value));
         }
 
         public Instruction CreateInstruction(OpCode opCode, MethodReference value)
         {
-            return _proc.Create(opCode, value);
+            return _proc.Create(opCode, _typeSystem.Import(value));
         }
 
         public Instruction CreateInstruction(OpCode opCode)

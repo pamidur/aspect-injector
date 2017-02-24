@@ -22,8 +22,11 @@ namespace AspectInjector.Core.Models.Converters
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var jt = JToken.Load(reader);
-            var token = new MetadataToken(jt.ToObject<uint>());
+            var value = JToken.Load(reader).Value<uint?>();
+            if (!value.HasValue)
+                return null;
+
+            var token = new MetadataToken(value.Value);
 
             if (token.TokenType == TokenType.TypeDef)
                 return _reference.GetTypes().First(td => td.MetadataToken == token);
