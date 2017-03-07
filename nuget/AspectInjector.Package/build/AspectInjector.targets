@@ -11,7 +11,7 @@
 
   <Target Name="InjectAspects">
     <PropertyGroup>
-      <ProcessCmd>&quot;$(MSBuildThisFileDirectory)aspectinjector.cli.exe&quot; process -f $(IntermediateOutputPath)$(TargetFileName) -r @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
+      <ProcessCmd>&quot;$(MSBuildThisFileDirectory)aspectinjector.cli.exe&quot; process -f &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; -r @(ReferencePath->'"&quot;%(Fullpath)&quot;"', ' ')</ProcessCmd>
     </PropertyGroup>
 
     <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" />
@@ -22,7 +22,7 @@
     <Message Text="SnTool found: $(SnTool)"/>
 
     <PropertyGroup>
-      <signcmd>&quot;$(SnTool)&quot; -R $(IntermediateOutputPath)$(TargetFileName) $(AssemblyOriginatorKeyFile)</signcmd>
+      <signcmd>&quot;$(SnTool)&quot; -R &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(AssemblyOriginatorKeyFile)</signcmd>
     </PropertyGroup>
 
     <Exec Command="$(signcmd)" />

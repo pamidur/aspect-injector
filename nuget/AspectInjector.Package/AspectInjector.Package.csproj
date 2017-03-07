@@ -14,6 +14,7 @@
     <PackageTags>AOP aspect aspects injector injection wp8 wp8.1 win8 win8.1 notify notifypropertychanged INPC</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IncludeBuildOutput>False</IncludeBuildOutput>
+    <Version>1.0.3</Version>
     <!--<NuspecProperties>DevelopmentDependency=true</NuspecProperties>-->
   </PropertyGroup>
 
@@ -27,6 +28,9 @@
       <Link>lib\%(Filename)%(Extension)</Link>
     </None>
     <None Include="$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(Configuration)\*.dll" Pack="true" PackagePath="build">
+      <Link>build\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(Configuration)\*.exe" Exclude="$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(Configuration)\*.vshost.exe" Pack="true" PackagePath="build">
       <Link>build\%(Filename)%(Extension)</Link>
     </None>
   </ItemGroup>
