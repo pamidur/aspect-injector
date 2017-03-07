@@ -21,8 +21,8 @@ namespace AspectInjector.CLI.Commands
         [Option('f', "file", Required = true, HelpText = ".net assembly file for processing (typically exe or dll)")]
         public string Filename { get; set; }
 
-        [Option('r', "references", HelpText = "Referenced assemblies")]
-        public IEnumerable<string> References { get; set; }
+        [Option('r', "references", HelpText = "Referenced assemblies semicolon separated")]
+        public string References { get; set; }
 
         public override int Execute()
         {
@@ -41,7 +41,7 @@ namespace AspectInjector.CLI.Commands
             var resolver = new KnownReferencesAssemblyResolver();
             resolver.AddSearchDirectory(Path.GetDirectoryName(Filename));
             if (References != null)
-                References.ToList().ForEach(resolver.AddReference);
+                References.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(resolver.AddReference);
 
             try
             {
