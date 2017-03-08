@@ -57,7 +57,7 @@ namespace AspectInjector.Core.Models
         {
             args?.Invoke(this);
 
-            var methodRef = _typeSystem.Import(_proc.Body.Method.ParametrizeGenericChild(method));
+            var methodRef = _typeSystem.Import(_proc.Body.Method.ParametrizeGenericChild(_typeSystem.Import(method)));
             var def = method.Resolve();
 
             var code = OpCodes.Call;

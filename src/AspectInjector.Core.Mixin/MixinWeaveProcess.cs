@@ -31,18 +31,20 @@ namespace AspectInjector.Core.Mixin
             foreach (var iface in ifaceTree)
                 if (_target.Interfaces.All(i => !i.IsTypeOf(iface)))
                 {
-                    _target.Interfaces.Add(_ts.Import(iface));
+                    var ifaceRef = _ts.Import(iface);
+
+                    _target.Interfaces.Add(ifaceRef);
 
                     var ifaceDefinition = iface.Resolve();
 
                     foreach (var method in ifaceDefinition.Methods.Where(m => m.IsNormalMethod() || m.IsConstructor))
-                        CreateMethodProxy(method, iface);
+                        CreateMethodProxy(method, ifaceRef);
 
                     foreach (var @event in ifaceDefinition.Events)
-                        CreateEventProxy(@event, iface);
+                        CreateEventProxy(@event, ifaceRef);
 
                     foreach (var property in ifaceDefinition.Properties)
-                        CreatePropertyProxy(property, iface);
+                        CreatePropertyProxy(property, ifaceRef);
                 }
         }
 
@@ -65,11 +67,11 @@ namespace AspectInjector.Core.Mixin
                 if (ifaceMethod.Resolve().IsSpecialName)
                     proxy.IsSpecialName = true;
 
-                proxy.Overrides.Add(_ts.Import(ifaceMethod));
-
-                foreach (var parameter in ifaceMethod.Parameters)
+                foreach (var parameter in _target.ParametrizeGenericChild(ifaceMethod).Parameters)
                     proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _ts.Import(ifaceMethod.ResolveGenericType(parameter.ParameterType))));
 
+                proxy.Overrides.Add(ifaceMethod);
+                
                 proxy.GetEditor().Instead(
                         e => e
                         .LoadAspect(_aspect)
@@ -86,7 +88,7 @@ namespace AspectInjector.Core.Mixin
             var method = _ts.Import(originalMethod);
 
             if (@interface.IsGenericInstance)
-                method = originalMethod.MakeHostInstanceGeneric(@interface);
+                method = _ts.Import(method.MakeHostInstanceGeneric(@interface));
 
             GetOrCreateMethodProxy(method);
         }
@@ -94,7 +96,7 @@ namespace AspectInjector.Core.Mixin
         protected void CreateEventProxy(EventDefinition originalEvent, TypeReference @interface)
         {
             var eventName = $"{@interface.FullName}.{originalEvent.Name}";
-            var eventType = @interface.ResolveGenericType(originalEvent.EventType);
+            var eventType = @interface.ResolveGenericType(_ts.Import(originalEvent.AddMethod??originalEvent.RemoveMethod).Parameters[0].ParameterType);
 
             var ed = _target.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.IsTypeOf(eventType));
             if (ed == null)
@@ -103,16 +105,16 @@ namespace AspectInjector.Core.Mixin
 
                 if (originalEvent.AddMethod != null)
                 {
-                    MethodReference method = originalEvent.AddMethod;
-                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric(@interface);
+                    MethodReference method = _ts.Import(originalEvent.AddMethod);
+                    if (@interface.IsGenericInstance) method = _ts.Import(method.MakeHostInstanceGeneric(@interface));
 
                     ed.AddMethod = GetOrCreateMethodProxy(method);
                 }
 
                 if (originalEvent.RemoveMethod != null)
                 {
-                    MethodReference method = originalEvent.RemoveMethod;
-                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric(@interface);
+                    MethodReference method = _ts.Import(originalEvent.RemoveMethod);
+                    if (@interface.IsGenericInstance) method = _ts.Import(method.MakeHostInstanceGeneric(@interface));
 
                     ed.RemoveMethod = GetOrCreateMethodProxy(method);
                 }
@@ -124,8 +126,16 @@ namespace AspectInjector.Core.Mixin
         protected void CreatePropertyProxy(PropertyDefinition originalProperty, TypeReference @interface)
         {
             var propertyName = $"{@interface.FullName}.{originalProperty.Name}";
-            var propertyType = @interface.ResolveGenericType(originalProperty.PropertyType);
 
+            TypeReference propertyType = null;
+
+            if (originalProperty.GetMethod != null)
+                propertyType = _ts.Import(originalProperty.GetMethod).ReturnType;
+            else if(originalProperty.SetMethod!=null)
+                propertyType = _ts.Import(originalProperty.SetMethod).Parameters[0].ParameterType;
+
+            propertyType = @interface.ResolveGenericType(propertyType);
+            
             var pd = _target.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.IsTypeOf(propertyType));
             if (pd == null)
             {
@@ -133,16 +143,16 @@ namespace AspectInjector.Core.Mixin
 
                 if (originalProperty.GetMethod != null)
                 {
-                    MethodReference method = originalProperty.GetMethod;
-                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric(@interface);
-
+                    MethodReference method = _ts.Import(originalProperty.GetMethod);
+                    if (@interface.IsGenericInstance) method = _ts.Import(method.MakeHostInstanceGeneric(@interface));
+                    
                     pd.GetMethod = GetOrCreateMethodProxy(method);
                 }
 
                 if (originalProperty.SetMethod != null)
                 {
-                    MethodReference method = originalProperty.SetMethod;
-                    if (@interface.IsGenericInstance) method = method.MakeHostInstanceGeneric(@interface);
+                    MethodReference method = _ts.Import(originalProperty.SetMethod);
+                    if (@interface.IsGenericInstance) method = _ts.Import(method.MakeHostInstanceGeneric(@interface));
 
                     pd.SetMethod = GetOrCreateMethodProxy(method);
                 }
@@ -151,7 +161,7 @@ namespace AspectInjector.Core.Mixin
             }
         }
 
-        private static IEnumerable<TypeReference> GetInterfacesTree(TypeReference typeReference)
+        private IEnumerable<TypeReference> GetInterfacesTree(TypeReference typeReference)
         {
             var definition = typeReference.Resolve();
             if (!definition.IsInterface)
