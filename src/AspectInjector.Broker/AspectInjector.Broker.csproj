@@ -21,10 +21,4 @@
     <DocumentationFile>bin\Release\netstandard1.0\AspectInjector.Broker.xml</DocumentationFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BuildTools.StyleCop" Version="4.7.49">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-
 </Project>
