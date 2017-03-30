@@ -140,6 +140,7 @@
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(ConfigurationName)\aspectinjector.cli.exe process -d -f "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Configuration)' == 'Debug' ">$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(ConfigurationName)\aspectinjector.cli.exe process -d -f "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Configuration)' != 'Debug' ">$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(ConfigurationName)\aspectinjector.cli.exe process -f "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
