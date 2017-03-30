@@ -14,7 +14,6 @@ PM> Install-Package AspectInjector -Pre
 ### Features ###
 - Compile-time injection
 - No runtime dependencies
-- User defined attributes
 - Advice debugging
 - Interface injection
 - Injection into Methods, Properties, Events
@@ -24,6 +23,7 @@ PM> Install-Package AspectInjector -Pre
 
 Aspect is a class which contains a set of advices - methods which should be injected to certain points in the code. Each advice has mandatory attributes which define a kind of target class members (constructor, getter, setter, regular method etc.) and join points - points in the code where this advice should be injected (before target member, after or both). Aspects and advices are marked with appropriate attributes. For example, we have a class with one method marked as advice:
 ```C#
+[Aspect(Aspect.Scope.Instance)]
 class TraceAspect
 {
 	private int count;
@@ -40,11 +40,11 @@ class TraceAspect
 Having it we can apply this aspect to any method or a set of methods of some class:
 ```C#
 //Method CallCountTrace of TraceAspect instance will be called at the beginning of Calculate() 
-[Aspect(typeof(TraceAspect))]
+[Inject(typeof(TraceAspect))]
 public void Calculate() { }
 
 //Method CallCountTrace of TraceAspect instance will be called at the beginning of Load() and Save()
-[Aspect(typeof(TraceAspect))]
+[Inject(typeof(TraceAspect))]
 class Container
 {
     public string Name { get; set; }
@@ -54,11 +54,12 @@ class Container
 }
 
 //Will not work - CallCountTrace() advice is applicable to regular methods only
-[Aspect(typeof(TraceAspect))]
+[Inject(typeof(TraceAspect))]
 public string Name { get; set; }
 ```
 Please note that there will be only one instace of an aspect per target class regardless of number of affected members. So in the example above Container class will have only one instance of TraceAspect, so both Load() and Save() will increment the same call counter.
 
+**!!!! Everything below is outdated !!!!**
 
 ### Attributes ###
 
