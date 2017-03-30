@@ -11,7 +11,7 @@ $github_api_token = ""
 $github_repo_uri = "https://api.github.com/repos/pamidur/aspect-injector"
 $solutionFilename = "AspectInjector.sln"
 $testsSolutionFilename = "AspectInjector.Test.sln"
-$binDir = ".\AspectInjector.BuildTask\bin\Release"
+$binDir = ".\AspectInjector.CommandLine\bin\Release"
 $testsDll = ".\AspectInjector.Tests\bin\Release\AspectInjector.Tests.dll"
 $packageBuildPlace = ".\packagebuildplace"
 
@@ -154,11 +154,12 @@ New-Item $toolsDir -ItemType Directory | Out-Null
 "Copying items."
 Copy-Item "packagecontent\AspectInjector.nuspec" $packageBuildPlace
 Copy-Item "packagecontent\AspectInjector.targets" $targetsDir
-Copy-Item "packagecontent\AspectInjector.props" $targetsDir
 Copy-Item "packagecontent\install.ps1" $toolsDir
 Copy-Item "README.md" (join-path $packageBuildPlace "readme.txt" )
 Get-ChildItem $binDir -Filter "*.dll" -Recurse | %{ Copy-Item $_.Fullname $targetsDir }
+Get-ChildItem $binDir -Filter "*.exe" -Recurse | %{ Copy-Item $_.Fullname $targetsDir }
 Copy-Item (Join-Path $binDir "AspectInjector.Broker.dll") $libDir
+Copy-Item (Join-Path $binDir "AspectInjector.Broker.xml") $libDir
 
 "Updating nuspec"
 $nuspec = join-path $packageBuildPlace "AspectInjector.nuspec"

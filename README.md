@@ -28,7 +28,7 @@ class TraceAspect
 {
 	private int count;
 	
-	[Advice(InjectionPoints.Before, InjectionTargets.Method)]
+	[Advice(Advice.Type.Before, Advice.Target.Method)]
 	public void CallCountTrace()
 	{
 		Console.WriteLine("Call #{0}", count);
@@ -97,8 +97,8 @@ Parameters
 
 |Name |Type |Description  |
 |-----|-----|-------------|
-|Points|InjectionPoints|Point in the target class member, where the current advice should be injected.|
-|Targets|InjectionTargets|Kind of target class members to which the current advice should be injected.|
+|Points|Advice.Type|Point in the target class member, where the current advice should be injected.|
+|Targets|Advice.Target|Kind of target class members to which the current advice should be injected.|
 
 **AdviceArgumentAttribute**
 
@@ -111,7 +111,7 @@ Parameters
 
 |Name |Type |Description  |
 |-----|-----|-------------|
-|Source|AdviceArgumentSource| A kind of a source from which specific advice parameter should be populated |
+|Source|AdviceArgument.Source| A kind of a source from which specific advice parameter should be populated |
 
 **AdviceInterfaceProxyAttribute**
 
@@ -133,10 +133,10 @@ public class NotifyPropertyChangedAspect : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler PropertyChanged;
 
-    [Advice(InjectionPoints.After, InjectionTargets.Setter)]
+    [Advice(Advice.Type.After, Advice.Target.Setter)]
     public void RaisePropertyChanged(
-        [AdviceArgument(AdviceArgumentSource.Instance)] object targetInstance,
-        [AdviceArgument(AdviceArgumentSource.TargetName)] string propertyName)
+        [AdviceArgument(AdviceArgument.Source.Instance)] object targetInstance,
+        [AdviceArgument(AdviceArgument.Source.TargetName)] string propertyName)
     {
         var handler = PropertyChanged;
         if(handler != null)
@@ -160,7 +160,7 @@ Is used to specify target members filtering criteria for AspectAttribute, the me
 |ProtectedInternal|
 |Public|
 
-**AdviceArgumentSource**
+**AdviceArgument.Source**
 
 Is used to specify the source from which specific advice parameter should be populated. Corresponding required parameter types are shown in the table below.
 
@@ -176,7 +176,7 @@ Is used to specify the source from which specific advice parameter should be pop
 |ReturnType| Type | The return type of the target member.
 |RoutableData| Attribute[] | TBD
 
-**InjectionPoints**
+**Advice.Type**
 
 Is used to specify the point in the target class member, where the current advice should be injected.
 
@@ -186,7 +186,7 @@ Is used to specify the point in the target class member, where the current advic
 |After| After the target body is executed.
 |Around| Replaces the target with an advice method accepting both a delegate and parameters of the original call as the input. Allows to wrap any method with additional fucntionality - for example, measuring target call duration, exception handling etc.
 
-**InjectionTargets**
+**Advice.Target**
 
 Is used to specify the kind of target class members to which the current advice should be injected.
 

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <CompileDependsOn>
+      $(CompileDependsOn);
+      InjectAspects;
+      SignAssemblyAfterAspectInjection
+    </CompileDependsOn>
+  </PropertyGroup>
+
+  <Target Name="InjectAspects">
+    <PropertyGroup>
+      <ProcessCmd>&quot;$(MSBuildThisFileDirectory)aspectinjector.cli.exe&quot; process -f &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; -r &quot;@(ReferencePath->'"%(Fullpath)"', ';')&quot;</ProcessCmd>
+    </PropertyGroup>
+
+    <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+  </Target>
+
+  <Target Name="SignAssemblyAfterAspectInjection" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true'" DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
+
+    <Message Text="SnTool found: $(SnTool)"/>
+
+    <PropertyGroup>
+      <signcmd>&quot;$(SnTool)&quot; -R &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(AssemblyOriginatorKeyFile)</signcmd>
+    </PropertyGroup>
+
+    <Exec Command="$(signcmd)" />
+  </Target>
+
+  <Target Name="GetSnToolForUnix" Condition=" '$(OS)' == 'Unix' ">
+    <PropertyGroup>
+      <SnTool>sn</SnTool>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="GetSnToolForWindows" Condition=" '$(OS)' != 'Unix' ">
+    <GetFrameworkSdkPath>
+      <Output TaskParameter="Path" PropertyName="WindowsSdkPath" />
+    </GetFrameworkSdkPath>
+    <ItemGroup>
+      <SnTools Include="$(WindowsSdkPath)**\sn.exe" />
+    </ItemGroup>
+    <PropertyGroup>
+      <SnToolsRaw>@(SnTools)</SnToolsRaw>
+    </PropertyGroup>
+    <PropertyGroup>
+      <SnTool>$(SnToolsRaw.Substring(0, $(SnToolsRaw.IndexOf(';'))))</SnTool>
+    </PropertyGroup>
+  </Target>
+
+</Project>
