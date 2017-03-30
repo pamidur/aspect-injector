@@ -35,11 +35,7 @@ namespace AspectInjector.Core.Fluent
 
                 if (!MethodEditors.TryGetValue(md, out result))
                 {
-                    //if (md.CustomAttributes.HasAttributeOfType<AsyncStateMachineAttribute>() /* && md.ReturnType != md.Module.TypeSystem.Void*/)
-                    //    result = new TargetAsyncMethodContext(md, ModuleContext.GetOrCreateContext(md.Module));
-                    //else
                     result = new MethodEditor(md);
-
                     MethodEditors.Add(md, result);
                 }
 

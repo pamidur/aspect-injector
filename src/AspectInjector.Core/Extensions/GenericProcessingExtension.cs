@@ -1,5 +1,6 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Rocks;
+using System;
 using System.Linq;
 
 namespace AspectInjector.Core.Extensions
@@ -31,7 +32,7 @@ namespace AspectInjector.Core.Extensions
             }
 
             return reference;
-        }
+        }      
 
         public static FieldReference ParametrizeGenericChild(this MemberReference member, FieldReference child)
         {
@@ -47,7 +48,7 @@ namespace AspectInjector.Core.Extensions
                 if (!nestedGeneric.ContainsGenericParameter)
                     return nestedGeneric;
 
-                var args = nestedGeneric.GenericArguments.Select(ga => member.ResolveGenericType(ga)).ToArray();
+                var args = nestedGeneric.GenericArguments.Select(ga => member.ResolveIfGeneric(ga)).ToArray();
 
                 return child.Resolve().MakeGenericInstanceType(args);
             }
@@ -82,27 +83,47 @@ namespace AspectInjector.Core.Extensions
             }
         }
 
+        public static TypeReference ResolveIfGeneric(this MemberReference member, TypeReference param)
+        {
+            if (param.ContainsGenericParameter)
+                return member.ResolveGenericType(param);
+
+            return param;
+        }
+
         public static TypeReference ResolveGenericType(this MemberReference member, TypeReference param)
         {
+            if (!param.ContainsGenericParameter)
+                throw new Exception($"{param} is not generic!");
+
+            if (param.IsByReference && param.ContainsGenericParameter)
+                return new ByReferenceType(member.ResolveGenericType(param.GetElementType()));
+
+            if (param.IsGenericInstance)
+            {
+                var nestedGeneric = (GenericInstanceType)param;
+                var args = nestedGeneric.GenericArguments.Select(ga => member.ResolveIfGeneric(ga)).ToArray();
+                return param.Module.Import(param.Resolve()).MakeGenericInstanceType(args);
+            }
+
             var gparam = param as GenericParameter;
             if (gparam == null)
-                return param;
+                throw new Exception("Cannot resolve generic parameter");
 
-            var generic = member as IGenericInstance;
-            if (generic == null)
-                return member.DeclaringType == null ? param : member.DeclaringType.ResolveGenericType(param);
+            object resolvedMember = ((dynamic)member).Resolve();
+            object resolvedOwner = ((dynamic)gparam.Owner).Resolve();
 
-            dynamic resolvedMember = ((dynamic)member).Resolve();
-
-            var owner = (IGenericParameterProvider)resolvedMember;
-            var parent = resolvedMember.DeclaringType as TypeReference;
-
-            if (gparam.Owner == owner)
-                return generic.GenericArguments[gparam.Position];
-            else if (parent != null && parent.IsGenericInstance && gparam.Owner == parent.Resolve())
-                return parent.ResolveGenericType(gparam);
+            if (resolvedOwner == resolvedMember)
+            {
+                if (member is IGenericInstance)
+                    return (member as IGenericInstance).GenericArguments[gparam.Position];
+                else
+                    return ((IGenericParameterProvider)member).GenericParameters[gparam.Position];
+            }
+            else if (member.DeclaringType != null)
+                return member.DeclaringType.ResolveGenericType(gparam);
             else
-                return param;
+                throw new Exception("Cannot resolve generic parameter");
         }
     }
 }

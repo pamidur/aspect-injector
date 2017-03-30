@@ -42,7 +42,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 switch (arg.Source)
                 {
                     case Source.Arguments: LoadArgumentsArgument(pc, arg); break;
-                    case Source.Attributes: LoadAttributesArgument(pc, arg); break;
+                    //case Source.Attributes: LoadAttributesArgument(pc, arg); break;
                     case Source.Instance: LoadInstanceArgument(pc, arg); break;
                     case Source.Method: LoadMethodArgument(pc, arg); break;
                     case Source.Name: LoadNameArgument(pc, arg); break;

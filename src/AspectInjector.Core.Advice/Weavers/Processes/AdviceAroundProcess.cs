@@ -148,7 +148,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             original.Name = _movedOriginalName;
             original.IsPrivate = true;
 
-            var returnType = _target.ResolveGenericType(_target.ReturnType);
+            var returnType = _target.ResolveIfGeneric(_target.ReturnType);
 
             MoveBody(_target, original);
 

@@ -14,6 +14,7 @@ namespace AspectInjector.Tests.Runtime.Mixins
         [Inject(typeof(GlobalAspect))]
         private class TestClass<T2>
         {
+            
         }
     }
 }

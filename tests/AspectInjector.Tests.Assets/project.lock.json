@@ -1880,20 +1880,20 @@
     ".NETStandard,Version=v1.0": []
   },
   "packageFolders": {
-    "C:\\Users\\Alexander\\.nuget\\packages\\": {}
+    "C:\\Users\\Oleksandr.Hulyi\\.nuget\\packages\\": {}
   },
   "project": {
     "restore": {
-      "projectUniqueName": "D:\\SVN\\Git\\aspect-injector\\tests\\AspectInjector.Tests.Assets\\AspectInjector.Tests.Assets.csproj",
+      "projectUniqueName": "D:\\repos\\aspect-injector\\tests\\AspectInjector.Tests.Assets\\AspectInjector.Tests.Assets.csproj",
       "projectName": "AspectInjector.Tests.Assets",
-      "projectPath": "D:\\SVN\\Git\\aspect-injector\\tests\\AspectInjector.Tests.Assets\\AspectInjector.Tests.Assets.csproj",
-      "projectJsonPath": "D:\\SVN\\Git\\aspect-injector\\tests\\AspectInjector.Tests.Assets\\project.json",
+      "projectPath": "D:\\repos\\aspect-injector\\tests\\AspectInjector.Tests.Assets\\AspectInjector.Tests.Assets.csproj",
+      "projectJsonPath": "D:\\repos\\aspect-injector\\tests\\AspectInjector.Tests.Assets\\project.json",
       "projectStyle": "ProjectJson",
       "frameworks": {
         "netstandard1.0": {
           "projectReferences": {
-            "D:\\SVN\\Git\\aspect-injector\\src\\AspectInjector.Broker\\AspectInjector.Broker.csproj": {
-              "projectPath": "D:\\SVN\\Git\\aspect-injector\\src\\AspectInjector.Broker\\AspectInjector.Broker.csproj"
+            "D:\\repos\\aspect-injector\\src\\AspectInjector.Broker\\AspectInjector.Broker.csproj": {
+              "projectPath": "D:\\repos\\aspect-injector\\src\\AspectInjector.Broker\\AspectInjector.Broker.csproj"
             }
           }
         }

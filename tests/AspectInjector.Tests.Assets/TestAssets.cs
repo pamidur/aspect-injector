@@ -33,6 +33,11 @@ namespace AspectInjector.Tests.Assets
 
         public event EventHandler<Tuple<Asset1, Asset1>> TestEvent;
 
+        public void EmptyMethod()
+        {
+            throw new NotImplementedException();
+        }
+
         public Tuple<int, Asset1, Asset1, Asset1, T3> TestMethod<T3>(int a1, Asset1 a2, Asset1 a3, Asset1 a4, T3 a5, ref int ar1, ref Asset1 ar2, ref Asset1 ar3, ref Asset1 ar4, ref T3 ar5, out int ao1, out Asset1 ao2, out Asset1 ao3, out Asset1 ao4, out T3 ao5)
         {
             throw new NotImplementedException();
@@ -52,6 +57,8 @@ namespace AspectInjector.Tests.Assets
             Tuple<T1, T2> TestProperty { get; set; }
 
             event EventHandler<Tuple<T1, T2>> TestEvent;
+
+            void EmptyMethod();
         }
     }
 }

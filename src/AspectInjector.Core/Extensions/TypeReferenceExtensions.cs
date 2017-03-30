@@ -73,14 +73,5 @@ namespace AspectInjector.Core.Extensions
 
             return td.Interfaces.Any(i => i.IsTypeOf(ti)) || (td.BaseType != null && td.BaseType.Implements(ti));
         }
-
-        //public static IEnumerable<MethodReference> GetMethodRefs(this TypeReference tr, ExtendedTypeSystem ts)
-        //{
-        //    var def = tr.Resolve();
-        //    var methods = def.Methods.Select(d => d.CreateReference(ts));
-
-        //    GenericParameter a;
-        //    a.
-        //}
     }
 }
