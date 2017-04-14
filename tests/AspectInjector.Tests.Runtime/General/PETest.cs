@@ -13,7 +13,7 @@ namespace AspectInjector.Tests.General
         [TestMethod]
         public void General_PEIntegrity_IsOk()
         {
-            var sdkFolder = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
+            var sdkFolder = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version45, VisualStudioVersion.VersionLatest);
 
             var peverify = Directory.GetFiles(sdkFolder, "peverify.exe", SearchOption.AllDirectories).First();
 
@@ -23,7 +23,7 @@ namespace AspectInjector.Tests.General
 
             proc.WaitForExit();
 
-            Assert.AreEqual(0, proc.ExitCode, $"{proc.StandardOutput.ReadToEnd()}");
+            Assert.AreEqual(0, proc.ExitCode);
         }
     }
 }

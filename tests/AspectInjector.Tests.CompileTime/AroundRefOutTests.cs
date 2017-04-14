@@ -34,6 +34,7 @@ namespace AspectInjector.CompileTimeTests
             }
         }
 
+        [Aspect(Aspect.Scope.Global)]
         public class TestAspectImplementation
         {
             [Advice(Advice.Type.Around, Advice.Target.Method)]

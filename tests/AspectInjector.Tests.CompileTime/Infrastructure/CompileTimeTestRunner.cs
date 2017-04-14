@@ -33,14 +33,13 @@ namespace AspectInjector.CompileTimeTests
 
             asmproc.ProcessAssembly(_asm);
         }
-
-        [TestMethod]
+        
         protected void PE_Integrity_Is_Ok()
         {
             var tempFile = Path.GetTempFileName() + ".dll";
             _asm.Write(tempFile);
 
-            var sdkFolder = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
+            var sdkFolder = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version45, VisualStudioVersion.VersionLatest);
 
             var peverify = Directory.GetFiles(sdkFolder, "peverify.exe", SearchOption.AllDirectories).First();
 
@@ -48,7 +47,7 @@ namespace AspectInjector.CompileTimeTests
 
             proc.WaitForExit();
 
-            Assert.AreEqual(0, proc.ExitCode, $"{proc.StandardOutput.ReadToEnd()}");
+            Assert.AreEqual(0, proc.ExitCode);
 
             File.Delete(tempFile);
         }
