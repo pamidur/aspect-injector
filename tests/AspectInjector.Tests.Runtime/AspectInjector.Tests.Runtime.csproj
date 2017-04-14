@@ -141,6 +141,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent Condition=" '$(Configuration)' == 'Debug' ">$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(ConfigurationName)\aspectinjector.cli.exe process -d -f "$(TargetPath)"</PostBuildEvent>
-    <PostBuildEvent Condition=" '$(Configuration)' != 'Debug' ">$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(ConfigurationName)\aspectinjector.cli.exe process -f "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Configuration)' != 'Debug' ">$(SolutionDir)\src\AspectInjector.CommandLine\bin\Debug\aspectinjector.cli.exe process -d -f "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

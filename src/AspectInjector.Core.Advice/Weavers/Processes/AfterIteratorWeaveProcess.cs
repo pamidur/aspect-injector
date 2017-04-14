@@ -11,43 +11,26 @@ using System.Runtime.CompilerServices;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
-    internal class AfterIteratorWeaveProcess : AdviceWeaveProcessBase<AfterAdviceEffect>
+    internal class AfterIteratorWeaveProcess : AfterStateMachineWeaveProcessBase
     {
-        private readonly TypeDefinition _stateMachine;
-        private readonly FieldDefinition _this;
-
         public AfterIteratorWeaveProcess(ILogger log, MethodDefinition target, AfterAdviceEffect effect, AspectDefinition aspect)
             : base(log, target, effect, aspect)
         {
-            _stateMachine = target.CustomAttributes.First(ca => ca.AttributeType.IsTypeOf(typeof(IteratorStateMachineAttribute)))
+            
+        }
+
+        protected override TypeDefinition GetStateMachine()
+        {
+            return _target.CustomAttributes.First(ca => ca.AttributeType.IsTypeOf(typeof(IteratorStateMachineAttribute)))
                 .GetConstructorValue<TypeReference>(0).Resolve();
-
-            var thisType = _target.DeclaringType.Resolve();
-
-            _this = _target.IsStatic ? null : _stateMachine.Fields.First(f => f.IsPublic && f.FieldType.Resolve().IsTypeOf(thisType) && f.Name.StartsWith("<>") && f.Name.EndsWith("_this"));
         }
 
-        public override void Execute()
-        {
-            FindOrCreateAfterStateMachineMethod().GetEditor().OnExit(
-                e => e
-                .LoadAspect(_aspect, _target, LoadOriginalThis, _target.DeclaringType)
-                .Call(_effect.Method, LoadAdviceArgs)
-            );
-        }
-
-        private void LoadOriginalThis(PointCut pc)
-        {
-            if (_this != null)
-                pc.This().Load(_this);
-        }
-
-        private FieldReference FindField(ParameterDefinition p)
+        protected override FieldReference FindField(ParameterDefinition p)
         {
             return _stateMachine.Fields.First(f => f.IsPrivate && f.Name == p.Name);
         }
 
-        protected MethodDefinition FindOrCreateAfterStateMachineMethod()
+        protected override MethodDefinition FindOrCreateAfterStateMachineMethod()
         {
             var afterMethod = _stateMachine.Methods.FirstOrDefault(m => m.Name == Constants.AfterStateMachineMethodName);
 
@@ -74,13 +57,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             return afterMethod;
         }
 
-        protected override void LoadInstanceArgument(PointCut pc, AdviceArgument parameter)
-        {
-            if (_this != null)
-                LoadOriginalThis(pc);
-            else
-                pc.Value((object)null);
-        }
 
         protected override void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
         {
@@ -92,16 +68,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             pc.TypeOf(_stateMachine.Interfaces.First(i => i.Name.StartsWith("IEnumerable`1")));
         }
 
-        protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
+        protected override void InsertStateMachineCall(Action<PointCut> code)
         {
-            var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
-            {
-                var field = FindField(p);
-                il.ThisOrStatic().Load(field).ByVal(field.FieldType);
-            }
-            ).ToArray();
-
-            pc.CreateArray<object>(elements);
+            _target.GetEditor().OnExit(code);
         }
     }
 }

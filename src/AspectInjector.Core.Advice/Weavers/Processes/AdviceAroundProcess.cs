@@ -45,7 +45,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 _ts.Object);
 
             var targetFuncCtor = targetFuncType.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic).MakeHostInstanceGeneric(targetFuncType);
-            var targetMethod = _wrapper.ParametrizeGenericChild(GetOrCreateUnwrapper().MakeHostInstanceGeneric(_target.DeclaringType));
+            var targetMethod = _wrapper.MakeCallReference(GetOrCreateUnwrapper().MakeHostInstanceGeneric(_target.DeclaringType));
 
             pc.ThisOrNull().Call(targetFuncCtor, args => args.Load(targetMethod));
         }
@@ -76,7 +76,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var instructions = prev.Body.Instructions.Where(i => i.Operand is MethodReference && ((MethodReference)i.Operand).Resolve() == unwrapper).ToList();
 
             foreach (var inst in instructions)
-                inst.Operand = prev.ParametrizeGenericChild(next.MakeHostInstanceGeneric(_target.DeclaringType));
+                inst.Operand = prev.MakeCallReference(next.MakeHostInstanceGeneric(_target.DeclaringType));
         }
 
         private MethodDefinition GetOrCreateUnwrapper()

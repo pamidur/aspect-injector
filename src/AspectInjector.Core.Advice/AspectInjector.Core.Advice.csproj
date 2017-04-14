@@ -79,6 +79,7 @@
     <Compile Include="Weavers\AdviceAroundWeaver.cs" />
     <Compile Include="Weavers\Processes\AfterIteratorWeaveProcess.cs" />
     <Compile Include="Weavers\Processes\AfterAsyncWeaveProcess.cs" />
+    <Compile Include="Weavers\Processes\AfterStateMachineWeaveProcessBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

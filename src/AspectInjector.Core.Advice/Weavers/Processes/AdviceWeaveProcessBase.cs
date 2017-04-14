@@ -57,7 +57,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected virtual void LoadTypeArgument(PointCut pc, AdviceArgument parameter)
         {
-            pc.TypeOf(_target.DeclaringType.ParametrizeGenericChild(_target.DeclaringType));
+            pc.TypeOf(_target.DeclaringType);
         }
 
         protected virtual void LoadTargetArgument(PointCut pc, AdviceArgument parameter)

@@ -14,7 +14,7 @@ namespace AspectInjector.Core.Extensions
             var reference = new MethodReference(
                 self.Name,
                 self.ReturnType,
-                context.ParametrizeGenericChild(self.DeclaringType))
+                context.MakeCallReference(self.DeclaringType))
             {
                 HasThis = self.HasThis,
                 ExplicitThis = self.ExplicitThis,
@@ -34,53 +34,68 @@ namespace AspectInjector.Core.Extensions
             return reference;
         }      
 
-        public static FieldReference ParametrizeGenericChild(this MemberReference member, FieldReference child)
+        public static FieldReference MakeCallReference(this MemberReference member, FieldReference reference)
         {
-            return new FieldReference(child.Name, child.FieldType, member.ParametrizeGenericChild(child.DeclaringType));
+            return member.Module.Import(new FieldReference(reference.Name, member.Module.Import(reference.FieldType), member.MakeCallReference(reference.DeclaringType)));
         }
 
-        public static TypeReference ParametrizeGenericChild(this MemberReference member, TypeReference child)
+        public static MethodReference MakeCallReference(this MemberReference member, MethodReference reference)
         {
-            if (child.IsGenericInstance)
-            {
-                var nestedGeneric = (GenericInstanceType)child;
+            if (reference.GenericParameters.Count == 0)
+                return member.Module.Import(reference);
 
-                if (!nestedGeneric.ContainsGenericParameter)
-                    return nestedGeneric;
-
-                var args = nestedGeneric.GenericArguments.Select(ga => member.ResolveIfGeneric(ga)).ToArray();
-
-                return child.Resolve().MakeGenericInstanceType(args);
-            }
-            else
-            {
-                if (!child.HasGenericParameters)
-                    return child;
-
-                return child.MakeGenericInstanceType(child.GenericParameters.Select(member.ResolveGenericType).ToArray());
-            }
+            var result = new GenericInstanceMethod(reference);
+            var args = reference.GenericParameters.Select(gp => member.GetMatchedParam(gp) ?? gp).ToList();
+            args.ForEach(result.GenericArguments.Add);
+            return member.Module.Import(result);
         }
 
-        public static MethodReference ParametrizeGenericChild(this MemberReference member, MethodReference child)
+        public static TypeReference MakeCallReference(this MemberReference member, TypeReference reference)
         {
-            var paramProvider = member as IGenericParameterProvider;
-            if (paramProvider == null)
-                return child;
+            if (reference.GenericParameters.Count == 0)
+                return member.Module.Import(reference);
 
-            if (child.IsGenericInstance)
+            var args = reference.GenericParameters.Select(gp => member.GetMatchedParam(gp) ?? gp).ToArray();
+
+            return member.ParametrizeGenericInstance(reference.Resolve().MakeGenericInstanceType(args));
+        }
+
+        public static GenericParameter GetMatchedParam(this MemberReference provider, GenericParameter original)
+        {
+            if (provider is MethodReference)
             {
-                return child;
+                var match = ((MethodReference)provider).GenericParameters.FirstOrDefault(gp => gp.Name == original.Name);
+                match = match ?? provider.DeclaringType.GetMatchedParam(original);
+                return match;
             }
-            else
+            else if (provider is TypeReference)
             {
-                if (!child.HasGenericParameters)
-                    return child;
-
-                var result = new GenericInstanceMethod(child);
-                paramProvider.GenericParameters.Select(member.ResolveGenericType).ToList().ForEach(result.GenericArguments.Add);
-
-                return result;
+                return ((TypeReference)provider).GenericParameters.FirstOrDefault(gp => gp.Name == original.Name);
             }
+
+            throw new Exception($"Non supported generic provider {provider.GetType()}");
+        }
+
+        public static GenericInstanceType ParametrizeGenericInstance(this MemberReference member, GenericInstanceType generic)
+        {
+            if (!generic.ContainsGenericParameter)
+                return generic;
+
+            var args = generic.GenericArguments.Select(ga => member.ResolveIfGeneric(ga)).ToArray();
+
+            return generic.Resolve().MakeGenericInstanceType(args);
+        }
+
+        public static GenericInstanceMethod ParametrizeGenericInstance(this MemberReference member, GenericInstanceMethod generic)
+        {
+            if (!generic.ContainsGenericParameter)
+                return generic;
+
+            var args = generic.GenericArguments.Select(ga => member.ResolveIfGeneric(ga)).ToList();
+
+            var result = new GenericInstanceMethod(generic);
+            args.ForEach(result.GenericArguments.Add);
+            return result;
         }
 
         public static TypeReference ResolveIfGeneric(this MemberReference member, TypeReference param)

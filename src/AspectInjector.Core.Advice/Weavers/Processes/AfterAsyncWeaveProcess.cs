@@ -11,48 +11,34 @@ using System.Runtime.CompilerServices;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
-    internal class AfterAsyncWeaveProcess : AdviceWeaveProcessBase<AfterAdviceEffect>
+    internal class AfterAsyncWeaveProcess : AfterStateMachineWeaveProcessBase
     {
         private static readonly Type[] _supportedMethodBuilders = new[] {
             typeof(AsyncTaskMethodBuilder),
             typeof(AsyncTaskMethodBuilder<>),
             typeof(AsyncVoidMethodBuilder)
         };
-
-        private readonly TypeDefinition _stateMachine;
-        private readonly FieldDefinition _this;
+        
         private readonly TypeReference _asyncResult;
 
         public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, AfterAdviceEffect effect, AspectDefinition aspect) : base(log, target, effect, aspect)
         {
-            _stateMachine = target.CustomAttributes.First(ca => ca.AttributeType.IsTypeOf(typeof(AsyncStateMachineAttribute)))
-                .GetConstructorValue<TypeReference>(0).Resolve();
-
             _asyncResult = (_stateMachine.Fields.First(f => f.Name == "<>t__builder").FieldType as IGenericInstance)?.GenericArguments.FirstOrDefault();
-            _this = _target.IsStatic ? null : _stateMachine.Fields.First(f => f.IsPublic && f.FieldType.Resolve().IsTypeOf(_target.DeclaringType) && f.Name.StartsWith("<>") && f.Name.EndsWith("_this"));
-        }
+         }
 
-        public override void Execute()
+        protected override TypeDefinition GetStateMachine()
         {
-            FindOrCreateAfterStateMachineMethod().GetEditor().OnExit(
-                e => e
-                .LoadAspect(_aspect, _target, LoadThis, _target.DeclaringType)
-                .Call(_effect.Method, LoadAdviceArgs)
-            );
+            return _target.CustomAttributes.First(ca => ca.AttributeType.IsTypeOf(typeof(AsyncStateMachineAttribute)))
+                .GetConstructorValue<TypeReference>(0).Resolve();
         }
 
-        private void LoadThis(PointCut pc)
-        {
-            if (_this != null)
-                pc.This().Load(_this);
-        }
 
-        private FieldReference FindField(ParameterDefinition p)
+        protected override FieldReference FindField(ParameterDefinition p)
         {
             return _stateMachine.Fields.First(f => f.IsPublic && f.Name == p.Name);
         }
 
-        protected MethodDefinition FindOrCreateAfterStateMachineMethod()
+        protected override MethodDefinition FindOrCreateAfterStateMachineMethod()
         {
             var afterMethod = _stateMachine.Methods.FirstOrDefault(m => m.Name == Constants.AfterStateMachineMethodName);
 
@@ -118,24 +104,10 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             pc.TypeOf(_asyncResult ?? _ts.Void);
         }
 
-        protected override void LoadInstanceArgument(PointCut pc, AdviceArgument parameter)
+        protected override void InsertStateMachineCall(Action<PointCut> code)
         {
-            if (_this != null)
-                LoadThis(pc);
-            else
-                pc.Value((object)null);
-        }
-
-        protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
-        {
-            var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
-            {
-                var field = FindField(p);
-                il.ThisOrStatic().Load(field).ByVal(field.FieldType);
-            }
-            ).ToArray();
-
-            pc.CreateArray<object>(elements);
+            var tgti = _target.Body.Instructions.First(i => i.OpCode == OpCodes.Stloc_0);
+            _target.GetEditor().OnInstruction(tgti, code);
         }
     }
 }

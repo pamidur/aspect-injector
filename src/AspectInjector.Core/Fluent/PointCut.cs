@@ -57,7 +57,7 @@ namespace AspectInjector.Core.Models
         {
             args?.Invoke(this);
 
-            var methodRef = _typeSystem.Import(_proc.Body.Method.ParametrizeGenericChild(_typeSystem.Import(method)));
+            var methodRef = _proc.Body.Method.MakeCallReference(_typeSystem.Import(method));
             var def = method.Resolve();
 
             var code = OpCodes.Call;
@@ -82,6 +82,12 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
+        public PointCut Dup()
+        {
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Dup));
+            return this;
+        }
+
         public PointCut ThisOrStatic()
         {
             if (_proc.Body.Method.HasThis)
@@ -102,7 +108,9 @@ namespace AspectInjector.Core.Models
         {
             val?.Invoke(this);
 
-            var fieldRef = _proc.Body.Method.ParametrizeGenericChild(_typeSystem.Import(field));
+            var fieldRef = _proc.Body.Method.MakeCallReference(_typeSystem.Import(field));
+            //var fieldRef2 = _proc.Body.Method.ParametrizeGenericChild(_typeSystem.Import(field));
+
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldRef));
@@ -186,7 +194,7 @@ namespace AspectInjector.Core.Models
 
         public PointCut TypeOf(TypeReference type)
         {
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, type));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _proc.Body.Method.MakeCallReference(type)));
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.Type.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle")));
 
             return this;
@@ -226,7 +234,7 @@ namespace AspectInjector.Core.Models
 
         public PointCut Load(FieldReference field)
         {
-            var fieldRef = _proc.Body.Method.ParametrizeGenericChild(field);
+            var fieldRef = _proc.Body.Method.MakeCallReference(_typeSystem.Import(field));
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, fieldRef));
@@ -404,7 +412,7 @@ namespace AspectInjector.Core.Models
         public PointCut MethodOf(MethodReference method)
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, method));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, method.DeclaringType.ParametrizeGenericChild(method.DeclaringType)));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, method.DeclaringType.MakeCallReference(method.DeclaringType)));
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2)));
 
             return this;
