@@ -48,7 +48,7 @@ namespace AspectInjector.CompileTimeTests
 
             proc.WaitForExit();
 
-            Assert.AreEqual(0, proc.ExitCode);
+            Assert.AreEqual(0, proc.ExitCode, $"{proc.StandardOutput.ReadToEnd()}");
 
             File.Delete(tempFile);
         }
