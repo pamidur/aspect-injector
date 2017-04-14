@@ -14,7 +14,8 @@
     <PackageTags>AOP aspect aspects injector injection wp8 wp8.1 win8 win8.1 notify notifypropertychanged INPC</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IncludeBuildOutput>False</IncludeBuildOutput>
-    <Version>1.0.5</Version>
+    <Version>0.0.0</Version>
+    <PackageVersion>0.0.0</PackageVersion>
     <!--<NuspecProperties>DevelopmentDependency=true</NuspecProperties>-->
   </PropertyGroup>
 
