@@ -45,6 +45,31 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             return thisfield;
         }
 
+        private FieldDefinition GetArgsField()
+        {
+            var argsfield = _stateMachine.Fields.FirstOrDefault(f => f.Name == Constants.MovedArgs);
+
+            if (argsfield == null)
+            {
+                argsfield = new FieldDefinition(Constants.MovedArgs, FieldAttributes.Public, _ts.ObjectArray);
+                _stateMachine.Fields.Add(argsfield);
+
+                InsertStateMachineCall(
+                    e => e
+                    .Dup()
+                    .Store(argsfield, v =>
+                    {
+                        var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
+                               il.Load(p).ByVal(p.ParameterType)
+                           ).ToArray();
+
+                        v.CreateArray<object>(elements);
+                    }));
+            }
+
+            return argsfield;
+        }
+
         protected abstract void InsertStateMachineCall(Action<PointCut> code);
 
         public override void Execute()
@@ -72,17 +97,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
         {
-            var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
-            {
-                var field = FindField(p);
-                il.ThisOrStatic().Load(field).ByVal(field.FieldType);
-            }
-            ).ToArray();
-
-            pc.CreateArray<object>(elements);
+            pc.This().Load(GetArgsField());
         }
-
-        protected abstract FieldReference FindField(ParameterDefinition p);
+        
         protected abstract MethodDefinition FindOrCreateAfterStateMachineMethod();
     }
 }

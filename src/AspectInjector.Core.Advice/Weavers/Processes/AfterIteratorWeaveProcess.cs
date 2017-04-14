@@ -25,11 +25,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 .GetConstructorValue<TypeReference>(0).Resolve();
         }
 
-        protected override FieldReference FindField(ParameterDefinition p)
-        {
-            return _stateMachine.Fields.First(f => f.IsPrivate && f.Name == p.Name);
-        }
-
         protected override MethodDefinition FindOrCreateAfterStateMachineMethod()
         {
             var afterMethod = _stateMachine.Methods.FirstOrDefault(m => m.Name == Constants.AfterStateMachineMethodName);

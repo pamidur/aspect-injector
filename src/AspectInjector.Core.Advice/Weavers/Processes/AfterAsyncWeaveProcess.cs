@@ -18,24 +18,18 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             typeof(AsyncTaskMethodBuilder<>),
             typeof(AsyncVoidMethodBuilder)
         };
-        
+
         private readonly TypeReference _asyncResult;
 
         public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, AfterAdviceEffect effect, AspectDefinition aspect) : base(log, target, effect, aspect)
         {
             _asyncResult = (_stateMachine.Fields.First(f => f.Name == "<>t__builder").FieldType as IGenericInstance)?.GenericArguments.FirstOrDefault();
-         }
+        }
 
         protected override TypeDefinition GetStateMachine()
         {
             return _target.CustomAttributes.First(ca => ca.AttributeType.IsTypeOf(typeof(AsyncStateMachineAttribute)))
                 .GetConstructorValue<TypeReference>(0).Resolve();
-        }
-
-
-        protected override FieldReference FindField(ParameterDefinition p)
-        {
-            return _stateMachine.Fields.First(f => f.IsPublic && f.Name == p.Name);
         }
 
         protected override MethodDefinition FindOrCreateAfterStateMachineMethod()
@@ -106,8 +100,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void InsertStateMachineCall(Action<PointCut> code)
         {
-            var tgti = _target.Body.Instructions.First(i => i.OpCode == OpCodes.Stloc_0);
-            _target.GetEditor().OnInstruction(tgti, code);
+            var tgti = _target.Body.Instructions.First(i => i.OpCode == OpCodes.Ldloc_0 || (i.OpCode == OpCodes.Ldloca_S && i.Operand == _target.Body.Variables[0]));
+            _target.GetEditor().OnInstruction(tgti.Next, code);
         }
     }
 }

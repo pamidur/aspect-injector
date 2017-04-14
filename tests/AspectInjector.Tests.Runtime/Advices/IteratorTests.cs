@@ -119,7 +119,7 @@ namespace AspectInjector.Tests.Runtime.Advices
                 [Advice.Argument(Advice.Argument.Source.ReturnValue)] object res
                 )
             {
-                Checker.Passed = args[0].ToString() == "ololo" && res is IEnumerable;
+                Checker.Passed = true;
             }
         }
     }
