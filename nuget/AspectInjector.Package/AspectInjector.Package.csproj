@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard1.0</TargetFramework>
-    <PackageId>AspectInjector</PackageId>
-    <Product>AspectInjector</Product>
+    <PackageId>Aspect Injector</PackageId>
+    <Product>Aspect Injector</Product>
     <Copyright>Copyright © AspectInjector Team 2017</Copyright>
     <Company>AspectInjector Team</Company>
     <Description>This library provides attributes-based compile-time AOP framework.</Description>
