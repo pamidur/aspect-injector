@@ -291,7 +291,7 @@
           "ref/netstandard1.0/System.Xml.XDocument.dll": {}
         }
       },
-      "AspectInjector.Broker/1.0.0": {
+      "AspectInjector.Broker/0.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.0",
         "dependencies": {
@@ -1867,7 +1867,7 @@
         "ref/xamarinwatchos10/_._"
       ]
     },
-    "AspectInjector.Broker/1.0.0": {
+    "AspectInjector.Broker/0.0.0": {
       "type": "project",
       "path": "../../src/AspectInjector.Broker/AspectInjector.Broker.csproj",
       "msbuildProject": "../../src/AspectInjector.Broker/AspectInjector.Broker.csproj"
