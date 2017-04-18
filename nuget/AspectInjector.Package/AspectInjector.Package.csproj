@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard1.0</TargetFramework>
-    <PackageId>Aspect Injector</PackageId>
+    <PackageId>AspectInjector</PackageId>
     <Product>Aspect Injector</Product>
     <Copyright>Copyright © AspectInjector Team 2017</Copyright>
     <Company>AspectInjector Team</Company>
