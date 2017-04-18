@@ -3,6 +3,7 @@
     <TargetFramework>netstandard1.0</TargetFramework>
     <PackageId>AspectInjector</PackageId>
     <Product>Aspect Injector</Product>
+    <Title>Aspect Injector</Title>
     <Copyright>Copyright © AspectInjector Team 2017</Copyright>
     <Company>AspectInjector Team</Company>
     <Description>This library provides attributes-based compile-time AOP framework.</Description>
