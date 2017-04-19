@@ -11,7 +11,7 @@
 
   <Target Name="InjectAspects">
     <PropertyGroup>
-      <ProcessCmd>&quot;$(MSBuildThisFileDirectory)aspectinjector.cli.exe&quot; process -f &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; -r &quot;@(ReferencePath->'"%(Fullpath)"', ';')&quot;</ProcessCmd>
+      <ProcessCmd>&quot;$(MSBuildThisFileDirectory)aspectinjector.cli.exe&quot; process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
     </PropertyGroup>
 
     <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" />

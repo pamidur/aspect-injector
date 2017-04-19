@@ -68,7 +68,7 @@
   </PropertyGroup>
   <Target Name="InjectAspects">
     <PropertyGroup>
-      <ProcessCmd>"$(SolutionDir)src\AspectInjector.CommandLine\bin\$(ConfigurationName)\aspectinjector.cli.exe" process -f $(ProjectDir)$(IntermediateOutputPath)$(TargetFileName) -r @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
+      <ProcessCmd>"$(SolutionDir)src\AspectInjector.CommandLine\bin\$(ConfigurationName)\aspectinjector.cli.exe" process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
     </PropertyGroup>
     <Exec Command="$(ProcessCmd)" WorkingDirectory="$(SolutionDir)src\AspectInjector.CommandLine\bin\$(ConfigurationName)\" />
   </Target>

@@ -6,7 +6,6 @@ using AspectInjector.Core.Mixin;
 using AspectInjector.Core.Models;
 using AspectInjector.Core.Services;
 using AspectInjector.Core.Utils;
-using CommandLine;
 using DryIoc;
 using System;
 using System.Collections.Generic;
@@ -15,47 +14,47 @@ using System.Linq;
 
 namespace AspectInjector.CLI.Commands
 {
-    [Verb("process", HelpText = "Instructs Aspect Injector to process injections")]
-    public class ProcessCommand : CommandBase
+    public class ProcessCommand : ICommand
     {
-        [Option('f', "file", Required = true, HelpText = ".net assembly file for processing (typically exe or dll)")]
-        public string Filename { get; set; }
+        public string Description => "Instructs Aspect Injector to process injections.";
 
-        [Option('r', "references", HelpText = "Referenced assemblies semicolon separated")]
-        public string References { get; set; }
-
-        public override int Execute()
+        public int Execute(IReadOnlyList<string> args)
         {
-            var result = base.Execute();
-            if (result != 0)
-                return result;
-
-            if (!File.Exists(Filename))
+            if (args.Count == 0)
             {
-                Log.LogError(CompilationMessage.From($"File {Filename} does not exist."));
+                ShowHelp();
+                return -1;
+            }
+
+            var filename = args[0];
+            var references = new ArraySegment<string>(args.ToArray(), 1, args.Count - 1);
+
+            if (!File.Exists(filename))
+            {
+                ShowHelp($"File {filename} does not exist.");
                 return 1;
             }
 
-            var processor = CreateProcessor();
+            var log = new ConsoleLogger();
+            var processor = CreateProcessor(log);
 
             var resolver = new KnownReferencesAssemblyResolver();
-            resolver.AddSearchDirectory(Path.GetDirectoryName(Filename));
-            if (References != null)
-                References.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(resolver.AddReference);
+            resolver.AddSearchDirectory(Path.GetDirectoryName(filename));
+            references.ToList().ForEach(resolver.AddReference);
 
             try
             {
-                processor.Process(Filename, resolver);
+                processor.Process(filename, resolver);
             }
             catch (Exception e)
             {
-                Log.LogError(CompilationMessage.From(e.ToString()));
+                log.LogError(CompilationMessage.From(e.ToString()));
             }
 
-            return Log.IsErrorThrown ? 1 : result;
-        }
+            return log.IsErrorThrown ? 1 : 0;
+        }  
 
-        private Processor CreateProcessor()
+        private Processor CreateProcessor(ILogger log)
         {
             var container = new Container();
 
@@ -67,7 +66,7 @@ namespace AspectInjector.CLI.Commands
             container.Register<IAssetsCache, AssetsCache>(Reuse.Singleton);
             container.Register<IInjectionCollector, InjectionCollector>(Reuse.Singleton);
             container.Register<IJanitor, Janitor>(Reuse.Singleton);
-            container.UseInstance(Log, true);
+            container.UseInstance(log, true);
 
             //register effects
 
@@ -82,6 +81,23 @@ namespace AspectInjector.CLI.Commands
             //done registration
 
             return container.Resolve<Processor>();
+        }
+
+        private void ShowHelp(params string[] errors)
+        {
+            Program.ShowHeader();
+            Console.WriteLine("PROCESS USAGE:");
+            Console.WriteLine();
+            Console.WriteLine(" aspectinjector.cli.exe process <assembly> [<references>]");
+
+            if(errors.Any())
+            {
+                Console.WriteLine();
+                Console.WriteLine("ERRORS:");
+                foreach(var error in errors)
+                    Console.WriteLine($" {error}");
+            }
+            Console.WriteLine();
         }
     }
 }
