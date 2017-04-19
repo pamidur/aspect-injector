@@ -47,10 +47,8 @@ namespace AspectInjector.Core.Services
 
         private void FlushCacheToModule(ModuleDefinition module)
         {
-            var assets = _assetsCache[module.FullyQualifiedName];
-
-            if (assets == null) // cache was neither loaded nor created
-                return;
+            if (!_assetsCache.TryGetValue(module.FullyQualifiedName, out var assets))
+                return; // cache was neither loaded nor created 
 
             var serializerSettings = new JsonSerializerSettings
             {
