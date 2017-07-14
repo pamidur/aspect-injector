@@ -45,7 +45,7 @@
       <SnToolsRaw>@(SnTools)</SnToolsRaw>
     </PropertyGroup>
     <PropertyGroup>
-      <SnTool>$(SnToolsRaw.Substring(0, $(SnToolsRaw.IndexOf(';'))))</SnTool>
+      <SnTool>$(SnToolsRaw.Split(';')[0])</SnTool>
     </PropertyGroup>
   </Target>
 
