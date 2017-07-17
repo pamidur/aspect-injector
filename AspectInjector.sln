@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_solution", "_solution", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
 	ProjectSection(SolutionItems) = preProject
@@ -10,19 +10,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_solution", "_solution", "{
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core", "src\AspectInjector.Core\AspectInjector.Core.csproj", "{ACCC10D0-D079-4B9C-8269-71796A0EF822}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Core", "src\AspectInjector.Core\AspectInjector.Core.csproj", "{ACCC10D0-D079-4B9C-8269-71796A0EF822}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.CLI", "src\AspectInjector.CommandLine\AspectInjector.CLI.csproj", "{FC862191-9081-4A58-96FF-B57F17AC40A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.CLI", "src\AspectInjector.CommandLine\AspectInjector.CLI.csproj", "{FC862191-9081-4A58-96FF-B57F17AC40A9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2DAB661A-26B2-440A-BC54-59F2C8404F12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core.Mixin", "src\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj", "{3FBD73F5-6098-45A8-A236-6CC2F093B804}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Core.Mixin", "src\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj", "{3FBD73F5-6098-45A8-A236-6CC2F093B804}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core.Advice", "src\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj", "{1A96AA51-2CBC-4901-91D1-53208AD5E6B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Core.Advice", "src\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj", "{1A96AA51-2CBC-4901-91D1-53208AD5E6B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Tests.Runtime", "tests\AspectInjector.Tests.Runtime\AspectInjector.Tests.Runtime.csproj", "{EE475524-F971-49F1-B794-6B37B770AA23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Broker", "src\AspectInjector.Broker\AspectInjector.Broker.csproj", "{0926FE28-73BA-4F73-9188-B196FBBC9410}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Broker", "src\AspectInjector.Broker\AspectInjector.Broker.csproj", "{0926FE28-73BA-4F73-9188-B196FBBC9410}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Tests.CompileTime", "tests\AspectInjector.Tests.CompileTime\AspectInjector.Tests.CompileTime.csproj", "{217FD2E2-0AB4-4D1B-9EF7-E7139D893A99}"
 EndProject
@@ -33,7 +33,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Tests.Assets
 		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {FC862191-9081-4A58-96FF-B57F17AC40A9}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Package", "nuget\AspectInjector.Package\AspectInjector.Package.csproj", "{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Package", "nuget\AspectInjector.Package\AspectInjector.Package.csproj", "{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0926FE28-73BA-4F73-9188-B196FBBC9410} = {0926FE28-73BA-4F73-9188-B196FBBC9410}
 		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {FC862191-9081-4A58-96FF-B57F17AC40A9}

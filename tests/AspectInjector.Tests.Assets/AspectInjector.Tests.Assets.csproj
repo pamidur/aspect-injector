@@ -68,9 +68,9 @@
   </PropertyGroup>
   <Target Name="InjectAspects">
     <PropertyGroup>
-      <ProcessCmd>"$(SolutionDir)src\AspectInjector.CommandLine\bin\$(ConfigurationName)\net45\aspectinjector.cli.exe" process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
+      <ProcessCmd>"$(SolutionDir)src\AspectInjector.CommandLine\bin\$(ConfigurationName)\aspectinjector.cli.exe" process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
     </PropertyGroup>
-    <Exec Command="$(ProcessCmd)" WorkingDirectory="$(SolutionDir)src\AspectInjector.CommandLine\bin\$(ConfigurationName)\net45\" />
+    <Exec Command="$(ProcessCmd)" WorkingDirectory="$(SolutionDir)src\AspectInjector.CommandLine\bin\$(ConfigurationName)\" />
   </Target>
   <Target Name="SignAssemblyAfterAspects" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true'" DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
     <Message Text="SnTool found: $(SnTool)" />
