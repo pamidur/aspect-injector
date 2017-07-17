@@ -20,6 +20,9 @@ PM> Install-Package AspectInjector -Pre
 - Injection into Methods, Properties, Events
 - Ability to wrap method around
 
+### Known issues ###
+- Cannot inject into assemblies built using new .csproj (typically .NetCore and .NetStandard assemblies). Fix - needed adoption of Mono.Cecil 0.10 which is in beta now.
+
 ### Concept ###
 
 Aspect is a class which contains a set of advices - methods which should be injected to certain points in the code. Each advice has mandatory attributes which define a kind of target class members (constructor, getter, setter, regular method etc.) and join points - points in the code where this advice should be injected (before target member, after or both). Aspects and advices are marked with appropriate attributes. For example, we have a class with one method marked as advice:
@@ -38,12 +41,14 @@ class TraceAspect
 } 
 ```
 
-Having it we can apply this aspect to any method or a set of methods of some class:
+Having it we can apply this aspect to any method:
 ```C#
 //Method CallCountTrace of TraceAspect instance will be called at the beginning of Calculate() 
 [Inject(typeof(TraceAspect))]
 public void Calculate() { }
-
+```
+... or a set of methods of some class:
+```C#
 //Method CallCountTrace of TraceAspect instance will be called at the beginning of Load() and Save()
 [Inject(typeof(TraceAspect))]
 class Container
@@ -53,7 +58,9 @@ class Container
     public void Load() { }
     public void Save() { }
 }
-
+```
+... but not to properties in this case:
+```C#
 //Will not work - CallCountTrace() advice is applicable to regular methods only
 [Inject(typeof(TraceAspect))]
 public string Name { get; set; }
