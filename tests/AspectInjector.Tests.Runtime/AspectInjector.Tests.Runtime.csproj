@@ -60,7 +60,7 @@
     <Otherwise>
       <ItemGroup>
         <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
-          <Private>False</Private>
+          <Private>True</Private>
         </Reference>
       </ItemGroup>
     </Otherwise>
@@ -140,7 +140,7 @@
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent Condition=" '$(Configuration)' == 'Debug' ">$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(ConfigurationName)\aspectinjector.cli.exe -d process "$(TargetPath)"</PostBuildEvent>
-    <PostBuildEvent Condition=" '$(Configuration)' != 'Debug' ">$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(ConfigurationName)\aspectinjector.cli.exe process "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Configuration)' == 'Debug' ">$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(ConfigurationName)\net45\aspectinjector.cli.exe -d process "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Configuration)' != 'Debug' ">$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(ConfigurationName)\net45\aspectinjector.cli.exe process "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
