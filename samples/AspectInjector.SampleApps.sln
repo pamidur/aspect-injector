@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.13
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Freezable", "Freezable\Freezable.csproj", "{9B300FB2-A9E7-4A43-B802-262122248798}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotifyPropertyChanged", "NotifyPropertyChanged\NotifyPropertyChanged.csproj", "{4867C72A-4799-4E1D-9120-330854484B69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging", "Logging\Logging.csproj", "{AD862D09-609F-4F1E-AE29-4E5D15FA864A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Security", "Security\Security.csproj", "{BDDCB98F-2ADB-474A-9D27-1DD053D9146C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +25,19 @@ Global
 		{4867C72A-4799-4E1D-9120-330854484B69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4867C72A-4799-4E1D-9120-330854484B69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4867C72A-4799-4E1D-9120-330854484B69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD862D09-609F-4F1E-AE29-4E5D15FA864A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD862D09-609F-4F1E-AE29-4E5D15FA864A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD862D09-609F-4F1E-AE29-4E5D15FA864A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD862D09-609F-4F1E-AE29-4E5D15FA864A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDDCB98F-2ADB-474A-9D27-1DD053D9146C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDDCB98F-2ADB-474A-9D27-1DD053D9146C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDDCB98F-2ADB-474A-9D27-1DD053D9146C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDDCB98F-2ADB-474A-9D27-1DD053D9146C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DE1CFDCB-A690-412A-84BA-72C9E1949E96}
 	EndGlobalSection
 EndGlobal
