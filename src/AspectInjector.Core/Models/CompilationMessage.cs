@@ -9,19 +9,21 @@ namespace AspectInjector.Core.Models
         public CompilationMessage(string text, SequencePoint sp)
         {
             Text = text;
-            SequencePoint = sp ?? new SequencePoint(new Document(string.Empty));
+            SequencePoint = sp ?? new SequencePoint(Instruction.Create(OpCodes.Nop), new Document(string.Empty));
         }
 
         public string Text { get; set; }
 
         public SequencePoint SequencePoint { get; set; }
 
-        public static CompilationMessage From(string text, Instruction inst)
+        public static CompilationMessage From(string text, MethodDefinition scope, Instruction inst)
         {
-            while (inst != null && inst.SequencePoint == null && inst.Previous != null)
+
+
+            while (inst != null && scope.DebugInformation.GetSequencePoint(inst) == null && inst.Previous != null)
                 inst = inst.Previous;
 
-            return new CompilationMessage(text, inst?.SequencePoint);
+            return new CompilationMessage(text, inst == null ? null : scope.DebugInformation.GetSequencePoint(inst));
         }
 
         public static CompilationMessage From(string text)
@@ -35,13 +37,13 @@ namespace AspectInjector.Core.Models
             if (source is TypeDefinition)
             {
                 var td = (TypeDefinition)(object)source;
-                return From(text, td.Methods.FirstOrDefault(m => m.HasBody && m.Body.Instructions.Any(i => i.SequencePoint != null)));
+                return From(text, td.Methods.FirstOrDefault(m => m.DebugInformation.GetSequencePointMapping().Any()));
             }
 
             if (source is MethodDefinition)
             {
                 var md = (MethodDefinition)(object)source;
-                return From(text, md.Body.Instructions.FirstOrDefault(i => i.SequencePoint != null));
+                return new CompilationMessage(text, md.DebugInformation.GetSequencePointMapping().FirstOrDefault().Value);
             }
 
             //if (source is ParameterDefinition)

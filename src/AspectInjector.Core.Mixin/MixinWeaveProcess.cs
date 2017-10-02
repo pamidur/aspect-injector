@@ -29,11 +29,11 @@ namespace AspectInjector.Core.Mixin
             var ifaceTree = GetInterfacesTree(_effect.InterfaceType);
 
             foreach (var iface in ifaceTree)
-                if (_target.Interfaces.All(i => !i.IsTypeOf(iface)))
+                if (_target.Interfaces.All(i => !i.InterfaceType.IsTypeOf(iface)))
                 {
                     var ifaceRef = _ts.Import(iface);
 
-                    _target.Interfaces.Add(ifaceRef);
+                    _target.Interfaces.Add(new InterfaceImplementation(ifaceRef));
 
                     var ifaceDefinition = iface.Resolve();
 
@@ -177,7 +177,7 @@ namespace AspectInjector.Core.Mixin
             if (!definition.IsInterface)
                 throw new NotSupportedException(typeReference.Name + " should be an interface");
 
-            var nestedIfaces = definition.Interfaces.Select(i => typeReference.IsGenericInstance ? (typeReference).MakeCallReference(i) : i);
+            var nestedIfaces = definition.Interfaces.Select(i => typeReference.IsGenericInstance ? (typeReference).MakeCallReference(i.InterfaceType) : i.InterfaceType);
 
             return new[] { typeReference }.Concat(nestedIfaces);
         }

@@ -62,7 +62,7 @@ namespace AspectInjector.Core.Models
 
         public TypeReference ToTypeReference(ModuleDefinition reference)
         {
-            var asm = reference.AssemblyResolver.Resolve(AssemblyName);
+            var asm = reference.AssemblyResolver.Resolve(new AssemblyNameReference(AssemblyName,new Version()));
 
             var nestedPath = Name.Split(new[] { '+' });
 

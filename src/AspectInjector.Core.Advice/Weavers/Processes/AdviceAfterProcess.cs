@@ -7,11 +7,14 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AdviceAfterProcess : AdviceWeaveProcessBase<AfterAdviceEffect>
     {
+        private static readonly Dictionary<MethodBody, VariableDefinition> _returnVariablesCache = new Dictionary<MethodBody, VariableDefinition>();
+
         private VariableDefinition _retvar;
 
         public AdviceAfterProcess(ILogger log, MethodDefinition target, AspectDefinition aspect, AfterAdviceEffect effect)
@@ -23,12 +26,13 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private VariableDefinition GetOrCreateRetVar()
         {
-            var ret = _target.Body.Variables.FirstOrDefault(v => v.Name == Constants.ReturnValueArgName);
-            if (ret == null)
+            if (!_returnVariablesCache.TryGetValue(_target.Body, out var ret))
             {
-                ret = new VariableDefinition(Constants.ReturnValueArgName, _target.ReturnType);
+                ret = new VariableDefinition(_target.ReturnType);
                 _target.Body.Variables.Add(ret);
                 _target.Body.InitLocals = true;
+
+                _returnVariablesCache.Add(_target.Body, ret);
             }
 
             return ret;

@@ -124,10 +124,10 @@ namespace AspectInjector.Core.Services
             if (methodBody.Variables.Any(v => v.VariableType.BelongsToAssembly(BrokerKeyToken)))
                 _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", methodBody.Method));
 
-            methodBody.Instructions.ToList().ForEach(CheckInstructionReferencesBroker);
+            methodBody.Instructions.ToList().ForEach(i => CheckInstructionReferencesBroker(methodBody.Method, i));
         }
 
-        private void CheckInstructionReferencesBroker(Instruction instruction)
+        private void CheckInstructionReferencesBroker(MethodDefinition scope, Instruction instruction)
         {
             if (instruction.OpCode == OpCodes.Ldtoken ||
                 instruction.OpCode == OpCodes.Isinst ||
@@ -140,7 +140,7 @@ namespace AspectInjector.Core.Services
                 {
                     if (type.BelongsToAssembly(BrokerKeyToken) ||
                         IsGenericInstanceArgumentsReferenceBroker(type as GenericInstanceType))
-                        _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", instruction));
+                        _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", scope, instruction));
                 }
             }
 
@@ -154,7 +154,7 @@ namespace AspectInjector.Core.Services
                 {
                     if (method.DeclaringType.BelongsToAssembly(BrokerKeyToken) ||
                         IsGenericInstanceArgumentsReferenceBroker(method as GenericInstanceMethod))
-                        _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", instruction));
+                        _log.LogError(CompilationMessage.From("Types from AspectInjector.Broker can't be referenced", scope, instruction));
                 }
             }
         }

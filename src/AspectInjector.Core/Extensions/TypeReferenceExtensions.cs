@@ -71,7 +71,7 @@ namespace AspectInjector.Core.Extensions
             var td = tr.Resolve();
             var ti = @interface;
 
-            return td.Interfaces.Any(i => i.IsTypeOf(ti)) || (td.BaseType != null && td.BaseType.Implements(ti));
+            return td.Interfaces.Any(i => i.InterfaceType.IsTypeOf(ti)) || (td.BaseType != null && td.BaseType.Implements(ti));
         }
     }
 }

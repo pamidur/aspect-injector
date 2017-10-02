@@ -4,6 +4,7 @@ using Mono.Cecil;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System;
 
 namespace AspectInjector.Core
 {
@@ -44,6 +45,7 @@ namespace AspectInjector.Core
             }
         }
 
+
         private AssemblyDefinition ReadAssembly(string assemblyFile, IAssemblyResolver resolver, bool readSymbols)
         {
             var assembly = AssemblyDefinition.ReadAssembly(assemblyFile,
@@ -66,12 +68,38 @@ namespace AspectInjector.Core
 
         private void WriteAssembly(AssemblyDefinition assembly, string path, bool writeSymbols)
         {
-            assembly.Write(path,
-                new WriterParameters()
-                {
-                    WriteSymbols = writeSymbols,
-                    ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
-                });
+            var origOut = Path.GetDirectoryName(path);
+            var tempDir = Path.Combine(origOut, "aspect_compile");
+            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+
+            Directory.CreateDirectory(tempDir);
+
+            var fileName = Path.Combine(tempDir, Path.GetFileName(path));
+            var pdbName = Path.Combine(tempDir, Path.GetFileNameWithoutExtension(path) + ".pdb");
+
+            using (var fileStream = File.Open(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+            {
+                
+                    assembly.Write(fileStream,
+                        new WriterParameters()
+                        {
+                            WriteSymbols = writeSymbols,
+                            ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
+                        });
+
+                    assembly.MainModule.SymbolReader.Dispose();
+                    assembly.Dispose();
+                    assembly = null;
+                
+            }
+
+            foreach (var file in Directory.GetFiles(tempDir))
+            {
+                var origFile = Path.Combine(origOut, Path.GetFileName(file));
+                File.Replace(file, origFile, origFile + ".old");
+            }
+
+            Directory.Delete(tempDir, true);
 
             _log.LogInfo("Assembly has been written.");
         }

@@ -60,7 +60,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void LoadReturnTypeArgument(PointCut pc, AdviceArgument parameter)
         {
-            pc.TypeOf(_stateMachine.Interfaces.First(i => i.Name.StartsWith("IEnumerable`1")));
+            pc.TypeOf(_stateMachine.Interfaces.First(i => i.InterfaceType.Name.StartsWith("IEnumerable`1")).InterfaceType);
         }
 
         protected override void InsertStateMachineCall(Action<PointCut> code)

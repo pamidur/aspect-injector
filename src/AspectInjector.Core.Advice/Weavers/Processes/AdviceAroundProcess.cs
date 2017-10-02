@@ -111,7 +111,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                             {
                                 var elementType = ((ByReferenceType)p.ParameterType).ElementType;
 
-                                var tempVar = new VariableDefinition($"{Constants.Prefix}p_{p.Name}", elementType);
+                                var tempVar = new VariableDefinition(elementType);
                                 refList.Add(new Tuple<int, VariableDefinition>(i, tempVar));
                                 unwrapper.Body.Variables.Add(tempVar);
 
@@ -192,7 +192,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 to.Body.Instructions.Add(inst);
 
             foreach (var var in from.Body.Variables)
-                to.Body.Variables.Add(new VariableDefinition(var.Name, _ts.Import(var.VariableType)));
+                to.Body.Variables.Add(new VariableDefinition(_ts.Import(var.VariableType)));
 
             if (to.Body.HasVariables)
                 to.Body.InitLocals = true;
