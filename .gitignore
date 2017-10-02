@@ -16,6 +16,8 @@ x64/
 [Oo]bj/
 .vs/
 
+project.lock.json
+
 *.nupkg
 
 api.tokens

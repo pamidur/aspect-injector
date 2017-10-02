@@ -32,6 +32,12 @@ namespace AspectInjector.Core.Advice.Effects
                 return false;
             }
 
+            if (Method.ReturnType != Method.Module.TypeSystem.Object)
+            {
+                log.LogError(CompilationMessage.From($"Around advice {Method.FullName} should return an object. Could return null.", aspect.Host));
+                return false;
+            }
+
             return true;
         }
     }
