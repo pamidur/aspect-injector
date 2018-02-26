@@ -22,11 +22,11 @@
   <ItemGroup>
     <None Include="build\AspectInjector.targets" Pack="true" PackagePath="build" />
     <None Include="tools\install.ps1" Pack="true" PackagePath="tools" />
-    <None Include="$(SolutionDir)\src\AspectInjector.Broker\bin\$(Configuration)\netstandard1.0\*.dll" Pack="true" PackagePath="lib\netstandard1.0">
-      <Link>lib\%(Filename)%(Extension)</Link>
+    <None Include="$(SolutionDir)\src\AspectInjector.Broker\bin\$(Configuration)\**\*.dll" Pack="true" PackagePath="lib">
+      <Link>lib\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
-    <None Include="$(SolutionDir)\src\AspectInjector.Broker\bin\$(Configuration)\netstandard1.0\*.xml" Pack="true" PackagePath="lib\netstandard1.0">
-      <Link>lib\%(Filename)%(Extension)</Link>
+    <None Include="$(SolutionDir)\src\AspectInjector.Broker\bin\$(Configuration)\**\*.xml" Pack="true" PackagePath="lib">
+      <Link>lib\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
     <None Include="$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(Configuration)\*.dll" Pack="true" PackagePath="build">
       <Link>build\%(Filename)%(Extension)</Link>

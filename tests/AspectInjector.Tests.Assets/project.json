@@ -1,7 +1,8 @@
 ﻿{
   "supports": {},
   "dependencies": {
-    "NETStandard.Library": "1.6.1"
+    "NETStandard.Library": "2.0.1",
+    "Newtonsoft.Json": "11.0.1"
   },
   "frameworks": {
     "netstandard1.0": {}

@@ -1,11 +1,11 @@
-﻿using AspectInjector.Core.Extensions;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using AspectInjector.Core.Extensions;
 
 namespace AspectInjector.CompileTimeTests
 {
@@ -159,7 +159,7 @@ namespace AspectInjector.CompileTimeTests
 
             foreach (var v in method.Body.Variables)
             {
-                var nv = new VariableDefinition(v.Name, CopyReference(v.VariableType));
+                var nv = new VariableDefinition(CopyReference(v.VariableType));
                 newMethod.Body.Variables.Add(nv);
                 varMap.Add(v, nv);
             }
