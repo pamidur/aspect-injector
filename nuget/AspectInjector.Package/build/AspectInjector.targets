@@ -1,23 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <CompileDependsOn>
-      $(CompileDependsOn);
-      InjectAspects;
-      SignAssemblyAfterAspectInjection
-    </CompileDependsOn>
+    <AspectInjectorPath>&quot;$(MSBuildThisFileDirectory)aspectinjector.dll&quot;</AspectInjectorPath>
+    <AspectInjectorOptions></AspectInjectorOptions>
   </PropertyGroup>
 
-  <Target Name="InjectAspects">
+  <Target Name="InjectAspects" AfterTargets="AfterCompile">
     <PropertyGroup>
-      <ProcessCmd>&quot;$(MSBuildThisFileDirectory)aspectinjector.cli.exe&quot; process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
+      <ProcessCmd>dotnet $(AspectInjectorPath) $(AspectInjectorOptions) process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
     </PropertyGroup>
 
     <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" />
   </Target>
 
-  <Target Name="SignAssemblyAfterAspectInjection" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true'" DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
+  <Target Name="SignAssemblyAfterAspectInjection" AfterTargets="InjectAspects" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true'" DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
 
     <Message Text="SnTool found: $(SnTool)"/>
 

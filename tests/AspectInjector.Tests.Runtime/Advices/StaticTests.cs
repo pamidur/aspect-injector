@@ -1,22 +1,22 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Text;
 
 namespace AspectInjector.Tests.Advices
 {
-    [TestClass]
+    
     public class StaticTests
     {
-        [TestMethod]
+        [Fact]
         public void Advices_InjectBeforeStaticMethod()
         {
             Checker.Passed = false;
             StaticTests_BeforeTarget.TestStaticMethod();
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAroundStaticMethod()
         {
             Checker.Passed = false;
@@ -26,7 +26,7 @@ namespace AspectInjector.Tests.Advices
 
             StaticTests_AroundTarget.Do123((System.Int32)vv, new StringBuilder(), new object(), false, false);
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
         public class StaticTests_AroundTarget

@@ -1,16 +1,16 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Threading.Tasks;
 
 namespace AspectInjector.Tests.Advices
 {
-    [TestClass]
+
     public class AsyncTests
     {
         public static bool Data = false;
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterAsyncMethod()
         {
             AsyncTests.Data = false;
@@ -19,10 +19,10 @@ namespace AspectInjector.Tests.Advices
             var a = new AsyncTests_Target();
             a.Do().Wait();
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterAsyncMethod_WithResult()
         {
             AsyncTests.Data = false;
@@ -31,10 +31,10 @@ namespace AspectInjector.Tests.Advices
             var a = new AsyncTests_Target();
             var result = a.Do2().Result;
 
-            Assert.AreEqual(result, "test");
+            Assert.Equal("test", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterAsyncMethod_Void()
         {
             AsyncTests.Data = false;
@@ -44,10 +44,10 @@ namespace AspectInjector.Tests.Advices
             a.Do3();
             Task.Delay(200).Wait();
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterAsyncMethod_WithArguments_And_Result()
         {
             AsyncTests.Data = false;
@@ -56,7 +56,7 @@ namespace AspectInjector.Tests.Advices
             var a = new AsyncTests_Target();
             a.Do4("args_test").ConfigureAwait(false).GetAwaiter().GetResult();
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
     }
 

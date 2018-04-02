@@ -1,19 +1,19 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using System.Collections.Generic;
 
 namespace AspectInjector.Tests.Runtime.Before.Global
 {
-    [TestClass]
+    
     public class ArgumentsGlobalTests : TestRunner
     {
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Args_Consrtuctor()
         //{
         //    ExecConstructor();
         //    CheckSequence(GetConstructorArgsSequence(BeforeAspectGlobal.Executed));
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Static_Consrtuctor()
         //{
         //    ExecStaticConstructor();
@@ -23,7 +23,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
         //    });
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Setter()
         //{
         //    ExecSetter();
@@ -33,7 +33,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
         //    });
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Static_Setter()
         //{
         //    ExecStaticSetter();
@@ -43,7 +43,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
         //    });
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Getter()
         //{
         //    ExecGetter();
@@ -53,7 +53,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
         //    });
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Static_Getter()
         //{
         //    ExecStaticGetter();
@@ -63,7 +63,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
         //    });
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Add()
         //{
         //    ExecAdd();
@@ -73,7 +73,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
         //    });
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Static_Add()
         //{
         //    ExecStaticAdd();
@@ -83,7 +83,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
         //    });
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Remove()
         //{
         //    ExecRemove();
@@ -93,7 +93,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
         //    });
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Static_Remove()
         //{
         //    ExecStaticRemove();
@@ -103,7 +103,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
         //    });
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Methods()
         //{
         //    ExecMethod();
@@ -114,7 +114,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
 
         //    CheckSequence(new List<string> {
         //        BeforeAspectGlobal.Executed,
-        //        Events.TestMethodEnter,
+        //        Events.FactEnter,
 
         //        BeforeAspectGlobal.Executed,
         //        Events.TestIteratorMethodEnter,
@@ -130,7 +130,7 @@ namespace AspectInjector.Tests.Runtime.Before.Global
         //    });
         //}
 
-        //[TestMethod]
+        //[Fact]
         //public void AdviceBefore_Global_Static_Methods()
         //{
         //    ExecStaticMethod();

@@ -1,13 +1,12 @@
 ﻿using AspectInjector.Tests.Assets;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using Xunit;
 
 namespace AspectInjector.Tests.Runtime.Around
 {
-    [TestClass]
     public class TargetsGlobalTests : TestRunner
     {
-        [TestMethod]
+        [Fact]
         public void AdviceAround_Global_Setter()
         {
             ExecSetter();
@@ -19,7 +18,7 @@ namespace AspectInjector.Tests.Runtime.Around
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceAround_Global_Static_Setter()
         {
             ExecStaticSetter();
@@ -31,7 +30,7 @@ namespace AspectInjector.Tests.Runtime.Around
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceAround_Global_Getter()
         {
             ExecGetter();
@@ -43,7 +42,7 @@ namespace AspectInjector.Tests.Runtime.Around
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceAround_Global_Static_Getter()
         {
             ExecStaticGetter();
@@ -55,7 +54,7 @@ namespace AspectInjector.Tests.Runtime.Around
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceAround_Global_Add()
         {
             ExecAdd();
@@ -67,7 +66,7 @@ namespace AspectInjector.Tests.Runtime.Around
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceAround_Global_Static_Add()
         {
             ExecStaticAdd();
@@ -79,7 +78,7 @@ namespace AspectInjector.Tests.Runtime.Around
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceAround_Global_Remove()
         {
             ExecRemove();
@@ -91,7 +90,7 @@ namespace AspectInjector.Tests.Runtime.Around
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceAround_Global_Static_Remove()
         {
             ExecStaticRemove();
@@ -103,7 +102,7 @@ namespace AspectInjector.Tests.Runtime.Around
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceAround_Global_Methods()
         {
             ExecMethod();
@@ -114,7 +113,7 @@ namespace AspectInjector.Tests.Runtime.Around
 
             CheckSequence(new List<string> {
                 GlobalAspect.AroundEnter,
-                Events.TestMethodExit,
+                Events.FactExit,
                 GlobalAspect.AroundExit,
 
                 //state machine executes after around
@@ -136,7 +135,7 @@ namespace AspectInjector.Tests.Runtime.Around
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceAround_Global_Static_Methods()
         {
             ExecStaticMethod();

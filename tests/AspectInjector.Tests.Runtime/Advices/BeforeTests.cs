@@ -1,83 +1,76 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 
 namespace AspectInjector.Tests.Advices
 {
-    [TestClass]
     public class BeforeTests
     {
-        private BeforeTests_Target _beforeTestClass;
+        private BeforeTests_Target _beforeTestClass = new BeforeTests_Target();
 
-        [TestInitialize]
-        public void SetUp()
-        {
-            _beforeTestClass = new BeforeTests_Target();
-        }
-
-        [TestMethod]
+        [Fact]
         public void Advices_InjectBeforeMethod()
         {
             Checker.Passed = false;
-            _beforeTestClass.TestMethod("");
-            Assert.IsTrue(Checker.Passed);
+            _beforeTestClass.Fact("");
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectBeforeSetter()
         {
             Checker.Passed = false;
 
             _beforeTestClass.TestProperty = 1;
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectBeforeGetter()
         {
             Checker.Passed = false;
 
             var a = _beforeTestClass.TestProperty;
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectBeforeAddEvent()
         {
             Checker.Passed = false;
 
             _beforeTestClass.TestEvent += (s, e) => { };
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectBeforeRemoveEvent()
         {
             Checker.Passed = false;
 
             _beforeTestClass.TestEvent += (s, e) => { };
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectBeforeConstructor()
         {
             Checker.Passed = false;
 
             var a = new BeforeTests_BeforeConstructorTarget();
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectBeforeConstructor_WithInterface()
         {
             Checker.Passed = false;
 
             var a = new BeforeTests_BeforeConstructorWithInterfaceTarget();
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod, Ignore]
+        [Fact(Skip = "Feature is outdated")]
         public void Advices_InjectBeforeSetter_AccessOldValue()
         {
             Checker.Passed = false;
@@ -87,7 +80,7 @@ namespace AspectInjector.Tests.Advices
             BeforeTests_SetterValueTarget.GlobalData = 2;
             a.Data = 4;
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
     }
 
@@ -107,7 +100,7 @@ namespace AspectInjector.Tests.Advices
     [Inject(typeof(BeforeTests_Aspect))]
     internal class BeforeTests_Target
     {
-        public void TestMethod(string data)
+        public void Fact(string data)
         {
         }
 

@@ -1,13 +1,13 @@
 ﻿//using AspectInjector.Broker;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using Xunit;
 //using System;
 
 //namespace AspectInjector.Tests.General
 //{
-//    [TestClass]
+//    
 //    public class CustomAttributesTests
 //    {
-//        [TestMethod]
+//        [Fact]
 //        public void General_CustomAttributes_PassRoutableValues()
 //        {
 //            Checker.Passed = false;
@@ -15,12 +15,12 @@
 //            var a = new CustomAttributesTests_Target();
 //            a.Do();
 
-//            Assert.IsTrue(Checker.Passed);
+//            Assert.True(Checker.Passed);
 
 //            var b = new CustomAttributesTestsAttribute("111") { Value = "olo" };
 //        }
 
-//        [TestMethod]
+//        [Fact]
 //        public void General_CustomAttributes_Multiple()
 //        {
 //            Checker.Passed = false;
@@ -28,7 +28,7 @@
 //            var a = new CustomAttributesTests_MultipleTarget();
 //            a.Do123();
 
-//            Assert.IsTrue(Checker.Passed);
+//            Assert.True(Checker.Passed);
 //        }
 //    }
 

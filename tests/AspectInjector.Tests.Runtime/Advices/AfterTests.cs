@@ -1,106 +1,100 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using Xunit;
 
 namespace AspectInjector.Tests.Advices
 {
-    [TestClass]
     public class AfterTests
     {
-        private AfterTests_AfterMethodTarget _afterTestClass;
-
-        [TestInitialize]
-        public void SetUp()
-        {
-            _afterTestClass = new AfterTests_AfterMethodTarget();
-        }
+        private AfterTests_AfterMethodTarget _afterTestClass = new AfterTests_AfterMethodTarget();
+      
 
         //after
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterMethod()
         {
             Checker.Passed = false;
 
-            _afterTestClass.TestMethod("");
-            Assert.IsTrue(Checker.Passed);
+            _afterTestClass.Fact("");
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterSetter()
         {
             Checker.Passed = false;
 
             _afterTestClass.TestProperty = 1;
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterCustomSetter()
         {
             Checker.Passed = false;
 
             _afterTestClass.TestCustomSetterProperty = 2;
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterCustomSetter2()
         {
             Checker.Passed = false;
 
             _afterTestClass.TestCustomSetterProperty = 1;
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterGetter()
         {
             Checker.Passed = false;
 
             var a = _afterTestClass.TestProperty;
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterAddEvent()
         {
             Checker.Passed = false;
 
             _afterTestClass.TestEvent += (s, e) => { };
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterRemoveEvent()
         {
             Checker.Passed = false;
 
             _afterTestClass.TestEvent += (s, e) => { };
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
         //constructors
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterConstructor()
         {
             Checker.Passed = false;
 
             var a = new AfterTests_AfterConstructorTarget();
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterSecondConstructor()
         {
             Checker.Passed = false;
 
             var a = new AfterTests_AfterConstructorTarget("");
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod, Ignore]
+        [Fact(Skip = "Feature is outdated")]
         public void Advices_InjectAfterSetter_AccessOldValue()
         {
             Checker.Passed = false;
@@ -110,7 +104,7 @@ namespace AspectInjector.Tests.Advices
             AfterTests_SetterValueTarget.GlobalData = 2;
             a.Data = 4;
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
     }
 
@@ -131,7 +125,7 @@ namespace AspectInjector.Tests.Advices
     [Inject(typeof(AfterTests_AfterMethodAspect))]
     internal class AfterTests_AfterMethodTarget
     {
-        public void TestMethod(string data)
+        public void Fact(string data)
         {
         }
 

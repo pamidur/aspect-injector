@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <!--<SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>_key.snk</AssemblyOriginatorKeyFile>-->
+    <Product>AspectInjector</Product>
+    <Copyright>Copyright © AspectInjector Team 2017</Copyright>
+    <Description>This is Advice injection library of Aspect Injector.</Description>
+    <AssemblyVersion>0.0.0.0</AssemblyVersion>
+    <FileVersion>0.0.0.0</FileVersion>
+    <Version>0.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" Version="0.10.0-beta7" />
+    <PackageReference Include="DryIoc.dll" Version="2.12.7" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
+    <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" />
+    <ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj" />
+    <ProjectReference Include="..\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj" />
+  </ItemGroup>  
+</Project>

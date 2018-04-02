@@ -1,12 +1,12 @@
 ﻿//using AspectInjector.Broker;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using Xunit;
 
 //namespace AspectInjector.Tests.Interfaces
 //{
-//    [TestClass]
+//    
 //    public class InheritanceTests
 //    {
-//        [TestMethod]
+//        [Fact]
 //        public void Interfaces_InjectionSupportsInheritance()
 //        {
 //            var ti = (IInheritanceTests)new InheritanceTests_Target();

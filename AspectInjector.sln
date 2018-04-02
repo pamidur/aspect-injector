@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_solution", "_solution", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
 	ProjectSection(SolutionItems) = preProject
@@ -27,21 +27,17 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Core.Tests", "tests\AspectInjector.Tests.Core\AspectInjector.Core.Tests.csproj", "{9641A20D-A3A6-4A80-A839-D80950CE959A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Tests.Assets", "tests\AspectInjector.Tests.Assets\AspectInjector.Tests.Assets.csproj", "{47463727-FF34-4C9D-BEF1-E6222936DFC8}"
-	ProjectSection(ProjectDependencies) = postProject
-		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {FC862191-9081-4A58-96FF-B57F17AC40A9}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Package", "nuget\AspectInjector.Package\AspectInjector.Package.csproj", "{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0926FE28-73BA-4F73-9188-B196FBBC9410} = {0926FE28-73BA-4F73-9188-B196FBBC9410}
-		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {FC862191-9081-4A58-96FF-B57F17AC40A9}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{8B8EB611-8720-4A8B-8F52-43327FE510E9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.CLI", "src\AspectInjector.CommandLine\AspectInjector.CLI.csproj", "{FC862191-9081-4A58-96FF-B57F17AC40A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector", "src\AspectInjector\AspectInjector.csproj", "{39D7DF82-485F-4E1F-9F08-B375EBC22214}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,10 +81,10 @@ Global
 		{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FC862191-9081-4A58-96FF-B57F17AC40A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FC862191-9081-4A58-96FF-B57F17AC40A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FC862191-9081-4A58-96FF-B57F17AC40A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FC862191-9081-4A58-96FF-B57F17AC40A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39D7DF82-485F-4E1F-9F08-B375EBC22214}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39D7DF82-485F-4E1F-9F08-B375EBC22214}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39D7DF82-485F-4E1F-9F08-B375EBC22214}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39D7DF82-485F-4E1F-9F08-B375EBC22214}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,7 +99,7 @@ Global
 		{9641A20D-A3A6-4A80-A839-D80950CE959A} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
 		{47463727-FF34-4C9D-BEF1-E6222936DFC8} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
 		{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC} = {8B8EB611-8720-4A8B-8F52-43327FE510E9}
-		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
+		{39D7DF82-485F-4E1F-9F08-B375EBC22214} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B153C707-A96B-404C-B0E6-2225AE14B304}

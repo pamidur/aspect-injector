@@ -1,13 +1,13 @@
 ﻿using AspectInjector.Tests.Assets;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System.Collections.Generic;
 
 namespace AspectInjector.Tests.Runtime.Before
 {
-    [TestClass]
+    
     public class TargetsGlobalTests : TestRunner
     {
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Consrtuctor()
         {
             ExecConstructor();
@@ -17,7 +17,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Static_Consrtuctor()
         {
             ExecStaticConstructor();
@@ -27,7 +27,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Setter()
         {
             ExecSetter();
@@ -37,7 +37,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Static_Setter()
         {
             ExecStaticSetter();
@@ -47,7 +47,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Getter()
         {
             ExecGetter();
@@ -57,7 +57,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Static_Getter()
         {
             ExecStaticGetter();
@@ -67,7 +67,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Add()
         {
             ExecAdd();
@@ -77,7 +77,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Static_Add()
         {
             ExecStaticAdd();
@@ -87,7 +87,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Remove()
         {
             ExecRemove();
@@ -97,7 +97,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Static_Remove()
         {
             ExecStaticRemove();
@@ -107,7 +107,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Methods()
         {
             ExecMethod();
@@ -118,7 +118,7 @@ namespace AspectInjector.Tests.Runtime.Before
 
             CheckSequence(new List<string> {
                 GlobalAspect.BeforeExecuted,
-                Events.TestMethodEnter,
+                Events.FactEnter,
 
                 GlobalAspect.BeforeExecuted,
                 Events.TestIteratorMethodEnter,
@@ -134,7 +134,7 @@ namespace AspectInjector.Tests.Runtime.Before
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceBefore_Global_Static_Methods()
         {
             ExecStaticMethod();

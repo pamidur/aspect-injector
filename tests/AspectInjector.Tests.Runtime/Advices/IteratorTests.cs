@@ -1,15 +1,15 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace AspectInjector.Tests.Runtime.Advices
 {
-    [TestClass]
+    
     public class IteratorTests
     {
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterIteratorMethod()
         {
             Checker.Passed = false;
@@ -18,14 +18,14 @@ namespace AspectInjector.Tests.Runtime.Advices
 
             foreach (var d in a.Get("test"))
             {
-                Assert.IsFalse(Checker.Passed);
+                Assert.False(Checker.Passed);
                 d.Equals('a');
             }
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterIteratorMethod_WithArgs()
         {
             Checker.Passed = false;
@@ -34,14 +34,14 @@ namespace AspectInjector.Tests.Runtime.Advices
 
             foreach (var d in a.Get1("test"))
             {
-                Assert.IsFalse(Checker.Passed);
+                Assert.False(Checker.Passed);
                 d.Equals('a');
             }
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterIteratorMethod2()
         {
             Checker.Passed = false;
@@ -50,11 +50,11 @@ namespace AspectInjector.Tests.Runtime.Advices
 
             foreach (var d in a.Get2())
             {
-                Assert.IsFalse(Checker.Passed);
+                Assert.False(Checker.Passed);
                 d.Equals('a');
             }
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
         public class TargetClass

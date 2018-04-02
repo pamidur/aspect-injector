@@ -1,14 +1,13 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Reflection;
 
 namespace AspectInjector.Tests.Advices
-{
-    [TestClass]
+{    
     public class AroundTests
     {
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAroundMethod_StructResult()
         {
             Checker.Passed = false;
@@ -22,10 +21,10 @@ namespace AspectInjector.Tests.Advices
 
             a.Do1(new object(), 1, ref ref1, out out1, ref ref2, out out2, false, false);
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAroundMethod()
         {
             Checker.Passed = false;
@@ -39,20 +38,20 @@ namespace AspectInjector.Tests.Advices
 
             a.Do2(new object(), 1, ref ref1, out out1, ref ref2, out out2, false, false);
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAroundMethod_ModifyArguments()
         {
             var i = 1;
 
             Checker.Passed = true;
-            new AroundTests_ArgumentsModificationTarget().TestMethod(ref i);
-            Assert.IsTrue(Checker.Passed);
+            new AroundTests_ArgumentsModificationTarget().Fact(ref i);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod, Ignore]
+        [Fact(Skip = "Feature is not done yet.")]
         public void Advices_InjectAroundMethod_NoWrapperInStackTrace()
         {
             var passed = false;
@@ -68,7 +67,7 @@ namespace AspectInjector.Tests.Advices
                 passed = !e.StackTrace.Contains("__a$");
             }
 
-            Assert.IsTrue(passed);
+            Assert.True(passed);
         }
 
         internal class AroundTests_Target
@@ -215,7 +214,7 @@ namespace AspectInjector.Tests.Advices
         internal class AroundTests_ArgumentsModificationTarget
         {
             [Inject(typeof(AroundTests_ArgumentsModificationAspect))]
-            public void TestMethod(ref int i)
+            public void Fact(ref int i)
             {
                 if (i == 2)
                     i = 3;

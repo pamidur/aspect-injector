@@ -1,12 +1,12 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace AspectInjector.Tests.Advices
 {
-    [TestClass]
+    
     public class FilterTests
     {
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAfterMethod_NameFilter()
         {
             Checker.Passed = false;
@@ -14,7 +14,7 @@ namespace AspectInjector.Tests.Advices
             var a = new FilterTests_Target();
             a.Do123();
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
         [Inject(typeof(FilterTests_Aspect))]

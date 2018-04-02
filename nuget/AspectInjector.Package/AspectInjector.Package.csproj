@@ -14,26 +14,14 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>AOP aspect aspects injector injection wp8 wp8.1 win8 win8.1 win10 dotnet core notify notifypropertychanged INPC</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <IncludeBuildOutput>False</IncludeBuildOutput>
+    <IncludeBuildOutput>True</IncludeBuildOutput>
     <Version>0.0.0</Version>
-    <!--<NuspecProperties>DevelopmentDependency=true</NuspecProperties>-->
+    <DevelopmentDependency>true</DevelopmentDependency>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="build\AspectInjector.targets" Pack="true" PackagePath="build" />
-    <None Include="tools\install.ps1" Pack="true" PackagePath="tools" />
-    <None Include="$(SolutionDir)\src\AspectInjector.Broker\bin\$(Configuration)\**\*.dll" Pack="true" PackagePath="lib">
-      <Link>lib\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </None>
-    <None Include="$(SolutionDir)\src\AspectInjector.Broker\bin\$(Configuration)\**\*.xml" Pack="true" PackagePath="lib">
-      <Link>lib\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </None>
-    <None Include="$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(Configuration)\*.dll" Pack="true" PackagePath="build">
-      <Link>build\%(Filename)%(Extension)</Link>
-    </None>
-    <None Include="$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(Configuration)\*.exe" Exclude="$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(Configuration)\*.vshost.exe" Pack="true" PackagePath="build">
-      <Link>build\%(Filename)%(Extension)</Link>
-    </None>
+    <None Include="tools\install.ps1" Pack="true" PackagePath="tools" />    
   </ItemGroup>
 
   <ItemGroup>
@@ -42,4 +30,21 @@
     </PackageReference>
   </ItemGroup>
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    
+    <Exec Command="dotnet publish $(SolutionDir)src\AspectInjector\AspectInjector.csproj -o $(TargetDir)publish -c $(Configuration)" />
+  
+  </Target>
+
+  <Target Name="SomeUniqueName" BeforeTargets="_GetBuildOutputFilesWithTfm">
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(TargetDir)publish\*.dll" Pack="true" PackagePath="build">
+        <Link>build\%(Filename)%(Extension)</Link>
+      </BuildOutputInPackage>
+      <BuildOutputInPackage Include="$(TargetDir)publish\AspectInjector.Broker.*" Exclude="$(TargetDir)publish\AspectInjector.Broker.pdb" Pack="true" PackagePath="lib\netstandard1.0">
+        <Link>lib\netstandard1.0\%(Filename)%(Extension)</Link>
+      </BuildOutputInPackage>
+    
+  </ItemGroup>
+  </Target>
 </Project>

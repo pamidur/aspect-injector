@@ -1,61 +1,54 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 
 namespace AspectInjector.Tests.Advices
 {
-    [TestClass]
+    
     public class GenericTests
     {
-        private GenericTests_Target<string> _target;
-        private GenericTests_OpenGenericTarget<string, int> _openGenericTarget;
-
-        [TestInitialize]
-        public void SetUp()
-        {
-            _target = new GenericTests_Target<string>();
-            _openGenericTarget = new GenericTests_OpenGenericTarget<string, int>();
-        }
-
-        [TestMethod]
+        private GenericTests_Target<string> _target = new GenericTests_Target<string>();
+        private GenericTests_OpenGenericTarget<string, int> _openGenericTarget = new GenericTests_OpenGenericTarget<string, int>();
+        
+        [Fact]
         public void Advices_InjectBeforeMethod_GenericClass()
         {
             Checker.Passed = false;
-            _target.TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            _target.Fact();
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectBeforeMethod_GenericMethod()
         {
             Checker.Passed = false;
             _target.TestGenericMethod<object>();
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectBeforeMethod_OpenGenericMethod()
         {
             Checker.Passed = false;
-            _openGenericTarget.TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            _openGenericTarget.Fact();
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void Advices_InjectAroundMethod_GenericMethod()
         {
             Checker.Passed = false;
             var target = new GenericAroundTests_Target();
             var rr = string.Empty;
-            target.TestMethod<string>(ref rr);
-            Assert.IsTrue(Checker.Passed);
+            target.Fact<string>(ref rr);
+            Assert.True(Checker.Passed);
         }
     }
 
     [Inject(typeof(GenericTests_Aspect))]
     internal class GenericTests_Target<T>
     {
-        public void TestMethod()
+        public void Fact()
         {
         }
 
@@ -79,7 +72,7 @@ namespace AspectInjector.Tests.Advices
     internal class GenericTests_OpenGenericTarget<U, V> :
         GenericTests_OpenGenericTargetBase<string, U>
     {
-        public void TestMethod()
+        public void Fact()
         {
         }
     }
@@ -94,7 +87,7 @@ namespace AspectInjector.Tests.Advices
     [Inject(typeof(GenericAroundTests_Aspect))]
     internal class GenericAroundTests_Target
     {
-        public T TestMethod<T>(ref T value)
+        public T Fact<T>(ref T value)
         {
             var a = new object[] { value };
             return value;

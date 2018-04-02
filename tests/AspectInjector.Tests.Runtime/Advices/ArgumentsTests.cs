@@ -1,93 +1,92 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System.Reflection;
 
 namespace AspectInjector.Tests.Advices
 {
-    [TestClass]
     public class ArgumentsTests
     {
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_Instance_InjectBeforeMethod_NotNull()
         {
             Checker.Passed = false;
-            new ArgumentsTests_InstanceTarget().TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            new ArgumentsTests_InstanceTarget().Fact();
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_Instance_InjectBeforeStaticMethod_Null()
         {
             Checker.Passed = false;
-            ArgumentsTests_StaticInstanceTarget.TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            ArgumentsTests_StaticInstanceTarget.Fact();
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_ReturnType_InjectBeforeMethod()
         {
             Checker.Passed = false;
-            ArgumentsTests_ReturnTypeTarget.TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            ArgumentsTests_ReturnTypeTarget.Fact();
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_Method_InjectBeforeStaticMethod()
         {
             Checker.Passed = false;
-            new ArgumentsTests_StaticMethodTarget().TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            new ArgumentsTests_StaticMethodTarget().Fact();
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_Method_InjectBeforeStaticConstructor()
         {
             Checker.Passed = false;
             var temp = new ArgumentsTests_StaticConstructorTarget();
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_ReturnValue_AfterMethod()
         {
             Checker.Passed = false;
-            var temp = new ArgumentsTests_AroundRetValTarget().TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            var temp = new ArgumentsTests_AroundRetValTarget().Fact();
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_Method_InjectBeforeMethod()
         {
             Checker.Passed = false;
-            new ArgumentsTests_MethodTarget().TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            new ArgumentsTests_MethodTarget().Fact();
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_Method_InjectBeforeConstructor()
         {
             Checker.Passed = false;
             var temp = new ArgumentsTests_ConstructorTarget();
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_Method_InjectBeforeConstructorChain()
         {
             Checker.Passed = false;
-            new ArgumentsTests_ConstructorChainTarget().TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            new ArgumentsTests_ConstructorChainTarget().Fact();
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_Method_InjectAroundMethod()
         {
             Checker.Passed = false;
-            new ArgumentsTests_AroundMethodTarget().TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            new ArgumentsTests_AroundMethodTarget().Fact();
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_Arguments_InjectBeforeMethod()
         {
             var obj = new object();
@@ -97,28 +96,28 @@ namespace AspectInjector.Tests.Advices
 
             Checker.Passed = false;
 
-            new ArgumentsTests_ArgumentsTarget().TestMethod(obj,
+            new ArgumentsTests_ArgumentsTarget().Fact(obj,
                 ref obj,
                 out outObj,
                 val,
                 ref val,
                 out outVal);
 
-            Assert.IsTrue(Checker.Passed);
+            Assert.True(Checker.Passed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AdviceArguments_Arguments_InjectBeforeStaticMethod()
         {
             Checker.Passed = false;
-            ArgumentsTests_StaticArgumentsTarget.TestMethod(1, "2");
-            Assert.IsTrue(Checker.Passed);
+            ArgumentsTests_StaticArgumentsTarget.Fact(1, "2");
+            Assert.True(Checker.Passed);
         }
 
         internal class ArgumentsTests_InstanceTarget
         {
             [Inject(typeof(ArgumentsTests_InstanceAspect))]
-            public void TestMethod()
+            public void Fact()
             {
             }
         }
@@ -136,7 +135,7 @@ namespace AspectInjector.Tests.Advices
         internal static class ArgumentsTests_StaticInstanceTarget
         {
             [Inject(typeof(ArgumentsTests_StaticInstanceAspect))]
-            public static void TestMethod()
+            public static void Fact()
             {
             }
         }
@@ -154,7 +153,7 @@ namespace AspectInjector.Tests.Advices
         [Inject(typeof(ArgumentsTests_ReturnTypeAspect))]
         internal static class ArgumentsTests_ReturnTypeTarget
         {
-            public static void TestMethod()
+            public static void Fact()
             {
             }
         }
@@ -172,7 +171,7 @@ namespace AspectInjector.Tests.Advices
         internal class ArgumentsTests_StaticMethodTarget
         {
             [Inject(typeof(ArgumentsTests_StaticMethodAspect))]
-            public void TestMethod()
+            public void Fact()
             {
             }
         }
@@ -198,7 +197,7 @@ namespace AspectInjector.Tests.Advices
         internal class ArgumentsTests_MethodTarget
         {
             [Inject(typeof(ArgumentsTests_MethodAspect))]
-            public void TestMethod()
+            public void Fact()
             {
             }
         }
@@ -218,7 +217,7 @@ namespace AspectInjector.Tests.Advices
             }
 
             [Inject(typeof(ArgumentsTests_MethodAspect))]
-            public void TestMethod()
+            public void Fact()
             {
             }
         }
@@ -245,7 +244,7 @@ namespace AspectInjector.Tests.Advices
         internal class ArgumentsTests_ArgumentsTarget
         {
             [Inject(typeof(ArgumentsTests_ArgumentsAspect))]
-            public void TestMethod(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut)
+            public void Fact(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut)
             {
                 valueOut = 1;
                 objOut = new object();
@@ -267,7 +266,7 @@ namespace AspectInjector.Tests.Advices
         internal static class ArgumentsTests_StaticArgumentsTarget
         {
             [Inject(typeof(ArgumentsTests_StaticArgumentsAspect))]
-            public static void TestMethod(int a, string b)
+            public static void Fact(int a, string b)
             {
             }
         }
@@ -285,7 +284,7 @@ namespace AspectInjector.Tests.Advices
         internal class ArgumentsTests_AroundMethodTarget
         {
             [Inject(typeof(ArgumentsTests_AroundMethodAspect))]
-            public void TestMethod()
+            public void Fact()
             {
             }
         }
@@ -296,7 +295,7 @@ namespace AspectInjector.Tests.Advices
             [Advice(Advice.Type.Around, Advice.Target.Method)]
             public object BeforeMethod([Advice.Argument(Advice.Argument.Source.Method)] MethodBase method)
             {
-                Checker.Passed = method.Name == "TestMethod";
+                Checker.Passed = method.Name == "Fact";
                 return null;
             }
         }
@@ -304,7 +303,7 @@ namespace AspectInjector.Tests.Advices
         internal class ArgumentsTests_AroundRetValTarget
         {
             [Inject(typeof(ArgumentsTests_AroundRetValAspect))]
-            public object TestMethod()
+            public object Fact()
             {
                 return new object();
             }

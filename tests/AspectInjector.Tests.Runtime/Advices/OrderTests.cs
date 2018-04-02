@@ -1,25 +1,18 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace AspectInjector.Tests.Advices
 {
-    [TestClass]
     public class OrderTests
     {
-        private OrderTests_Target _beforeTestClass;
+        private OrderTests_Target _beforeTestClass = new OrderTests_Target();
 
-        [TestInitialize]
-        public void SetUp()
-        {
-            _beforeTestClass = new OrderTests_Target();
-        }
-
-        [TestMethod, Ignore]//in release the order may be changed by compiller :(
+        [Fact(Skip = "In release the order may be changed by compiller :(")]
         public void Advices_InjectBeforeMethod_Ordered()
         {
             Checker.Passed = false;
-            _beforeTestClass.TestMethod();
-            Assert.IsTrue(Checker.Passed);
+            _beforeTestClass.Fact();
+            Assert.True(Checker.Passed);
         }
     }
 
@@ -28,7 +21,7 @@ namespace AspectInjector.Tests.Advices
     [Inject(typeof(OrderTests_Aspect3))]
     internal class OrderTests_Target
     {
-        public void TestMethod()
+        public void Fact()
         {
         }
     }

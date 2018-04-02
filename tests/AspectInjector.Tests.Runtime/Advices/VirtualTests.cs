@@ -1,13 +1,13 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 
 namespace AspectInjector.Tests.Advices
 {
-    [TestClass]
+
     public class VirtualTests
     {
-        [TestMethod, Ignore]
+        [Fact(Skip = "Skipped for some reason, need to check")]
         public void Advices_InjectAroundVirtualOverrideMethods()
         {
             VirtualTests_Base t = new VirtualTests_Inherited();
@@ -17,7 +17,7 @@ namespace AspectInjector.Tests.Advices
             }
             catch (Exception e)
             {
-                Assert.Fail("No exception is expected, but got {0}", e);
+                Assert.True(false, $"No exception is expected, but got {e}");
             }
         }
     }

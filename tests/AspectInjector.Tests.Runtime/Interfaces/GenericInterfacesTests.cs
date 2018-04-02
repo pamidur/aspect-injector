@@ -1,11 +1,11 @@
 ﻿//using AspectInjector.Broker;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using Xunit;
 //using System;
 //using System.IO;
 
 //namespace AspectInjector.Tests.Interfaces
 //{
-//    [TestClass]
+//    
 //    public class GenericInterfacesTests
 //    {
 //        [Broker.Inject(typeof(Aspect))]
@@ -45,10 +45,10 @@
 //        }
 //    }
 
-//    [TestClass]
+//    
 //    public class GenericInterfacesTests2
 //    {
-//        [TestMethod]
+//        [Fact]
 //        public void Interfaces_OpenGenericMethod()
 //        {
 //            var ti = (ITestInterface)new TestClass();
@@ -88,10 +88,10 @@
 //        }
 //    }
 
-//    [TestClass]
+//    
 //    public class GenericInterfacesTests3
 //    {
-//        [TestMethod]
+//        [Fact]
 //        public void Interfaces_OpenGenericMethodInClosedGenericType()
 //        {
 //            var data4 = "ref";

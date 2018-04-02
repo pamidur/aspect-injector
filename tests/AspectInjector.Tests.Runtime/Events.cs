@@ -2,8 +2,8 @@
 {
     public static class Events
     {
-        public static readonly string TestMethodEnter = "TestMethodEnter";
-        public static readonly string TestMethodExit = "TestMethodExit";
+        public static readonly string FactEnter = "FactEnter";
+        public static readonly string FactExit = "FactExit";
         public static readonly string TestConstructorEnter = "TestConstructorEnter";
         public static readonly string TestConstructorExit = "TestConstructorExit";
         public static readonly string TestIteratorMethodEnter = "TestIteratorMethodEnter";

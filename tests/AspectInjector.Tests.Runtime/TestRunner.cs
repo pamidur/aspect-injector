@@ -1,6 +1,6 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Tests.Assets;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +15,11 @@ namespace AspectInjector.Tests.Runtime
     {
         private static readonly List<string> _staticCtorEvents;
 
+        public TestRunner()
+        {
+            TestLog.Reset();
+        }
+
         static TestRunner()
         {
             TestLog.Reset();
@@ -24,13 +29,7 @@ namespace AspectInjector.Tests.Runtime
 
             _staticCtorEvents = TestLog.Log.ToList();
             TestLog.Reset();
-        }
-
-        [TestInitialize]
-        public void Init()
-        {
-            TestLog.Reset();
-        }
+        }        
 
         public List<string> GetConstructorArgsSequence(string prefix)
         {
@@ -87,10 +86,10 @@ namespace AspectInjector.Tests.Runtime
 
             var test = new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, out ao1, out ao2, out ao3, out ao4);
 
-            Assert.AreEqual(TestAssets.asset1, ao1);
-            Assert.AreEqual(TestAssets.asset2, ao2);
-            Assert.AreEqual(TestAssets.asset3, ao3);
-            Assert.AreEqual(TestAssets.asset4, ao4);
+            Assert.Equal(TestAssets.asset1, ao1);
+            Assert.Equal(TestAssets.asset2, ao2);
+            Assert.Equal(TestAssets.asset3, ao3);
+            Assert.Equal(TestAssets.asset4, ao4);
         }
 
         public void ExecStaticConstructor()
@@ -106,19 +105,19 @@ namespace AspectInjector.Tests.Runtime
             IAssetIface1<Asset1> ao4;
             Asset2 ao5;
 
-            var result = new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestMethod<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, ref TestAssets.asset5, out ao1, out ao2, out ao3, out ao4, out ao5);
+            var result = new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().Fact<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, ref TestAssets.asset5, out ao1, out ao2, out ao3, out ao4, out ao5);
 
-            Assert.AreEqual(TestAssets.asset1, ao1);
-            Assert.AreEqual(TestAssets.asset2, ao2);
-            Assert.AreEqual(TestAssets.asset3, ao3);
-            Assert.AreEqual(TestAssets.asset4, ao4);
-            Assert.AreEqual(TestAssets.asset5, ao5);
+            Assert.Equal(TestAssets.asset1, ao1);
+            Assert.Equal(TestAssets.asset2, ao2);
+            Assert.Equal(TestAssets.asset3, ao3);
+            Assert.Equal(TestAssets.asset4, ao4);
+            Assert.Equal(TestAssets.asset5, ao5);
 
-            Assert.AreEqual(TestAssets.asset1, result.Item1);
-            Assert.AreEqual(TestAssets.asset2, result.Item2);
-            Assert.AreEqual(TestAssets.asset3, result.Item3);
-            Assert.AreEqual(TestAssets.asset4, result.Item4);
-            Assert.AreEqual(TestAssets.asset5, result.Item5);
+            Assert.Equal(TestAssets.asset1, result.Item1);
+            Assert.Equal(TestAssets.asset2, result.Item2);
+            Assert.Equal(TestAssets.asset3, result.Item3);
+            Assert.Equal(TestAssets.asset4, result.Item4);
+            Assert.Equal(TestAssets.asset5, result.Item5);
         }
 
         public void ExecStaticMethod()
@@ -131,17 +130,17 @@ namespace AspectInjector.Tests.Runtime
 
             var result = TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticMethod<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5, ref TestAssets.asset1, ref TestAssets.asset2, ref TestAssets.asset3, ref TestAssets.asset4, ref TestAssets.asset5, out ao1, out ao2, out ao3, out ao4, out ao5);
 
-            Assert.AreEqual(TestAssets.asset1, ao1);
-            Assert.AreEqual(TestAssets.asset2, ao2);
-            Assert.AreEqual(TestAssets.asset3, ao3);
-            Assert.AreEqual(TestAssets.asset4, ao4);
-            Assert.AreEqual(TestAssets.asset5, ao5);
+            Assert.Equal(TestAssets.asset1, ao1);
+            Assert.Equal(TestAssets.asset2, ao2);
+            Assert.Equal(TestAssets.asset3, ao3);
+            Assert.Equal(TestAssets.asset4, ao4);
+            Assert.Equal(TestAssets.asset5, ao5);
 
-            Assert.AreEqual(TestAssets.asset1, result.Item1);
-            Assert.AreEqual(TestAssets.asset2, result.Item2);
-            Assert.AreEqual(TestAssets.asset3, result.Item3);
-            Assert.AreEqual(TestAssets.asset4, result.Item4);
-            Assert.AreEqual(TestAssets.asset5, result.Item5);
+            Assert.Equal(TestAssets.asset1, result.Item1);
+            Assert.Equal(TestAssets.asset2, result.Item2);
+            Assert.Equal(TestAssets.asset3, result.Item3);
+            Assert.Equal(TestAssets.asset4, result.Item4);
+            Assert.Equal(TestAssets.asset5, result.Item5);
         }
 
         public void ExecSetter()
@@ -188,44 +187,44 @@ namespace AspectInjector.Tests.Runtime
         {
             var result = new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestIteratorMethod<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Last();
 
-            Assert.AreEqual(TestAssets.asset1, result.Item1);
-            Assert.AreEqual(TestAssets.asset2, result.Item2);
-            Assert.AreEqual(TestAssets.asset3, result.Item3);
-            Assert.AreEqual(TestAssets.asset4, result.Item4);
-            Assert.AreEqual(TestAssets.asset5, result.Item5);
+            Assert.Equal(TestAssets.asset1, result.Item1);
+            Assert.Equal(TestAssets.asset2, result.Item2);
+            Assert.Equal(TestAssets.asset3, result.Item3);
+            Assert.Equal(TestAssets.asset4, result.Item4);
+            Assert.Equal(TestAssets.asset5, result.Item5);
         }
 
         public void ExecStaticIteratorMethod()
         {
             var result = TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticIteratorMethod<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Last();
 
-            Assert.AreEqual(TestAssets.asset1, result.Item1);
-            Assert.AreEqual(TestAssets.asset2, result.Item2);
-            Assert.AreEqual(TestAssets.asset3, result.Item3);
-            Assert.AreEqual(TestAssets.asset4, result.Item4);
-            Assert.AreEqual(TestAssets.asset5, result.Item5);
+            Assert.Equal(TestAssets.asset1, result.Item1);
+            Assert.Equal(TestAssets.asset2, result.Item2);
+            Assert.Equal(TestAssets.asset3, result.Item3);
+            Assert.Equal(TestAssets.asset4, result.Item4);
+            Assert.Equal(TestAssets.asset5, result.Item5);
         }
 
         public void ExecAsyncTypedTaskMethod()
         {
             var result = new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestAsyncMethod1<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Result;
 
-            Assert.AreEqual(TestAssets.asset1, result.Item1);
-            Assert.AreEqual(TestAssets.asset2, result.Item2);
-            Assert.AreEqual(TestAssets.asset3, result.Item3);
-            Assert.AreEqual(TestAssets.asset4, result.Item4);
-            Assert.AreEqual(TestAssets.asset5, result.Item5);
+            Assert.Equal(TestAssets.asset1, result.Item1);
+            Assert.Equal(TestAssets.asset2, result.Item2);
+            Assert.Equal(TestAssets.asset3, result.Item3);
+            Assert.Equal(TestAssets.asset4, result.Item4);
+            Assert.Equal(TestAssets.asset5, result.Item5);
         }
 
         public void ExecStaticAsyncTypedTaskMethod()
         {
             var result = TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticAsyncMethod1<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Result;
 
-            Assert.AreEqual(TestAssets.asset1, result.Item1);
-            Assert.AreEqual(TestAssets.asset2, result.Item2);
-            Assert.AreEqual(TestAssets.asset3, result.Item3);
-            Assert.AreEqual(TestAssets.asset4, result.Item4);
-            Assert.AreEqual(TestAssets.asset5, result.Item5);
+            Assert.Equal(TestAssets.asset1, result.Item1);
+            Assert.Equal(TestAssets.asset2, result.Item2);
+            Assert.Equal(TestAssets.asset3, result.Item3);
+            Assert.Equal(TestAssets.asset4, result.Item4);
+            Assert.Equal(TestAssets.asset5, result.Item5);
         }
 
         public void ExecAsyncTaskMethod()
@@ -255,7 +254,7 @@ namespace AspectInjector.Tests.Runtime
             var logEvents = TestLog.Log.Where(e => orderedEvents.Contains(e));
 
             if (!logEvents.SequenceEqual(orderedEvents))
-                Assert.Fail(string.Join(Environment.NewLine, logEvents));
+                Assert.True(false, string.Join(Environment.NewLine, logEvents));
         }
     }
 }

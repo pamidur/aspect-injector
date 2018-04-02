@@ -44,13 +44,13 @@ namespace AspectInjector.Tests.Runtime
 
             [Inject(typeof(InstanceAspect))]
             [Inject(typeof(GlobalAspect))]
-            public Tuple<int, Asset1, T1, T2, T3> TestMethod<T3>(
+            public Tuple<int, Asset1, T1, T2, T3> Fact<T3>(
                 int a1, Asset1 a2, T1 a3, T2 a4, T3 a5,
                 ref int ar1, ref Asset1 ar2, ref T1 ar3, ref T2 ar4, ref T3 ar5,
                 out int ao1, out Asset1 ao2, out T1 ao3, out T2 ao4, out T3 ao5
                 )
             {
-                TestLog.Write(Events.TestMethodEnter);
+                TestLog.Write(Events.FactEnter);
 
                 ao1 = ar1;
                 ao2 = ar2;
@@ -58,7 +58,7 @@ namespace AspectInjector.Tests.Runtime
                 ao4 = ar4;
                 ao5 = ar5;
 
-                TestLog.Write(Events.TestMethodExit);
+                TestLog.Write(Events.FactExit);
 
                 return new Tuple<int, Asset1, T1, T2, T3>(a1, a2, a3, a4, a5);
             }

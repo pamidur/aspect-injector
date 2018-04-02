@@ -1,10 +1,10 @@
 ﻿//using AspectInjector.Broker;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using Xunit;
 //using System;
 
 //namespace AspectInjector.Tests.Interfaces
 //{
-//    [TestClass]
+//    
 //    public class PartialMembersInterfacesTests
 //    {
 //        [Broker.Inject(typeof(Aspect))]
