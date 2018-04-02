@@ -141,6 +141,12 @@
   <Import Project="..\..\nuget\AspectInjector.Package\build\AspectInjector.targets" />
   <PropertyGroup>
     <_ASI_Location>$(SolutionDir)src\AspectInjector\bin\$(ConfigurationName)\</_ASI_Location>
-    <_ASI_Options Condition=" '$(Configuration)' == 'Debug' ">-d</_ASI_Options>
+    <_ASI_Options Condition=" '$(Configuration)' == 'Debug' ">-d</_ASI_Options>    
   </PropertyGroup>
+
+  <!--<PropertyGroup>
+    <_ASI_Location>$(SolutionDir)src\AspectInjector\bin\Debug\</_ASI_Location>
+    <_ASI_Options>-d</_ASI_Options>
+  </PropertyGroup>-->
+  
 </Project>

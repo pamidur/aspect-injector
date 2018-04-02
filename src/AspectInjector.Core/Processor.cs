@@ -1,7 +1,10 @@
 ﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
+using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -121,6 +124,19 @@ namespace AspectInjector.Core
 
             foreach (var injection in injections)
                 _log.LogError(CompilationMessage.From($"Couldn't find weaver for {injection.ToString()}", injection.Target));
+
+            var isInRelease = false;
+
+            var debugAttr = assembly.CustomAttributes.FirstOrDefault(a => a.AttributeType.IsTypeOf(typeof(DebuggableAttribute)));
+            if (!debugAttr.GetConstructorValue<DebuggableAttribute.DebuggingModes>(0).HasFlag(DebuggableAttribute.DebuggingModes.DisableOptimizations))
+                isInRelease = true;
+
+            foreach (var module in assembly.Modules)
+            {
+                if (isInRelease)
+                    EditorFactory.Optimize(module);
+                EditorFactory.CleanUp(module);
+            }
         }
     }
 }
