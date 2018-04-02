@@ -28,10 +28,10 @@
     <None Include="$(SolutionDir)\src\AspectInjector.Broker\bin\$(Configuration)\netstandard1.0\*.xml" Pack="true" PackagePath="lib\net45">
       <Link>lib\%(Filename)%(Extension)</Link>
     </None>
-    <None Include="$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(Configuration)\*.dll" Pack="true" PackagePath="build">
+    <None Include="$(SolutionDir)\src\AspectInjector\bin\$(Configuration)\*.dll" Pack="true" PackagePath="build">
       <Link>build\%(Filename)%(Extension)</Link>
     </None>
-    <None Include="$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(Configuration)\*.exe" Exclude="$(SolutionDir)\src\AspectInjector.CommandLine\bin\$(Configuration)\*.vshost.exe" Pack="true" PackagePath="build">
+    <None Include="$(SolutionDir)\src\AspectInjector\bin\$(Configuration)\*.exe" Exclude="$(SolutionDir)\src\AspectInjector\bin\$(Configuration)\*.vshost.exe" Pack="true" PackagePath="build">
       <Link>build\%(Filename)%(Extension)</Link>
     </None>
   </ItemGroup>
