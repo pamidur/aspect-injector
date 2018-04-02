@@ -9,7 +9,7 @@ Aspect Injector Reference
 
 ### Download ###
 ```ps
-PM> Install-Package AspectInjector -Pre
+PM> Install-Package AspectInjector
 ```
 
 ### Features ###
