@@ -15,9 +15,17 @@ namespace AspectInjector.Tests.General
         [TestMethod]
         public void General_PEIntegrity_IsOk()
         {
-            var sdkFolder = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\NETFXSDK\\4.6", "InstallationFolder", null) as string;
-            if (null == sdkFolder)
-                throw new InvalidOperationException("Could not find Windows SDK v10.0A installation folder.");
+            var sdksNodes = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64).OpenSubKey("SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\NETFXSDK\\");
+
+            var latestSdk = sdksNodes.GetSubKeyNames().OrderByDescending(s => s).FirstOrDefault();
+
+            if(latestSdk == null)
+                throw new InvalidOperationException("Could not find Windows SDK.");            
+
+            var sdkFolder = sdksNodes.OpenSubKey(latestSdk).GetValue("InstallationFolder", null) as string;
+
+            if (sdkFolder == null)
+                throw new InvalidOperationException($"SDK folder is not found for net {latestSdk}.");
 
             var peverify = Directory.GetFiles(sdkFolder, "peverify.exe", SearchOption.AllDirectories).First();
 

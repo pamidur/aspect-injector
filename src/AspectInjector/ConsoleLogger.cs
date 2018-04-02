@@ -1,7 +1,7 @@
 ﻿using AspectInjector.Core.Services;
 using System;
 
-namespace AspectInjector.CLI
+namespace AspectInjector
 {
     public class ConsoleLogger : Logger
     {

@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace AspectInjector.CLI.Commands
+namespace AspectInjector.Commands
 {
     public class ProcessCommand : ICommand
     {
@@ -88,7 +88,7 @@ namespace AspectInjector.CLI.Commands
             Program.ShowHeader();
             Console.WriteLine("PROCESS USAGE:");
             Console.WriteLine();
-            Console.WriteLine(" aspectinjector.cli.exe process <assembly> [<references>]");
+            Console.WriteLine(" AspectInjector.exe process <assembly> [<references>]");
 
             if(errors.Any())
             {

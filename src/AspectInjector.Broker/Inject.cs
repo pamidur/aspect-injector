@@ -26,10 +26,10 @@ namespace AspectInjector.Broker
         ///// </summary>
         //public To ChildFilter { get; set; }
 
-        /// <summary>
-        /// Specifies priority for this cut. The higher priority the earlier execution.
-        /// </summary>
-        public ushort Priority { get; set; }
+        ///// <summary>
+        ///// Specifies priority for this cut. The higher priority the earlier execution.
+        ///// </summary>
+        //public ushort Priority { get; set; }
 
         ///// <summary>
         ///// Member access modifier enumeration.

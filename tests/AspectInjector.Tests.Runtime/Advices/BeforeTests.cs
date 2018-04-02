@@ -76,19 +76,6 @@ namespace AspectInjector.Tests.Advices
             var a = new BeforeTests_BeforeConstructorWithInterfaceTarget();
             Assert.IsTrue(Checker.Passed);
         }
-
-        [TestMethod, Ignore]
-        public void Advices_InjectBeforeSetter_AccessOldValue()
-        {
-            Checker.Passed = false;
-
-            var a = new BeforeTests_SetterValueTarget();
-            a.Data = 2;
-            BeforeTests_SetterValueTarget.GlobalData = 2;
-            a.Data = 4;
-
-            Assert.IsTrue(Checker.Passed);
-        }
     }
 
     //test classes
@@ -160,26 +147,6 @@ namespace AspectInjector.Tests.Advices
         public void Dispose()
         {
             throw new NotImplementedException();
-        }
-    }
-
-    internal class BeforeTests_SetterValueTarget
-    {
-        public static int GlobalData = 0;
-
-        [Inject(typeof(BeforeTests_SetterValueAspect))]
-        public int Data { get; set; }
-    }
-
-    [Aspect(Aspect.Scope.Global)]
-    internal class BeforeTests_SetterValueAspect
-    {
-        [Advice(Advice.Type.Before, Advice.Target.Setter)]
-        public void AfterMethod(
-            [Advice.Argument(Advice.Argument.Source.ReturnValue)] object old
-            )
-        {
-            Checker.Passed = (int)old == BeforeTests_SetterValueTarget.GlobalData;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AspectInjector.CLI
+namespace AspectInjector
 {
     interface ICommand
     {

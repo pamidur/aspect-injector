@@ -52,25 +52,6 @@ namespace AspectInjector.Tests.Advices
             Assert.IsTrue(Checker.Passed);
         }
 
-        [TestMethod, Ignore]
-        public void Advices_InjectAroundMethod_NoWrapperInStackTrace()
-        {
-            var passed = false;
-
-            var a = new AroundTests_StackTraceTarget();
-
-            try
-            {
-                a.Do();
-            }
-            catch (Exception e)
-            {
-                passed = !e.StackTrace.Contains("__a$");
-            }
-
-            Assert.IsTrue(passed);
-        }
-
         internal class AroundTests_Target
         {
             [Inject(typeof(AroundTests_Aspect1))]
@@ -238,26 +219,6 @@ namespace AspectInjector.Tests.Advices
                 Checker.Passed = (int)args[0] == 3;
 
                 return result;
-            }
-        }
-
-        internal class AroundTests_StackTraceTarget
-        {
-            [Inject(typeof(AroundTests_StackTraceAspect))]
-            public void Do()
-            {
-                throw new Exception("Test Exception");
-            }
-        }
-
-        [Aspect(Aspect.Scope.Global)]
-        public class AroundTests_StackTraceAspect
-        {
-            [Advice(Advice.Type.Around, Advice.Target.Method)]
-            public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
-            {
-                return target(arguments);
             }
         }
     }
