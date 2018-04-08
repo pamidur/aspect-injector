@@ -13,19 +13,25 @@ namespace AspectInjector.Core
     public class Processor
     {
         private readonly IAspectExtractor _aspectExtractor;
-        private readonly IAspectWeaver _assectWeaver;
+        private readonly IAspectWeaver _aspectWeaver;
         private readonly IAssetsCache _cache;
         private readonly IEnumerable<IEffectWeaver> _effectWeavers;
         private readonly IInjectionCollector _injectionCollector;
         private readonly IJanitor _janitor;
         private readonly ILogger _log;
 
-        public Processor(IJanitor janitor, IAspectExtractor aspectExtractor, IAssetsCache cache, IInjectionCollector injectionCollector, IAspectWeaver assectWeaver, IEnumerable<IEffectWeaver> effectWeavers, ILogger logger)
+        public Processor(IJanitor janitor, 
+            IAspectExtractor aspectExtractor, 
+            IAssetsCache cache, 
+            IInjectionCollector injectionCollector, 
+            IAspectWeaver aspectWeaver, 
+            IEnumerable<IEffectWeaver> effectWeavers, 
+            ILogger logger)
         {
             _aspectExtractor = aspectExtractor;
             _injectionCollector = injectionCollector;
             _cache = cache;
-            _assectWeaver = assectWeaver;
+            _aspectWeaver = aspectWeaver;
             _effectWeavers = effectWeavers;
             _janitor = janitor;
             _log = logger;
@@ -90,7 +96,7 @@ namespace AspectInjector.Core
             return false;
         }
 
-        public void ProcessAssembly(AssemblyDefinition assembly)
+        private void ProcessAssembly(AssemblyDefinition assembly)
         {
             var aspects = _aspectExtractor.Extract(assembly);
 
@@ -98,6 +104,7 @@ namespace AspectInjector.Core
                 _cache.Cache(aspect);
 
             var injections = _injectionCollector.Collect(assembly).ToList();
+            injections = ExcludeAspectInjections(injections, aspects);
 
             _janitor.Cleanup(assembly);
 
@@ -107,7 +114,7 @@ namespace AspectInjector.Core
             _cache.FlushCache(assembly);
 
             foreach (var aspect in aspects)
-                _assectWeaver.WeaveGlobalAssests(aspect);
+                _aspectWeaver.WeaveGlobalAssests(aspect);
 
             foreach (var injector in _effectWeavers.OrderByDescending(i => i.Priority))
             {
@@ -137,6 +144,12 @@ namespace AspectInjector.Core
                     EditorFactory.Optimize(module);
                 EditorFactory.CleanUp(module);
             }
+        }
+
+        private List<Injection> ExcludeAspectInjections(IEnumerable<Injection> injections, IEnumerable<AspectDefinition> aspects)
+        {
+            var aspectTypes = new HashSet<TypeDefinition>(aspects.Select(a => a.Host));
+            return injections.Where(i => !aspectTypes.Contains(i.Target.DeclaringType)).ToList();
         }
     }
 }
