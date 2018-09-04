@@ -5,7 +5,7 @@ Aspect Injector Reference
 ### Project Status ###
 [![NuGet](https://img.shields.io/nuget/v/AspectInjector.svg)](https://www.nuget.org/packages/AspectInjector)
 [![NuGet Pre Release](https://img.shields.io/nuget/vpre/AspectInjector.svg)](https://www.nuget.org/packages/AspectInjector)
-[![status](https://ci.appveyor.com/api/projects/status/github/pamidur/aspect-injector?branch=master&svg=true)](https://ci.appveyor.com/project/pamidur/aspect-injector)
+[![Build Status](https://travis-ci.org/pamidur/aspect-injector.svg?branch=master)](https://travis-ci.org/pamidur/aspect-injector)
 
 ### Download ###
 ```ps
