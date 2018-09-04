@@ -13,9 +13,10 @@ script:
   - dotnet restore ./
   - dotnet build ./ -c $MODE -p:Version=$VERSION -p:InformationalVersion=$VERSION:$TRAVIS_COMMIT -p:Product="$PRODUCT" -p:Authors="$AUTHORS" -p:Company="$AUTHORS"
   - dotnet test ./ -c $MODE --no-build
+  - dotnet pack ./nuget/AspectInjector.Package/ -c $MODE --no-build -p:Version=$VERSION -p:Product="$PRODUCT" -p:Authors="$AUTHORS"
 deploy:
   skip_cleanup: true
   provider: script
-  script: dotnet pack ./nuget/AspectInjector.Package/ -c $MODE --no-build -p:Version=$VERSION -p:Product="$PRODUCT" -p:Authors="$AUTHORS" && dotnet nuget push ./nuget/**/*.nupkg -s $NUGETURL -k $NUGETKEY
+  script: dotnet nuget push ./nuget/**/*.nupkg -s $NUGETURL -k $NUGETKEY
   on:
     tags: true
