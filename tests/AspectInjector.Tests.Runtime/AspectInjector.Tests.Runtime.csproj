@@ -23,6 +23,5 @@
   <PropertyGroup>
     <_ASI_Location>$(SolutionDir)src\AspectInjector\bin\$(Configuration)\netcoreapp2.0\</_ASI_Location>
     <_ASI_Options Condition=" '$(Configuration)' == 'Debug' "></_ASI_Options>
-  </PropertyGroup>
-  
+  </PropertyGroup>  
 </Project>

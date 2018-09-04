@@ -57,8 +57,8 @@ namespace AspectInjector.Commands
             }
 
             return log.IsErrorThrown ? 1 : 0;
-        }
-
+        }
+
         private Processor CreateProcessor(ILogger log)
         {
             var container = new Container();

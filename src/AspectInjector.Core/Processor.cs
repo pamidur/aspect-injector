@@ -1,32 +1,35 @@
 ﻿using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System;
 
 namespace AspectInjector.Core
 {
     public class Processor
     {
         private readonly IAspectExtractor _aspectExtractor;
-        private readonly IAspectWeaver _assectWeaver;
+        private readonly IAspectWeaver _aspectWeaver;
         private readonly IAssetsCache _cache;
         private readonly IEnumerable<IEffectWeaver> _effectWeavers;
         private readonly IInjectionCollector _injectionCollector;
         private readonly IJanitor _janitor;
         private readonly ILogger _log;
 
-        public Processor(IJanitor janitor, IAspectExtractor aspectExtractor, IAssetsCache cache, IInjectionCollector injectionCollector, IAspectWeaver assectWeaver, IEnumerable<IEffectWeaver> effectWeavers, ILogger logger)
+        public Processor(IJanitor janitor,
+            IAspectExtractor aspectExtractor,
+            IAssetsCache cache,
+            IInjectionCollector injectionCollector,
+            IAspectWeaver aspectWeaver,
+            IEnumerable<IEffectWeaver> effectWeavers,
+            ILogger logger)
         {
             _aspectExtractor = aspectExtractor;
             _injectionCollector = injectionCollector;
             _cache = cache;
-            _assectWeaver = assectWeaver;
+            _aspectWeaver = aspectWeaver;
             _effectWeavers = effectWeavers;
             _janitor = janitor;
             _log = logger;
@@ -73,7 +76,10 @@ namespace AspectInjector.Core
         {
             var origOut = Path.GetDirectoryName(path);
             var tempDir = Path.Combine(origOut, "aspect_compile");
-            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+            if (Directory.Exists(tempDir))
+            {
+                Directory.Delete(tempDir, true);
+            }
 
             Directory.CreateDirectory(tempDir);
 
@@ -87,8 +93,8 @@ namespace AspectInjector.Core
                     new WriterParameters()
                     {
                         WriteSymbols = writeSymbols,
-                            ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
-                        });
+                        ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
+                    });
 
                 assembly.MainModule.SymbolReader.Dispose();
                 assembly.Dispose();
@@ -112,7 +118,9 @@ namespace AspectInjector.Core
             var pdbPath = Path.Combine(Path.GetDirectoryName(dllPath), Path.GetFileNameWithoutExtension(dllPath) + ".pdb");
 
             if (File.Exists(pdbPath))
+            {
                 return true;
+            }
 
             _log.LogInfo($"Symbols not found on {pdbPath}. Proceeding without...");
             return false;
@@ -122,21 +130,23 @@ namespace AspectInjector.Core
         {
             var aspects = _aspectExtractor.Extract(assembly);
 
-            foreach (var aspect in aspects)
+            foreach (var aspect in aspects)            
                 _cache.Cache(aspect);
+            
 
             var injections = _injectionCollector.Collect(assembly).ToList();
+            injections = ExcludeAspectInjections(injections, aspects);
 
             _janitor.Cleanup(assembly);
 
-            if (_log.IsErrorThrown)
-                return;
+            if (_log.IsErrorThrown)            
+                return;            
 
             _cache.FlushCache(assembly);
             _log.LogInfo($"Stored {aspects.Count} aspects");
 
-            foreach (var aspect in aspects)
-                _assectWeaver.WeaveGlobalAssests(aspect);
+            foreach (var aspect in aspects)            
+                _aspectWeaver.WeaveGlobalAssests(aspect);            
 
             _log.LogInfo($"Found {injections.Count} injections");
 
@@ -144,17 +154,18 @@ namespace AspectInjector.Core
             {
                 _log.LogInfo($"Executing {injector.GetType().Name}");
 
-                foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key).ToList())
-                    foreach (var injection in prioritizedInjections.OrderByDescending(i => i.Effect.Priority))
+                foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key).ToList())                
+                    foreach (var injection in prioritizedInjections.OrderByDescending(i => i.Effect.Priority))                    
                         if (injector.CanWeave(injection))
                         {
                             injector.Weave(injection);
                             injections.Remove(injection);
-                        }
+                        }   
             }
 
-            foreach (var injection in injections)
+            foreach (var injection in injections)            
                 _log.LogError(CompilationMessage.From($"Couldn't find weaver for {injection.ToString()}", injection.Target));
+            
 
             if (optimize)
                 _log.LogInfo($"Cleanup and optimize.");
@@ -163,10 +174,17 @@ namespace AspectInjector.Core
 
             foreach (var module in assembly.Modules)
             {
-                if (optimize)
+                if (optimize)                
                     EditorFactory.Optimize(module);
+                
                 EditorFactory.CleanUp(module);
             }
+        }
+
+        private List<Injection> ExcludeAspectInjections(IEnumerable<Injection> injections, IEnumerable<AspectDefinition> aspects)
+        {
+            var aspectTypes = new HashSet<TypeDefinition>(aspects.Select(a => a.Host));
+            return injections.Where(i => !aspectTypes.Contains(i.Target.DeclaringType)).ToList();
         }
     }
 }

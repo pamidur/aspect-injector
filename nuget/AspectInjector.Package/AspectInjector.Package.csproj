@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard1.0</TargetFramework>
+    <TargetFramework>net45</TargetFramework>
     <PackageId>AspectInjector</PackageId>
     <Product>Aspect Injector</Product>
     <Title>Aspect Injector</Title>
