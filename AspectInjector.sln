@@ -22,9 +22,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Broker", "src\AspectInjector.Broker\AspectInjector.Broker.csproj", "{0926FE28-73BA-4F73-9188-B196FBBC9410}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Package", "nuget\AspectInjector.Package\AspectInjector.Package.csproj", "{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}"
-	ProjectSection(ProjectDependencies) = postProject
-		{0926FE28-73BA-4F73-9188-B196FBBC9410} = {0926FE28-73BA-4F73-9188-B196FBBC9410}
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{8B8EB611-8720-4A8B-8F52-43327FE510E9}"
 EndProject
