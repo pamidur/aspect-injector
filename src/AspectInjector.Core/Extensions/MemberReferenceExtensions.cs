@@ -9,12 +9,12 @@ namespace AspectInjector.Core.Extensions
     {
         public static bool IsAsync(this MethodDefinition m)
         {
-            return m.CustomAttributes.Any(a => a.AttributeType.IsTypeOf(typeof(AsyncStateMachineAttribute)));
+            return m.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.AsyncStateMachineAttribute);
         }
 
         public static bool IsIterator(this MethodDefinition m)
         {
-            return m.CustomAttributes.Any(a => a.AttributeType.IsTypeOf(typeof(IteratorStateMachineAttribute)));
+            return m.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.IteratorStateMachineAttribute);
         }
 
         public static bool IsNormalMethod(this MethodDefinition m)

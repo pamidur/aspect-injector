@@ -28,7 +28,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override TypeDefinition GetStateMachine()
         {
-            return _target.CustomAttributes.First(ca => ca.AttributeType.IsTypeOf(typeof(AsyncStateMachineAttribute)))
+            return _target.CustomAttributes.First(ca => ca.AttributeType.FullName == WellKnownTypes.AsyncStateMachineAttribute)
                 .GetConstructorValue<TypeReference>(0).Resolve();
         }
 
@@ -46,7 +46,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                         return false;
 
                     var method = ((MethodReference)i.Operand).Resolve();
-                    return method.Name == "SetResult" && _supportedMethodBuilders.Any(bt => method.DeclaringType.IsTypeOf(bt));
+                    return method.Name == "SetResult" && _supportedMethodBuilders.Any(bt => method.DeclaringType.FullName == bt.FullName);
                 }).ToList();
 
                 afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _ts.Void);
