@@ -19,7 +19,7 @@
 
   <Target Name="_ASI_InjectAspectsCore" Condition="'$(_InjectionNeeded)' == 'true'">
     <PropertyGroup>
-      <ProcessCmd>dotnet &quot;$(_ASI_Location)aspectinjector.dll&quot; $(_ASI_Options) process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(_ASI_Process_Options) @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
+      <ProcessCmd>dotnet &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_ASI_Options) process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(_ASI_Process_Options) @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
     </PropertyGroup>
     <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="_AspectExitCode" />
