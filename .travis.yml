@@ -1,0 +1,21 @@
+language: csharp
+mono: none
+dotnet: 2.1.401
+env:
+  global:
+    - NUGETURL=https://api.nuget.org/v3/index.json
+    - VERSION=${TRAVIS_TAG:-0.0.0-dev}
+    - MODE=Release
+    - PRODUCT='Aspect Injector'
+    - AUTHORS='Aspect Injector Contributors'
+script:
+  - echo $VERSION
+  - dotnet restore ./
+  - dotnet build ./ -c $MODE -p:Version=$VERSION -p:InformationalVersion=$VERSION:$TRAVIS_COMMIT -p:Product="$PRODUCT" -p:Authors="$AUTHORS" -p:Company="$AUTHORS"
+  - dotnet test ./ -c $MODE --no-build
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: dotnet pack ./nuget/AspectInjector.Package/ -c $MODE --no-build -p:Version=$VERSION -p:Product="$PRODUCT" -p:Authors="$AUTHORS" && dotnet nuget push ./nuget/**/*.nupkg -s $NUGETURL -k $NUGETKEY
+  on:
+    tags: true

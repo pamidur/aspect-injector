@@ -2,12 +2,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.0</TargetFramework>
     <PackageId>AspectInjector</PackageId>
-    <Product>Aspect Injector</Product>
     <Title>Aspect Injector</Title>
     <Copyright>Copyright © AspectInjector Team 2018</Copyright>
-    <Company>AspectInjector Team</Company>
     <Description>This library provides attributes-based compile-time AOP framework.</Description>
-    <Authors>Yuriy Ivon,  Alexander Guly</Authors>
     <PackageProjectUrl>https://github.com/pamidur/aspect-injector</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/pamidur/aspect-injector</RepositoryUrl>
@@ -26,8 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="build\AspectInjector.targets" Pack="true" PackagePath="build" />
-    <None Include="tools\install.ps1" Pack="true" PackagePath="tools" />
+    <None Include="build/AspectInjector.targets" Pack="true" PackagePath="build" />
+    <None Include="tools/install.ps1" Pack="true" PackagePath="tools" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -36,13 +33,13 @@
 
   <Target Name="AddMainFilesToPackage">
 
-    <Exec Command="dotnet publish $(SolutionDir)src\AspectInjector\AspectInjector.csproj -o $(TargetDir)..\publish -c $(Configuration)" />
+    <Exec Command="dotnet publish ../../src/AspectInjector/ -o $(TargetDir)../publish -c $(Configuration)" />
     
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(TargetDir)..\publish\*.dll">
+      <TfmSpecificPackageFile Include="$(TargetDir)../publish/*.dll">
         <PackagePath>build</PackagePath>
       </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(TargetDir)..\publish\AspectInjector.Broker.*" Exclude="$(TargetDir)..\publish\AspectInjector.Broker.pdb">
+      <TfmSpecificPackageFile Include="$(TargetDir)../publish/AspectInjector.Broker.*" Exclude="$(TargetDir)../publish/AspectInjector.Broker.pdb">
         <PackagePath>lib/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>    

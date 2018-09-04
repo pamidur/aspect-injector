@@ -3,13 +3,7 @@
     <TargetFramework>netstandard1.0</TargetFramework>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>_key.snk</AssemblyOriginatorKeyFile>
-    <Product>AspectInjector</Product>
-    <Copyright>Copyright © AspectInjector Team 2017</Copyright>
-    <Company>AspectInjector Team</Company>
-    <Description>This library provides attributes-based compile-time AOP framework.</Description>    
-    <AssemblyVersion>0.0.0.0</AssemblyVersion>
-    <FileVersion>0.0.0.0</FileVersion>
-    <Version>0.0.0</Version>
+    <Description>Broker for Aspect Injector operations.</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

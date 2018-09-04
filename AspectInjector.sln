@@ -5,6 +5,7 @@ VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_solution", "_solution", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
 	ProjectSection(SolutionItems) = preProject
+		.travis.yml = .travis.yml
 		LICENSE = LICENSE
 		package.png = package.png
 		README.md = README.md
@@ -58,9 +59,7 @@ Global
 		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0926FE28-73BA-4F73-9188-B196FBBC9410}.Release|Any CPU.Build.0 = Release|Any CPU
 		{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A4BDB41D-096A-42E7-953E-99F7680141B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A4BDB41D-096A-42E7-953E-99F7680141B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4BDB41D-096A-42E7-953E-99F7680141B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
