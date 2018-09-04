@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
+    <ProjectReference Include="..\..\src\AspectInjector\AspectInjector.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\..\nuget\AspectInjector.Package\build\AspectInjector.targets" />
+
+  <PropertyGroup>
+    <_ASI_Location>$(SolutionDir)src\AspectInjector\bin\$(Configuration)\netcoreapp2.0\</_ASI_Location>
+  </PropertyGroup>
+
+</Project>

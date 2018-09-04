@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace AspectInjector.CLI.GlobalSwitches
+namespace AspectInjector.GlobalSwitches
 {
     class DebugSwitch : ISwitch
     {

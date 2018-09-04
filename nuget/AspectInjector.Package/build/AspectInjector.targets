@@ -1,33 +1,69 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <AspectInjectorPath>&quot;$(MSBuildThisFileDirectory)aspectinjector.dll&quot;</AspectInjectorPath>
-    <AspectInjectorOptions></AspectInjectorOptions>
+    <_InjectAspectsDependsOn>
+      _ASI_CheckAssemblyChanged;
+      _ASI_InjectAspectsCore;
+      _ASI_ResignAssembly;
+      _ASI_TouchTimestampFile
+    </_InjectAspectsDependsOn>
   </PropertyGroup>
 
-  <Target Name="InjectAspects" AfterTargets="AfterCompile">
-    <PropertyGroup>
-      <ProcessCmd>dotnet $(AspectInjectorPath) $(AspectInjectorOptions) process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
-    </PropertyGroup>
+  <PropertyGroup>
+    <_ASI_Location>$(MSBuildThisFileDirectory)</_ASI_Location>
+    <_ASI_Options></_ASI_Options>
+    <_ASI_Process_Options Condition="'$(Optimize)' == 'true'">-o</_ASI_Process_Options>
+  </PropertyGroup>
 
-    <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+  <Target Name="InjectAspects" AfterTargets="CoreCompile" DependsOnTargets="$(_InjectAspectsDependsOn)"/>
+
+  <Target Name="_ASI_InjectAspectsCore" Condition="'$(_InjectionNeeded)' == 'true'">
+    <PropertyGroup>
+      <ProcessCmd>dotnet &quot;$(_ASI_Location)aspectinjector.dll&quot; $(_ASI_Options) process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(_ASI_Process_Options) @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
+    </PropertyGroup>
+    <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="_AspectExitCode" />
+    </Exec>
+    <Error Text="Aspect Injector processing has failed. See other errors." Condition="'$(_AspectExitCode)' != '0'" Code="ASI0001" File="AspectInjector"/>
   </Target>
 
-  <Target Name="SignAssemblyAfterAspectInjection" AfterTargets="InjectAspects" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true'" DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
-
-    <Message Text="SnTool found: $(SnTool)"/>
-
+  <Target Name="_ASI_ResignAssembly" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true' AND '$(_InjectionNeeded)' == 'true' " DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
     <PropertyGroup>
-      <signcmd>&quot;$(SnTool)&quot; -R &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(AssemblyOriginatorKeyFile)</signcmd>
+      <_SignCommand Condition="'$(KeyContainerName)' != ''">&quot;$(SnTool)&quot; -Rc &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(KeyContainerName)</_SignCommand>
+      <_SignCommand Condition="'$(KeyContainerName)' == '' AND '$(KeyOriginatorFile)' != ''">&quot;$(SnTool)&quot; -R &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(KeyOriginatorFile)</_SignCommand>
     </PropertyGroup>
+    <Exec Command="$(_SignCommand)" Condition="'$(_SignCommand)' != ''" EchoOff="true" IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="_SignExitCode" />
+    </Exec>
+    <Error Text="Aspect Injector cannot re-sing assembly. Try rebuid solution." Condition="'$(_SignExitCode)' != '0'" Code="ASI0002" File="AspectInjector"/>
+  </Target>
 
-    <Exec Command="$(signcmd)" />
+  <Target Name="_ASI_TouchTimestampFile" Condition="'$(_InjectionNeeded)' == 'true'">
+    <Touch Files="%(IntermediateAssembly.FullPath)._asi_ts" AlwaysCreate="true" Time="%(IntermediateAssembly.ModifiedTime)"/>
+    <PropertyGroup>
+      <_InjectionNeeded>false</_InjectionNeeded>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_ASI_CheckAssemblyChanged">
+    <ItemGroup>
+      <_TimeStampFiles Include="%(IntermediateAssembly.FullPath)._asi_ts" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_TSOld>%(_TimeStampFiles.ModifiedTime)</_TSOld>
+      <_TSNew>%(IntermediateAssembly.ModifiedTime)</_TSNew>
+    </PropertyGroup>
+    <PropertyGroup>
+      <_InjectionNeeded Condition="'$(_TSOld)' != '$(_TSNew)' AND '$(_TSNew)' != '' ">true</_InjectionNeeded>
+    </PropertyGroup>
+    <Message Text="Assembly requires injection." Condition="'$(_InjectionNeeded)' == 'true'"/>
   </Target>
 
   <Target Name="GetSnToolForUnix" Condition=" '$(OS)' == 'Unix' ">
     <PropertyGroup>
       <SnTool>sn</SnTool>
     </PropertyGroup>
+    <Message Text="SnTool found: $(SnTool)"/>
   </Target>
 
   <Target Name="GetSnToolForWindows" Condition=" '$(OS)' != 'Unix' ">
@@ -43,6 +79,8 @@
     <PropertyGroup>
       <SnTool>$(SnToolsRaw.Split(';')[0])</SnTool>
     </PropertyGroup>
+    <Message Text="SnTool found: $(SnTool)"/>
   </Target>
 
 </Project>
+

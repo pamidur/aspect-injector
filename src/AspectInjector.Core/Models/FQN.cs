@@ -89,7 +89,7 @@ namespace AspectInjector.Core.Models
                 exactType = newRef;
             }
 
-            var tr = reference.Import(exactType);
+            var tr = reference.ImportReference(exactType);
 
             if (Arguments != null && Arguments.Any())
             {

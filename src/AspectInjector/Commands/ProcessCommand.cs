@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace AspectInjector.CLI.Commands
+namespace AspectInjector.Commands
 {
     public class ProcessCommand : ICommand
     {
@@ -27,7 +27,12 @@ namespace AspectInjector.CLI.Commands
             }
 
             var filename = args[0];
-            var references = new ArraySegment<string>(args.ToArray(), 1, args.Count - 1);
+
+            var optimize = args[1] == "-o";
+
+            var refsStart = optimize ? 2 : 1;
+
+            var references = new ArraySegment<string>(args.ToArray(), refsStart, args.Count - refsStart);
 
             if (!File.Exists(filename))
             {
@@ -44,7 +49,7 @@ namespace AspectInjector.CLI.Commands
 
             try
             {
-                processor.Process(filename, resolver);
+                processor.Process(filename, resolver, optimize);
             }
             catch (Exception e)
             {
@@ -52,7 +57,7 @@ namespace AspectInjector.CLI.Commands
             }
 
             return log.IsErrorThrown ? 1 : 0;
-        }  
+        }
 
         private Processor CreateProcessor(ILogger log)
         {
@@ -88,13 +93,13 @@ namespace AspectInjector.CLI.Commands
             Program.ShowHeader();
             Console.WriteLine("PROCESS USAGE:");
             Console.WriteLine();
-            Console.WriteLine(" aspectinjector.cli.exe process <assembly> [<references>]");
+            Console.WriteLine(" AspectInjector.exe process <assembly> [-o] [<references>]");
 
-            if(errors.Any())
+            if (errors.Any())
             {
                 Console.WriteLine();
                 Console.WriteLine("ERRORS:");
-                foreach(var error in errors)
+                foreach (var error in errors)
                     Console.WriteLine($" {error}");
             }
             Console.WriteLine();

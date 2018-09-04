@@ -93,19 +93,6 @@ namespace AspectInjector.Tests.Advices
             var a = new AfterTests_AfterConstructorTarget("");
             Assert.True(Checker.Passed);
         }
-
-        [Fact(Skip = "Feature is outdated")]
-        public void Advices_InjectAfterSetter_AccessOldValue()
-        {
-            Checker.Passed = false;
-
-            var a = new AfterTests_SetterValueTarget();
-            a.Data = 2;
-            AfterTests_SetterValueTarget.GlobalData = 2;
-            a.Data = 4;
-
-            Assert.True(Checker.Passed);
-        }
     }
 
     //test classes
@@ -176,23 +163,5 @@ namespace AspectInjector.Tests.Advices
     {
         [Advice(Advice.Type.After, Advice.Target.Constructor)]
         public void AfterConstructor() { Checker.Passed = true; }
-    }
-
-    internal class AfterTests_SetterValueTarget
-    {
-        public static int GlobalData = 0;
-
-        [Inject(typeof(AfterTests_SetterValueAspect))]
-        public int Data { get; set; }
-    }
-
-    [Aspect(Aspect.Scope.Global)]
-    internal class AfterTests_SetterValueAspect
-    {
-        [Advice(Advice.Type.After, Advice.Target.Setter)]
-        public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object old)
-        {
-            Checker.Passed = (int)old == AfterTests_SetterValueTarget.GlobalData;
-        }
-    }
+    }   
 }

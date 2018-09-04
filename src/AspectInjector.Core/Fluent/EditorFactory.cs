@@ -1,7 +1,9 @@
 ﻿using AspectInjector.Core.Fluent.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AspectInjector.Core.Fluent
 {
@@ -57,6 +59,23 @@ namespace AspectInjector.Core.Fluent
 
                 return result;
             }
+        }
+
+        public static void Optimize(ModuleDefinition module)
+        {
+            foreach (var body in Processors.Keys.Where(b=>b.Method.Module == module))
+                body.OptimizeMacros();
+        }
+
+        public static void CleanUp(ModuleDefinition module)
+        {
+            foreach (var body in Processors.Keys.Where(b => b.Method.Module == module).ToList())
+            {
+                Processors.Remove(body);
+                MethodEditors.Remove(body.Method);
+            }
+
+            TypeSystems.Remove(module);
         }
     }
 }

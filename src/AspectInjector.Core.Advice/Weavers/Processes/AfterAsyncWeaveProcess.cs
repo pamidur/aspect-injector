@@ -100,8 +100,13 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void InsertStateMachineCall(Action<PointCut> code)
         {
-            var tgti = _target.Body.Instructions.First(i => i.OpCode == OpCodes.Ldloc_0 || (i.OpCode == OpCodes.Ldloca_S && i.Operand == _target.Body.Variables[0]));
-            _target.GetEditor().OnInstruction(tgti.Next, code);
+            var editor = _target.GetEditor();
+
+            var tgtis = _target.Body.Instructions.Where(i => (i.OpCode== OpCodes.Ldloc || i.OpCode == OpCodes.Ldloca) && i.Operand == _target.Body.Variables[0]).ToList();
+            if (tgtis.Count == 0)
+                throw new Exception();
+
+            editor.OnInstruction(tgtis[0].Next, code);
         }
     }
 }

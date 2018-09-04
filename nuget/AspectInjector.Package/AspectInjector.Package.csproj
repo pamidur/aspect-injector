@@ -4,7 +4,7 @@
     <PackageId>AspectInjector</PackageId>
     <Product>Aspect Injector</Product>
     <Title>Aspect Injector</Title>
-    <Copyright>Copyright © AspectInjector Team 2017</Copyright>
+    <Copyright>Copyright © AspectInjector Team 2018</Copyright>
     <Company>AspectInjector Team</Company>
     <Description>This library provides attributes-based compile-time AOP framework.</Description>
     <Authors>Yuriy Ivon,  Alexander Guly</Authors>
@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <None Include="build\AspectInjector.targets" Pack="true" PackagePath="build" />
-    <None Include="tools\install.ps1" Pack="true" PackagePath="tools" />    
+    <None Include="tools\install.ps1" Pack="true" PackagePath="tools" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,8 +43,7 @@
       </BuildOutputInPackage>
       <BuildOutputInPackage Include="$(TargetDir)publish\AspectInjector.Broker.*" Exclude="$(TargetDir)publish\AspectInjector.Broker.pdb" Pack="true" PackagePath="lib\netstandard1.0">
         <Link>lib\netstandard1.0\%(Filename)%(Extension)</Link>
-      </BuildOutputInPackage>
-    
+      </BuildOutputInPackage>    
   </ItemGroup>
   </Target>
 </Project>

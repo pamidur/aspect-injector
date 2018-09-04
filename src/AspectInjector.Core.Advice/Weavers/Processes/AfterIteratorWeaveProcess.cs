@@ -16,7 +16,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         public AfterIteratorWeaveProcess(ILogger log, MethodDefinition target, AfterAdviceEffect effect, AspectDefinition aspect)
             : base(log, target, effect, aspect)
         {
-            
+
         }
 
         protected override TypeDefinition GetStateMachine()
@@ -33,6 +33,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             {
                 var moveNext = _stateMachine.Methods.First(m => m.Name == "MoveNext");
 
+                var moveNextEditor = moveNext.GetEditor();
+
                 var exitPoints = moveNext.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList();
 
                 afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _ts.Void);
@@ -40,9 +42,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 afterMethod.GetEditor().Instead(pc => pc.Return());
 
-                foreach (var exit in exitPoints.Where(e => e.Previous.OpCode == OpCodes.Ldc_I4_0))
+                foreach (var exit in exitPoints.Where(e => e.Previous.OpCode == OpCodes.Ldc_I4 && (int)e.Previous.Operand == 0))
                 {
-                    moveNext.GetEditor().OnInstruction(exit, il =>
+                    moveNextEditor.OnInstruction(exit, il =>
                     {
                         il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine));
                     });

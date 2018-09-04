@@ -1,4 +1,4 @@
-﻿namespace AspectInjector.CLI
+﻿namespace AspectInjector
 {
     interface ISwitch
     {

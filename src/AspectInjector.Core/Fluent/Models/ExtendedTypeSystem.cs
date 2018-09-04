@@ -44,19 +44,19 @@ namespace AspectInjector.Core.Fluent.Models
 
             ObjectArray = MakeArrayType(Object);
 
-            Task = md.Import(typeof(Task));
-            TaskGeneric = md.Import(typeof(Task<>));
-            TaskCompletionGeneric = md.Import(typeof(TaskCompletionSource<>));
-            ActionGeneric = md.Import(typeof(Action<>));
-            FuncGeneric = md.Import(typeof(Func<>));
-            FuncGeneric2 = md.Import(typeof(Func<,>));
+            Task = md.ImportReference(typeof(Task));
+            TaskGeneric = md.ImportReference(typeof(Task<>));
+            TaskCompletionGeneric = md.ImportReference(typeof(TaskCompletionSource<>));
+            ActionGeneric = md.ImportReference(typeof(Action<>));
+            FuncGeneric = md.ImportReference(typeof(Func<>));
+            FuncGeneric2 = md.ImportReference(typeof(Func<,>));
 
-            MethodBase = md.Import(typeof(MethodBase));
-            Type = md.Import(typeof(Type));
+            MethodBase = md.ImportReference(typeof(MethodBase));
+            Type = md.ImportReference(typeof(Type));
 
-            DebuggerHiddenAttribute = md.Import(typeof(DebuggerHiddenAttribute));
-            DebuggerStepThroughAttribute = md.Import(typeof(DebuggerStepThroughAttribute));
-            CompilerGeneratedAttribute = md.Import(typeof(CompilerGeneratedAttribute));
+            DebuggerHiddenAttribute = md.ImportReference(typeof(DebuggerHiddenAttribute));
+            DebuggerStepThroughAttribute = md.ImportReference(typeof(DebuggerStepThroughAttribute));
+            CompilerGeneratedAttribute = md.ImportReference(typeof(CompilerGeneratedAttribute));
 
             LoadIndirectMap = new Dictionary<TypeReference, OpCode>
             {
@@ -105,7 +105,7 @@ namespace AspectInjector.Core.Fluent.Models
             //if (field.DeclaringType.IsGenericParameter)
             //    context = ((GenericParameter)field.DeclaringType).Owner;
 
-            return _module.Import(field/*, context*/);
+            return _module.ImportReference(field/*, context*/);
         }
 
         public ModuleDefinition GetModule()
@@ -115,7 +115,7 @@ namespace AspectInjector.Core.Fluent.Models
 
         public TypeReference Import(TypeReference type, IGenericParameterProvider genericContext)
         {
-            return _module.Import(type, genericContext);
+            return _module.ImportReference(type, genericContext);
         }
 
         public TypeReference Import(TypeReference type)
@@ -124,7 +124,7 @@ namespace AspectInjector.Core.Fluent.Models
             //if (type.IsGenericParameter)
             //    context = ((GenericParameter)type).Owner;
 
-            return _module.Import(type, context);
+            return _module.ImportReference(type, context);
         }
 
         public TypeReference Import(Type type)
@@ -133,12 +133,12 @@ namespace AspectInjector.Core.Fluent.Models
             //if (type.IsGenericParameter)
             //    context = ((GenericParameter)type).Owner;
 
-            return _module.Import(type, context);
+            return _module.ImportReference(type, context);
         }
 
         public MethodReference Import(MethodReference method)
         {
-            return _module.Import(method);
+            return _module.ImportReference(method);
         }
 
         #endregion Public Constructors

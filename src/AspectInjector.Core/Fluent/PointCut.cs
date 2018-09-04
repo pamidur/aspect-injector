@@ -430,7 +430,7 @@ namespace AspectInjector.Core.Models
 
         public Instruction CreateInstruction(OpCode opCode, int value)
         {
-            return _proc.CreateOptimized(opCode, value);
+            return _proc.Create(opCode, value);
         }
 
         public Instruction CreateInstruction(OpCode opCode, string value)

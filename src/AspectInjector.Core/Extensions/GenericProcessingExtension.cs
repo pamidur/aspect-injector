@@ -36,24 +36,24 @@ namespace AspectInjector.Core.Extensions
 
         public static FieldReference MakeCallReference(this MemberReference member, FieldReference reference)
         {
-            return member.Module.Import(new FieldReference(reference.Name, member.Module.Import(reference.FieldType), member.MakeCallReference(reference.DeclaringType)));
+            return member.Module.ImportReference(new FieldReference(reference.Name, member.Module.ImportReference(reference.FieldType), member.MakeCallReference(reference.DeclaringType)));
         }
 
         public static MethodReference MakeCallReference(this MemberReference member, MethodReference reference)
         {
             if (reference.GenericParameters.Count == 0)
-                return member.Module.Import(reference);
+                return member.Module.ImportReference(reference);
 
             var result = new GenericInstanceMethod(reference);
             var args = reference.GenericParameters.Select(gp => member.GetMatchedParam(gp) ?? gp).ToList();
             args.ForEach(result.GenericArguments.Add);
-            return member.Module.Import(result);
+            return member.Module.ImportReference(result);
         }
 
         public static TypeReference MakeCallReference(this MemberReference member, TypeReference reference)
         {
             if (reference.GenericParameters.Count == 0)
-                return member.Module.Import(reference);
+                return member.Module.ImportReference(reference);
 
             var args = reference.GenericParameters.Select(gp => member.GetMatchedParam(gp) ?? gp).ToArray();
 
@@ -118,7 +118,7 @@ namespace AspectInjector.Core.Extensions
             {
                 var nestedGeneric = (GenericInstanceType)param;
                 var args = nestedGeneric.GenericArguments.Select(ga => member.ResolveIfGeneric(ga)).ToArray();
-                return param.Module.Import(param.Resolve()).MakeGenericInstanceType(args);
+                return param.Module.ImportReference(param.Resolve()).MakeGenericInstanceType(args);
             }
 
             var gparam = param as GenericParameter;

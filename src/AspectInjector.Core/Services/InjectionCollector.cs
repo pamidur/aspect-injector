@@ -67,7 +67,7 @@ namespace AspectInjector.Core.Services
                 return Enumerable.Empty<Injection>();
             }
 
-            var priority = attr.GetPropertyValue<Broker.Inject, ushort>(i => i.Priority);
+            ushort priority = /* attr.GetPropertyValue<Broker.Inject, ushort>(i => i.Priority)*/ 0;
 
             // var childFilter = attr.GetPropertyValue<Broker.Inject, InjectionChildFilter>(i => i.Filter);
 

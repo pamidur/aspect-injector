@@ -12,13 +12,16 @@
     <Version>0.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Mono.Cecil" Version="0.10.0-beta7" />
-    <PackageReference Include="DryIoc.dll" Version="2.12.7" />
+    <PackageReference Include="Mono.Cecil" Version="0.10.0" />
+    <PackageReference Include="DryIoc.dll" Version="3.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" />
     <ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj" />
     <ProjectReference Include="..\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Commands\Switches\" />
   </ItemGroup>  
 </Project>

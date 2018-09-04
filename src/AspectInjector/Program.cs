@@ -1,10 +1,10 @@
-﻿using AspectInjector.CLI.Commands;
-using AspectInjector.CLI.GlobalSwitches;
+﻿using AspectInjector.Commands;
+using AspectInjector.GlobalSwitches;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace AspectInjector.CLI
+namespace AspectInjector
 {
     internal class Program
     {

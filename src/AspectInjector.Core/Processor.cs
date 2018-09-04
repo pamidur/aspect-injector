@@ -1,7 +1,10 @@
 ﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
+using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System;
@@ -29,14 +32,14 @@ namespace AspectInjector.Core
             _log = logger;
         }
 
-        public void Process(string assemblyFile, IAssemblyResolver resolver)
+        public void Process(string assemblyFile, IAssemblyResolver resolver, bool optimize)
         {
             _log.LogInfo($"Aspect Injector has started for {Path.GetFileName(assemblyFile)}");
 
             var pdbPresent = AreSymbolsFound(assemblyFile);
             var assembly = ReadAssembly(assemblyFile, resolver, pdbPresent);
 
-            ProcessAssembly(assembly);
+            ProcessAssembly(assembly, optimize);
 
             if (!_log.IsErrorThrown)
             {
@@ -79,18 +82,18 @@ namespace AspectInjector.Core
 
             using (var fileStream = File.Open(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
             {
-                
-                    assembly.Write(fileStream,
-                        new WriterParameters()
-                        {
-                            WriteSymbols = writeSymbols,
+
+                assembly.Write(fileStream,
+                    new WriterParameters()
+                    {
+                        WriteSymbols = writeSymbols,
                             ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
                         });
 
-                    assembly.MainModule.SymbolReader.Dispose();
-                    assembly.Dispose();
-                    assembly = null;
-                
+                assembly.MainModule.SymbolReader.Dispose();
+                assembly.Dispose();
+                assembly = null;
+
             }
 
             foreach (var file in Directory.GetFiles(tempDir))
@@ -115,7 +118,7 @@ namespace AspectInjector.Core
             return false;
         }
 
-        public void ProcessAssembly(AssemblyDefinition assembly)
+        public void ProcessAssembly(AssemblyDefinition assembly, bool optimize)
         {
             var aspects = _aspectExtractor.Extract(assembly);
 
@@ -130,9 +133,12 @@ namespace AspectInjector.Core
                 return;
 
             _cache.FlushCache(assembly);
+            _log.LogInfo($"Stored {aspects.Count} aspects");
 
             foreach (var aspect in aspects)
                 _assectWeaver.WeaveGlobalAssests(aspect);
+
+            _log.LogInfo($"Found {injections.Count} injections");
 
             foreach (var injector in _effectWeavers.OrderByDescending(i => i.Priority))
             {
@@ -149,6 +155,18 @@ namespace AspectInjector.Core
 
             foreach (var injection in injections)
                 _log.LogError(CompilationMessage.From($"Couldn't find weaver for {injection.ToString()}", injection.Target));
+
+            if (optimize)
+                _log.LogInfo($"Cleanup and optimize.");
+            else
+                _log.LogInfo($"Cleanup.");
+
+            foreach (var module in assembly.Modules)
+            {
+                if (optimize)
+                    EditorFactory.Optimize(module);
+                EditorFactory.CleanUp(module);
+            }
         }
     }
 }

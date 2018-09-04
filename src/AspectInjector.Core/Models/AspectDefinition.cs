@@ -29,7 +29,7 @@ namespace AspectInjector.Core.Models
                     m.IsStatic && m.IsPublic
                     && m.Name == Constants.AspectFactoryMethodName
                     && m.ReturnType.IsTypeOf(m.Module.TypeSystem.Object)
-                    && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.IsTypeOf(m.Module.Import(typeof(System.Type)))
+                    && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.IsTypeOf(m.Module.ImportReference(typeof(System.Type)))
                     );
                 }
                 else

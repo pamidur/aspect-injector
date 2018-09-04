@@ -3,6 +3,7 @@ using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using System;
 using System.Linq;
 
@@ -16,6 +17,7 @@ namespace AspectInjector.Core.Fluent
         internal MethodEditor(MethodDefinition md)
         {
             _md = md;
+            _md.Body?.SimplifyMacros();
             _typeSystem = md.Module.GetTypeSystem();
         }
 
@@ -59,7 +61,7 @@ namespace AspectInjector.Core.Fluent
         {
             if (_md.IsConstructor && !_md.IsStatic)
             {
-                if (instruction.OpCode == OpCodes.Ldarg_0
+                if (instruction.OpCode == OpCodes.Ldarg && (int)instruction.Operand == 0
                     && instruction.Next.OpCode == OpCodes.Call
                     && ((MethodReference)instruction.Next.Operand).Name == Constants.InstanceAspectsMethodName
                     )
@@ -79,15 +81,12 @@ namespace AspectInjector.Core.Fluent
             {
                 var il = _md.Body.GetEditor();
                 var newRet = il.Create(OpCodes.Ret);
-                var tempNop = il.Create(OpCodes.Nop);
 
                 il.InsertAfter(ret, newRet);
 
-                il.Replace(ret, tempNop);
+                il.SafeReplace(ret, il.Create(OpCodes.Nop));
 
                 action(new PointCut(_md.Body.GetEditor(), newRet));
-
-                il.Remove(tempNop);
             }
         }
 

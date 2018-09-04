@@ -30,13 +30,13 @@ namespace AspectInjector.Core.Services
         private Assets GetAssets(ModuleDefinition module)
         {
             EnsureCacheLoaded(module);
-            return _assetsCache[module.FullyQualifiedName];
+            return _assetsCache[$"{module.Assembly.FullName}+{module.Name}"];
         }
 
         private void EnsureCacheLoaded(ModuleDefinition module)
         {
-            if (!_assetsCache.ContainsKey(module.FullyQualifiedName))
-                _assetsCache.Add(module.FullyQualifiedName, ReadAssetsFromModule(module));
+            if (!_assetsCache.ContainsKey($"{module.Assembly.FullName}+{module.Name}"))
+                _assetsCache.Add($"{module.Assembly.FullName}+{module.Name}", ReadAssetsFromModule(module));
         }
 
         public void FlushCache(AssemblyDefinition assembly)
@@ -47,7 +47,7 @@ namespace AspectInjector.Core.Services
 
         private void FlushCacheToModule(ModuleDefinition module)
         {
-            if (!_assetsCache.TryGetValue(module.FullyQualifiedName, out var assets))
+            if (!_assetsCache.TryGetValue($"{module.Assembly.FullName}+{module.Name}", out var assets))
                 return; // cache was neither loaded nor created 
 
             var serializerSettings = new JsonSerializerSettings
