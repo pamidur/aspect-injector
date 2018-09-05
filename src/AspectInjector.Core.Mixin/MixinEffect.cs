@@ -22,7 +22,7 @@ namespace AspectInjector.Core.Mixin
             if (effect == null)
                 return false;
 
-            return other.InterfaceType.IsTypeOf(InterfaceType);
+            return other.InterfaceType.Match(InterfaceType);
         }
 
         public override bool Validate(AspectDefinition aspect, ILogger log)

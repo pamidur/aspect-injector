@@ -32,7 +32,7 @@ namespace AspectInjector.Core.Extensions
             if (m.Name == ifaceMethod.Name && m.Parameters.Count == ifaceMethodDef.Parameters.Count)
             {
                 for (int i = 0; i < m.Parameters.Count; i++)
-                    if (!m.Parameters[i].ParameterType.IsTypeOf(ifaceMethod.ResolveGenericType(ifaceMethodDef.Parameters[i].ParameterType)))
+                    if (!m.Parameters[i].ParameterType.Match(ifaceMethod.ResolveGenericType(ifaceMethodDef.Parameters[i].ParameterType)))
                         return false;
 
                 return true;

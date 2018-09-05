@@ -30,7 +30,7 @@ namespace AspectInjector.Core.Mixin
             var ifaceTree = GetInterfacesTree(_effect.InterfaceType);
 
             foreach (var iface in ifaceTree)
-                if (_target.Interfaces.All(i => !i.InterfaceType.IsTypeOf(iface)))
+                if (_target.Interfaces.All(i => !i.InterfaceType.Match(iface)))
                 {
                     var ifaceRef = _ts.Import(iface);
 
@@ -102,7 +102,7 @@ namespace AspectInjector.Core.Mixin
             var eventName = $"{@interface.FullName}.{originalEvent.Name}";
             var eventType = @interface.ResolveIfGeneric(_ts.Import(originalEvent.AddMethod ?? originalEvent.RemoveMethod).Parameters[0].ParameterType);
                         
-            var ed = _target.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.IsTypeOf(eventType));
+            var ed = _target.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.Match(eventType));
             if (ed == null)
             {
                 ed = new EventDefinition(eventName, EventAttributes.None, _ts.Import(eventType));
@@ -157,7 +157,7 @@ namespace AspectInjector.Core.Mixin
             if (getMethod != null) getMethod = _ts.Import(getMethod);
             if (setMethod != null) setMethod = _ts.Import(setMethod);
 
-            var pd = _target.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.IsTypeOf(propertyType));
+            var pd = _target.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.Match(propertyType));
             if (pd == null)
             {
                 pd = new PropertyDefinition(propertyName, PropertyAttributes.None, propertyType);

@@ -38,7 +38,7 @@ namespace AspectInjector.Core.Models.Converters
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             var td = (TypeReference)value;
-            JToken.FromObject(td.GetFQN().ToString(), serializer).WriteTo(writer);
+            JToken.FromObject(FQN.FromTypeReference(td).ToString(), serializer).WriteTo(writer);
         }
     }
 }

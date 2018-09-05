@@ -128,8 +128,8 @@ namespace AspectInjector.Core.Fluent
             var point = _md.Body.Instructions.FirstOrDefault(
                 i => i != null && i.OpCode == OpCodes.Call && i.Operand is MethodReference
                     && ((MethodReference)i.Operand).Resolve().IsConstructor
-                    && (((MethodReference)i.Operand).DeclaringType.IsTypeOf(_md.DeclaringType.BaseType)
-                        || ((MethodReference)i.Operand).DeclaringType.IsTypeOf(_md.DeclaringType)));
+                    && (((MethodReference)i.Operand).DeclaringType.Match(_md.DeclaringType.BaseType)
+                        || ((MethodReference)i.Operand).DeclaringType.Match(_md.DeclaringType)));
 
             if (point == null)
                 throw new Exception("Cannot find base class ctor call");

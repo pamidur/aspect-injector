@@ -306,7 +306,7 @@ namespace AspectInjector.Core.Models
 
                 if (typeOnStack.IsValueType)
                 {
-                    var opcode = _typeSystem.LoadIndirectMap.First(kv => typeOnStack.IsTypeOf(kv.Key)).Value;
+                    var opcode = _typeSystem.LoadIndirectMap.First(kv => typeOnStack.Match(kv.Key)).Value;
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
                 }
                 else if (typeOnStack.IsGenericParameter)
@@ -331,7 +331,7 @@ namespace AspectInjector.Core.Models
 
                 if (refType.IsValueType)
                 {
-                    var opcode = _typeSystem.SaveIndirectMap.First(kv => refType.IsTypeOf(kv.Key)).Value;
+                    var opcode = _typeSystem.SaveIndirectMap.First(kv => refType.Match(kv.Key)).Value;
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, refType));
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
                 }

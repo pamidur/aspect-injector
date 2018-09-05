@@ -21,12 +21,14 @@ namespace AspectInjector.Core.Extensions
             return token.SequenceEqual(publicKey);
         }
 
-        public static bool IsTypeOf(this TypeReference tr1, TypeReference tr2)
+        public static bool Match(this TypeReference tr1, TypeReference tr2)
         {
             if (tr1 == null || tr2 == null)
                 return false;
 
-            return FQN.FromTypeReference(tr1).Equals(FQN.FromTypeReference(tr2));
+            return tr1.FullName == tr2.FullName;
+
+            //return FQN.FromTypeReference(tr1).Equals(FQN.FromTypeReference(tr2));
         }
 
         //public static bool IsSubTypeOf(this TypeDefinition tr, Type type)
@@ -43,11 +45,6 @@ namespace AspectInjector.Core.Extensions
 
         //    return isSubType;
         //}
-
-        internal static FQN GetFQN(this TypeReference type)
-        {
-            return FQN.FromTypeReference(type);
-        }
 
         public static IEnumerable<TypeDefinition> GetTypesTree(this TypeDefinition type)
         {
@@ -66,7 +63,7 @@ namespace AspectInjector.Core.Extensions
             var td = tr.Resolve();
             var ti = @interface;
 
-            return td.Interfaces.Any(i => i.InterfaceType.IsTypeOf(ti)) || (td.BaseType != null && td.BaseType.Implements(ti));
+            return td.Interfaces.Any(i => i.InterfaceType.Match(ti)) || (td.BaseType != null && td.BaseType.Implements(ti));
         }
     }
 }
