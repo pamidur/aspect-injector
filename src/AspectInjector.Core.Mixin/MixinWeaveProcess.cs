@@ -5,6 +5,7 @@ using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AspectInjector.Core.Mixin
@@ -64,6 +65,7 @@ namespace AspectInjector.Core.Mixin
                 foreach (var gp in ifaceMethod.GenericParameters)
                     proxy.GenericParameters.Add(new GenericParameter(gp.Name, proxy));
 
+                proxy.GetEditor().Mark<DebuggerHiddenAttribute>();
                 proxy.ReturnType = _ts.Import(ifaceMethod.ResolveIfGeneric(ifaceMethod.ReturnType));
 
                 if (ifaceMethod.Resolve().IsSpecialName)

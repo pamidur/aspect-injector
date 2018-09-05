@@ -6,6 +6,7 @@ using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -54,6 +55,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 _stateMachine.Methods.Add(afterMethod);
 
+                afterMethod.GetEditor().Mark<DebuggerHiddenAttribute>();
                 afterMethod.GetEditor().Instead(pc => pc.Return());
 
                 VariableDefinition resvar = null;
@@ -102,7 +104,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         {
             var editor = _target.GetEditor();
 
-            var tgtis = _target.Body.Instructions.Where(i => (i.OpCode== OpCodes.Ldloc || i.OpCode == OpCodes.Ldloca) && i.Operand == _target.Body.Variables[0]).ToList();
+            var tgtis = _target.Body.Instructions.Where(i => (i.OpCode == OpCodes.Ldloc || i.OpCode == OpCodes.Ldloca) && i.Operand == _target.Body.Variables[0]).ToList();
             if (tgtis.Count == 0)
                 throw new Exception();
 

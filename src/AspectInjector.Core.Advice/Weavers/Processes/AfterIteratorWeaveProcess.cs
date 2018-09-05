@@ -6,6 +6,7 @@ using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -39,7 +40,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _ts.Void);
                 _stateMachine.Methods.Add(afterMethod);
-
+                afterMethod.GetEditor().Mark<DebuggerHiddenAttribute>();
                 afterMethod.GetEditor().Instead(pc => pc.Return());
 
                 foreach (var exit in exitPoints.Where(e => e.Previous.OpCode == OpCodes.Ldc_I4 && (int)e.Previous.Operand == 0))

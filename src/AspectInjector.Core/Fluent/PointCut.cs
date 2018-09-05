@@ -5,6 +5,7 @@ using AspectInjector.Core.Fluent.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AspectInjector.Core.Models
@@ -212,6 +213,7 @@ namespace AspectInjector.Core.Models
                 type.Methods.Add(instanceAspectsInitializer);
 
                 instanceAspectsInitializer.GetEditor().Instead(i => i.Return());
+                instanceAspectsInitializer.GetEditor().Mark<DebuggerHiddenAttribute>();
 
                 var ctors = type.Methods.Where(c => c.IsConstructor && !c.IsStatic).ToList();
 
