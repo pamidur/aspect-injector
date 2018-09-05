@@ -39,6 +39,9 @@
       <TfmSpecificPackageFile Include="$(TargetDir)../publish/*.dll">
         <PackagePath>build</PackagePath>
       </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="$(TargetDir)../publish/*.runtimeconfig.json ">
+        <PackagePath>build</PackagePath>
+      </TfmSpecificPackageFile>
       <TfmSpecificPackageFile Include="$(TargetDir)../publish/AspectInjector.Broker.*" Exclude="$(TargetDir)../publish/AspectInjector.Broker.pdb">
         <PackagePath>lib/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
