@@ -21,7 +21,8 @@ PM> Install-Package AspectInjector
 - Ability to wrap method around
 
 ### Known issues ###
-- Cannot inject into assemblies built using new .csproj (typically .NetCore and .NetStandard assemblies). Fix - needed adoption of Mono.Cecil 0.10 which is in beta now.<sub><sup>I know, it sounds stupid. How can csproj relate to compiled binary? But the thing is that new csproj produces new type of pdb which can't be read by Mono.Cecil at the moment.</sup></sub>
+- .NetCore and .NetStandard assemblies are supported in v > 1.5.0 
+- If you use v > 1.5.0 - make sure you have installed .net core 2.1 runtime
 
 ### Concept ###
 
