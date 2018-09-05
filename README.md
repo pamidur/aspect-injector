@@ -1,4 +1,4 @@
-Aspect Injector Reference
+<img src="https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png" width="48" align="right"/>Aspect Injector Reference
 ========================
 **Aspect Injector** is a framework for creating and injecting aspects into your .net assemblies.
 
