@@ -34,8 +34,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AspectInjector.Broker, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a29e12442a3d3609, processorArchitecture=MSIL">
-      <HintPath>..\packages\AspectInjector.1.0.0-rc2\lib\netstandard1.0\AspectInjector.Broker.dll</HintPath>
+    <Reference Include="AspectInjector.Broker, Version=1.0.1.0, Culture=neutral, PublicKeyToken=a29e12442a3d3609, processorArchitecture=MSIL">
+      <HintPath>..\packages\AspectInjector.1.0.1\lib\net45\AspectInjector.Broker.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -57,11 +57,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\AspectInjector.1.0.0-rc2\build\AspectInjector.targets" Condition="Exists('..\packages\AspectInjector.1.0.0-rc2\build\AspectInjector.targets')" />
+  <Import Project="..\packages\AspectInjector.1.0.1\build\AspectInjector.targets" Condition="Exists('..\packages\AspectInjector.1.0.1\build\AspectInjector.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\AspectInjector.1.0.0-rc2\build\AspectInjector.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AspectInjector.1.0.0-rc2\build\AspectInjector.targets'))" />
+    <Error Condition="!Exists('..\packages\AspectInjector.1.0.1\build\AspectInjector.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AspectInjector.1.0.1\build\AspectInjector.targets'))" />
   </Target>
 </Project>
