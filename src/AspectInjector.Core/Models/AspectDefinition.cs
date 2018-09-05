@@ -28,8 +28,8 @@ namespace AspectInjector.Core.Models
                     _factoryMethod = Factory.Resolve().Methods.FirstOrDefault(m =>
                     m.IsStatic && m.IsPublic
                     && m.Name == Constants.AspectFactoryMethodName
-                    && m.ReturnType.IsTypeOf(m.Module.TypeSystem.Object)
-                    && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.IsTypeOf(m.Module.ImportReference(typeof(System.Type)))
+                    && m.ReturnType.FullName == WellKnownTypes.Object
+                    && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.FullName == WellKnownTypes.Type
                     );
                 }
                 else

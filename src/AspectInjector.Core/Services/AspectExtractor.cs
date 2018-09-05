@@ -46,7 +46,7 @@ namespace AspectInjector.Core.Services
 
         private CustomAttribute ExtractAspectAttribute(TypeDefinition type)
         {
-            var aspectUsage = type.CustomAttributes.FirstOrDefault(ca => ca.AttributeType.IsTypeOf(typeof(Aspect)));
+            var aspectUsage = type.CustomAttributes.FirstOrDefault(ca => ca.AttributeType.FullName == WellKnownTypes.Aspect);
 
             if (aspectUsage != null)
                 type.CustomAttributes.Remove(aspectUsage);

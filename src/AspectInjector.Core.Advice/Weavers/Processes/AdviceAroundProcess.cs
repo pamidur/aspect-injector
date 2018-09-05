@@ -125,7 +125,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                             {
                                 c = c.Load(argsParam).GetByIndex(i);
 
-                                if (p.ParameterType.IsGenericParameter || !p.ParameterType.IsTypeOf(_ts.Object))
+                                if (p.ParameterType.IsGenericParameter || p.ParameterType.FullName != WellKnownTypes.Object)
                                     c = c.Cast(p.ParameterType);
                             }
                         }
@@ -134,7 +134,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     foreach (var refPar in refList)
                         il = il.Load(argsParam).SetByIndex(refPar.Item1, val => val.Load(refPar.Item2).ByVal(refPar.Item2.VariableType));
 
-                    if (original.ReturnType.IsTypeOf(_ts.Void))
+                    if (original.ReturnType.FullName == WellKnownTypes.Void)
                         il = il.Value((object)null);
                     else if (original.ReturnType.IsValueType || original.ReturnType.IsGenericParameter)
                         il = il.ByVal(original.ReturnType);
@@ -178,9 +178,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     }
 
                     //drop if void, cast if not is object
-                    if (returnType.IsTypeOf(_ts.Void))
+                    if (returnType.FullName == WellKnownTypes.Void)
                         e = e.Pop();
-                    else if (!returnType.IsTypeOf(_ts.Object))
+                    else if (returnType.FullName != WellKnownTypes.Object)
                         e = e.Cast(returnType);
 
                     e.Return();

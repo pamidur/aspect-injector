@@ -25,7 +25,7 @@ namespace AspectInjector.Core.Mixin
 
             foreach (var ca in type.CustomAttributes.ToList())
             {
-                if (ca.AttributeType.IsTypeOf(typeof(Broker.Mixin)))
+                if (ca.AttributeType.FullName == WellKnownTypes.Mixin)
                 {
                     type.CustomAttributes.Remove(ca);
                     mixins.Add(new MixinEffect { InterfaceType = ca.GetConstructorValue<TypeReference>(0) });

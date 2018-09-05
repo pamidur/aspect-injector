@@ -20,7 +20,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         public AdviceAfterProcess(ILogger log, MethodDefinition target, AspectDefinition aspect, AfterAdviceEffect effect)
             : base(log, target, effect, aspect)
         {
-            if (!_target.ReturnType.IsTypeOf(_ts.Void) && effect.Arguments.Any(a => a.Source == Broker.Advice.Argument.Source.ReturnValue))
+            if (_target.ReturnType.FullName != WellKnownTypes.Void && effect.Arguments.Any(a => a.Source == Broker.Advice.Argument.Source.ReturnValue))
                 _retvar = GetOrCreateRetVar();
         }
 

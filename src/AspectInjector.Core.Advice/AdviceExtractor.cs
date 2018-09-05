@@ -36,7 +36,7 @@ namespace AspectInjector.Core.Advice
 
             foreach (var ca in method.CustomAttributes.ToList())
             {
-                if (ca.AttributeType.IsTypeOf(typeof(Broker.Advice)))
+                if (ca.AttributeType.FullName == WellKnownTypes.Advice)
                 {
                     method.CustomAttributes.Remove(ca);
 
@@ -65,7 +65,7 @@ namespace AspectInjector.Core.Advice
 
             foreach (var par in method.Parameters)
             {
-                var argAttr = par.CustomAttributes.FirstOrDefault(ca => ca.AttributeType.IsTypeOf(typeof(Argument)));
+                var argAttr = par.CustomAttributes.FirstOrDefault(ca => ca.AttributeType.FullName == WellKnownTypes.Argument);
 
                 if (argAttr == null)
                 {

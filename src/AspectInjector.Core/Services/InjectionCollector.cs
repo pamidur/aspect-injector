@@ -47,7 +47,7 @@ namespace AspectInjector.Core.Services
         {
             var injections = Enumerable.Empty<Injection>();
 
-            foreach (var attr in target.CustomAttributes.Where(a => a.AttributeType.IsTypeOf(typeof(Broker.Inject))).ToList())
+            foreach (var attr in target.CustomAttributes.Where(a => a.AttributeType.FullName == WellKnownTypes.Inject).ToList())
             {
                 injections = injections.Concat(ParseInjectionAttribute(target, attr));
                 target.CustomAttributes.Remove(attr);

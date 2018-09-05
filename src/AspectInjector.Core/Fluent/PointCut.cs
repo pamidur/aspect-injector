@@ -342,7 +342,7 @@ namespace AspectInjector.Core.Models
                 }
                 else
                 {
-                    if (!refType.IsTypeOf(_typeSystem.Object))
+                    if (refType.FullName != WellKnownTypes.Object)
                         Cast(refType);
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stind_Ref));
                 }
