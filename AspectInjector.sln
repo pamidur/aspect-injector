@@ -39,6 +39,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Analyzer", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Analyzer.Test", "analyzers\AspectInjector.Analyzer.Test\AspectInjector.Analyzer.Test.csproj", "{ACEE719B-B932-4B41-84AE-0F0CA0CE37E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Analyzer.Vsix", "analyzers\AspectInjector.Analyzer.Vsix\AspectInjector.Analyzer.Vsix.csproj", "{06F6709E-56E5-41ED-9BC1-55A8F648DD72}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{ACEE719B-B932-4B41-84AE-0F0CA0CE37E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACEE719B-B932-4B41-84AE-0F0CA0CE37E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACEE719B-B932-4B41-84AE-0F0CA0CE37E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06F6709E-56E5-41ED-9BC1-55A8F648DD72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06F6709E-56E5-41ED-9BC1-55A8F648DD72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06F6709E-56E5-41ED-9BC1-55A8F648DD72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06F6709E-56E5-41ED-9BC1-55A8F648DD72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -100,6 +106,7 @@ Global
 		{6431E891-8E90-4510-AC8F-581536757EA0} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
 		{8A2E5556-55A4-4A1C-BE82-7603BEFA1A19} = {F062AF31-5518-40FA-A790-E4B4887126C1}
 		{ACEE719B-B932-4B41-84AE-0F0CA0CE37E0} = {F062AF31-5518-40FA-A790-E4B4887126C1}
+		{06F6709E-56E5-41ED-9BC1-55A8F648DD72} = {F062AF31-5518-40FA-A790-E4B4887126C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B153C707-A96B-404C-B0E6-2225AE14B304}

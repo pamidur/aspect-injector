@@ -1,78 +1,75 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using TestHelper;
 using AspectInjector.Analyzer;
 using AspectInjector.Analyzer.Mixin;
+using Xunit;
 
 namespace AspectInjector.Analyzer.Test
 {
-    [TestClass]
     public class UnitTest : CodeFixVerifier
     {
-
-        //No diagnostics expected to show up
-        [TestMethod]
-        public void TestMethod1()
+        [Fact]
+        public void NoCode_NoDiagnostics()
         {
             var test = @"";
 
             VerifyCSharpDiagnostic(test);
         }
 
-        //Diagnostic and CodeFix both triggered and checked for
-        [TestMethod]
-        public void TestMethod2()
+        [Fact]
+        public void Can_Mixin_Only_Interfaces()
         {
-            var test = @"
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Diagnostics;
-    using AspectInjector.Broker;
+            var test = @"  
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Diagnostics;
+using AspectInjector.Broker;
 
-    namespace ConsoleApplication1
+    namespace TestNameSpace
     {
-        [Mixin()]
-        [AspectInjector.Broker.Mixin(typeof(Console))]
-        [MyCool]
-        [System.Obsolete]
-        class TypeName
+        [Mixin(typeof(DummyClass))]
+        [Aspect(Aspect.Scope.Global)]
+        class TypeClass
         {   
         }
+
+        interface IDummyInterface{}
+        class DummyClass{}
     }";
             var expected = new DiagnosticResult
             {
-                Id = "AspectInjector-MixinAttributeAnalyzer",
-                Message = String.Format("Type name '{0}' contains lowercase letters", "TypeName"),
-                Severity = DiagnosticSeverity.Warning,
+                Id = Rules.CanMixinOnlyInterfaces.Id,
+                Message = string.Format((string)Rules.CanMixinOnlyInterfaces.MessageFormat, "DummyClass"),
+                Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {
-                            new DiagnosticResultLocation("Test0.cs", 11, 15)
+                            new DiagnosticResultLocation("Test0.cs", 12, 10)
                         }
             };
 
             VerifyCSharpDiagnostic(test, expected);
 
-            var fixtest = @"
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Diagnostics;
+    //        var fixtest = @"
+    //using System;
+    //using System.Collections.Generic;
+    //using System.Linq;
+    //using System.Text;
+    //using System.Threading.Tasks;
+    //using System.Diagnostics;
 
-    namespace ConsoleApplication1
-    {
-        class TYPENAME
-        {   
-        }
-    }";
-            VerifyCSharpFix(test, fixtest);
+    //namespace ConsoleApplication1
+    //{
+    //    class TYPENAME
+    //    {   
+    //    }
+    //}";
+    //        VerifyCSharpFix(test, fixtest);
         }
 
         //protected override CodeFixProvider GetCSharpCodeFixProvider()
