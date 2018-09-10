@@ -16,9 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Update="NETStandard.Library" Version="1.6.1">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Update="NETStandard.Library" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup>
