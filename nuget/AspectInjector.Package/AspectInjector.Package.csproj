@@ -13,7 +13,6 @@
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <IncludeBuildOutput>False</IncludeBuildOutput>
     <Version>0.0.0</Version>
-    <DevelopmentDependency>true</DevelopmentDependency>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="build/AspectInjector.targets" Pack="true" PackagePath="build" />
-    <None Include="tools/install.ps1" Pack="true" PackagePath="tools" />
+    <None Include="build/*.*" Pack="true" PackagePath="build" />
+    <None Include="tools/*.*" Pack="true" PackagePath="tools" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -33,18 +32,34 @@
 
   <Target Name="AddMainFilesToPackage">
 
-    <Exec Command="dotnet publish ../../src/AspectInjector/ -o $(TargetDir)../publish -c $(Configuration)" />
+    <PropertyGroup>
+      <PublishMain>$(TargetDir)../publish_main/</PublishMain>
+      <PublishAnalyzer>$(TargetDir)../publish_analyzer/</PublishAnalyzer>
+    </PropertyGroup>
+
+    <Exec Command="dotnet publish ../../src/AspectInjector/ -o $(PublishMain) -c $(Configuration) --no-build" />
+    <Exec Command="dotnet publish ../../analyzers/AspectInjector.Analyzer/ -o $(PublishAnalyzer) -c $(Configuration) --no-build" />
     
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(TargetDir)../publish/*.dll">
+      <TfmSpecificPackageFile Include="$(PublishMain)*.dll">
         <PackagePath>build</PackagePath>
       </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(TargetDir)../publish/*.runtimeconfig.json ">
+      <TfmSpecificPackageFile Include="$(PublishMain)*.runtimeconfig.json ">
         <PackagePath>build</PackagePath>
       </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(TargetDir)../publish/AspectInjector.Broker.*" Exclude="$(TargetDir)../publish/AspectInjector.Broker.pdb">
+    </ItemGroup>
+
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(PublishMain)AspectInjector.Broker.*" Exclude="$(PublishMain)AspectInjector.Broker.pdb">
         <PackagePath>lib/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
-    </ItemGroup>    
+    </ItemGroup>
+
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(PublishAnalyzer)*.dll">
+        <PackagePath>analyzers/dotnet/cs</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+    
   </Target>
 </Project>

@@ -4,10 +4,6 @@
     <OutputType>Exe</OutputType>
     <Description>Entrypoint for Aspect Injector.</Description>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.10.0" />
     <PackageReference Include="DryIoc.dll" Version="3.0.2" />
@@ -18,7 +14,4 @@
     <ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj" />
     <ProjectReference Include="..\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Commands\Switches\" />
-  </ItemGroup>  
 </Project>

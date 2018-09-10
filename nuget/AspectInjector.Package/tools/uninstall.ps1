@@ -4,19 +4,8 @@ if($project.Object.SupportsPackageDependencyResolution)
 {
     if($project.Object.SupportsPackageDependencyResolution())
     {
-        # Do not install analyzers via install.ps1, instead let the project system handle it.
+        # Do not uninstall analyzers via uninstall.ps1, instead let the project system handle it.
         return
-    }
-}
-
-foreach ($reference in $project.Object.References)
-{
-    if($reference.Name -eq "AspectInjector.Broker")
-    {
-        if($reference.CopyLocal -eq $true)
-        {
-            $reference.CopyLocal = $false;
-        }
     }
 }
 
@@ -24,14 +13,14 @@ $analyzersPaths = Join-Path (Join-Path (Split-Path -Path $toolsPath -Parent) "an
 
 foreach($analyzersPath in $analyzersPaths)
 {
+    # Uninstall the language agnostic analyzers.
     if (Test-Path $analyzersPath)
     {
-        # Install the language agnostic analyzers.
         foreach ($analyzerFilePath in Get-ChildItem -Path "$analyzersPath\*.Analyzer.dll" -Exclude *.resources.dll)
         {
             if($project.Object.AnalyzerReferences)
             {
-                $project.Object.AnalyzerReferences.Add($analyzerFilePath.FullName)
+                $project.Object.AnalyzerReferences.Remove($analyzerFilePath.FullName)
             }
         }
     }
@@ -54,7 +43,7 @@ if($languageFolder -eq "")
 
 foreach($analyzersPath in $analyzersPaths)
 {
-    # Install language specific analyzers.
+    # Uninstall language specific analyzers.
     $languageAnalyzersPath = join-path $analyzersPath $languageFolder
     if (Test-Path $languageAnalyzersPath)
     {
@@ -62,7 +51,14 @@ foreach($analyzersPath in $analyzersPaths)
         {
             if($project.Object.AnalyzerReferences)
             {
-                $project.Object.AnalyzerReferences.Add($analyzerFilePath.FullName)
+                try
+                {
+                    $project.Object.AnalyzerReferences.Remove($analyzerFilePath.FullName)
+                }
+                catch
+                {
+
+                }
             }
         }
     }
