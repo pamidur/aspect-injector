@@ -163,6 +163,7 @@ namespace TestHelper
                 .AddMetadataReference(projectId, MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")))
                 .AddMetadataReference(projectId, MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")))
                 .AddMetadataReference(projectId, MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")))
+                .AddMetadataReference(projectId, MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "netstandard.dll")))
                 .AddMetadataReference(projectId, BrokerReference);
 
             int count = 0;
