@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AspectInjector.Core.Models;
+﻿using AspectInjector.Core.Models;
 
 namespace AspectInjector.Core.Contracts
 {

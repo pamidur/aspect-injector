@@ -1,26 +1,24 @@
 ﻿using System.Collections.Generic;
 using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Services;
 using Mono.Cecil;
 using AspectInjector.Core.Advice.Effects;
 using System.Linq;
 using AspectInjector.Core.Extensions;
 using static AspectInjector.Broker.Advice;
 using AspectInjector.Core.Models;
-using System;
 
 namespace AspectInjector.Core.Advice
 {
-    public class AdviceExtractor : IEffectExtractor
+    public class AdviceReader : IEffectReader
     {
         private readonly ILogger _log;
 
-        public AdviceExtractor(ILogger log)
+        public AdviceReader(ILogger log)
         {
             _log = log;
         }
 
-        public IReadOnlyCollection<Effect> Extract(ICustomAttributeProvider host)
+        public IReadOnlyCollection<Effect> Read(ICustomAttributeProvider host)
         {
             var source = host as MethodDefinition;
 
@@ -38,8 +36,6 @@ namespace AspectInjector.Core.Advice
             {
                 if (ca.AttributeType.FullName == WellKnownTypes.Advice)
                 {
-                    method.CustomAttributes.Remove(ca);
-
                     var adviceType = ca.GetConstructorValue<Broker.Advice.Type>(0);
                     var advice = CreateEffect(adviceType);
                     if (advice == null)
@@ -72,8 +68,6 @@ namespace AspectInjector.Core.Advice
                     _log.LogError(CompilationMessage.From("Unbound arguments are not supported.", method));
                     continue;
                 }
-
-                par.CustomAttributes.Remove(argAttr);
 
                 args.Add(new AdviceArgument
                 {

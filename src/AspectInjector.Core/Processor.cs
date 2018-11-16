@@ -10,28 +10,23 @@ namespace AspectInjector.Core
 {
     public class Processor
     {
-        private readonly IAspectExtractor _aspectExtractor;
+        private readonly IAspectReader _aspectExtractor;
         private readonly IAspectWeaver _aspectWeaver;
-        private readonly IAssetsCache _cache;
         private readonly IEnumerable<IEffectWeaver> _effectWeavers;
-        private readonly IInjectionCollector _injectionCollector;
-        private readonly IJanitor _janitor;
+        private readonly IInjectionReader _injectionCollector;
         private readonly ILogger _log;
 
-        public Processor(IJanitor janitor,
-            IAspectExtractor aspectExtractor,
-            IAssetsCache cache,
-            IInjectionCollector injectionCollector,
+        public Processor(
+            IAspectReader aspectExtractor,
+            IInjectionReader injectionCollector,
             IAspectWeaver aspectWeaver,
             IEnumerable<IEffectWeaver> effectWeavers,
             ILogger logger)
         {
             _aspectExtractor = aspectExtractor;
             _injectionCollector = injectionCollector;
-            _cache = cache;
             _aspectWeaver = aspectWeaver;
             _effectWeavers = effectWeavers;
-            _janitor = janitor;
             _log = logger;
         }
 
@@ -88,7 +83,6 @@ namespace AspectInjector.Core
 
             using (var fileStream = File.Open(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
             {
-
                 assembly.Write(fileStream,
                     new WriterParameters()
                     {
@@ -99,7 +93,6 @@ namespace AspectInjector.Core
                 assembly.MainModule.SymbolReader.Dispose();
                 assembly.Dispose();
                 assembly = null;
-
             }
 
             foreach (var file in Directory.GetFiles(tempDir))
@@ -128,49 +121,47 @@ namespace AspectInjector.Core
 
         public void ProcessAssembly(AssemblyDefinition assembly, bool optimize)
         {
-            var aspects = _aspectExtractor.Extract(assembly);
+            var aspects = _aspectExtractor.ReadAll(assembly);
+            _log.LogInfo($"Found {aspects.Count} aspects");
 
-            foreach (var aspect in aspects)            
-                _cache.Cache(aspect);
-            
-
-            var injections = _injectionCollector.Collect(assembly).ToList();
-            injections = ExcludeAspectInjections(injections, aspects);
-
-            _janitor.Cleanup(assembly);
+            var injections = _injectionCollector.ReadAll(assembly).ToList();
+            _log.LogInfo($"Found {injections.Count} injections");
 
             if (_log.IsErrorThrown)            
                 return;            
 
-            _cache.FlushCache(assembly);
-            _log.LogInfo($"Stored {aspects.Count} aspects");
-
-            foreach (var aspect in aspects)            
-                _aspectWeaver.WeaveGlobalAssests(aspect);            
-
-            _log.LogInfo($"Found {injections.Count} injections");
-
-            foreach (var injector in _effectWeavers.OrderByDescending(i => i.Priority))
+            if (aspects.Count != 0)
             {
-                _log.LogInfo($"Executing {injector.GetType().Name}");
-
-                foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key).ToList())                
-                    foreach (var injection in prioritizedInjections.OrderByDescending(i => i.Effect.Priority))                    
-                        if (injector.CanWeave(injection))
-                        {
-                            injector.Weave(injection);
-                            injections.Remove(injection);
-                        }   
+                _log.LogInfo($"Processing aspects...");
+                foreach (var aspect in aspects)
+                    _aspectWeaver.WeaveGlobalAssests(aspect);
             }
 
-            foreach (var injection in injections)            
-                _log.LogError(CompilationMessage.From($"Couldn't find weaver for {injection.ToString()}", injection.Target));
-            
+            if (injections.Count != 0)
+            {
+                _log.LogInfo($"Processing injections...");
+
+                foreach (var injector in _effectWeavers.OrderByDescending(i => i.Priority))
+                {
+                    _log.LogInfo($"Executing {injector.GetType().Name}...");
+
+                    foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key).ToList())
+                        foreach (var injection in prioritizedInjections.OrderByDescending(i => i.Effect.Priority))
+                            if (injector.CanWeave(injection))
+                            {
+                                injector.Weave(injection);
+                                injections.Remove(injection);
+                            }
+                }
+
+                foreach (var injection in injections)
+                    _log.LogError(CompilationMessage.From($"Couldn't find weaver for {injection.ToString()}", injection.Target));
+            }
 
             if (optimize)
-                _log.LogInfo($"Cleanup and optimize.");
+                _log.LogInfo($"Cleanup and optimize...");
             else
-                _log.LogInfo($"Cleanup.");
+                _log.LogInfo($"Cleanup...");
 
             foreach (var module in assembly.Modules)
             {

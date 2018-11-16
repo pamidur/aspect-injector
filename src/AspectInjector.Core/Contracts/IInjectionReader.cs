@@ -4,8 +4,8 @@ using Mono.Cecil;
 
 namespace AspectInjector.Core.Contracts
 {
-    public interface IInjectionCollector
+    public interface IInjectionReader
     {
-        IReadOnlyCollection<Injection> Collect(AssemblyDefinition assembly);
+        IReadOnlyCollection<Injection> ReadAll(AssemblyDefinition assembly);
     }
 }

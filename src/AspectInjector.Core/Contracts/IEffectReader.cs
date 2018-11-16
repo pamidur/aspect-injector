@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 namespace AspectInjector.Core.Contracts
 {
-    public interface IEffectExtractor
+    public interface IEffectReader
     {
-        IReadOnlyCollection<Effect> Extract(ICustomAttributeProvider host);
+        IReadOnlyCollection<Effect> Read(ICustomAttributeProvider host);
     }
 }

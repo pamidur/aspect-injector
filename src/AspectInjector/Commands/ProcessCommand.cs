@@ -66,17 +66,15 @@ namespace AspectInjector.Commands
             //register main services
 
             container.Register<Processor>(Reuse.Singleton);
-            container.Register<IAspectExtractor, AspectExtractor>(Reuse.Singleton);
+            container.Register<IAspectReader, AspectReader>(Reuse.Singleton);
             container.Register<IAspectWeaver, AspectWeaver>(Reuse.Singleton);
-            container.Register<IAssetsCache, AssetsCache>(Reuse.Singleton);
-            container.Register<IInjectionCollector, InjectionCollector>(Reuse.Singleton);
-            container.Register<IJanitor, Janitor>(Reuse.Singleton);
+            container.Register<IInjectionReader, InjectionReader>(Reuse.Singleton);
             container.UseInstance(log, true);
 
             //register effects
 
-            container.Register<IEffectExtractor, MixinExtractor>();
-            container.Register<IEffectExtractor, AdviceExtractor>();
+            container.Register<IEffectReader, MixinReader>();
+            container.Register<IEffectReader, AdviceReader>();
 
             container.Register<IEffectWeaver, MixinWeaver>();
             container.Register<IEffectWeaver, AdviceInlineWeaver>();

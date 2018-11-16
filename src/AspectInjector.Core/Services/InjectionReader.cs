@@ -4,22 +4,21 @@ using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace AspectInjector.Core.Services
 {
-    public class InjectionCollector : IInjectionCollector
+    public class InjectionReader : IInjectionReader
     {
-        private readonly IAssetsCache _cache;
+        private readonly IAspectReader _aspectReader;
         private readonly ILogger _log;
 
-        public InjectionCollector(IAssetsCache cache, ILogger logger)
+        public InjectionReader(IAspectReader aspectReader, ILogger logger)
         {
-            _cache = cache;
+            _aspectReader = aspectReader;
             _log = logger;
         }
 
-        public IReadOnlyCollection<Injection> Collect(AssemblyDefinition assembly)
+        public IReadOnlyCollection<Injection> ReadAll(AssemblyDefinition assembly)
         {
             var aspects = ExtractInjections(assembly);
 
@@ -47,11 +46,9 @@ namespace AspectInjector.Core.Services
         {
             var injections = Enumerable.Empty<Injection>();
 
-            foreach (var attr in target.CustomAttributes.Where(a => a.AttributeType.FullName == WellKnownTypes.Inject).ToList())
-            {
+            foreach (var attr in target.CustomAttributes.Where(a => a.AttributeType.FullName == WellKnownTypes.Inject).ToList())            
                 injections = injections.Concat(ParseInjectionAttribute(target, attr));
-                target.CustomAttributes.Remove(attr);
-            }
+            
 
             return injections;
         }
@@ -59,7 +56,7 @@ namespace AspectInjector.Core.Services
         private IEnumerable<Injection> ParseInjectionAttribute(ICustomAttributeProvider target, CustomAttribute attr)
         {
             var aspectRef = attr.GetConstructorValue<TypeReference>(0);
-            var aspect = _cache.ReadAspect(aspectRef.Resolve());
+            var aspect = _aspectReader.Read(aspectRef.Resolve());
 
             if (aspect == null)
             {
@@ -80,20 +77,16 @@ namespace AspectInjector.Core.Services
         {
             var result = Enumerable.Empty<Injection>();
 
-            var assm = target as AssemblyDefinition;
-            if (assm != null)
+            if (target is AssemblyDefinition assm)
                 result = result.Concat(assm.Modules.SelectMany(nt => FindApplicableMembers(nt, aspect, priority)));
 
-            var module = target as ModuleDefinition;
-            if (module != null)
+            if (target is ModuleDefinition module)
                 result = result.Concat(module.Types.SelectMany(nt => FindApplicableMembers(nt, aspect, priority)));
 
-            var member = target as IMemberDefinition;
-            if (member != null)
+            if (target is IMemberDefinition member)
                 result = result.Concat(CreateInjections(member, aspect, priority));
 
-            var type = target as TypeDefinition;
-            if (type != null)
+            if (target is TypeDefinition type)
             {
                 result = result.Concat(type.Methods.Where(m => m.IsNormalMethod() || m.IsConstructor)
                     .SelectMany(m => FindApplicableMembers(m, aspect, priority)));
@@ -107,6 +100,9 @@ namespace AspectInjector.Core.Services
 
         private IEnumerable<Injection> CreateInjections(IMemberDefinition target, AspectDefinition aspect, ushort priority)
         {
+            if (target is TypeDefinition && target.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.Aspect))
+                return Enumerable.Empty<Injection>();
+
             return aspect.Effects.Where(e => e.IsApplicableFor(target)).Select(e => new Injection()
             {
                 Target = target,

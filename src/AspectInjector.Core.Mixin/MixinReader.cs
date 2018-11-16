@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace AspectInjector.Core.Mixin
 {
-    public class MixinExtractor : IEffectExtractor
+    public class MixinReader : IEffectReader
     {
-        public IReadOnlyCollection<Effect> Extract(ICustomAttributeProvider host)
+        public IReadOnlyCollection<Effect> Read(ICustomAttributeProvider host)
         {
             var source = host as TypeDefinition;
 
@@ -25,11 +25,8 @@ namespace AspectInjector.Core.Mixin
 
             foreach (var ca in type.CustomAttributes.ToList())
             {
-                if (ca.AttributeType.FullName == WellKnownTypes.Mixin)
-                {
-                    type.CustomAttributes.Remove(ca);
-                    mixins.Add(new MixinEffect { InterfaceType = ca.GetConstructorValue<TypeReference>(0) });
-                }
+                if (ca.AttributeType.FullName == WellKnownTypes.Mixin)                
+                    mixins.Add(new MixinEffect { InterfaceType = ca.GetConstructorValue<TypeReference>(0) });                
             }
 
             return mixins;
