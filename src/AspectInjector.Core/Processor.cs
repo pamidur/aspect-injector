@@ -54,10 +54,13 @@ namespace AspectInjector.Core
                 {
                     ReadingMode = ReadingMode.Deferred
                 });
+            var name = assembly.Name;
+            assembly.Dispose();
 
             assembly = resolver.Resolve(assembly.Name, new ReaderParameters
             {
                 ReadingMode = ReadingMode.Deferred,
+                ReadWrite = true,
                 AssemblyResolver = resolver,
                 ReadSymbols = readSymbols
             });
@@ -69,39 +72,16 @@ namespace AspectInjector.Core
 
         private void WriteAssembly(AssemblyDefinition assembly, string path, bool writeSymbols)
         {
-            var origOut = Path.GetDirectoryName(path);
-            var tempDir = Path.Combine(origOut, "aspect_compile");
-            if (Directory.Exists(tempDir))
-            {
-                Directory.Delete(tempDir, true);
-            }
-
-            Directory.CreateDirectory(tempDir);
-
-            var fileName = Path.Combine(tempDir, Path.GetFileName(path));
-            var pdbName = Path.Combine(tempDir, Path.GetFileNameWithoutExtension(path) + ".pdb");
-
-            using (var fileStream = File.Open(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
-            {
-                assembly.Write(fileStream,
-                    new WriterParameters()
-                    {
-                        WriteSymbols = writeSymbols,
+            assembly.Write(
+                new WriterParameters()
+                {
+                    WriteSymbols = writeSymbols,
                         ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
                     });
 
-                assembly.MainModule.SymbolReader.Dispose();
-                assembly.Dispose();
-                assembly = null;
-            }
-
-            foreach (var file in Directory.GetFiles(tempDir))
-            {
-                var origFile = Path.Combine(origOut, Path.GetFileName(file));
-                File.Replace(file, origFile, origFile + ".old");
-            }
-
-            Directory.Delete(tempDir, true);
+            assembly.MainModule.SymbolReader.Dispose();
+            assembly.Dispose();
+            assembly = null;
 
             _log.LogInfo("Assembly has been written.");
         }
@@ -127,8 +107,8 @@ namespace AspectInjector.Core
             var injections = _injectionCollector.ReadAll(assembly).ToList();
             _log.LogInfo($"Found {injections.Count} injections");
 
-            if (_log.IsErrorThrown)            
-                return;            
+            if (_log.IsErrorThrown)
+                return;
 
             if (aspects.Count != 0)
             {
@@ -165,9 +145,9 @@ namespace AspectInjector.Core
 
             foreach (var module in assembly.Modules)
             {
-                if (optimize)                
+                if (optimize)
                     EditorFactory.Optimize(module);
-                
+
                 EditorFactory.CleanUp(module);
             }
         }
