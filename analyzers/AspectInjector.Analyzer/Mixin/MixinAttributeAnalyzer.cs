@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace AspectInjector.Analyzer.Mixin
 {
@@ -29,8 +29,8 @@ namespace AspectInjector.Analyzer.Mixin
 
             var location = context.Node.GetLocation();
 
-            if (!context.ContainingSymbol.GetAttributes().Any(a=>a.AttributeClass.ToDisplayString() == _aspectType.FullName)) 
-               context.ReportDiagnostic(Diagnostic.Create(Rules.MixinShouldBePartOfAspect, location, context.ContainingSymbol.Name));      
+            if (!context.ContainingSymbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == _aspectType.FullName))
+                context.ReportDiagnostic(Diagnostic.Create(Rules.MixinShouldBePartOfAspect, location, context.ContainingSymbol.Name));
 
             if (attr.AttributeConstructor == null)
                 return;
@@ -42,13 +42,9 @@ namespace AspectInjector.Analyzer.Mixin
 
             if (arg.TypeKind != TypeKind.Interface)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.CanMixinOnlyInterfaces, context.Node.GetLocation(), arg.Name));
-            else
-            {
-                var aspectClass = context.ContainingSymbol as INamedTypeSymbol;
+            else if (context.ContainingSymbol is INamedTypeSymbol aspectClass && !aspectClass.AllInterfaces.Any(i => i == arg))
+                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectShouldImplementMixin, location, context.ContainingSymbol.Name, arg.Name));
 
-                if (aspectClass != null && !aspectClass.AllInterfaces.Any(i => i == arg))
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.AspectShouldImplementMixin, location, context.ContainingSymbol.Name, arg.Name));
-            }
         }
     }
 }

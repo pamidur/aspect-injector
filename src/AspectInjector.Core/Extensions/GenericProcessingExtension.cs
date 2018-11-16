@@ -121,8 +121,7 @@ namespace AspectInjector.Core.Extensions
                 return param.Module.ImportReference(param.Resolve()).MakeGenericInstanceType(args);
             }
 
-            var gparam = param as GenericParameter;
-            if (gparam == null)
+            if (!(param is GenericParameter gparam))
                 throw new Exception("Cannot resolve generic parameter");
 
             object resolvedMember = ((dynamic)member).Resolve();

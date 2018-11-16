@@ -4,9 +4,6 @@
     <Description>This is Advice injection library of Aspect Injector.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Mono.Cecil" Version="0.10.0" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" />
   </ItemGroup>

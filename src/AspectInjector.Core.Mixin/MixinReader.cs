@@ -11,9 +11,7 @@ namespace AspectInjector.Core.Mixin
     {
         public IReadOnlyCollection<Effect> Read(ICustomAttributeProvider host)
         {
-            var source = host as TypeDefinition;
-
-            if (source != null)
+            if (host is TypeDefinition source)
                 return Extract(source);
 
             return new List<Effect>();
@@ -25,8 +23,8 @@ namespace AspectInjector.Core.Mixin
 
             foreach (var ca in type.CustomAttributes.ToList())
             {
-                if (ca.AttributeType.FullName == WellKnownTypes.Mixin)                
-                    mixins.Add(new MixinEffect { InterfaceType = ca.GetConstructorValue<TypeReference>(0) });                
+                if (ca.AttributeType.FullName == WellKnownTypes.Mixin)
+                    mixins.Add(new MixinEffect { InterfaceType = ca.GetConstructorValue<TypeReference>(0) });
             }
 
             return mixins;

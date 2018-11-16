@@ -5,7 +5,6 @@
     <Description>Entrypoint for Aspect Injector.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Mono.Cecil" Version="0.10.0" />
     <PackageReference Include="DryIoc.dll" Version="3.0.2" />
   </ItemGroup>
   <ItemGroup>

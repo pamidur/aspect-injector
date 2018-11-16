@@ -20,9 +20,7 @@ namespace AspectInjector.Core.Advice
 
         public IReadOnlyCollection<Effect> Read(ICustomAttributeProvider host)
         {
-            var source = host as MethodDefinition;
-
-            if (source != null)
+            if (host is MethodDefinition source)
                 return Extract(source);
 
             return new List<Effect>();

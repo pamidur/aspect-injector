@@ -1,12 +1,5 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <ItemGroup>
-    <PackageReference Update="AspectInjector">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>all</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
   <PropertyGroup>
     <_InjectAspectsDependsOn>
       _ASI_CheckAssemblyChanged;
