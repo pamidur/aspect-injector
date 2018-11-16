@@ -9,17 +9,6 @@ if($project.Object.SupportsPackageDependencyResolution)
     }
 }
 
-foreach ($reference in $project.Object.References)
-{
-    if($reference.Name -eq "AspectInjector.Broker")
-    {
-        if($reference.CopyLocal -eq $true)
-        {
-            $reference.CopyLocal = $false;
-        }
-    }
-}
-
 $analyzersPaths = Join-Path (Join-Path (Split-Path -Path $toolsPath -Parent) "analyzers") * -Resolve
 
 foreach($analyzersPath in $analyzersPaths)
