@@ -24,7 +24,7 @@
     <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="_AspectExitCode" />
     </Exec>
-    <Error Text="Aspect Injector processing has failed. See other errors." Condition="'$(_AspectExitCode)' != '0'" Code="ASI0001" File="AspectInjector"/>
+    <Error Text="Aspect Injector processing has failed. See other errors." Condition="'$(_AspectExitCode)' != '0'" Code="ASI0001"  File="AspectInjector"/>
   </Target>
 
   <Target Name="_ASI_ResignAssembly" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true' AND '$(_InjectionNeeded)' == 'true' " DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">

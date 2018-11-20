@@ -43,7 +43,7 @@ namespace AspectInjector.Core.Services
                         Effects = effects
                     };                
                 else if (effects.Any())
-                    _log.LogError(CompilationMessage.From($"Type {type.FullName} has effects, but is not marked as an aspect. Concider using [Aspect] attribute.", type));
+                    _log.LogWarning(CompilationMessage.From($"Type {type.FullName} has effects, but is not marked as an aspect. Concider using [Aspect] attribute.", type));
 
                 _cache.AddOrUpdate(type, aspectDef, (k, o) => aspectDef);
             }
