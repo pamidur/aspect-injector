@@ -10,6 +10,8 @@ namespace AspectInjector.Analyzer.Mixin
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class MixinAttributeAnalyzer : DiagnosticAnalyzer
     {
+        internal static readonly string MinixTypeProperty = "mixin_type";
+
         private static readonly Type _mixinType = typeof(Broker.Mixin);
         private static readonly Type _aspectType = typeof(Broker.Aspect);
 
@@ -43,7 +45,7 @@ namespace AspectInjector.Analyzer.Mixin
             if (arg.TypeKind != TypeKind.Interface)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.CanMixinOnlyInterfaces, context.Node.GetLocation(), arg.Name));
             else if (context.ContainingSymbol is INamedTypeSymbol aspectClass && !aspectClass.AllInterfaces.Any(i => i == arg))
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectShouldImplementMixin, location, context.ContainingSymbol.Name, arg.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectShouldImplementMixin, location,ImmutableDictionary<string, string>.Empty.Add(MinixTypeProperty,arg.Name), context.ContainingSymbol.Name, arg.Name));
 
         }
     }
