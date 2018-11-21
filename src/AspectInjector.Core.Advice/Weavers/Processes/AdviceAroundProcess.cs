@@ -192,7 +192,16 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         private void MoveBody(MethodDefinition from, MethodDefinition to)
         {
             foreach (var inst in from.Body.Instructions)
+            {
                 to.Body.Instructions.Add(inst);
+
+                if (from.DebugInformation.HasSequencePoints)
+                {
+                    var sp = from.DebugInformation.GetSequencePoint(inst);
+                    if (sp != null)
+                        to.DebugInformation.SequencePoints.Add(sp);
+                }
+            }
 
             foreach (var var in from.Body.Variables)
                 to.Body.Variables.Add(new VariableDefinition(_ts.Import(var.VariableType)));
@@ -204,6 +213,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 to.Body.ExceptionHandlers.Add(handler);
 
             //erase old body
+            from.DebugInformation.SequencePoints.Clear();
             from.Body.Instructions.Clear();
             from.Body = new MethodBody(from);
         }
