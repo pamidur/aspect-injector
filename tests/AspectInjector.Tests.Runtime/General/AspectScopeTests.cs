@@ -39,7 +39,7 @@ namespace AspectInjector.Tests.General
             _counter++;
         }
 
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
         public void Do()
         {
         }
@@ -55,7 +55,7 @@ namespace AspectInjector.Tests.General
             _counter++;
         }
 
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
         public void Do()
         {
         }

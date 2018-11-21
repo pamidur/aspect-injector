@@ -54,9 +54,9 @@ namespace AspectInjector.Analyzer.Analyzers
             if (attr.AttributeConstructor == null)
                 return;
 
-            var atype = (Advice.Type)attr.ConstructorArguments[0].Value;
+            var atype = (Advice.Kind)attr.ConstructorArguments[0].Value;
 
-            if (atype == Advice.Type.Around)
+            if (atype == Advice.Kind.Around)
             {
                 if (method.ReturnType.SpecialType != SpecialType.System_Object)
                     context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "does not return 'object' for Around"));

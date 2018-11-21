@@ -24,7 +24,7 @@ namespace TestNameSpace
     [Aspect(Aspect.Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before)]
         public static void Before(){}
     }
 }";
@@ -42,7 +42,7 @@ namespace TestNameSpace
     [Aspect(Aspect.Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before)]
         private void Before(){}
     }
 }";
@@ -61,7 +61,7 @@ namespace TestNameSpace
     [Aspect(Aspect.Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before)]
         public void Before<T>(){}
     }
 }";
@@ -80,7 +80,7 @@ namespace TestNameSpace
     [Aspect(Aspect.Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before)]
         public int Before(){ return 1; }
     }
 }";
@@ -99,7 +99,7 @@ namespace TestNameSpace
     [Aspect(Aspect.Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Type.Around, Advice.Target.Method)]
+        [Advice(Advice.Kind.Around)]
         public void Around(){ }
     }
 }";
@@ -118,7 +118,7 @@ namespace TestNameSpace
     [Aspect(Aspect.Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before)]
         public void Before(string data, int val, [Advice.Argument(Advice.Argument.Source.Instance)] object i){ }
     }
 }";
@@ -140,7 +140,7 @@ namespace TestNameSpace
     [Aspect(Aspect.Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before)]
         public void Before([Advice.Argument(Advice.Argument.Source.Instance)] object i){ }
     }
 }";
@@ -157,7 +157,7 @@ namespace TestNameSpace
 {
     class TypeClass
     {   
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before)]
         public void Before(){}
     }
 }";

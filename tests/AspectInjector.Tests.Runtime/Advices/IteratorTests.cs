@@ -103,7 +103,7 @@ namespace AspectInjector.Tests.Runtime.Advices
         [Aspect(Aspect.Scope.PerInstance)]
         public class TestAspect
         {
-            [Advice(Advice.Type.After, Advice.Target.Method)]
+            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void After()
             {
                 Checker.Passed = true;
@@ -113,7 +113,7 @@ namespace AspectInjector.Tests.Runtime.Advices
         [Aspect(Aspect.Scope.PerInstance)]
         public class TestArgsAspect
         {
-            [Advice(Advice.Type.After, Advice.Target.Method)]
+            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void After(
                 [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
                 [Advice.Argument(Advice.Argument.Source.ReturnValue)] object res

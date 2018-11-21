@@ -39,7 +39,7 @@ namespace AspectInjector.Core.Services
                     {
                         Host = type,
                         Scope = aspect.GetConstructorValue<Aspect.Scope>(0),
-                        Factory = aspect.GetPropertyValue<Aspect>(au => au.Factory) as TypeReference,
+                        Factory = aspect.GetPropertyValue<TypeReference>(nameof(Aspect.Factory)),
                         Effects = effects
                     };                
                 else if (effects.Any())

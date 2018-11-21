@@ -15,7 +15,7 @@ namespace AspectInjector.Tests.General
     [Aspect(Aspect.Scope.Global)]
     internal class UnmanagedTests_Aspect
     {
-        [Advice(Advice.Type.After, Advice.Target.Method)]
+        [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
         public void Trace()
         {
         }

@@ -27,7 +27,7 @@ namespace AspectInjector.Tests.Advices
     [Aspect(Aspect.Scope.Global)]
     public class NestedClassesTests_Aspect
     {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
         public void Fact()
         {
             Checker.Passed = true;

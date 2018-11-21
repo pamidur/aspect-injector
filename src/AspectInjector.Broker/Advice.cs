@@ -11,16 +11,25 @@ namespace AspectInjector.Broker
         /// <summary>
         /// Initializes a new instance of the <see cref="Advice" /> class.
         /// </summary>
-        /// <param name="type">Specifies when advice method should be called.</param>
-        /// <param name="targets">Specifies what target members this method is injected to.</param>
-        public Advice(Type type, Target targets)
+        /// <param name="kind">Specifies when advice method should be called.</param>
+        public Advice(Kind kind)
         {
         }
 
         /// <summary>
+        /// Specifies what target members this method is injected to. <see cref="Target.Any" /> by default.
+        /// </summary>
+        public Target Targets { get; set; }
+
+        /// <summary>
+        /// Specifies what target members access allowed for this method to inject to. <see cref="AccessModifier.Any" /> by default.
+        /// </summary>
+        public AccessModifier WithAccess { get; set; }
+
+        /// <summary>
         /// Advice method injection points enumeration.
         /// </summary>
-        public enum Type
+        public enum Kind
         {
             /// <summary>
             /// Advice method is called before target method.
@@ -44,6 +53,11 @@ namespace AspectInjector.Broker
         [Flags]
         public enum Target
         {
+            /// <summary>
+            /// Advice method is injected into any target's member.
+            /// </summary>
+            Any = 0,
+
             /// <summary>
             /// Advice method is injected into target's constructors.
             /// </summary>
@@ -115,7 +129,7 @@ namespace AspectInjector.Broker
                 /// <summary>
                 /// Target method delegate. Usage <example>Target(<see cref="Arguments"/>)</example> for chaining methods.
                 /// Should be of type <c>Func&lt;object[],object&gt;</c>.
-                /// Works only with <see cref="Advice.Type.Around" />.
+                /// Works only with <see cref="Advice.Kind.Around" />.
                 /// </summary>
                 Target = 4,
 

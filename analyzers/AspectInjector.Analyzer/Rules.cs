@@ -84,7 +84,7 @@ namespace AspectInjector.Analyzer
             Make("AIAM011",
                $"Argument source is always null in this context",
                "Argument '{0}' is always null {1}",
-               $"Argument source returns null in current context. '{nameof(Advice.Argument.Source.Target)}' should be used with {nameof(Advice.Type.Around)} advice, and '{nameof(Advice.Argument.Source.ReturnValue)}' should be used with {nameof(Advice.Type.After)} advice",
+               $"Argument source returns null in current context. '{nameof(Advice.Argument.Source.Target)}' should be used with {nameof(Advice.Kind.Around)} advice, and '{nameof(Advice.Argument.Source.ReturnValue)}' should be used with {nameof(Advice.Kind.After)} advice",
                DiagnosticSeverity.Warning);
 
         public static readonly DiagnosticDescriptor ArgumentHasInvalidType =

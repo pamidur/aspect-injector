@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
-using Mono.Cecil;
-using AspectInjector.Core.Advice.Effects;
-using System.Linq;
 using AspectInjector.Core.Extensions;
-using static AspectInjector.Broker.Advice;
 using AspectInjector.Core.Models;
+using Mono.Cecil;
+using System.Collections.Generic;
+using System.Linq;
+using static AspectInjector.Broker.Advice;
 
 namespace AspectInjector.Core.Advice
 {
@@ -34,7 +34,7 @@ namespace AspectInjector.Core.Advice
             {
                 if (ca.AttributeType.FullName == WellKnownTypes.Advice)
                 {
-                    var adviceType = ca.GetConstructorValue<Broker.Advice.Type>(0);
+                    var adviceType = ca.GetConstructorValue<Kind>(0);
                     var advice = CreateEffect(adviceType);
                     if (advice == null)
                     {
@@ -43,7 +43,10 @@ namespace AspectInjector.Core.Advice
                     }
 
                     advice.Method = method;
-                    advice.Target = ca.GetConstructorValue<Target>(1);
+                    advice.Target = ca.GetPropertyValue<Target>(nameof(Broker.Advice.Targets));
+                    if (advice.Target == Target.Any)
+                        advice.Target = Target.Constructor | Target.EventAdd | Target.EventRemove | Target.Getter | Target.Method | Target.Setter;
+
                     advice.Arguments = ExtractArguments(method);
 
                     advices.Add(advice);
@@ -77,13 +80,13 @@ namespace AspectInjector.Core.Advice
             return args;
         }
 
-        internal static AdviceEffectBase CreateEffect(Broker.Advice.Type adviceType)
+        internal static AdviceEffectBase CreateEffect(Broker.Advice.Kind adviceType)
         {
             switch (adviceType)
             {
-                case Broker.Advice.Type.After: return new AfterAdviceEffect();
-                case Broker.Advice.Type.Before: return new BeforeAdviceEffect();
-                case Broker.Advice.Type.Around: return new AroundAdviceEffect();
+                case Broker.Advice.Kind.After: return new AfterAdviceEffect();
+                case Broker.Advice.Kind.Before: return new BeforeAdviceEffect();
+                case Broker.Advice.Kind.Around: return new AroundAdviceEffect();
                 default: return null;
             }
         }
