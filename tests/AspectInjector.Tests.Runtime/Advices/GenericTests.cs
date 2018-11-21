@@ -60,7 +60,7 @@ namespace AspectInjector.Tests.Advices
     [Aspect(Aspect.Scope.Global)]
     internal class GenericTests_Aspect
     {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
         public void BeforeMethod() { Checker.Passed = true; }
     }
 
@@ -80,7 +80,7 @@ namespace AspectInjector.Tests.Advices
     [Aspect(Aspect.Scope.Global)]
     internal class GenericTests_OpenGenericAspect
     {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
         public void BeforeMethod() { Checker.Passed = true; }
     }
 
@@ -97,7 +97,7 @@ namespace AspectInjector.Tests.Advices
     [Aspect(Aspect.Scope.Global)]
     internal class GenericAroundTests_Aspect
     {
-        [Advice(Advice.Type.Around, Advice.Target.Method)]
+        [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
         public object AroundAdvice([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
             [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
         {

@@ -62,13 +62,13 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected virtual void LoadTargetArgument(PointCut pc, AdviceArgument parameter)
         {
-            _log.LogWarning(CompilationMessage.From($"Advice {_effect.Type.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", _effect.Method));
+            _log.LogWarning(CompilationMessage.From($"Advice {_effect.Kind.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", _effect.Method));
             pc.Null();
         }
 
         protected virtual void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
         {
-            _log.LogWarning(CompilationMessage.From($"Advice {_effect.Type.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", _effect.Method));
+            _log.LogWarning(CompilationMessage.From($"Advice {_effect.Kind.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", _effect.Method));
             pc.Null();
         }
 

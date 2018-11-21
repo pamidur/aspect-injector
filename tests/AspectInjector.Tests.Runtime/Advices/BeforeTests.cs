@@ -101,28 +101,28 @@ namespace AspectInjector.Tests.Advices
     internal class BeforeTests_Aspect
     {
         //Property
-        [Advice(Advice.Type.Before, Advice.Target.Setter)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.Setter)]
         public void BeforeSetter() { Checker.Passed = true; }
 
-        [Advice(Advice.Type.Before, Advice.Target.Getter)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.Getter)]
         public void BeforeGetter() { Checker.Passed = true; }
 
         //Event
-        [Advice(Advice.Type.Before, Advice.Target.EventAdd)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.EventAdd)]
         public void BeforeEventAdd() { Checker.Passed = true; }
 
-        [Advice(Advice.Type.Before, Advice.Target.EventRemove)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.EventRemove)]
         public void BeforeEventRemove() { Checker.Passed = true; }
 
         //Method
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
         public void BeforeMethod() { Checker.Passed = true; }
     }
 
     [Aspect(Aspect.Scope.Global)]
     internal class BeforeTests_BeforeConstructorAspect
     {
-        [Advice(Advice.Type.Before, Advice.Target.Constructor)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.Constructor)]
         public void BeforeConstructor([Advice.Argument(Advice.Argument.Source.Instance)] object instance)
         {
             if (instance != null)
@@ -134,7 +134,7 @@ namespace AspectInjector.Tests.Advices
     [Aspect(Aspect.Scope.Global)]
     internal class BeforeTests_BeforeConstructorWithInterfaceAspect : IDisposable
     {
-        [Advice(Advice.Type.Before, Advice.Target.Constructor)]
+        [Advice(Advice.Kind.Before, Targets = Advice.Target.Constructor)]
         public void BeforeConstructor() { Checker.Passed = true; }
 
         public void Dispose()

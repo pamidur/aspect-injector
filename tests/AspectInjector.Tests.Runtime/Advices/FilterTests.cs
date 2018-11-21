@@ -31,7 +31,7 @@ namespace AspectInjector.Tests.Advices
         {
             public int Counter = 0;
 
-            [Advice(Advice.Type.After, Advice.Target.Method)]
+            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void AfterMethod()
             {
                 Counter++;

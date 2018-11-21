@@ -101,7 +101,7 @@ namespace AspectInjector.Tests.Advices
         [Aspect(Aspect.Scope.Global)]
         public class AsyncTests_ArgumentsAspect
         {
-            [Advice(Advice.Type.After, Advice.Target.Method)]
+            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object value,
                 [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args
                 )
@@ -113,7 +113,7 @@ namespace AspectInjector.Tests.Advices
         [Aspect(Aspect.Scope.PerInstance)]
         public class AsyncTests_SimpleAspect
         {
-            [Advice(Advice.Type.After, Advice.Target.Method)]
+            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void AfterMethod(
                 [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
                 [Advice.Argument(Advice.Argument.Source.Instance)] object th
@@ -126,7 +126,7 @@ namespace AspectInjector.Tests.Advices
         [Aspect(Aspect.Scope.Global)]
         public class AsyncTests_SimpleAspectGlobal
         {
-            [Advice(Advice.Type.After, Advice.Target.Method)]
+            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void AfterMethod(
                 [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
                 [Advice.Argument(Advice.Argument.Source.Instance)] object th

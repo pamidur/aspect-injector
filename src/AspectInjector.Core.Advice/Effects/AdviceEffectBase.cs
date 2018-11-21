@@ -4,15 +4,13 @@ using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
 using static AspectInjector.Broker.Advice;
-using System;
-using System.Linq;
 
 namespace AspectInjector.Core.Advice.Effects
 {
     internal abstract class AdviceEffectBase : Effect
     {
         public Target Target { get; set; }
-        public abstract Broker.Advice.Type Type { get; }
+        public abstract Kind Kind { get; }
         public MethodDefinition Method { get; set; }
 
         public List<AdviceArgument> Arguments { get; set; } = new List<AdviceArgument>();
@@ -47,7 +45,7 @@ namespace AspectInjector.Core.Advice.Effects
             if (other == null)
                 return false;
 
-            return other.Target == Target && other.Type == Type && other.Method == Method;
+            return other.Target == Target && other.Kind == Kind && other.Method == Method;
         }
 
         public override bool Validate(AspectDefinition aspect, ILogger log)
@@ -75,7 +73,7 @@ namespace AspectInjector.Core.Advice.Effects
 
         public override string ToString()
         {
-            return $"{Type.ToString()}{Target.ToString()}";
+            return $"{Kind.ToString()}{Target.ToString()}";
         }
     }
 }

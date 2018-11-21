@@ -140,28 +140,28 @@ namespace AspectInjector.Tests.Advices
     internal class AfterTests_AfterMethodAspect
     {
         //Property
-        [Advice(Advice.Type.After, Advice.Target.Setter)]
+        [Advice(Advice.Kind.After, Targets = Advice.Target.Setter)]
         public void AfterSetter() { Checker.Passed = true; }
 
-        [Advice(Advice.Type.After, Advice.Target.Getter)]
+        [Advice(Advice.Kind.After, Targets = Advice.Target.Getter)]
         public void AfterGetter() { Checker.Passed = true; }
 
         //Event
-        [Advice(Advice.Type.After, Advice.Target.EventAdd)]
+        [Advice(Advice.Kind.After, Targets = Advice.Target.EventAdd)]
         public void AfterEventAdd() { Checker.Passed = true; }
 
-        [Advice(Advice.Type.After, Advice.Target.EventRemove)]
+        [Advice(Advice.Kind.After, Targets = Advice.Target.EventRemove)]
         public void AfterEventRemove() { Checker.Passed = true; }
 
         //Method
-        [Advice(Advice.Type.After, Advice.Target.Method)]
+        [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
         public void AfterMethod() { Checker.Passed = true; }
     }
 
     [Aspect(Aspect.Scope.Global)]
     internal class AfterTests_AfterConstructorAspect
     {
-        [Advice(Advice.Type.After, Advice.Target.Constructor)]
+        [Advice(Advice.Kind.After, Targets = Advice.Target.Constructor)]
         public void AfterConstructor() { Checker.Passed = true; }
     }   
 }

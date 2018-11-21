@@ -13,7 +13,7 @@ namespace AspectInjector.Tests.Assets
         public static readonly string AroundEnter = "AroundAspectInstanceEnter";
         public static readonly string AroundExit = "AroundAspectInstanceExit";
 
-        [Advice(Advice.Type.After, Advice.Target.Constructor | Advice.Target.EventAdd | Advice.Target.EventRemove | Advice.Target.Getter | Advice.Target.Method | Advice.Target.Setter)]
+        [Advice(Advice.Kind.After)]
         public void After(
             [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
             //[Advice.Argument(Advice.Argument.Source.Attributes)] Attribute[] attrs,
@@ -39,7 +39,7 @@ namespace AspectInjector.Tests.Assets
             TestLog.Write(AfterExecuted);
         }
 
-        [Advice(Advice.Type.Before, Advice.Target.Constructor | Advice.Target.EventAdd | Advice.Target.EventRemove | Advice.Target.Getter | Advice.Target.Method | Advice.Target.Setter)]
+        [Advice(Advice.Kind.Before)]
         public void Before(
             [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
             //[Advice.Argument(Advice.Argument.Source.Attributes)] Attribute[] attrs,
@@ -65,7 +65,7 @@ namespace AspectInjector.Tests.Assets
             TestLog.Write(BeforeExecuted);
         }
 
-        [Advice(Advice.Type.Around, Advice.Target.Constructor | Advice.Target.EventAdd | Advice.Target.EventRemove | Advice.Target.Getter | Advice.Target.Method | Advice.Target.Setter)]
+        [Advice(Advice.Kind.Around)]
         public object Around(
             [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
             //[Advice.Argument(Advice.Argument.Source.Attributes)] Attribute[] attrs,

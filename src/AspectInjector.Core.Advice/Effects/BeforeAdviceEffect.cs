@@ -5,7 +5,7 @@ namespace AspectInjector.Core.Advice.Effects
 {
     internal class BeforeAdviceEffect : AdviceEffectBase
     {
-        public override Broker.Advice.Type Type => Broker.Advice.Type.Before;
+        public override Broker.Advice.Kind Kind => Broker.Advice.Kind.Before;
 
         public override bool Validate(AspectDefinition aspect, ILogger log)
         {

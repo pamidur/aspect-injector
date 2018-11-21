@@ -2,6 +2,6 @@
 {
     internal class AfterAdviceEffect : BeforeAdviceEffect
     {
-        public override Broker.Advice.Type Type => Broker.Advice.Type.After;
+        public override Broker.Advice.Kind Kind => Broker.Advice.Kind.After;
     }
 }

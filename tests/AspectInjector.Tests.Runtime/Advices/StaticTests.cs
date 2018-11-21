@@ -46,7 +46,7 @@ namespace AspectInjector.Tests.Advices
         [Aspect(Aspect.Scope.Global)]
         internal class StaticTests_AroundAspect1
         {
-            [Advice(Advice.Type.Around, Advice.Target.Method)]
+            [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
             public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
                 [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
             {
@@ -57,7 +57,7 @@ namespace AspectInjector.Tests.Advices
         [Aspect(Aspect.Scope.Global)]
         internal class StaticTests_AroundAspect2
         {
-            [Advice(Advice.Type.Around, Advice.Target.Method)]
+            [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
             public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
                 [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
             {
@@ -81,7 +81,7 @@ namespace AspectInjector.Tests.Advices
         internal class StaticTests_BeforeAspect
         {
             //Property
-            [Advice(Advice.Type.Before, Advice.Target.Method)]
+            [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
             public void BeforeMethod() { Checker.Passed = true; }
         }
     }

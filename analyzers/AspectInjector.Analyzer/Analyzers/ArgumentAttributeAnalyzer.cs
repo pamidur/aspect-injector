@@ -74,12 +74,12 @@ namespace AspectInjector.Analyzer.Analyzers
             if (adviceattr == null || adviceattr.AttributeConstructor == null)
                 return;
 
-            var adviceType = (Advice.Type)adviceattr.ConstructorArguments[0].Value;
+            var adviceType = (Advice.Kind)adviceattr.ConstructorArguments[0].Value;
 
-            if (source == Advice.Argument.Source.Target && adviceType != Advice.Type.Around)
+            if (source == Advice.Argument.Source.Target && adviceType != Advice.Kind.Around)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentIsAlwaysNull, location, param.Name, $"for '{adviceType}' advice"));
 
-            if (source == Advice.Argument.Source.ReturnValue && adviceType != Advice.Type.After)
+            if (source == Advice.Argument.Source.ReturnValue && adviceType != Advice.Kind.After)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentIsAlwaysNull, location, param.Name, $"for '{adviceType}' advice"));
         }
     }
