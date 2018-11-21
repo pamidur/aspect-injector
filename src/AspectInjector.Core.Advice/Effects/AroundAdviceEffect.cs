@@ -10,8 +10,6 @@ namespace AspectInjector.Core.Advice.Effects
 
         public override bool IsApplicableFor(IMemberDefinition target)
         {
-            //check args
-
             if (target is MethodDefinition && ((MethodDefinition)target).IsConstructor)
                 return false;
 
@@ -20,25 +18,13 @@ namespace AspectInjector.Core.Advice.Effects
 
         public override bool Validate(AspectDefinition aspect, ILogger log)
         {
-            if (Method.IsStatic)
-            {
-                log.LogError(CompilationMessage.From($"Advice {Method.FullName} cannot be static.", aspect.Host));
-                return false;
-            }
-
-            if (!Method.IsPublic)
-            {
-                log.LogError(CompilationMessage.From($"Advice {Method.FullName} should be public.", aspect.Host));
-                return false;
-            }
-
             if (Method.ReturnType != Method.Module.TypeSystem.Object)
             {
                 log.LogError(CompilationMessage.From($"Around advice {Method.FullName} should return an object. Could return null.", aspect.Host));
                 return false;
             }
 
-            return true;
+            return base.Validate(aspect, log);
         }
     }
 }

@@ -23,4 +23,9 @@
     <ProjectReference Include="..\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="Fixers\" />
+  </ItemGroup>
+
 </Project>

@@ -1,18 +1,7 @@
-﻿using System;
-using AspectInjector.Broker;
-using Mono.Cecil;
-
-namespace AspectInjector.Core.Advice.Effects
+﻿namespace AspectInjector.Core.Advice.Effects
 {
-    internal class AfterAdviceEffect : AdviceEffectBase
+    internal class AfterAdviceEffect : BeforeAdviceEffect
     {
         public override Broker.Advice.Type Type => Broker.Advice.Type.After;
-
-        public override bool IsApplicableFor(IMemberDefinition target)
-        {
-            // check args
-
-            return base.IsApplicableFor(target);
-        }
     }
 }

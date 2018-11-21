@@ -18,6 +18,7 @@ namespace AspectInjector.Analyzer.Analyzers
                 , Rules.AspectMustNotBeGeneric
                 , Rules.AspectMustHaveContructorOrFactory
                 , Rules.AspectFactoryMustContainFactoryMethod
+                , Rules.AspectShouldContainEffect
                 );
 
         public override void Initialize(AnalysisContext context)
@@ -68,6 +69,14 @@ namespace AspectInjector.Analyzer.Analyzers
                 }
             }
 
+            var advices = symbol.GetMembers()
+                .Where(m => m.DeclaredAccessibility == Accessibility.Public && m.Kind == SymbolKind.Method)
+                .Where(m => m.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AdviceType.FullName)).Any();
+
+            var mixins = symbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.MixinType.FullName);
+
+            if(!mixins && !advices)
+                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectShouldContainEffect, location, symbol.Name));
         }
     }
 }

@@ -35,6 +35,20 @@ namespace TestHelper
     /// </summary>
     public struct DiagnosticResult
     {
+        public static DiagnosticResult From(DiagnosticDescriptor diagnostic, int line, int column, string path = null)
+        {
+            return new DiagnosticResult
+            {
+                Id = diagnostic.Id,
+                Message = null,
+                Severity = diagnostic.DefaultSeverity,
+                Locations =
+                    new[] {
+                            new DiagnosticResultLocation("Test0.cs", line, column)
+                        }
+            };
+        }
+
         private DiagnosticResultLocation[] locations;
 
         public DiagnosticResultLocation[] Locations

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace AspectInjector.Analyzer.Test
 {
-    public class MixinAttributeTests : CodeFixVerifier
+    public class MixinAnalyzerTests : CodeFixVerifier
     {
         [Fact]
         public void NoCode_NoDiagnostics()

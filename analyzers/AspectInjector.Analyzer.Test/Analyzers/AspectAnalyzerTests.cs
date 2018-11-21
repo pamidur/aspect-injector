@@ -1,23 +1,18 @@
 using AspectInjector.Analyzer.Analyzers;
-using AspectInjector.Analyzer.CodeFixes;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TestHelper;
 using Xunit;
 
-namespace AspectInjector.Analyzer.Test
+namespace AspectInjector.Analyzer.Test.Analyzers
 {
-    public class AspectAttributeTests : CodeFixVerifier
+    public class AspectAnalyzerTests : CodeFixVerifier
     {
         [Fact]
         public void NoCode_NoDiagnostics()
         {
             var test = @"";
-
             VerifyCSharpDiagnostic(test);
         }
-
 
         [Fact]
         public void Aspect_Must_Not_Be_Static()
@@ -35,19 +30,6 @@ namespace AspectInjector.Analyzer.Test
     }";
             var expected = DiagnosticResult.From(Rules.AspectMustNotBeStatic, 4, 14);
             VerifyCSharpDiagnostic(test, expected);
-
-            var fixtest =
-@"using AspectInjector.Broker;
-    namespace TestNameSpace
-    {
-            [Aspect(Aspect.Scope.Global)]
-            class TypeClass
-            {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
-        public void Before(){}
-            }
-    }";
-            VerifyCSharpFix(test, fixtest);
         }
 
         [Fact]
@@ -67,19 +49,6 @@ namespace AspectInjector.Analyzer.Test
 
             var expected = DiagnosticResult.From(Rules.AspectMustNotBeAbstract, 4, 14);
             VerifyCSharpDiagnostic(test, expected);
-
-            var fixtest =
-@"using AspectInjector.Broker;
-    namespace TestNameSpace
-    {
-            [Aspect(Aspect.Scope.Global)]
-            class TypeClass
-            {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
-        public void Before(){}
-            }
-    }";
-            VerifyCSharpFix(test, fixtest);
         }
 
         [Fact]
@@ -176,9 +145,20 @@ namespace TestNameSpace
             VerifyCSharpDiagnostic(test);
         }
 
-        protected override CodeFixProvider GetCSharpCodeFixProvider()
+        [Fact]
+        public void Aspect_Should_Have_Effects()
         {
-            return new AspectCodeFixProvider();
+            var test =
+@"using AspectInjector.Broker;
+namespace TestNameSpace
+{
+    [Aspect(Aspect.Scope.Global)]
+    class TypeClass
+    {
+    }
+}";
+            var expected = DiagnosticResult.From(Rules.AspectShouldContainEffect, 4, 6);
+            VerifyCSharpDiagnostic(test, expected);
         }
 
         protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()

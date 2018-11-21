@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Models;
 
 namespace AspectInjector.Core.Advice.Effects
 {
@@ -6,11 +7,15 @@ namespace AspectInjector.Core.Advice.Effects
     {
         public override Broker.Advice.Type Type => Broker.Advice.Type.Before;
 
-        public override bool IsApplicableFor(IMemberDefinition target)
+        public override bool Validate(AspectDefinition aspect, ILogger log)
         {
-            //check args
+            if (Method.ReturnType != Method.Module.TypeSystem.Void)
+            {
+                log.LogError(CompilationMessage.From($"Advice {Method.FullName} should be void.", aspect.Host));
+                return false;
+            }
 
-            return base.IsApplicableFor(target);
+            return base.Validate(aspect, log);
         }
     }
 }
