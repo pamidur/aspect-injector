@@ -25,12 +25,12 @@ namespace AspectInjector.Analyzer.Analyzers
         {
             var attr = context.ContainingSymbol.GetAttributes().FirstOrDefault(a => a.ApplicationSyntaxReference.Span == context.Node.Span);
 
-            if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.MixinType.FullName)
+            if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.MixinType)
                 return;
 
             var location = context.Node.GetLocation();
 
-            if (!context.ContainingSymbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType.FullName))
+            if (!context.ContainingSymbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
                 context.ReportDiagnostic(Diagnostic.Create(Rules.MixinMustBePartOfAspect, location, context.ContainingSymbol.Name));
 
             if (attr.AttributeConstructor == null)
@@ -42,7 +42,7 @@ namespace AspectInjector.Analyzer.Analyzers
                 return;
 
             if (arg.TypeKind != TypeKind.Interface)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.MixinSupportsOnlyInterfaces, context.Node.GetLocation(), arg.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.MixinSupportsOnlyInterfaces, location, arg.Name));
             else if (context.ContainingSymbol is INamedTypeSymbol aspectClass && !aspectClass.AllInterfaces.Any(i => i == arg))
                 context.ReportDiagnostic(Diagnostic.Create(Rules.MixinSupportsOnlyAspectInterfaces, location,ImmutableDictionary<string, string>.Empty.Add(WellKnown.MixinTypeProperty, arg.Name), context.ContainingSymbol.Name, arg.Name));
 

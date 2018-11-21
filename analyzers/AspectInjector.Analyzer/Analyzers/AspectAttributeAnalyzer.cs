@@ -30,7 +30,7 @@ namespace AspectInjector.Analyzer.Analyzers
         {
             var attr = context.ContainingSymbol.GetAttributes().FirstOrDefault(a => a.ApplicationSyntaxReference.Span == context.Node.Span);
 
-            if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.AspectType.FullName)
+            if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.AspectType)
                 return;
 
             var symbol = context.ContainingSymbol as INamedTypeSymbol;
@@ -63,7 +63,7 @@ namespace AspectInjector.Analyzer.Analyzers
                     || method.DeclaredAccessibility != Accessibility.Public
                     || method.ReturnType.SpecialType != SpecialType.System_Object
                     || method.Parameters.Length != 1
-                    || method.Parameters[0].Type.ToDisplayString() != WellKnown.Type.FullName)
+                    || method.Parameters[0].Type.ToDisplayString() != WellKnown.Type)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(Rules.AspectFactoryMustContainFactoryMethod, location, symbol.Name));
                 }
@@ -71,9 +71,9 @@ namespace AspectInjector.Analyzer.Analyzers
 
             var hasAdvices = symbol.GetMembers()
                 .Where(m => m.DeclaredAccessibility == Accessibility.Public && m.Kind == SymbolKind.Method)
-                .Where(m => m.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AdviceType.FullName)).Any();
+                .Where(m => m.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AdviceType)).Any();
 
-            var hasMixins = symbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.MixinType.FullName);
+            var hasMixins = symbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.MixinType);
 
             if(!hasMixins && !hasAdvices)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.AspectShouldContainEffect, location, symbol.Name));

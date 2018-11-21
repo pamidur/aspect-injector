@@ -64,7 +64,7 @@ namespace AspectInjector.Core.Advice.Effects
                 return false;
             }
 
-            if (!Method.HasGenericParameters)
+            if (Method.HasGenericParameters)
             {
                 log.LogError(CompilationMessage.From($"Advice {Method.FullName} must not be generic.", aspect.Host));
                 return false;

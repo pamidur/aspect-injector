@@ -109,6 +109,43 @@ namespace TestNameSpace
         }
 
         [Fact]
+        public void Advice_Argument_Must_Be_Bound()
+        {
+            var test =
+@"using AspectInjector.Broker;
+namespace TestNameSpace
+{
+    [Aspect(Aspect.Scope.Global)]
+    class TypeClass
+    {
+        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        public void Before(string data){ }
+    }
+}";
+
+            var expected = DiagnosticResult.From(Rules.AdviceArgumentMustBeBound, 8, 35);
+            VerifyCSharpDiagnostic(test, expected);
+        }
+
+        [Fact]
+        public void Advice_Argument_Must_Be_Bound_Valid()
+        {
+            var test =
+@"using AspectInjector.Broker;
+namespace TestNameSpace
+{
+    [Aspect(Aspect.Scope.Global)]
+    class TypeClass
+    {
+        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        public void Before([Advice.Argument(Advice.Argument.Source.Instance)] object i){ }
+    }
+}";
+
+            VerifyCSharpDiagnostic(test);
+        }
+
+        [Fact]
         public void Advice_Should_Be_Part_Of_Aspect()
         {
             var test =

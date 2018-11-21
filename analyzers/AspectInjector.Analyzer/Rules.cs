@@ -106,7 +106,11 @@ namespace AspectInjector.Analyzer
                "Advice '{0}' returns value",
                "Inline Advice must be void as returned value is not supported.");
 
-
+        public static readonly DiagnosticDescriptor AdviceArgumentMustBeBound =
+            Make("AIAM016",
+               "Advice Argument must be bound",
+               "Argument '{0}' is unbound",
+               "Unbound arguments are not supported.");
 
 
         public static readonly DiagnosticDescriptor ArgumentMustBePartOfAdvice =
@@ -114,12 +118,6 @@ namespace AspectInjector.Analyzer
                 "Advice Argument must be a part of an Advice",
                 "'{0}' is not an Advice",
                 "Unbound Advice Arguments are not supported.");
-
-        public static readonly DiagnosticDescriptor ArgumentMustBeBound =
-            Make("AIAM016",
-               "Advice Argument must be bound",
-               "Argument '{0}' is unbound",
-               "Unbound arguments are not supported.");
 
         public static readonly DiagnosticDescriptor ArgumentTargetShouldBeUsedForAroundAdvice =
             Make("AIAM017",

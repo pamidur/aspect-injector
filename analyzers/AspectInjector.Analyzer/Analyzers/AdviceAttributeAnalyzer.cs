@@ -18,6 +18,7 @@ namespace AspectInjector.Analyzer.Analyzers
                 , Rules.AdviceMustBePublic
                 , Rules.AdviceAroundMustReturnObject
                 , Rules.AdviceInlineMustBeVoid
+                , Rules.AdviceArgumentMustBeBound
                 );
 
         public override void Initialize(AnalysisContext context)
@@ -29,7 +30,7 @@ namespace AspectInjector.Analyzer.Analyzers
         {
             var attr = context.ContainingSymbol.GetAttributes().FirstOrDefault(a => a.ApplicationSyntaxReference.Span == context.Node.Span);
 
-            if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.AdviceType.FullName)
+            if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.AdviceType)
                 return;
 
             var method = context.ContainingSymbol as IMethodSymbol;
@@ -38,7 +39,7 @@ namespace AspectInjector.Analyzer.Analyzers
 
             var location = context.Node.GetLocation();
 
-            if (!method.ContainingSymbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType.FullName))
+            if (!method.ContainingSymbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
                 context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustBePartOfAspect, location, method.ContainingSymbol.Name));
 
             if (method.IsStatic)
@@ -50,21 +51,25 @@ namespace AspectInjector.Analyzer.Analyzers
             if (method.DeclaredAccessibility != Accessibility.Public)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustBePublic, location, method.Name));
 
+            foreach (var param in method.Parameters)
+                if (!param.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AdviceArgumentType))
+                    context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceArgumentMustBeBound, param.Locations.First(), param.Name));
+
             if (attr.AttributeConstructor == null)
                 return;
 
             var atype = (Advice.Type)attr.ConstructorArguments[0].Value;
 
-            if(atype == Advice.Type.Around)
+            if (atype == Advice.Type.Around)
             {
-                if(method.ReturnType.SpecialType != SpecialType.System_Object)
+                if (method.ReturnType.SpecialType != SpecialType.System_Object)
                     context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceAroundMustReturnObject, location, method.Name));
             }
             else
             {
                 if (method.ReturnType.SpecialType != SpecialType.System_Void)
                     context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceInlineMustBeVoid, location, method.Name));
-            }            
+            }
         }
     }
 }
