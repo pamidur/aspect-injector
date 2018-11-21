@@ -24,13 +24,13 @@ namespace AspectInjector.Analyzer.Analyzers
 
         private static void AnalyzeAttribute(SyntaxNodeAnalysisContext context)
         {
-            var attr = context.ContainingSymbol.GetAttributes().FirstOrDefault(a => a.ApplicationSyntaxReference.Span == context.Node.Span);
-
-            if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.AdviceArgumentType)
+            var param = context.SemanticModel.GetDeclaredSymbol(context.Node.Parent.Parent) as IParameterSymbol;
+            if (param == null)
                 return;
 
-            var param = context.ContainingSymbol as IParameterSymbol;
-            if (param == null)
+            var attr = param.GetAttributes().FirstOrDefault(a => a.ApplicationSyntaxReference.Span == context.Node.Span);
+
+            if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.AdviceArgumentType)
                 return;
 
             var location = context.Node.GetLocation();
@@ -71,7 +71,7 @@ namespace AspectInjector.Analyzer.Analyzers
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentHasInvalidType, location, param.Name, WellKnown.Type));
 
 
-            if (adviceattr.AttributeConstructor == null)
+            if (adviceattr == null || adviceattr.AttributeConstructor == null)
                 return;
 
             var adviceType = (Advice.Type)adviceattr.ConstructorArguments[0].Value;

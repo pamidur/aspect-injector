@@ -43,8 +43,7 @@ namespace AspectInjector.Analyzer
                "Aspect must not be generic, abstract or static",
                "Aspect '{0}' {1}",
                "Aspect must have valid signature. Aspect must be non-generic, non-abstract and non-static class.");
-
-
+        
         public static readonly DiagnosticDescriptor AspectFactoryMustContainFactoryMethod =
             Make("AIAM006",
                "Aspect factory must contain factory method",
@@ -57,14 +56,13 @@ namespace AspectInjector.Analyzer
                "Aspect '{0}' does not have public parameterless constructor nor defined factory",
                "Aspect must have public parameterless constructor or defined factory.");
 
-
+        
 
         public static readonly DiagnosticDescriptor AdviceMustHaveValidSingnature =
             Make("AIAM008",
                "Advice must have invalid signature",
                "Advice '{0}' {1}",
                "Advice must be non-static, non-generic, public method. Return 'void' if inline and 'object' otherwise.");      
-
 
         public static readonly DiagnosticDescriptor AdviceArgumentMustBeBound =
             Make("AIAM009",
@@ -77,20 +75,20 @@ namespace AspectInjector.Analyzer
         public static readonly DiagnosticDescriptor ArgumentMustBePartOfAdvice =
             Make("AIAM010",
                 "Advice Argument must be a part of an Advice",
-                "'{0}' is not an Advice",
+                "Method '{0}' is not an Advice",
                 "Unbound Advice Arguments are not supported.");
 
         public static readonly DiagnosticDescriptor ArgumentIsAlwaysNull =
             Make("AIAM011",
-               $"Argument source is always null in this context",
+               "Argument source is always null in this context",
                "Argument '{0}' is always null {1}",
                $"Argument source returns null in current context. '{nameof(Advice.Argument.Source.Target)}' should be used with {nameof(Advice.Type.Around)} advice, and '{nameof(Advice.Argument.Source.ReturnValue)}' should be used with {nameof(Advice.Type.After)} advice",
                DiagnosticSeverity.Warning);
 
         public static readonly DiagnosticDescriptor ArgumentHasInvalidType =
             Make("AIAM012",
-                $"Argument for source has invalid type",
+                "Argument for source has invalid type",
                 "'{0}' has invalid type, {1} expected",
-                $"Argument for source has invalid type.");
+                "Argument for source has invalid type.");
     }
 }
