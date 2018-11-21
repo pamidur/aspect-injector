@@ -54,15 +54,21 @@ namespace AspectInjector.Core.Advice.Effects
         {
             if (Method.IsStatic)
             {
-                log.LogError(CompilationMessage.From($"Advice {Method.FullName} cannot be static.", aspect.Host));
+                log.LogError(CompilationMessage.From($"Advice {Method.FullName} must not be static.", aspect.Host));
                 return false;
             }
 
             if (!Method.IsPublic)
             {
-                log.LogError(CompilationMessage.From($"Advice {Method.FullName} should be public.", aspect.Host));
+                log.LogError(CompilationMessage.From($"Advice {Method.FullName} must be public.", aspect.Host));
                 return false;
-            }            
+            }
+
+            if (!Method.HasGenericParameters)
+            {
+                log.LogError(CompilationMessage.From($"Advice {Method.FullName} must not be generic.", aspect.Host));
+                return false;
+            }
 
             return true;
         }

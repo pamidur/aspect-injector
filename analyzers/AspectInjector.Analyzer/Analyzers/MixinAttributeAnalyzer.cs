@@ -9,7 +9,12 @@ namespace AspectInjector.Analyzer.Analyzers
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class MixinAttributeAnalyzer : DiagnosticAnalyzer
     {
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rules.MixinSupportsOnlyInterfaces, Rules.MixinMustBePartOfAspect, Rules.MixinSupportsOnlyAspectInterfaces); } }
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
+            => ImmutableArray.Create(
+                Rules.MixinSupportsOnlyInterfaces
+                , Rules.MixinMustBePartOfAspect
+                , Rules.MixinSupportsOnlyAspectInterfaces
+                );
 
         public override void Initialize(AnalysisContext context)
         {
