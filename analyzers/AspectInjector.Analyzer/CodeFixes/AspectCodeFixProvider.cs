@@ -16,7 +16,7 @@ namespace AspectInjector.Analyzer.CodeFixes
     {
         public sealed override ImmutableArray<string> FixableDiagnosticIds =>
             ImmutableArray.Create(
-                Rules.AspectMustNotBeStatic.Id
+                Rules.AspectMustHaveValidSignature.Id
                 );
 
 
@@ -24,29 +24,32 @@ namespace AspectInjector.Analyzer.CodeFixes
         {
             var diagnostic = context.Diagnostics.First();
 
-            if (diagnostic.Id == Rules.AspectMustNotBeStatic.Id)
+            if (diagnostic.Id == Rules.AspectMustHaveValidSignature.Id)
                 context.RegisterCodeFix(CodeAction.Create(
-                    title: $"Make Aspect non-static",
-                    createChangedDocument: c => RemoveModifier(SyntaxKind.StaticKeyword, context.Document, diagnostic.Location.SourceSpan.Start, c)),
-                diagnostic);
-
-            if (diagnostic.Id == Rules.AspectMustNotBeAbstract.Id)
-                context.RegisterCodeFix(CodeAction.Create(
-                    title: $"Make Aspect non-abstract",
-                    createChangedDocument: c => RemoveModifier(SyntaxKind.AbstractKeyword, context.Document, diagnostic.Location.SourceSpan.Start, c)),
+                    title: $"Fix Aspect signature",
+                    createChangedDocument: c => RemoveModifier(context.Document, diagnostic.Location.SourceSpan.Start, c)),
                 diagnostic);
 
             return Task.CompletedTask;
         }
 
-        private async Task<Document> RemoveModifier(SyntaxKind modifier, Document document, int from, CancellationToken ct)
+        private async Task<Document> RemoveModifier(Document document, int from, CancellationToken ct)
         {
             var root = await document.GetSyntaxRootAsync(ct).ConfigureAwait(false);
             var type = root.FindToken(from).Parent.AncestorsAndSelf().OfType<TypeDeclarationSyntax>().First();
 
-            var token = type.Modifiers.First(m => m.Kind() == modifier);
+            var newtype = type;
 
-            var newtype = type.RemoveTokenKeepTrivia(token);
+            var statictoken = newtype.Modifiers.FirstOrDefault(m => m.Kind() == SyntaxKind.StaticKeyword);
+            if (statictoken != null)
+                newtype = newtype.RemoveTokenKeepTrivia(statictoken);
+
+            var abstracttoken = newtype.Modifiers.FirstOrDefault(m => m.Kind() == SyntaxKind.AbstractKeyword);
+            if (abstracttoken != null)
+                newtype = newtype.RemoveTokenKeepTrivia(abstracttoken);
+
+            if (newtype.TypeParameterList != null && !newtype.TypeParameterList.Span.IsEmpty)
+                newtype = newtype.RemoveNode(newtype.TypeParameterList, SyntaxRemoveOptions.KeepExteriorTrivia);
 
             return document.WithSyntaxRoot(root.ReplaceNode(type, newtype));
         }

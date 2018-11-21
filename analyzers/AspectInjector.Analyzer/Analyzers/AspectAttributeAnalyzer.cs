@@ -8,14 +8,10 @@ namespace AspectInjector.Analyzer.Analyzers
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class AspectAttributeAnalyzer : DiagnosticAnalyzer
-    {
-        internal static readonly string FactoryTypeProperty = "factory_type";
-        
+    {        
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
             ImmutableArray.Create(
-                Rules.AspectMustNotBeStatic
-                , Rules.AspectMustNotBeAbstract
-                , Rules.AspectMustNotBeGeneric
+                Rules.AspectMustHaveValidSignature
                 , Rules.AspectMustHaveContructorOrFactory
                 , Rules.AspectFactoryMustContainFactoryMethod
                 , Rules.AspectShouldContainEffect
@@ -43,13 +39,13 @@ namespace AspectInjector.Analyzer.Analyzers
             var location = context.Node.GetLocation();
 
             if (symbol.IsStatic)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustNotBeStatic, location, symbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustHaveValidSignature, location, symbol.Name, "is static"));
 
             if (symbol.IsAbstract)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustNotBeAbstract, location, symbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustHaveValidSignature, location, symbol.Name, "is abstract"));
 
             if (symbol.IsGenericType)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustNotBeGeneric, location, symbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustHaveValidSignature, location, symbol.Name, "has generic parameters"));
 
             if (!symbol.IsStatic && factory == null && ctor == null)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustHaveContructorOrFactory, location, symbol.Name));

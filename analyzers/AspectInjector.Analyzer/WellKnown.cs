@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace AspectInjector.Analyzer
 {
@@ -8,6 +9,8 @@ namespace AspectInjector.Analyzer
         public static readonly string AdviceArgumentType = typeof(Broker.Advice.Argument).FullName.Replace("+", ".");
         public static readonly string MixinType = typeof(Broker.Mixin).FullName;
         public static readonly string AspectType = typeof(Broker.Aspect).FullName;
+
+        public static readonly string MethodBase = typeof(MethodBase).FullName;
 
         public static readonly string Type = typeof(Type).FullName;
 

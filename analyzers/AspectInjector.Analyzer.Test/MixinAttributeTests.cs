@@ -229,8 +229,8 @@ using AspectInjector.Broker;
     }";
             var expected = new DiagnosticResult
             {
-                Id = Rules.MixinMustBePartOfAspect.Id,
-                Message = string.Format((string)Rules.MixinMustBePartOfAspect.MessageFormat, "TypeClass"),
+                Id = Rules.EffectMustBePartOfAspect.Id,
+                Message = string.Format((string)Rules.EffectMustBePartOfAspect.MessageFormat, "TypeClass"),
                 Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {

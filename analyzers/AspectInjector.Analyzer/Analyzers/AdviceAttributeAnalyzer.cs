@@ -12,12 +12,8 @@ namespace AspectInjector.Analyzer.Analyzers
     {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
-                Rules.AdviceMustBePartOfAspect
-                , Rules.AdviceMustNotBeStatic
-                , Rules.AdviceMustNotBeGeneric
-                , Rules.AdviceMustBePublic
-                , Rules.AdviceAroundMustReturnObject
-                , Rules.AdviceInlineMustBeVoid
+                Rules.EffectMustBePartOfAspect
+                , Rules.AdviceMustHaveValidSingnature
                 , Rules.AdviceArgumentMustBeBound
                 );
 
@@ -40,16 +36,16 @@ namespace AspectInjector.Analyzer.Analyzers
             var location = context.Node.GetLocation();
 
             if (!method.ContainingSymbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustBePartOfAspect, location, method.ContainingSymbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.EffectMustBePartOfAspect, location, method.ContainingSymbol.Name));
 
             if (method.IsStatic)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustNotBeStatic, location, method.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "is static"));
 
             if (method.IsGenericMethod)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustNotBeGeneric, location, method.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "is generic"));
 
             if (method.DeclaredAccessibility != Accessibility.Public)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustBePublic, location, method.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "is not public"));
 
             foreach (var param in method.Parameters)
                 if (!param.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AdviceArgumentType))
@@ -63,12 +59,12 @@ namespace AspectInjector.Analyzer.Analyzers
             if (atype == Advice.Type.Around)
             {
                 if (method.ReturnType.SpecialType != SpecialType.System_Object)
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceAroundMustReturnObject, location, method.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "does not return 'object' for Around"));
             }
             else
             {
                 if (method.ReturnType.SpecialType != SpecialType.System_Void)
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceInlineMustBeVoid, location, method.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "does not return 'void' for After or Before"));
             }
         }
     }

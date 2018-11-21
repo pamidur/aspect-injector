@@ -33,7 +33,7 @@ namespace AspectInjector.Analyzer.Test
         public void Before(){}
             }
     }";
-            var expected = DiagnosticResult.From(Rules.AspectMustNotBeStatic, 4, 14);
+            var expected = DiagnosticResult.From(Rules.AspectMustHaveValidSignature, 4, 14);
             VerifyCSharpDiagnostic(test, expected);
 
             var fixtest =
@@ -58,15 +58,12 @@ namespace AspectInjector.Analyzer.Test
     namespace TestNameSpace
     {
             [Aspect(Aspect.Scope.Global)]
-            abstract class TypeClass
+            abstract class TypeClass<T>
             {
         [Advice(Advice.Type.Before, Advice.Target.Method)]
         public void Before(){}
             }
     }";
-
-            var expected = DiagnosticResult.From(Rules.AspectMustNotBeAbstract, 4, 14);
-            VerifyCSharpDiagnostic(test, expected);
 
             var fixtest =
 @"using AspectInjector.Broker;
@@ -97,7 +94,7 @@ namespace TestNameSpace
     }
 }";
 
-            var expected = DiagnosticResult.From(Rules.AspectMustNotBeGeneric, 4, 6);
+            var expected = DiagnosticResult.From(Rules.AspectMustHaveValidSignature, 4, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 

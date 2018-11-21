@@ -94,7 +94,7 @@ namespace TestNameSpace
 
     interface IDummyInterface{}
 }";
-            var expected = DiagnosticResult.From(Rules.MixinMustBePartOfAspect, 4, 6);
+            var expected = DiagnosticResult.From(Rules.EffectMustBePartOfAspect, 4, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 

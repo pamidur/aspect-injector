@@ -12,7 +12,7 @@ namespace AspectInjector.Analyzer.Analyzers
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
                 Rules.MixinSupportsOnlyInterfaces
-                , Rules.MixinMustBePartOfAspect
+                , Rules.EffectMustBePartOfAspect
                 , Rules.MixinSupportsOnlyAspectInterfaces
                 );
 
@@ -31,7 +31,7 @@ namespace AspectInjector.Analyzer.Analyzers
             var location = context.Node.GetLocation();
 
             if (!context.ContainingSymbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
-                context.ReportDiagnostic(Diagnostic.Create(Rules.MixinMustBePartOfAspect, location, context.ContainingSymbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.EffectMustBePartOfAspect, location, context.ContainingSymbol.Name));
 
             if (attr.AttributeConstructor == null)
                 return;

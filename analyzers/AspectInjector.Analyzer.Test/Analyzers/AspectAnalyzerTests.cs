@@ -28,7 +28,7 @@ namespace AspectInjector.Analyzer.Test.Analyzers
         public void Before(){}
             }
     }";
-            var expected = DiagnosticResult.From(Rules.AspectMustNotBeStatic, 4, 14);
+            var expected = DiagnosticResult.From(Rules.AspectMustHaveValidSignature, 4, 14);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -47,7 +47,7 @@ namespace AspectInjector.Analyzer.Test.Analyzers
             }
     }";
 
-            var expected = DiagnosticResult.From(Rules.AspectMustNotBeAbstract, 4, 14);
+            var expected = DiagnosticResult.From(Rules.AspectMustHaveValidSignature, 4, 14);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -66,7 +66,7 @@ namespace TestNameSpace
     }
 }";
 
-            var expected = DiagnosticResult.From(Rules.AspectMustNotBeGeneric, 4, 6);
+            var expected = DiagnosticResult.From(Rules.AspectMustHaveValidSignature, 4, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 

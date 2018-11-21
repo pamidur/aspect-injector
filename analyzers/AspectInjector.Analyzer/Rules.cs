@@ -9,24 +9,25 @@ namespace AspectInjector.Analyzer
         => new DiagnosticDescriptor(id, title, message, "Aspects", severity, isEnabledByDefault: true, description: description, helpLinkUri: $"https://pamidur.github.io/aspect-injector/errors/{id}");
 
 
-        public static readonly DiagnosticDescriptor MixinSupportsOnlyInterfaces =
+        public static readonly DiagnosticDescriptor EffectMustBePartOfAspect =
             Make("AIAM001",
+                "Effect must be a part of an Aspect",
+                "'{0}' is not an Aspect",
+                "Unbound Effects are not supported.");
+
+
+
+        public static readonly DiagnosticDescriptor MixinSupportsOnlyInterfaces =
+            Make("AIAM002",
                 "Mixin supports only interfaces",
                 "'{0}' is not an interface",
                 "Non-interface types are not supported in this context.");
-
-        public static readonly DiagnosticDescriptor MixinMustBePartOfAspect =
-            Make("AIAM002",
-                "Mixin must be a part of an Aspect",
-                "'{0}' is not an Aspect",
-                "Unbound Mixins are not supported.");
 
         public static readonly DiagnosticDescriptor MixinSupportsOnlyAspectInterfaces =
             Make("AIAM003",
                "Mixin supports only implemented interfaces",
                "'{0}' does not implement '{1}'",
                "Aspect must implement mixin interface.");
-
 
 
 
@@ -37,101 +38,59 @@ namespace AspectInjector.Analyzer
                "Aspect should have at least one effect - Advice, Mixin etc.",
                 DiagnosticSeverity.Warning);
 
-        public static readonly DiagnosticDescriptor AspectMustNotBeGeneric =
+        public static readonly DiagnosticDescriptor AspectMustHaveValidSignature =
             Make("AIAM005",
-               "Aspect must not be generic",
-               "Aspect '{0}' has generic parameters",
-               "Generic Aspects are not supported.");
+               "Aspect must not be generic, abstract or static",
+               "Aspect '{0}' {1}",
+               "Aspect must have valid signature. Aspect must be non-generic, non-abstract and non-static class.");
 
-        public static readonly DiagnosticDescriptor AspectMustNotBeAbstract =
-            Make("AIAM006",
-               "Aspect must not be abstract",
-               "Aspect '{0}' is abstract",
-               "Abstract Aspect classes are not supported.");
-
-        public static readonly DiagnosticDescriptor AspectMustNotBeStatic =
-            Make("AIAM007",
-               "Aspect must not be static",
-               "Aspect '{0}' is static",
-               "Static Aspect classes are not supported.");
 
         public static readonly DiagnosticDescriptor AspectFactoryMustContainFactoryMethod =
-            Make("AIAM008",
+            Make("AIAM006",
                "Aspect factory must contain factory method",
                "Factory type '{0}' does not contain factory method",
                "Aspect factory must contain method 'public static object GetInstance(Type)'.");
 
         public static readonly DiagnosticDescriptor AspectMustHaveContructorOrFactory =
-            Make("AIAM009",
+            Make("AIAM007",
                "Aspect must have public parameterless constructor or factory",
                "Aspect '{0}' does not have public parameterless constructor nor defined factory",
                "Aspect must have public parameterless constructor or defined factory.");
 
 
 
+        public static readonly DiagnosticDescriptor AdviceMustHaveValidSingnature =
+            Make("AIAM008",
+               "Advice must have invalid signature",
+               "Advice '{0}' {1}",
+               "Advice must be non-static, non-generic, public method. Return 'void' if inline and 'object' otherwise.");      
 
-        public static readonly DiagnosticDescriptor AdviceMustBePartOfAspect =
-            Make("AIAM010",
-                "Advice must be a part of an Aspect",
-                "'{0}' is not an Aspect",
-                "Unbound Advices are not supported.");
-
-        public static readonly DiagnosticDescriptor AdviceMustNotBeStatic =
-            Make("AIAM011",
-               "Advice must not be static",
-               "Advice '{0}' is static",
-               "Static Advice methods are not supported.");
-
-        public static readonly DiagnosticDescriptor AdviceMustNotBeGeneric =
-            Make("AIAM019",
-               "Advice must not be generic",
-               "Advice '{0}' is generic",
-               "Generic Advice methods are not supported.");
-
-        public static readonly DiagnosticDescriptor AdviceMustBePublic =
-            Make("AIAM012",
-               "Advice must be public",
-               "Advice '{0}' is not public",
-               "Non-public Advice methods are not supported.");
-
-        public static readonly DiagnosticDescriptor AdviceAroundMustReturnObject =
-            Make("AIAM013",
-               "Around Advice must return object",
-               "Advice '{0}' does not have return value",
-               "Around Advice must return object that will casted to real method result.");
-
-        public static readonly DiagnosticDescriptor AdviceInlineMustBeVoid =
-            Make("AIAM014",
-               "Inline Advice must be void",
-               "Advice '{0}' returns value",
-               "Inline Advice must be void as returned value is not supported.");
 
         public static readonly DiagnosticDescriptor AdviceArgumentMustBeBound =
-            Make("AIAM016",
+            Make("AIAM009",
                "Advice Argument must be bound",
                "Argument '{0}' is unbound",
                "Unbound arguments are not supported.");
 
 
+
         public static readonly DiagnosticDescriptor ArgumentMustBePartOfAdvice =
-            Make("AIAM015",
+            Make("AIAM010",
                 "Advice Argument must be a part of an Advice",
                 "'{0}' is not an Advice",
                 "Unbound Advice Arguments are not supported.");
 
-        public static readonly DiagnosticDescriptor ArgumentTargetShouldBeUsedForAroundAdvice =
-            Make("AIAM017",
-               $"Argument source '{nameof(Advice.Argument.Source.Target)}' is valid with Aro{nameof(Advice.Type.Around)}und advice only",
-               "Argument '{0}' has invalid source",
-               $"Argument source '{nameof(Advice.Argument.Source.Target)}' should be used with {nameof(Advice.Type.Around)} advice only.",
+        public static readonly DiagnosticDescriptor ArgumentIsAlwaysNull =
+            Make("AIAM011",
+               $"Argument source is always null in this context",
+               "Argument '{0}' is always null {1}",
+               $"Argument source returns null in current context. '{nameof(Advice.Argument.Source.Target)}' should be used with {nameof(Advice.Type.Around)} advice, and '{nameof(Advice.Argument.Source.ReturnValue)}' should be used with {nameof(Advice.Type.After)} advice",
                DiagnosticSeverity.Warning);
 
-        public static readonly DiagnosticDescriptor ArgumentReturnValueShouldBeUsedForAfterAdvice =
-            Make("AIAM018",
-               $"Argument source '{nameof(Advice.Argument.Source.ReturnValue)}' is valid with {nameof(Advice.Type.After)} After advice only",
-               "Argument '{0}' has invalid source",
-               $"Argument source '{nameof(Advice.Argument.Source.ReturnValue)}' should be used with {nameof(Advice.Type.After)} advice only.",
-               DiagnosticSeverity.Warning);
-
+        public static readonly DiagnosticDescriptor ArgumentHasInvalidType =
+            Make("AIAM012",
+                $"Argument for source has invalid type",
+                "'{0}' has invalid type, {1} expected",
+                $"Argument for source has invalid type.");
     }
 }
