@@ -27,26 +27,26 @@ namespace AspectInjector.Analyzer
         public static readonly DiagnosticDescriptor AspectShouldContainEffect =
             Make("AIAM004",
                "Aspect should contain effect",
-               "'{0}' does not have any effect",
+               "Aspect '{0}' does not have any effect",
                "Aspect should have at least one effect - Advice, Mixin etc.",
                 DiagnosticSeverity.Warning);
 
         public static readonly DiagnosticDescriptor AspectMustNotBeGeneric =
             Make("AIAM005",
                "Aspect must not be generic",
-               "'{0}' has generic parameters",
+               "Aspect '{0}' has generic parameters",
                "Generic Aspects are not supported.");
 
         public static readonly DiagnosticDescriptor AspectMustNotBeAbstract =
             Make("AIAM006",
                "Aspect must not be abstract",
-               "'{0}' is abstract",
+               "Aspect '{0}' is abstract",
                "Abstract Aspect classes are not supported.");
 
         public static readonly DiagnosticDescriptor AspectMustNotBeStatic =
             Make("AIAM007",
                "Aspect must not be static",
-               "'{0}' is static",
+               "Aspect '{0}' is static",
                "Static Aspect classes are not supported.");
 
         public static readonly DiagnosticDescriptor AspectFactoryMustContainFactoryMethod =
@@ -58,7 +58,7 @@ namespace AspectInjector.Analyzer
         public static readonly DiagnosticDescriptor AspectMustHaveContructorOrFactory =
             Make("AIAM009",
                "Aspect must have public parameterless constructor or factory",
-               "'{0}' does not have public parameterless constructor nor defined factory",
+               "Aspect '{0}' does not have public parameterless constructor nor defined factory",
                "Aspect must have public parameterless constructor or defined factory.");
 
 

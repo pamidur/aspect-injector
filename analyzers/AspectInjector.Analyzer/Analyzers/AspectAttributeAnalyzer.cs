@@ -69,13 +69,13 @@ namespace AspectInjector.Analyzer.Analyzers
                 }
             }
 
-            var advices = symbol.GetMembers()
+            var hasAdvices = symbol.GetMembers()
                 .Where(m => m.DeclaredAccessibility == Accessibility.Public && m.Kind == SymbolKind.Method)
                 .Where(m => m.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AdviceType.FullName)).Any();
 
-            var mixins = symbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.MixinType.FullName);
+            var hasMixins = symbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.MixinType.FullName);
 
-            if(!mixins && !advices)
+            if(!hasMixins && !hasAdvices)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.AspectShouldContainEffect, location, symbol.Name));
         }
     }
