@@ -5,15 +5,8 @@ using Xunit;
 
 namespace AspectInjector.Analyzer.Test.Analyzers
 {
-    public class MixinAnalyzerTests : CodeFixVerifier
+    public class MixinAnalyzerTests : CorrectDefinitionsTests
     {
-        [Fact]
-        public void NoCode_NoDiagnostics()
-        {
-            var test = @"";
-            VerifyCSharpDiagnostic(test);
-        }
-
         [Fact]
         public void Can_Mixin_Only_Interfaces()
         {

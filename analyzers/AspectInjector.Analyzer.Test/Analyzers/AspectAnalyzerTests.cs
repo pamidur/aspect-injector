@@ -5,15 +5,8 @@ using Xunit;
 
 namespace AspectInjector.Analyzer.Test.Analyzers
 {
-    public class AspectAnalyzerTests : CodeFixVerifier
+    public class AspectAnalyzerTests : CorrectDefinitionsTests
     {
-        [Fact]
-        public void NoCode_NoDiagnostics()
-        {
-            var test = @"";
-            VerifyCSharpDiagnostic(test);
-        }
-
         [Fact]
         public void Aspect_Must_Not_Be_Static()
         {
@@ -117,32 +110,6 @@ namespace TestNameSpace
 
             var expected = DiagnosticResult.From(Rules.AspectFactoryMustContainFactoryMethod, 5, 6);
             VerifyCSharpDiagnostic(test, expected);
-        }
-
-        [Fact]
-        public void Aspect_Factory_Must_Have_Factory_Method_Valid()
-        {
-            var test =
-@"using AspectInjector.Broker;
-using System;
-namespace TestNameSpace
-{
-    [Aspect(Aspect.Scope.Global, Factory = typeof(FakeFactory))]
-    class TypeClass
-    {
-        public TypeClass(string value){}
-
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
-        public void Before(){}
-    }
-
-    class FakeFactory {
-        public static object GetInstance(Type type){
-            return null;
-        }
-    }
-}";            
-            VerifyCSharpDiagnostic(test);
         }
 
         [Fact]

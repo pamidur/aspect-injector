@@ -5,15 +5,8 @@ using Xunit;
 
 namespace AspectInjector.Analyzer.Test.Analyzers
 {
-    public class AdviceAnalyzerTests : CodeFixVerifier
+    public class AdviceAnalyzerTests : CorrectDefinitionsTests
     {
-        [Fact]
-        public void Advice_NoCode_NoDiagnostics()
-        {
-            var test = @"";
-            VerifyCSharpDiagnostic(test);
-        }
-
         [Fact]
         public void Advice_Must_Not_Be_Static()
         {
@@ -128,24 +121,6 @@ namespace TestNameSpace
                 DiagnosticResult.From(Rules.AdviceArgumentMustBeBound, 8, 45),
             };
             VerifyCSharpDiagnostic(test, expected);
-        }
-
-        [Fact]
-        public void Advice_Argument_Must_Be_Bound_Valid()
-        {
-            var test =
-@"using AspectInjector.Broker;
-namespace TestNameSpace
-{
-    [Aspect(Aspect.Scope.Global)]
-    class TypeClass
-    {
-        [Advice(Advice.Kind.Before)]
-        public void Before([Advice.Argument(Advice.Argument.Source.Instance)] object i){ }
-    }
-}";
-
-            VerifyCSharpDiagnostic(test);
         }
 
         [Fact]
