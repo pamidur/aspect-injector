@@ -13,7 +13,7 @@ namespace AspectInjector.Tests.General
     }
 
     [Aspect(Aspect.Scope.Global)]
-    [InjectionTrigger(typeof(UnmanagedTests_Aspect))]
+    [Injection(typeof(UnmanagedTests_Aspect))]
     internal class UnmanagedTests_Aspect : Attribute
     {
         [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]

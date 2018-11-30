@@ -5,7 +5,7 @@ using System.Reflection;
 namespace AspectInjector.Tests.Assets
 {
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
-    [InjectionTrigger(typeof(GlobalAspect))]
+    [Injection(typeof(GlobalAspect))]
     public class InjectGlobalAspect : Attribute
     {
 

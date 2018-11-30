@@ -137,7 +137,7 @@ namespace AspectInjector.Tests.Advices
 
     //aspects
     [Aspect(Aspect.Scope.Global)]
-    [InjectionTrigger(typeof(AfterTests_AfterMethodAspect))]
+    [Injection(typeof(AfterTests_AfterMethodAspect))]
     internal class AfterTests_AfterMethodAspect : Attribute
     {
         //Property
@@ -160,7 +160,7 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Aspect(Aspect.Scope.Global)]
-    [InjectionTrigger(typeof(AfterTests_AfterConstructorAspect))]
+    [Injection(typeof(AfterTests_AfterConstructorAspect))]
     internal class AfterTests_AfterConstructorAspect : Attribute
     {
         [Advice(Advice.Kind.After, Targets = Advice.Target.Constructor)]

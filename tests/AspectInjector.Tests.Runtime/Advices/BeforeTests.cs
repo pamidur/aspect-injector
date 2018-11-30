@@ -98,7 +98,7 @@ namespace AspectInjector.Tests.Advices
 
     //aspects
     [Aspect(Aspect.Scope.Global)]
-    [InjectionTrigger(typeof(BeforeTests_Aspect))]
+    [Injection(typeof(BeforeTests_Aspect))]
     internal class BeforeTests_Aspect : Attribute
     {
         //Property
@@ -121,7 +121,7 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Aspect(Aspect.Scope.Global)]
-    [InjectionTrigger(typeof(BeforeTests_BeforeConstructorAspect))]
+    [Injection(typeof(BeforeTests_BeforeConstructorAspect))]
     internal class BeforeTests_BeforeConstructorAspect : Attribute
     {
         [Advice(Advice.Kind.Before, Targets = Advice.Target.Constructor)]
@@ -134,7 +134,7 @@ namespace AspectInjector.Tests.Advices
 
     [Mixin(typeof(IDisposable))]
     [Aspect(Aspect.Scope.Global)]
-    [InjectionTrigger(typeof(BeforeTests_BeforeConstructorWithInterfaceAspect))]
+    [Injection(typeof(BeforeTests_BeforeConstructorWithInterfaceAspect))]
     internal class BeforeTests_BeforeConstructorWithInterfaceAspect : Attribute, IDisposable
     {
         [Advice(Advice.Kind.Before, Targets = Advice.Target.Constructor)]

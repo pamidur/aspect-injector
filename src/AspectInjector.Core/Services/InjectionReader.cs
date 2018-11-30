@@ -47,7 +47,7 @@ namespace AspectInjector.Core.Services
             var injections = Enumerable.Empty<Injection>();
 
             foreach (var trigger in target.CustomAttributes
-                .Select(a => new { attribute = a, injections = a.AttributeType.Resolve().CustomAttributes.Where(t => t.AttributeType.FullName == WellKnownTypes.InjectionTrigger).ToArray() })
+                .Select(a => new { attribute = a, injections = a.AttributeType.Resolve().CustomAttributes.Where(t => t.AttributeType.FullName == WellKnownTypes.Injection).ToArray() })
                 .Where(e => e.injections.Length != 0).ToArray())
                 injections = injections.Concat(ParseInjectionAttribute(target, trigger.attribute, trigger.injections));
 
@@ -70,7 +70,7 @@ namespace AspectInjector.Core.Services
                     continue;
                 }
 
-                var priority = injectionAttr.GetPropertyValue<ushort>(nameof(Broker.InjectionTrigger.Priority));
+                var priority = injectionAttr.GetPropertyValue<ushort>(nameof(Broker.Injection.Priority));
 
                 injections = injections.Concat(FindApplicableMembers(target, aspect, priority, trigger));
             }

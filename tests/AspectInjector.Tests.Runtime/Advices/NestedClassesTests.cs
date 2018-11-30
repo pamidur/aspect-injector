@@ -26,7 +26,7 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Aspect(Aspect.Scope.Global)]
-    [InjectionTrigger(typeof(NestedClassesTests_Aspect))]
+    [Injection(typeof(NestedClassesTests_Aspect))]
     public class NestedClassesTests_Aspect:Attribute
     {
         [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]

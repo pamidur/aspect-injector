@@ -171,7 +171,7 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        [InjectionTrigger(typeof(AroundTests_Aspect1))]
+        [Injection(typeof(AroundTests_Aspect1))]
         internal class AroundTests_Aspect1 : Attribute
         {
             [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
@@ -183,7 +183,7 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        [InjectionTrigger(typeof(AroundTests_Aspect2))]
+        [Injection(typeof(AroundTests_Aspect2))]
         internal class AroundTests_Aspect2 : Attribute
         {
             [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
@@ -205,7 +205,7 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        [InjectionTrigger(typeof(AroundTests_ArgumentsModificationAspect))]
+        [Injection(typeof(AroundTests_ArgumentsModificationAspect))]
         internal class AroundTests_ArgumentsModificationAspect : Attribute
         {
             [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]

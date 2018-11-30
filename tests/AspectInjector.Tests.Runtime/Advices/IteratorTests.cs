@@ -100,7 +100,7 @@ namespace AspectInjector.Tests.Runtime.Advices
         }
 
         [Aspect(Aspect.Scope.PerInstance)]
-        [InjectionTrigger(typeof(TestAspect))]
+        [Injection(typeof(TestAspect))]
         public class TestAspect : Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
@@ -111,7 +111,7 @@ namespace AspectInjector.Tests.Runtime.Advices
         }
 
         [Aspect(Aspect.Scope.PerInstance)]
-        [InjectionTrigger(typeof(TestArgsAspect))]
+        [Injection(typeof(TestArgsAspect))]
         public class TestArgsAspect : Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]

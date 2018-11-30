@@ -6,13 +6,13 @@ namespace AspectInjector.Broker
     /// Marks attribute as an injection trigger.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public class InjectionTrigger : Attribute
+    public class Injection : Attribute
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="InjectionTrigger" /> class.
+        /// Initializes a new instance of the <see cref="Injection" /> class.
         /// </summary>
         /// <param name="aspect">Aspect to inject.</param>
-        public InjectionTrigger(Type aspect)
+        public Injection(Type aspect)
         {
         }
 

@@ -157,11 +157,11 @@ namespace AspectInjector.Broker
                 /// </summary>
                 ReturnType = 8,
 
-                ///// <summary>
-                ///// Set of Attributes that target was tagged with. Methods inherit type's attributes. />.
-                ///// Should be of type <c>Attribute[]</c> or derived.
-                ///// </summary>
-                //Attributes = 9
+                /// <summary>
+                /// Set of injections that trigger this advice./>.
+                /// Should be of type <see cref="Attribute" />[].
+                /// </summary>
+                Injections = 9
             }
         }
     }

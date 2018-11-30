@@ -28,7 +28,7 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        [InjectionTrigger(typeof(FilterTests_Aspect))]
+        [Injection(typeof(FilterTests_Aspect))]
         public class FilterTests_Aspect : Attribute
         {
             public int Counter = 0;

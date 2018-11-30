@@ -11,7 +11,7 @@ namespace AspectInjector.Core
         public static readonly string IteratorStateMachineAttribute = typeof(IteratorStateMachineAttribute).FullName;
         public static readonly string AsyncStateMachineAttribute = typeof(AsyncStateMachineAttribute).FullName;
 
-        public static readonly string InjectionTrigger = typeof(Broker.InjectionTrigger).FullName;
+        public static readonly string Injection = typeof(Broker.Injection).FullName;
         public static readonly string Aspect = typeof(Broker.Aspect).FullName;
         public static readonly string Mixin = typeof(Broker.Mixin).FullName;
         public static readonly string Advice = typeof(Broker.Advice).FullName;

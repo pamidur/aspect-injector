@@ -99,7 +99,7 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        [InjectionTrigger(typeof(AsyncTests_ArgumentsAspect))]
+        [Injection(typeof(AsyncTests_ArgumentsAspect))]
         public class AsyncTests_ArgumentsAspect : Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
@@ -112,7 +112,7 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.PerInstance)]
-        [InjectionTrigger(typeof(AsyncTests_SimpleAspect))]
+        [Injection(typeof(AsyncTests_SimpleAspect))]
         public class AsyncTests_SimpleAspect : Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
@@ -126,7 +126,7 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        [InjectionTrigger(typeof(AsyncTests_SimpleAspectGlobal))]
+        [Injection(typeof(AsyncTests_SimpleAspectGlobal))]
         public class AsyncTests_SimpleAspectGlobal : Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
