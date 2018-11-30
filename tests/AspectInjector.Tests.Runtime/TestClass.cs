@@ -15,8 +15,8 @@ namespace AspectInjector.Tests.Runtime
             {
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public TestClass(
                 int a1, Asset1 a2, T1 a3, T2 a4,
                 ref int ar1, ref Asset1 ar2, ref T1 ar3, ref T2 ar4,
@@ -33,8 +33,8 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestConstructorExit);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             static TestClass()
             {
                 TestLog.Write(Events.TestStaticConstructorEnter);
@@ -42,8 +42,8 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestStaticConstructorExit);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public Tuple<int, Asset1, T1, T2, T3> Fact<T3>(
                 int a1, Asset1 a2, T1 a3, T2 a4, T3 a5,
                 ref int ar1, ref Asset1 ar2, ref T1 ar3, ref T2 ar4, ref T3 ar5,
@@ -63,8 +63,8 @@ namespace AspectInjector.Tests.Runtime
                 return new Tuple<int, Asset1, T1, T2, T3>(a1, a2, a3, a4, a5);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public static Tuple<int, Asset1, T1, T2, T3> TestStaticMethod<T3>(
                 int a1, Asset1 a2, T1 a3, T2 a4, T3 a5,
                 ref int ar1, ref Asset1 ar2, ref T1 ar3, ref T2 ar4, ref T3 ar5,
@@ -84,8 +84,8 @@ namespace AspectInjector.Tests.Runtime
                 return new Tuple<int, Asset1, T1, T2, T3>(a1, a2, a3, a4, a5);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public IEnumerable<Tuple<int, Asset1, T1, T2, T3>> TestIteratorMethod<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestIteratorMethodEnter);
@@ -98,8 +98,8 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestIteratorMethodExit);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public static IEnumerable<Tuple<int, Asset1, T1, T2, T3>> TestStaticIteratorMethod<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestStaticIteratorMethodEnter);
@@ -112,8 +112,8 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestStaticIteratorMethodExit);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public async Task<Tuple<int, Asset1, T1, T2, T3>> TestAsyncMethod1<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestAsyncMethodEnter);
@@ -125,8 +125,8 @@ namespace AspectInjector.Tests.Runtime
                 return new Tuple<int, Asset1, T1, T2, T3>(a1, a2, a3, a4, a5);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public static async Task<Tuple<int, Asset1, T1, T2, T3>> TestStaticAsyncMethod1<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestStaticAsyncMethodEnter);
@@ -138,8 +138,8 @@ namespace AspectInjector.Tests.Runtime
                 return new Tuple<int, Asset1, T1, T2, T3>(a1, a2, a3, a4, a5);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public async Task TestAsyncMethod2<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestAsyncMethodEnter);
@@ -149,8 +149,8 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestAsyncMethodExit);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public static async Task TestStaticAsyncMethod2<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestStaticAsyncMethodEnter);
@@ -160,8 +160,8 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestStaticAsyncMethodExit);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public async void TestAsyncMethod3<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestAsyncMethodEnter);
@@ -171,8 +171,8 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestAsyncMethodExit);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public static async void TestStaticAsyncMethod3<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
             {
                 TestLog.Write(Events.TestStaticAsyncMethodEnter);
@@ -182,8 +182,8 @@ namespace AspectInjector.Tests.Runtime
                 TestLog.Write(Events.TestStaticAsyncMethodExit);
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public Tuple<T1, T2> TestProperty
             {
                 get
@@ -202,8 +202,8 @@ namespace AspectInjector.Tests.Runtime
                 }
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public static Tuple<T1, T2> TestStaticProperty
             {
                 get
@@ -222,8 +222,8 @@ namespace AspectInjector.Tests.Runtime
                 }
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public event EventHandler<Tuple<T1, T2>> TestEvent
             {
                 add
@@ -241,8 +241,8 @@ namespace AspectInjector.Tests.Runtime
                 }
             }
 
-            [Inject(typeof(InstanceAspect))]
-            [Inject(typeof(GlobalAspect))]
+            [InjectInstanceAspect]
+            [InjectGlobalAspect]
             public static event EventHandler<Tuple<T1, T2>> TestStaticEvent
             {
                 add

@@ -45,7 +45,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
-    [Inject(typeof(GenericTests_Aspect))]
+    [GenericTests_Aspect]
     internal class GenericTests_Target<T>
     {
         public void Fact()
@@ -58,7 +58,8 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Aspect(Aspect.Scope.Global)]
-    internal class GenericTests_Aspect
+    [InjectionTrigger(typeof(GenericTests_Aspect))]
+    internal class GenericTests_Aspect : Attribute
     {
         [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
         public void BeforeMethod() { Checker.Passed = true; }
@@ -68,7 +69,7 @@ namespace AspectInjector.Tests.Advices
     {
     }
 
-    [Inject(typeof(GenericTests_OpenGenericAspect))]
+    [GenericTests_OpenGenericAspect]
     internal class GenericTests_OpenGenericTarget<U, V> :
         GenericTests_OpenGenericTargetBase<string, U>
     {
@@ -78,13 +79,14 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Aspect(Aspect.Scope.Global)]
-    internal class GenericTests_OpenGenericAspect
+    [InjectionTrigger(typeof(GenericTests_OpenGenericAspect))]
+    internal class GenericTests_OpenGenericAspect:Attribute
     {
         [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
         public void BeforeMethod() { Checker.Passed = true; }
     }
 
-    [Inject(typeof(GenericAroundTests_Aspect))]
+    [GenericAroundTests_Aspect]
     internal class GenericAroundTests_Target
     {
         public T Fact<T>(ref T value)
@@ -95,7 +97,8 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Aspect(Aspect.Scope.Global)]
-    internal class GenericAroundTests_Aspect
+    [InjectionTrigger(typeof(GenericAroundTests_Aspect))]
+    internal class GenericAroundTests_Aspect : Attribute
     {
         [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
         public object AroundAdvice([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,

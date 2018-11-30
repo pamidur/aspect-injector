@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Broker;
+using System;
 using Xunit;
 
 namespace AspectInjector.Tests.Advices
@@ -15,7 +16,7 @@ namespace AspectInjector.Tests.Advices
             Assert.True(Checker.Passed);
         }
 
-        [Inject(typeof(NestedClassesTests_Aspect))]
+        [NestedClassesTests_Aspect]
         private class NestedClassesTests_Target
         {
             public void Do()
@@ -25,7 +26,8 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Aspect(Aspect.Scope.Global)]
-    public class NestedClassesTests_Aspect
+    [InjectionTrigger(typeof(NestedClassesTests_Aspect))]
+    public class NestedClassesTests_Aspect:Attribute
     {
         [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
         public void Fact()

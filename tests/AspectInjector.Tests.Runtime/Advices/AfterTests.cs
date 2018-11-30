@@ -97,7 +97,7 @@ namespace AspectInjector.Tests.Advices
 
     //test classes
 
-    [Inject(typeof(AfterTests_AfterConstructorAspect))]
+    [AfterTests_AfterConstructorAspect]
     internal class AfterTests_AfterConstructorTarget
     {
         public AfterTests_AfterConstructorTarget()
@@ -109,7 +109,7 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
-    [Inject(typeof(AfterTests_AfterMethodAspect))]
+    [AfterTests_AfterMethodAspect]
     internal class AfterTests_AfterMethodTarget
     {
         public void Fact(string data)
@@ -137,7 +137,8 @@ namespace AspectInjector.Tests.Advices
 
     //aspects
     [Aspect(Aspect.Scope.Global)]
-    internal class AfterTests_AfterMethodAspect
+    [InjectionTrigger(typeof(AfterTests_AfterMethodAspect))]
+    internal class AfterTests_AfterMethodAspect : Attribute
     {
         //Property
         [Advice(Advice.Kind.After, Targets = Advice.Target.Setter)]
@@ -159,7 +160,8 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Aspect(Aspect.Scope.Global)]
-    internal class AfterTests_AfterConstructorAspect
+    [InjectionTrigger(typeof(AfterTests_AfterConstructorAspect))]
+    internal class AfterTests_AfterConstructorAspect : Attribute
     {
         [Advice(Advice.Kind.After, Targets = Advice.Target.Constructor)]
         public void AfterConstructor() { Checker.Passed = true; }

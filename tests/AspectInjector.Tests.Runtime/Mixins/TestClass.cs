@@ -10,8 +10,8 @@ namespace AspectInjector.Tests.Runtime.Mixins
 {
     internal class TestClassWrapper<T1>
     {
-        [Inject(typeof(InstanceAspect))]
-        [Inject(typeof(GlobalAspect))]
+        [InjectInstanceAspect]
+        [InjectGlobalAspect]
         private class TestClass<T2>
         {
             

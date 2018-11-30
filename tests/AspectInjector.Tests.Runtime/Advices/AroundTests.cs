@@ -1,10 +1,10 @@
 ﻿using AspectInjector.Broker;
-using Xunit;
 using System;
 using System.Reflection;
+using Xunit;
 
 namespace AspectInjector.Tests.Advices
-{    
+{
     public class AroundTests
     {
         [Fact]
@@ -53,8 +53,8 @@ namespace AspectInjector.Tests.Advices
 
         internal class AroundTests_Target
         {
-            [Inject(typeof(AroundTests_Aspect1))]
-            [Inject(typeof(AroundTests_Aspect2))] //fire first
+            [AroundTests_Aspect1]
+            [AroundTests_Aspect2] //fire first
             public object Do2(object data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
             {
                 Checker.Passed = passed && passed2;
@@ -65,8 +65,8 @@ namespace AspectInjector.Tests.Advices
                 return new object();
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
-            [Inject(typeof(AroundTests_Aspect2))] //fire first
+            [AroundTests_Aspect1]
+            [AroundTests_Aspect2] //fire first
             public int Do1(object data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
             {
                 Checker.Passed = passed && passed2;
@@ -77,35 +77,35 @@ namespace AspectInjector.Tests.Advices
                 return 1;
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public object Object(object data)
             {
                 Checker.Passed = true;
                 return new object();
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public object ObjectRef(ref object data)
             {
                 Checker.Passed = true;
                 return new object();
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public object ObjectOut(out object data)
             {
                 Checker.Passed = true;
                 return data = new object();
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public object Value(int data)
             {
                 Checker.Passed = true;
                 return new object();
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public object ValueRef(ref int data)
             {
                 Checker.Passed = true;
@@ -116,7 +116,7 @@ namespace AspectInjector.Tests.Advices
                 return new object();
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public object ValueOut(out int data)
             {
                 Checker.Passed = true;
@@ -124,14 +124,14 @@ namespace AspectInjector.Tests.Advices
                 return new object();
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public object ValueBoxed(Int32 data)
             {
                 Checker.Passed = true;
                 return new object();
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public object TypedObjectRef(ref StrongNameKeyPair data)
             {
                 Checker.Passed = true;
@@ -142,7 +142,7 @@ namespace AspectInjector.Tests.Advices
                 return new object();
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public T GenericRef<T>(ref T data)
             {
                 Checker.Passed = true;
@@ -153,7 +153,7 @@ namespace AspectInjector.Tests.Advices
                 return data;
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public T GenericOut<T>(out T data)
             {
                 Checker.Passed = true;
@@ -161,7 +161,7 @@ namespace AspectInjector.Tests.Advices
                 return data;
             }
 
-            [Inject(typeof(AroundTests_Aspect1))]
+            [AroundTests_Aspect1]
             public T Generic<T>(T data)
             {
                 Checker.Passed = true;
@@ -171,7 +171,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class AroundTests_Aspect1
+        [InjectionTrigger(typeof(AroundTests_Aspect1))]
+        internal class AroundTests_Aspect1 : Attribute
         {
             [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
             public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
@@ -182,7 +183,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class AroundTests_Aspect2
+        [InjectionTrigger(typeof(AroundTests_Aspect2))]
+        internal class AroundTests_Aspect2 : Attribute
         {
             [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
             public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
@@ -194,7 +196,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class AroundTests_ArgumentsModificationTarget
         {
-            [Inject(typeof(AroundTests_ArgumentsModificationAspect))]
+            [AroundTests_ArgumentsModificationAspect]
             public void Fact(ref int i)
             {
                 if (i == 2)
@@ -203,7 +205,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class AroundTests_ArgumentsModificationAspect
+        [InjectionTrigger(typeof(AroundTests_ArgumentsModificationAspect))]
+        internal class AroundTests_ArgumentsModificationAspect : Attribute
         {
             [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
             public object AroundMethod(

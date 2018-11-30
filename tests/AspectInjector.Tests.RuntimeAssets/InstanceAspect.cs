@@ -4,6 +4,13 @@ using System.Reflection;
 
 namespace AspectInjector.Tests.Assets
 {
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+    [InjectionTrigger(typeof(InstanceAspect))]
+    public class InjectInstanceAspect : Attribute
+    {
+
+    }
+
     [Aspect(Aspect.Scope.PerInstance)]
     [Mixin(typeof(IAssetIface1Wrapper<Asset1>.IAssetIface1<Asset2>))]
     public class InstanceAspect : TestAspectBase, IAssetIface1Wrapper<Asset1>.IAssetIface1<Asset2>

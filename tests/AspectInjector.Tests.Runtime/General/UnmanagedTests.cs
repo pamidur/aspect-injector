@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace AspectInjector.Tests.General
 {
     //The compilation is just failed if injector tries to process external methods
-    [Inject(typeof(UnmanagedTests_Aspect))]
+    [UnmanagedTests_Aspect]
     public class UnmanagedTests
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
@@ -13,7 +13,8 @@ namespace AspectInjector.Tests.General
     }
 
     [Aspect(Aspect.Scope.Global)]
-    internal class UnmanagedTests_Aspect
+    [InjectionTrigger(typeof(UnmanagedTests_Aspect))]
+    internal class UnmanagedTests_Aspect : Attribute
     {
         [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
         public void Trace()

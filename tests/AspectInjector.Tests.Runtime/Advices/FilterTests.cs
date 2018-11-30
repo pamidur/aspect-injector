@@ -1,9 +1,10 @@
 ﻿using AspectInjector.Broker;
+using System;
 using Xunit;
 
 namespace AspectInjector.Tests.Advices
 {
-    
+
     public class FilterTests
     {
         [Fact]
@@ -17,17 +18,18 @@ namespace AspectInjector.Tests.Advices
             Assert.True(Checker.Passed);
         }
 
-        [Inject(typeof(FilterTests_Aspect))]
+        [FilterTests_Aspect]
         public class FilterTests_Target
         {
-            [Inject(typeof(FilterTests_Aspect)/*, NameFilter = "Do"*/)]
+            [FilterTests_Aspect]
             public void Do123()
             {
             }
         }
 
         [Aspect(Aspect.Scope.Global)]
-        public class FilterTests_Aspect
+        [InjectionTrigger(typeof(FilterTests_Aspect))]
+        public class FilterTests_Aspect : Attribute
         {
             public int Counter = 0;
 

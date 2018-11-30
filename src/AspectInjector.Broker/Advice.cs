@@ -128,8 +128,8 @@ namespace AspectInjector.Broker
 
                 /// <summary>
                 /// Target method delegate. Usage <example>Target(<see cref="Arguments"/>)</example> for chaining methods.
-                /// Should be of type <c>Func&lt;object[],object&gt;</c>.
-                /// Works only with <see cref="Advice.Kind.Around" />.
+                /// Should be of type <see cref="T:Func{object[],object}" />.
+                /// Works only with <see cref="Kind.Around" />.
                 /// </summary>
                 Target = 4,
 
@@ -141,7 +141,7 @@ namespace AspectInjector.Broker
 
                 /// <summary>
                 /// Target method arguments.
-                /// Should be of type <c>object[]</c>.
+                /// Should be of type <see cref="object"/>[].
                 /// </summary>
                 Arguments = 6,
 

@@ -1,18 +1,20 @@
-﻿using AspectInjector.Core.Extensions;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using System;
+using System.Collections.Generic;
 
 namespace AspectInjector.Core.Models
 {
     public class Injection : IEquatable<Injection>
     {
-        public IMemberDefinition Target { get; set; }
+        public IMemberDefinition Target { get; internal set; }
 
         public uint Priority { get; internal set; }
 
         public AspectDefinition Source { get; internal set; }
 
         public Effect Effect { get; internal set; }
+
+        public List<ICustomAttribute> Triggers { get; internal set; } = new List<ICustomAttribute>();        
 
         public bool Equals(Injection other)
         {

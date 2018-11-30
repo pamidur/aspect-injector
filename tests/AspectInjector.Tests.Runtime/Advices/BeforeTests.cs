@@ -73,18 +73,18 @@ namespace AspectInjector.Tests.Advices
 
     //test classes
 
-    [Inject(typeof(BeforeTests_BeforeConstructorWithInterfaceAspect))]
+    [BeforeTests_BeforeConstructorWithInterfaceAspect]
     internal class BeforeTests_BeforeConstructorWithInterfaceTarget
     {
     }
 
-    [Inject(typeof(BeforeTests_BeforeConstructorAspect))]
+    [BeforeTests_BeforeConstructorAspect]
     internal class BeforeTests_BeforeConstructorTarget
     {
         private BeforeTests_Target testField = new BeforeTests_Target();
     }
 
-    [Inject(typeof(BeforeTests_Aspect))]
+    [BeforeTests_Aspect]
     internal class BeforeTests_Target
     {
         public void Fact(string data)
@@ -98,7 +98,8 @@ namespace AspectInjector.Tests.Advices
 
     //aspects
     [Aspect(Aspect.Scope.Global)]
-    internal class BeforeTests_Aspect
+    [InjectionTrigger(typeof(BeforeTests_Aspect))]
+    internal class BeforeTests_Aspect : Attribute
     {
         //Property
         [Advice(Advice.Kind.Before, Targets = Advice.Target.Setter)]
@@ -120,7 +121,8 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Aspect(Aspect.Scope.Global)]
-    internal class BeforeTests_BeforeConstructorAspect
+    [InjectionTrigger(typeof(BeforeTests_BeforeConstructorAspect))]
+    internal class BeforeTests_BeforeConstructorAspect : Attribute
     {
         [Advice(Advice.Kind.Before, Targets = Advice.Target.Constructor)]
         public void BeforeConstructor([Advice.Argument(Advice.Argument.Source.Instance)] object instance)
@@ -132,7 +134,8 @@ namespace AspectInjector.Tests.Advices
 
     [Mixin(typeof(IDisposable))]
     [Aspect(Aspect.Scope.Global)]
-    internal class BeforeTests_BeforeConstructorWithInterfaceAspect : IDisposable
+    [InjectionTrigger(typeof(BeforeTests_BeforeConstructorWithInterfaceAspect))]
+    internal class BeforeTests_BeforeConstructorWithInterfaceAspect : Attribute, IDisposable
     {
         [Advice(Advice.Kind.Before, Targets = Advice.Target.Constructor)]
         public void BeforeConstructor() { Checker.Passed = true; }

@@ -62,7 +62,7 @@ namespace AspectInjector.Tests.Advices
 
     public class AsyncTests_Target
     {
-        [Inject(typeof(AsyncTests_SimpleAspect))]
+        [AsyncTests_SimpleAspect]
         public async Task Do()
         {
             await Task.Delay(1);
@@ -70,7 +70,7 @@ namespace AspectInjector.Tests.Advices
             AsyncTests.Data = true;
         }
 
-        [Inject(typeof(AsyncTests_SimpleAspectGlobal))]
+        [AsyncTests_SimpleAspectGlobal]
         public async Task<string> Do2()
         {
             await Task.Delay(1);
@@ -80,7 +80,7 @@ namespace AspectInjector.Tests.Advices
             return "test";
         }
 
-        [Inject(typeof(AsyncTests_SimpleAspect))]
+        [AsyncTests_SimpleAspect]
         public async void Do3()
         {
             await Task.Delay(1);
@@ -88,7 +88,7 @@ namespace AspectInjector.Tests.Advices
             AsyncTests.Data = true;
         }
 
-        [Inject(typeof(AsyncTests_ArgumentsAspect))]
+        [AsyncTests_ArgumentsAspect]
         public async Task<string> Do4(string testData)
         {
             await Task.Delay(1);
@@ -99,7 +99,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        public class AsyncTests_ArgumentsAspect
+        [InjectionTrigger(typeof(AsyncTests_ArgumentsAspect))]
+        public class AsyncTests_ArgumentsAspect : Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object value,
@@ -111,7 +112,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.PerInstance)]
-        public class AsyncTests_SimpleAspect
+        [InjectionTrigger(typeof(AsyncTests_SimpleAspect))]
+        public class AsyncTests_SimpleAspect : Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void AfterMethod(
@@ -124,7 +126,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        public class AsyncTests_SimpleAspectGlobal
+        [InjectionTrigger(typeof(AsyncTests_SimpleAspectGlobal))]
+        public class AsyncTests_SimpleAspectGlobal : Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void AfterMethod(

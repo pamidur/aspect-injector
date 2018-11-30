@@ -31,8 +31,8 @@ namespace AspectInjector.Tests.Advices
 
         public class StaticTests_AroundTarget
         {
-            [Inject(typeof(StaticTests_AroundAspect1))]
-            [Inject(typeof(StaticTests_AroundAspect2))] //fire first
+            [StaticTests_AroundAspect1]
+            [StaticTests_AroundAspect2] //fire first
             public static int Do123(int data, StringBuilder sb, object to, bool passed, bool passed2)
             {
                 Checker.Passed = passed && passed2;
@@ -44,7 +44,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class StaticTests_AroundAspect1
+        [InjectionTrigger(typeof(StaticTests_AroundAspect1))]
+        internal class StaticTests_AroundAspect1 : Attribute
         {
             [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
             public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
@@ -55,7 +56,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class StaticTests_AroundAspect2
+        [InjectionTrigger(typeof(StaticTests_AroundAspect2))]
+        internal class StaticTests_AroundAspect2 : Attribute
         {
             [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
             public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
@@ -65,7 +67,7 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Inject(typeof(StaticTests_BeforeAspect))]
+        [StaticTests_BeforeAspect]
         internal class StaticTests_BeforeTarget
         {
             public static void TestStaticMethod()
@@ -78,7 +80,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class StaticTests_BeforeAspect
+        [InjectionTrigger(typeof(StaticTests_BeforeAspect))]
+        internal class StaticTests_BeforeAspect : Attribute
         {
             //Property
             [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]

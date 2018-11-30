@@ -30,7 +30,8 @@ namespace AspectInjector.Tests.General
     }
 
     [Aspect(Aspect.Scope.PerInstance)]
-    internal class AspectScopeTests_PerInstanceAspect
+    [InjectionTrigger(typeof(AspectScopeTests_PerInstanceAspect))]
+    internal class AspectScopeTests_PerInstanceAspect:Attribute
     {
         public static int _counter;
 
@@ -46,7 +47,8 @@ namespace AspectInjector.Tests.General
     }
 
     [Aspect(Aspect.Scope.Global)]
-    internal class AspectScopeTests_GlobalAspect
+    [InjectionTrigger(typeof(AspectScopeTests_GlobalAspect))]
+    internal class AspectScopeTests_GlobalAspect: Attribute
     {
         public static int _counter;
 
@@ -61,8 +63,8 @@ namespace AspectInjector.Tests.General
         }
     }
 
-    [Inject(typeof(AspectScopeTests_PerInstanceAspect))]
-    [Inject(typeof(AspectScopeTests_GlobalAspect))]
+    [AspectScopeTests_PerInstanceAspect]
+    [AspectScopeTests_GlobalAspect]
     internal class AspectScopeTests_Target
     {
         public void Fact()

@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Broker;
 using Xunit;
 using System.Reflection;
+using System;
 
 namespace AspectInjector.Tests.Advices
 {
@@ -116,14 +117,15 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_InstanceTarget
         {
-            [Inject(typeof(ArgumentsTests_InstanceAspect))]
+            [ArgumentsTests_InstanceAspect]
             public void Fact()
             {
             }
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class ArgumentsTests_InstanceAspect
+        [InjectionTrigger(typeof(ArgumentsTests_InstanceAspect))]
+        internal class ArgumentsTests_InstanceAspect : Attribute
         {
             [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
             public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Instance)] object instance)
@@ -134,14 +136,15 @@ namespace AspectInjector.Tests.Advices
 
         internal static class ArgumentsTests_StaticInstanceTarget
         {
-            [Inject(typeof(ArgumentsTests_StaticInstanceAspect))]
+            [ArgumentsTests_StaticInstanceAspect]
             public static void Fact()
             {
             }
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class ArgumentsTests_StaticInstanceAspect
+        [InjectionTrigger(typeof(ArgumentsTests_StaticInstanceAspect))]
+        internal class ArgumentsTests_StaticInstanceAspect:Attribute
         {
             [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
             public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Instance)] object instance)
@@ -150,7 +153,7 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Inject(typeof(ArgumentsTests_ReturnTypeAspect))]
+        [ArgumentsTests_ReturnTypeAspect]
         internal static class ArgumentsTests_ReturnTypeTarget
         {
             public static void Fact()
@@ -159,7 +162,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class ArgumentsTests_ReturnTypeAspect
+        [InjectionTrigger(typeof(ArgumentsTests_ReturnTypeAspect))]
+        internal class ArgumentsTests_ReturnTypeAspect: Attribute
         {
             [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
             public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Type)] System.Type type)
@@ -170,7 +174,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_StaticMethodTarget
         {
-            [Inject(typeof(ArgumentsTests_StaticMethodAspect))]
+            [ArgumentsTests_StaticMethodAspect]
             public void Fact()
             {
             }
@@ -178,14 +182,15 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_StaticConstructorTarget
         {
-            [Inject(typeof(ArgumentsTests_StaticMethodAspect))]
+            [ArgumentsTests_StaticMethodAspect]
             static ArgumentsTests_StaticConstructorTarget()
             {
             }
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class ArgumentsTests_StaticMethodAspect
+        [InjectionTrigger(typeof(ArgumentsTests_StaticMethodAspect))]
+        internal class ArgumentsTests_StaticMethodAspect : Attribute
         {
             [Advice(Advice.Kind.Before, Targets = Advice.Target.Method | Advice.Target.Constructor)]
             public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Method)] MethodBase method)
@@ -196,7 +201,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_MethodTarget
         {
-            [Inject(typeof(ArgumentsTests_MethodAspect))]
+            [ArgumentsTests_MethodAspect]
             public void Fact()
             {
             }
@@ -216,23 +221,24 @@ namespace AspectInjector.Tests.Advices
             {
             }
 
-            [Inject(typeof(ArgumentsTests_MethodAspect))]
+            [ArgumentsTests_MethodAspect]
             public void Fact()
             {
             }
         }
 
-        [Inject(typeof(ArgumentsTests_MethodAspect))]
+        [ArgumentsTests_MethodAspect]
         internal class ArgumentsTests_ConstructorTarget
         {
-            [Inject(typeof(ArgumentsTests_MethodAspect))]
+            [ArgumentsTests_MethodAspect]
             public ArgumentsTests_ConstructorTarget()
             {
             }
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class ArgumentsTests_MethodAspect
+        [InjectionTrigger(typeof(ArgumentsTests_MethodAspect))]
+        internal class ArgumentsTests_MethodAspect:Attribute
         {
             [Advice(Advice.Kind.Before, Targets = Advice.Target.Method | Advice.Target.Constructor)]
             public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Method)] MethodBase method)
@@ -243,7 +249,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_ArgumentsTarget
         {
-            [Inject(typeof(ArgumentsTests_ArgumentsAspect))]
+            [ArgumentsTests_ArgumentsAspect]
             public void Fact(object obj, ref object objRef, out object objOut, int value, ref int valueRef, out int valueOut)
             {
                 valueOut = 1;
@@ -252,7 +258,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class ArgumentsTests_ArgumentsAspect
+        [InjectionTrigger(typeof(ArgumentsTests_ArgumentsAspect))]
+        internal class ArgumentsTests_ArgumentsAspect:Attribute
         {
             [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
             public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Arguments)] object[] args)
@@ -265,14 +272,15 @@ namespace AspectInjector.Tests.Advices
 
         internal static class ArgumentsTests_StaticArgumentsTarget
         {
-            [Inject(typeof(ArgumentsTests_StaticArgumentsAspect))]
+            [ArgumentsTests_StaticArgumentsAspect]
             public static void Fact(int a, string b)
             {
             }
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class ArgumentsTests_StaticArgumentsAspect
+        [InjectionTrigger(typeof(ArgumentsTests_StaticArgumentsAspect))]
+        internal class ArgumentsTests_StaticArgumentsAspect :Attribute
         {
             [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
             public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Arguments)] object[] args)
@@ -283,14 +291,15 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_AroundMethodTarget
         {
-            [Inject(typeof(ArgumentsTests_AroundMethodAspect))]
+            [ArgumentsTests_AroundMethodAspect]
             public void Fact()
             {
             }
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class ArgumentsTests_AroundMethodAspect
+        [InjectionTrigger(typeof(ArgumentsTests_AroundMethodAspect))]
+        internal class ArgumentsTests_AroundMethodAspect : Attribute
         {
             [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
             public object BeforeMethod([Advice.Argument(Advice.Argument.Source.Method)] MethodBase method)
@@ -302,7 +311,7 @@ namespace AspectInjector.Tests.Advices
 
         internal class ArgumentsTests_AroundRetValTarget
         {
-            [Inject(typeof(ArgumentsTests_AroundRetValAspect))]
+            [ArgumentsTests_AroundRetValAspect]
             public object Fact()
             {
                 return new object();
@@ -310,7 +319,8 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Aspect(Aspect.Scope.Global)]
-        internal class ArgumentsTests_AroundRetValAspect
+        [InjectionTrigger(typeof(ArgumentsTests_AroundRetValAspect))]
+        internal class ArgumentsTests_AroundRetValAspect:Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object ret)

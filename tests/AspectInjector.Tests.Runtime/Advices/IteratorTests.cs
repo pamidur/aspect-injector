@@ -1,12 +1,11 @@
 ﻿using AspectInjector.Broker;
-using Xunit;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using Xunit;
 
 namespace AspectInjector.Tests.Runtime.Advices
 {
-    
+
     public class IteratorTests
     {
         [Fact]
@@ -59,14 +58,14 @@ namespace AspectInjector.Tests.Runtime.Advices
 
         public class TargetClass
         {
-            [Inject(typeof(TestAspect))]
+            [TestAspect]
             public IEnumerable<char> Get(string input)
             {
                 foreach (var c in input)
                     yield return c;
             }
 
-            [Inject(typeof(TestArgsAspect))]
+            [TestArgsAspect]
             public IEnumerable<char> Get1(string input)
             {
                 input = "ololo";
@@ -74,7 +73,7 @@ namespace AspectInjector.Tests.Runtime.Advices
                     yield return c;
             }
 
-            [Inject(typeof(TestAspect))]
+            [TestAspect]
             public IEnumerable<char> Get2()
             {
                 yield return 'a';
@@ -85,7 +84,7 @@ namespace AspectInjector.Tests.Runtime.Advices
 
         public class TestComplexClass<T1>
         {
-            [Inject(typeof(TestAspect))]
+            [TestAspect]
             public IEnumerable<Tuple<T1, T2>> Get2<T2>(
                 int val, T1 t1, T2 t2, object o
                 )
@@ -93,7 +92,7 @@ namespace AspectInjector.Tests.Runtime.Advices
                 yield return null;
             }
 
-            [Inject(typeof(TestAspect))]
+            [TestAspect]
             public IEnumerable<Tuple<T1>> Get3(int val, T1 t1, object o)
             {
                 yield return null;
@@ -101,7 +100,8 @@ namespace AspectInjector.Tests.Runtime.Advices
         }
 
         [Aspect(Aspect.Scope.PerInstance)]
-        public class TestAspect
+        [InjectionTrigger(typeof(TestAspect))]
+        public class TestAspect : Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void After()
@@ -111,7 +111,8 @@ namespace AspectInjector.Tests.Runtime.Advices
         }
 
         [Aspect(Aspect.Scope.PerInstance)]
-        public class TestArgsAspect
+        [InjectionTrigger(typeof(TestArgsAspect))]
+        public class TestArgsAspect : Attribute
         {
             [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
             public void After(
