@@ -6,7 +6,7 @@ namespace AspectInjector.Broker
     /// Member access modifier enumeration.
     /// </summary>
     [Flags]
-    public enum AccessModifier
+    public enum AccessModifier : byte
     {
         /// <summary>
         /// All members.
@@ -16,41 +16,41 @@ namespace AspectInjector.Broker
         /// <summary>
         /// Private members.
         /// </summary>
-        Private = 16,
+        Private = 1,
 
         /// <summary>
         /// Internal members.
         /// </summary>
-        Internal = 20,
+        Internal = 2,
 
         /// <summary>
         /// Protected members.
         /// </summary>
-        Protected = 24,
+        Protected = 4,
 
         /// <summary>
         /// Protected internal members (Protected OR Internal).
         /// </summary>
-        ProtectedInternal = 28,
+        ProtectedInternal = 8,
 
         /// <summary>
         /// Protected AND internal members.
         /// </summary>
-        PrivateProtected = 30,
+        ProtectedPrivate = 16,
 
         /// <summary>
         /// Public members.
         /// </summary>
-        Public = 16,
+        Public = 32,
 
         /// <summary>
         /// Static members.
         /// </summary>
-        Static = 32,
+        Static = 64,
 
         /// <summary>
         /// Non static members.
         /// </summary>
-        NonStatic = 64
+        Instance = 128
     }
 }

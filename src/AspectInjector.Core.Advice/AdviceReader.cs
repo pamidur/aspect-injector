@@ -1,4 +1,5 @@
-﻿using AspectInjector.Core.Advice.Effects;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
@@ -44,8 +45,10 @@ namespace AspectInjector.Core.Advice
 
                     advice.Method = method;
                     advice.Target = ca.GetPropertyValue<Target>(nameof(Broker.Advice.Targets));
-                    if (advice.Target == Target.Any)
-                        advice.Target = Target.Constructor | Target.EventAdd | Target.EventRemove | Target.Getter | Target.Method | Target.Setter;
+                    if (advice.Target == Target.Any) advice.Target = (Target)byte.MaxValue;
+
+                    advice.WithAccess = ca.GetPropertyValue<AccessModifier>(nameof(Broker.Advice.WithAccess));
+                    if (advice.WithAccess == AccessModifier.Any) advice.WithAccess = (AccessModifier)byte.MaxValue;
 
                     advice.Arguments = ExtractArguments(method);
 

@@ -1,4 +1,5 @@
-﻿using AspectInjector.Core.Contracts;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
@@ -10,30 +11,54 @@ namespace AspectInjector.Core.Advice.Effects
     internal abstract class AdviceEffectBase : Effect
     {
         public Target Target { get; set; }
-        public abstract Kind Kind { get; }
-        public MethodDefinition Method { get; set; }
+        public AccessModifier WithAccess { get; set; }
 
+        public MethodDefinition Method { get; set; }
         public List<AdviceArgument> Arguments { get; set; } = new List<AdviceArgument>();
+
+        public abstract Kind Kind { get; }
 
         public override bool IsApplicableFor(IMemberDefinition target)
         {
-            if (Target.HasFlag(Target.Method) && target is MethodDefinition && ((MethodDefinition)target).IsNormalMethod())
-                return true;
+            if (Target.HasFlag(Target.Method) && target is MethodDefinition method && method.IsNormalMethod())
+                return IsApplicableForModifier(method);
 
-            if (Target.HasFlag(Target.Constructor) && target is MethodDefinition && ((MethodDefinition)target).IsConstructor)
-                return true;
+            if (Target.HasFlag(Target.Constructor) && target is MethodDefinition ctor && ctor.IsConstructor)
+                return IsApplicableForModifier(ctor);
 
-            if (Target.HasFlag(Target.Setter) && target is PropertyDefinition && ((PropertyDefinition)target).SetMethod != null)
-                return true;
+            if (Target.HasFlag(Target.Setter) && target is PropertyDefinition setter && setter.SetMethod != null)
+                return IsApplicableForModifier(setter.SetMethod);
 
-            if (Target.HasFlag(Target.Getter) && target is PropertyDefinition && ((PropertyDefinition)target).GetMethod != null)
-                return true;
+            if (Target.HasFlag(Target.Getter) && target is PropertyDefinition getter && getter.GetMethod != null)
+                return IsApplicableForModifier(getter.GetMethod);
 
-            if (Target.HasFlag(Target.EventAdd) && target is EventDefinition && ((EventDefinition)target).AddMethod != null)
-                return true;
+            if (Target.HasFlag(Target.EventAdd) && target is EventDefinition add && add.AddMethod != null)
+                return IsApplicableForModifier(add.AddMethod);
 
-            if (Target.HasFlag(Target.EventRemove) && target is EventDefinition && ((EventDefinition)target).RemoveMethod != null)
-                return true;
+            if (Target.HasFlag(Target.EventRemove) && target is EventDefinition remove && remove.RemoveMethod != null)
+                return IsApplicableForModifier(remove.RemoveMethod);
+
+            return false;
+        }
+
+
+        protected bool IsApplicableForModifier(MethodDefinition target)
+        {
+            if (
+                (WithAccess.HasFlag(AccessModifier.Instance) && !target.IsStatic)
+                || (WithAccess.HasFlag(AccessModifier.Static) && target.IsStatic)
+                )
+            {
+                if (
+                    (WithAccess.HasFlag(AccessModifier.Private) && target.IsPrivate)
+                    || (WithAccess.HasFlag(AccessModifier.Public) && target.IsPublic)
+                    || (WithAccess.HasFlag(AccessModifier.Protected) && target.IsFamily)
+                    || (WithAccess.HasFlag(AccessModifier.ProtectedInternal) && target.IsFamilyOrAssembly)
+                    || (WithAccess.HasFlag(AccessModifier.ProtectedPrivate) && target.IsFamilyAndAssembly)
+                    || (WithAccess.HasFlag(AccessModifier.Internal) && target.IsAssembly)
+                    )
+                    return true;
+            }
 
             return false;
         }

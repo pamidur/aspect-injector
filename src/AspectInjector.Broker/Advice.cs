@@ -51,7 +51,7 @@ namespace AspectInjector.Broker
         /// Advice method injection targets enumeration.
         /// </summary>
         [Flags]
-        public enum Target
+        public enum Target : byte
         {
             /// <summary>
             /// Advice method is injected into any target's member.
