@@ -8,14 +8,13 @@ using Mono.Cecil.Cil;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AfterIteratorWeaveProcess : AfterStateMachineWeaveProcessBase
     {
-        public AfterIteratorWeaveProcess(ILogger log, MethodDefinition target, AfterAdviceEffect effect, AspectDefinition aspect)
-            : base(log, target, effect, aspect)
+        public AfterIteratorWeaveProcess(ILogger log, MethodDefinition target, Injection injection)
+            : base(log, target, injection)
         {
 
         }

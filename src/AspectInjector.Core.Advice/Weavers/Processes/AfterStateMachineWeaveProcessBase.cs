@@ -1,15 +1,11 @@
 ﻿using AspectInjector.Core.Advice.Effects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Models;
-using Mono.Cecil;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
-using Mono.Cecil.Cil;
+using AspectInjector.Core.Models;
+using Mono.Cecil;
+using System;
+using System.Linq;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
@@ -18,7 +14,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         protected readonly FieldDefinition _originalThis;
         protected readonly TypeDefinition _stateMachine;
 
-        public AfterStateMachineWeaveProcessBase(ILogger log, MethodDefinition target, AfterAdviceEffect effect, AspectDefinition aspect) : base(log, target, effect, aspect)
+        public AfterStateMachineWeaveProcessBase(ILogger log, MethodDefinition target, Injection injection) : base(log, target, injection)
         {
             _stateMachine = GetStateMachine();
             _originalThis = _target.IsStatic ? null : GetThisField();

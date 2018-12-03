@@ -22,7 +22,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private readonly TypeReference _asyncResult;
 
-        public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, AfterAdviceEffect effect, AspectDefinition aspect) : base(log, target, effect, aspect)
+        public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, Injection injection) : base(log, target, injection)
         {
             _asyncResult = (_stateMachine.Fields.First(f => f.Name == "<>t__builder").FieldType as IGenericInstance)?.GenericArguments.FirstOrDefault();
         }

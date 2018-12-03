@@ -84,12 +84,12 @@ namespace AspectInjector.Core.Advice.Weavers
         {
             if (injection.Effect is AfterAdviceEffect)
             {
-                var process = new AdviceAfterProcess(_log, method, injection.Source, (AfterAdviceEffect)injection.Effect);
+                var process = new AdviceAfterProcess(_log, method, injection);
                 process.Execute();
             }
             else if (injection.Effect is BeforeAdviceEffect)
             {
-                var process = new AdviceBeforeProcess(_log, method, injection.Source, (BeforeAdviceEffect)injection.Effect);
+                var process = new AdviceBeforeProcess(_log, method, injection);
                 process.Execute();
             }
             else

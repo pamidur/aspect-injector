@@ -8,6 +8,14 @@ namespace AspectInjector.Tests.Advices
     public class ArgumentsTests
     {
         [Fact]
+        public void AdviceArguments_Name_Of_Real_Target()
+        {
+            Checker.Passed = false;
+            var r = new ArgumentsTests_PropertyTarget().Fact;
+            Assert.True(Checker.Passed);
+        }
+
+        [Fact]
         public void AdviceArguments_Instance_InjectBeforeMethod_NotNull()
         {
             Checker.Passed = false;
@@ -326,6 +334,23 @@ namespace AspectInjector.Tests.Advices
             public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object ret)
             {
                 Checker.Passed = ret != null;
+            }
+        }
+
+        internal class ArgumentsTests_PropertyTarget
+        {
+            [ArgumentsTests_PropertyTarget_Aspect]
+            public object Fact { get; set; }
+        }
+
+        [Injection(typeof(ArgumentsTests_PropertyTarget_Aspect))]
+        [Aspect(Aspect.Scope.Global)]
+        class ArgumentsTests_PropertyTarget_Aspect : Attribute
+        {
+            [Advice(Advice.Kind.Before)]
+            public void TestName([Advice.Argument(Advice.Argument.Source.Name)] string name)
+            {
+                Checker.Passed = name == "Fact";
             }
         }
     }

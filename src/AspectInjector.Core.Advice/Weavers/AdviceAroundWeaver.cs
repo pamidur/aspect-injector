@@ -25,7 +25,7 @@ namespace AspectInjector.Core.Advice.Weavers
         {
             if (injection.Effect is AroundAdviceEffect)
             {
-                var process = new AdviceAroundProcess(_log, injection.Source, method, (AroundAdviceEffect)injection.Effect);
+                var process = new AdviceAroundProcess(_log, method, injection);
                 process.Execute();
             }
             else

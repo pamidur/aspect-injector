@@ -1,16 +1,12 @@
 ﻿using AspectInjector.Core.Advice.Effects;
+using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Fluent;
+using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AspectInjector.Core.Fluent.Models;
 using static AspectInjector.Broker.Advice.Argument;
-using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Extensions;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
@@ -19,16 +15,18 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
     {
         protected readonly MethodDefinition _target;
         protected readonly TEffect _effect;
+        protected readonly Injection _injection;
         protected readonly ExtendedTypeSystem _ts;
         protected readonly ILogger _log;
         protected readonly AspectDefinition _aspect;
 
-        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, TEffect effect, AspectDefinition aspect)
+        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, Injection injection)
         {
             _log = log;
             _target = target;
-            _effect = effect;
-            _aspect = aspect;
+            _effect = (TEffect)injection.Effect;
+            _injection = injection;
+            _aspect = injection.Source;
 
             _ts = target.Module.GetTypeSystem();
         }
@@ -42,7 +40,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 switch (arg.Source)
                 {
                     case Source.Arguments: LoadArgumentsArgument(pc, arg); break;
-                    //case Source.Attributes: LoadAttributesArgument(pc, arg); break;
+                    case Source.Injections: LoadInjectionsArgument(pc, arg); break;
                     case Source.Instance: LoadInstanceArgument(pc, arg); break;
                     case Source.Method: LoadMethodArgument(pc, arg); break;
                     case Source.Name: LoadNameArgument(pc, arg); break;
@@ -90,8 +88,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 pc.This();
         }
 
-        protected virtual void LoadAttributesArgument(PointCut pc, AdviceArgument parameter)
+        protected virtual void LoadInjectionsArgument(PointCut pc, AdviceArgument parameter)
         {
+            throw new NotImplementedException();
             pc.Null();
         }
 
@@ -106,7 +105,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected virtual void LoadNameArgument(PointCut pc, AdviceArgument parameter)
         {
-            pc.Value(_target.Name);
+            pc.Value(_injection.Target.Name);
         }
     }
 }

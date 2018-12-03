@@ -4,7 +4,6 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
-using System;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
@@ -25,10 +24,10 @@ namespace AspectInjector.Core.Advice.Weavers
         protected override void WeaveMethod(MethodDefinition method, Injection injection)
         {
             if (method.IsAsync())
-                new AfterAsyncWeaveProcess(_log, method, (AfterAdviceEffect)injection.Effect, injection.Source).Execute();
+                new AfterAsyncWeaveProcess(_log, method, injection).Execute();
 
             if (method.IsIterator())
-                new AfterIteratorWeaveProcess(_log, method, (AfterAdviceEffect)injection.Effect, injection.Source).Execute();
+                new AfterIteratorWeaveProcess(_log, method, injection).Execute();
         }
     }
 }

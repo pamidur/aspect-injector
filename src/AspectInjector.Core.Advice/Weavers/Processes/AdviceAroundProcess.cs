@@ -19,7 +19,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         private readonly string _movedOriginalName;
         private MethodDefinition _wrapper;
 
-        public AdviceAroundProcess(ILogger log, AspectDefinition aspect, MethodDefinition target, AroundAdviceEffect effect) : base(log, target, effect, aspect)
+        public AdviceAroundProcess(ILogger log, MethodDefinition target, Injection injection) : base(log, target, injection)
         {
             _wrapperNamePrefix = $"{GetAroundMethodPrefix(_target)}w_";
             _unWrapperName = $"{GetAroundMethodPrefix(_target)}u";
