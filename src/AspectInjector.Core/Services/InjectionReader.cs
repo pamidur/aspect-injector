@@ -114,7 +114,7 @@ namespace AspectInjector.Core.Services
                 Source = aspect,
                 Priority = priority,
                 Effect = e,
-                Triggers = new List<ICustomAttribute> { trigger }
+                Triggers = new List<CustomAttribute> { trigger }
             });
         }
 

@@ -4,7 +4,9 @@ using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using static AspectInjector.Broker.Advice.Argument;
 
@@ -90,8 +92,43 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected virtual void LoadInjectionsArgument(PointCut pc, AdviceArgument parameter)
         {
-            throw new NotImplementedException();
-            pc.Null();
+            var elements = _injection.Triggers.Select<CustomAttribute, Action<PointCut>>(ca => il =>
+            {
+                var ctor = ca.Constructor.Resolve();
+                void ctorParams(PointCut ilc) => ca.ConstructorArguments.Select(caa => ilc.Value(caa)).ToArray();
+                il.Call(ctor, ctorParams);
+
+                if (ca.Properties.Any() || ca.Fields.Any())
+                {
+                    var catype = ca.AttributeType.Resolve();
+
+                    var attrvar = new VariableDefinition(_ts.Import(ca.AttributeType));
+                    _target.Body.Variables.Add(attrvar);
+                    _target.Body.InitLocals = true;
+
+                    il.Store(attrvar);
+
+                    foreach (var namedArg in ca.Properties)
+                    {
+                        var prop = catype.Properties.First(p => p.Name == namedArg.Name).SetMethod;
+
+                        il.Load(attrvar);
+                        il.Call(prop, ilp => ilp.Value(namedArg.Argument));
+                    }
+
+                    foreach (var namedArg in ca.Fields)
+                    {
+                        var field = catype.Fields.First(p => p.Name == namedArg.Name);
+
+                        il.Load(attrvar);
+                        il.Store(field, ilf => ilf.Value(namedArg.Argument));
+                    }
+                    il.Load(attrvar);
+                }
+            }
+            ).ToArray();
+
+            pc.CreateArray<Attribute>(elements);
         }
 
         protected virtual void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)

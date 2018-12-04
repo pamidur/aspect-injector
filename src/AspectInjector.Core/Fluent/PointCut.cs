@@ -351,22 +351,86 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
-        public PointCut Value<T>(T value)
+        public PointCut Primitive(object value)
         {
-            var valueType = typeof(T);
+            var valueType = value.GetType();
 
-            if (valueType == typeof(bool))
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, ((bool)(object)value) ? 1 : 0));
-            else if (valueType.IsValueType)
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, (int)(object)value));
-            else if (valueType == typeof(string))
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldstr, (string)(object)value));
-            else if (valueType.IsClass && value == null)
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldnull));
-            else
-                throw new NotSupportedException();
+            switch (value)
+            {
+                case bool bo: _proc.SafeInsertBefore(_refInst, _proc.Create(bo ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0)); break;
+                case long l: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_I8, l)); break;
+                case ulong ul: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_I8, unchecked((long)ul))); break;
+                case double d: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_R8, d)); break;
+                case int i: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_I4, i)); break;
+                case uint ui: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_I4, unchecked((int)ui))); break;
+                case float f: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_R4, f)); break;
+                case sbyte sb: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_I4, (int)sb)); break;
+                case byte b: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_I4, (int)b)); break;
+                case ushort us: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_I4, us)); break;
+                case short s: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_I4, s)); break;
+                case char c: _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Ldc_I4, c)); break;
+
+                default: throw new NotSupportedException(valueType.ToString());
+            }
 
             return this;
+        }
+
+        public void CastSmart(TypeReference typeOnStack, TypeReference expectedType)
+        {
+            if (typeOnStack.Match(expectedType))
+                return;
+
+            if (expectedType.IsValueType || expectedType.IsGenericParameter)
+            {
+                if (!typeOnStack.IsValueType)
+                    _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Unbox_Any, _typeSystem.Import(expectedType)));
+            }
+            else
+            {
+                if (typeOnStack.IsValueType)
+                    _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Box, _typeSystem.Import(typeOnStack)));
+                else if (!expectedType.Match(_typeSystem.Object))
+                    _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Castclass, _typeSystem.Import(expectedType)));
+            }
+        }
+
+        public PointCut Value(object value)
+        {
+            if (value == null)
+                return Null();
+
+            var valueType = value.GetType();
+
+            if (value is CustomAttributeArgument argument)
+                AttributeArgument(argument);
+            else if (value is TypeReference tr)
+                TypeOf(tr);
+            else if (valueType.IsValueType)
+                Primitive(value);
+            else if (value is string str)
+                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldstr, str));
+            //else if (valueType.IsArray)
+            //    CreateArray(_typeSystem.Import(valueType.GetElementType()), il => ((Array)value).Cast<object>().Select(Value).ToArray());
+            else
+                throw new NotSupportedException(valueType.ToString());
+
+            return this;
+        }
+
+        private void AttributeArgument(CustomAttributeArgument argument)
+        {
+            var val = argument.Value;
+
+            if (val.GetType().IsArray)
+                CreateArray(_typeSystem.Import(argument.Type.GetElementType()), ((Array)val).Cast<object>().Select<object, Action<PointCut>>(v => il => Value(v)).ToArray());
+            else
+            {
+                Value(val);
+
+                if (val is CustomAttributeArgument next)
+                    CastSmart(next.Type, argument.Type);
+            }
         }
 
         public PointCut Null()

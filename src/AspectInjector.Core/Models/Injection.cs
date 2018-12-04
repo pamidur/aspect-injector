@@ -14,7 +14,7 @@ namespace AspectInjector.Core.Models
 
         public Effect Effect { get; internal set; }
 
-        public List<ICustomAttribute> Triggers { get; internal set; } = new List<ICustomAttribute>();        
+        public List<CustomAttribute> Triggers { get; internal set; } = new List<CustomAttribute>();        
 
         public bool Equals(Injection other)
         {
