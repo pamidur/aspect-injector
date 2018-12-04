@@ -1,6 +1,6 @@
 language: csharp
 mono: none
-dotnet: 2.1.401
+dotnet: 2.1.500
 env:
   global:
     - NUGETURL=https://api.nuget.org/v3/index.json
