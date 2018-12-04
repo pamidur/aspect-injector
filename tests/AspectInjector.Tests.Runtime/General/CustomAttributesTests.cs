@@ -26,7 +26,7 @@ namespace AspectInjector.Tests.General
             [TestInjection(true, byte.MaxValue, sbyte.MinValue, char.MaxValue, short.MinValue, ushort.MaxValue, int.MinValue, uint.MaxValue, float.MinValue, long.MinValue, ulong.MaxValue, double.MinValue)]
             public void Do() { }
 
-            [TestInjection2(2, new object[] { new object[] { 0.5f, true }, 1, typeof(TestInjection2) }, new double[] { 12d, -0.777d }, new float[] { }, new bool[] { true }, typeof(TestClass), StringComparison.InvariantCulture)]
+            [TestInjection2(new ulong[] { ulong.MinValue, ulong.MaxValue }, 2, new object[] { new object[] { 0.5f, true }, 1, typeof(TestInjection2) }, new double[] { 12d, -0.777d }, new float[] { }, new bool[] { true }, typeof(TestClass), StringComparison.InvariantCulture)]
             public void Do2() { }
         }
 
@@ -37,8 +37,9 @@ namespace AspectInjector.Tests.General
             {
             }
 
-            public TestInjection2(object o, object[] oa, double[] da=null, float[] fa=null, bool[] ba = null, Type type = null, StringComparison e = StringComparison.InvariantCulture)
+            public TestInjection2(ulong[] ul, object o, object[] oa, double[] da, float[] fa, bool[] ba, Type type, StringComparison e)
             {
+                Ul = ul;
                 O = o;
                 Oa = oa;
                 Da = da;
@@ -48,6 +49,7 @@ namespace AspectInjector.Tests.General
                 E = e;
             }
 
+            public ulong[] Ul { get; }
             public object O { get; }
             public object[] Oa { get; }
             public double[] Da { get; }
@@ -102,10 +104,10 @@ namespace AspectInjector.Tests.General
 
 
 
-                Checker.Passed = (int)a.O == 2 && (float)((object[])a.Oa[0])[0] == 0.5f && (bool)((object[])a.Oa[0])[1] == true
+                Checker.Passed = a.Ul[0]==ulong.MinValue && a.Ul[1] == ulong.MaxValue && (int)a.O == 2 && (float)((object[])a.Oa[0])[0] == 0.5f && (bool)((object[])a.Oa[0])[1] == true
                     && (int)a.Oa[1] == 1 && (Type)a.Oa[2] == typeof(TestInjection2) && a.Da[0] == 12d && a.Da[1] == -0.777d
                     && a.Fa.Length == 0 && a.Ba[0] == true && a.Type == typeof(TestClass) && a.E == StringComparison.InvariantCulture;
-                    }
+            }
 
             [Advice(Advice.Kind.Before)]
             public void Before([Advice.Argument(Advice.Argument.Source.Injections)] Attribute[] data)

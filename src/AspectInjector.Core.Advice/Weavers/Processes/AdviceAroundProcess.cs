@@ -118,12 +118,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                                 refList.Add(new Tuple<int, VariableDefinition>(i, tempVar));
                                 unwrapper.Body.Variables.Add(tempVar);
 
-                                c.Store(tempVar, v => v.Load(argsParam).GetByIndex(i).Cast(elementType));
+                                c.Store(tempVar, v => v.Load(argsParam).GetByIndex(_ts.Object, i).Cast(elementType));
                                 c.LoadRef(tempVar);
                             }
                             else
                             {
-                                c = c.Load(argsParam).GetByIndex(i);
+                                c = c.Load(argsParam).GetByIndex(_ts.Object, i);
 
                                 if (p.ParameterType.IsGenericParameter || p.ParameterType.FullName != WellKnownTypes.Object)
                                     c = c.Cast(p.ParameterType);
@@ -174,7 +174,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     {
                         var p = _target.Parameters[i];
                         if (p.ParameterType.IsByReference)
-                            e.StoreByRef(p, val => e.Load(argsVar).GetByIndex(i));
+                            e.StoreByRef(p, val => e.Load(argsVar).GetByIndex(_ts.Object, i));
                     }
 
                     //drop if void, cast if not is object

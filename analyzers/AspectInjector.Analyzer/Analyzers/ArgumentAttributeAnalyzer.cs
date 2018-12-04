@@ -24,8 +24,7 @@ namespace AspectInjector.Analyzer.Analyzers
 
         private static void AnalyzeAttribute(SyntaxNodeAnalysisContext context)
         {
-            var param = context.SemanticModel.GetDeclaredSymbol(context.Node.Parent.Parent) as IParameterSymbol;
-            if (param == null)
+            if (!(context.SemanticModel.GetDeclaredSymbol(context.Node.Parent.Parent) is IParameterSymbol param))
                 return;
 
             var attr = param.GetAttributes().FirstOrDefault(a => a.ApplicationSyntaxReference.Span == context.Node.Span);
