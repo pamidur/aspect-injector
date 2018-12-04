@@ -29,7 +29,7 @@ namespace AspectInjector.Tests.General
         }
     }
 
-    [Aspect(Aspect.Scope.PerInstance)]
+    [Aspect(Scope.PerInstance)]
     [Injection(typeof(AspectScopeTests_PerInstanceAspect))]
     internal class AspectScopeTests_PerInstanceAspect:Attribute
     {
@@ -40,13 +40,13 @@ namespace AspectInjector.Tests.General
             _counter++;
         }
 
-        [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
+        [Advice(Kind.Before, Targets = Target.Method)]
         public void Do()
         {
         }
     }
 
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     [Injection(typeof(AspectScopeTests_GlobalAspect))]
     internal class AspectScopeTests_GlobalAspect: Attribute
     {
@@ -57,7 +57,7 @@ namespace AspectInjector.Tests.General
             _counter++;
         }
 
-        [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
+        [Advice(Kind.Before, Targets = Target.Method)]
         public void Do()
         {
         }

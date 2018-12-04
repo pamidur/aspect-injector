@@ -99,25 +99,25 @@ namespace AspectInjector.Tests.Runtime.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.PerInstance)]
+        [Aspect(Scope.PerInstance)]
         [Injection(typeof(TestAspect))]
         public class TestAspect : Attribute
         {
-            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
+            [Advice(Kind.After, Targets = Target.Method)]
             public void After()
             {
                 Checker.Passed = true;
             }
         }
 
-        [Aspect(Aspect.Scope.PerInstance)]
+        [Aspect(Scope.PerInstance)]
         [Injection(typeof(TestArgsAspect))]
         public class TestArgsAspect : Attribute
         {
-            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
+            [Advice(Kind.After, Targets = Target.Method)]
             public void After(
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
-                [Advice.Argument(Advice.Argument.Source.ReturnValue)] object res
+                [Argument(Source.Arguments)] object[] args,
+                [Argument(Source.ReturnValue)] object res
                 )
             {
                 Checker.Passed = true;

@@ -25,11 +25,11 @@ namespace AspectInjector.Tests.Advices
         }
     }
 
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     [Injection(typeof(NestedClassesTests_Aspect))]
     public class NestedClassesTests_Aspect:Attribute
     {
-        [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
+        [Advice(Kind.Before, Targets = Target.Method)]
         public void Fact()
         {
             Checker.Passed = true;

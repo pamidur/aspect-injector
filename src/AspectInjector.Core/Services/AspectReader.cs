@@ -38,7 +38,7 @@ namespace AspectInjector.Core.Services
                     aspectDef = new AspectDefinition
                     {
                         Host = type,
-                        Scope = aspect.GetConstructorValue<Aspect.Scope>(0),
+                        Scope = aspect.GetConstructorValue<Scope>(0),
                         Factory = aspect.GetPropertyValue<TypeReference>(nameof(Aspect.Factory)),
                         Effects = effects
                     };                

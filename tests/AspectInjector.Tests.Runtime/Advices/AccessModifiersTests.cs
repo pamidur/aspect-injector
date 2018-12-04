@@ -35,12 +35,12 @@ namespace AspectInjector.Tests.Runtime.Advices
             internal static void InternalStatic() => Assert.True(false);
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(AccessTestAspect))]
         internal class AccessTestAspect : Attribute
         {
-            [Advice(Advice.Kind.Around, WithAccess = AccessModifier.Internal | AccessModifier.AnyScope)]
-            public object Around([Advice.Argument(Advice.Argument.Source.Method)] MethodBase method)
+            [Advice(Kind.Around, Targets = Target.Internal)]
+            public object TestAccess([Argument(Source.Method)] MethodBase method)
             {
                 Assert.True(method.IsAssembly);
                 Assert.False(method.IsPublic);

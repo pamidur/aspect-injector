@@ -105,7 +105,7 @@
 
 //        [Mixin(typeof(IGeneralTests))]
 //        [Mixin(typeof(INotifyPropertyChanged))]
-//        [Aspect(Aspect.Scope.Global)]
+//        [Aspect(Scope.Global)]
 //        internal class GeneralTests_Aspect : IGeneralTests, INotifyPropertyChanged
 //        {
 //            public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };

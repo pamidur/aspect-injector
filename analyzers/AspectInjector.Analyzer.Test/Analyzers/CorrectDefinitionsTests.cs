@@ -21,41 +21,41 @@ using System;
 namespace TestNameSpace
 {
     [Mixin(typeof(ITestInterface))]
-    [Aspect(Aspect.Scope.Global, Factory = typeof(FakeFactory))]
+    [Aspect(Scope.Global, Factory = typeof(FakeFactory))]
     class TypeClass : ITestInterface
     {
         public TypeClass(string value){}
 
-        [Advice(Advice.Kind.Before)]
+        [Advice(Kind.Before)]
         public void Before(
-            [Advice.Argument(Advice.Argument.Source.Instance)] object i,
-            [Advice.Argument(Advice.Argument.Source.Type)] Type t,
-            [Advice.Argument(Advice.Argument.Source.Method)] System.Reflection.MethodBase m,            
-            [Advice.Argument(Advice.Argument.Source.Name)] string n,
-            [Advice.Argument(Advice.Argument.Source.Arguments)] object[] a,
-            [Advice.Argument(Advice.Argument.Source.ReturnType)] Type rt            
+            [Argument(Source.Instance)] object i,
+            [Argument(Source.Type)] Type t,
+            [Argument(Source.Method)] System.Reflection.MethodBase m,            
+            [Argument(Source.Name)] string n,
+            [Argument(Source.Arguments)] object[] a,
+            [Argument(Source.ReturnType)] Type rt            
         ){}
 
-        [Advice(Advice.Kind.After)]
+        [Advice(Kind.After)]
         public void After(
-            [Advice.Argument(Advice.Argument.Source.Instance)] object i,
-            [Advice.Argument(Advice.Argument.Source.Type)] Type t,
-            [Advice.Argument(Advice.Argument.Source.Method)] System.Reflection.MethodBase m,            
-            [Advice.Argument(Advice.Argument.Source.Name)] string n,
-            [Advice.Argument(Advice.Argument.Source.Arguments)] object[] a,
-            [Advice.Argument(Advice.Argument.Source.ReturnType)] Type rt,            
-            [Advice.Argument(Advice.Argument.Source.ReturnValue)] object rv            
+            [Argument(Source.Instance)] object i,
+            [Argument(Source.Type)] Type t,
+            [Argument(Source.Method)] System.Reflection.MethodBase m,            
+            [Argument(Source.Name)] string n,
+            [Argument(Source.Arguments)] object[] a,
+            [Argument(Source.ReturnType)] Type rt,            
+            [Argument(Source.ReturnValue)] object rv            
         ){}
 
-        [Advice(Advice.Kind.Around)]
+        [Advice(Kind.Around)]
         public object Around(
-            [Advice.Argument(Advice.Argument.Source.Instance)] object i,
-            [Advice.Argument(Advice.Argument.Source.Type)] Type t,
-            [Advice.Argument(Advice.Argument.Source.Method)] System.Reflection.MethodBase m,            
-            [Advice.Argument(Advice.Argument.Source.Name)] string n,
-            [Advice.Argument(Advice.Argument.Source.Arguments)] object[] a,
-            [Advice.Argument(Advice.Argument.Source.ReturnType)] Type rt,            
-            [Advice.Argument(Advice.Argument.Source.Target)] Func<object[],object> target          
+            [Argument(Source.Instance)] object i,
+            [Argument(Source.Type)] Type t,
+            [Argument(Source.Method)] System.Reflection.MethodBase m,            
+            [Argument(Source.Name)] string n,
+            [Argument(Source.Arguments)] object[] a,
+            [Argument(Source.ReturnType)] Type rt,            
+            [Argument(Source.Target)] Func<object[],object> target          
         ){ return null; }
 
     }

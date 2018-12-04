@@ -30,30 +30,30 @@ namespace AspectInjector.Tests.Runtime.Advices
         [Injection(typeof(OrderTests_Aspect2), Priority = 1)]
         class Trigger : Attribute { }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         internal class OrderTests_Aspect1
         {
-            [Advice(Advice.Kind.Before)]
+            [Advice(Kind.Before)]
             public void BeforeMethod()
             {
                 Checker.Passed = false;
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         internal class OrderTests_Aspect2
         {
-            [Advice(Advice.Kind.Before)]
+            [Advice(Kind.Before)]
             public void BeforeMethod()
             {
                 Checker.Passed = false;
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         internal class OrderTests_Aspect3
         {
-            [Advice(Advice.Kind.Before)]
+            [Advice(Kind.Before)]
             public void BeforeMethod()
             {
                 Checker.Passed = true;

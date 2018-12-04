@@ -14,10 +14,10 @@ namespace AspectInjector.Analyzer.Test.Analyzers
 @"using AspectInjector.Broker;
     namespace TestNameSpace
     {
-            [Aspect(Aspect.Scope.Global)]
+            [Aspect(Scope.Global)]
             static class TypeClass
             {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Type.Before, Target.Method)]
         public void Before(){}
             }
     }";
@@ -32,10 +32,10 @@ namespace AspectInjector.Analyzer.Test.Analyzers
 @"using AspectInjector.Broker;
     namespace TestNameSpace
     {
-            [Aspect(Aspect.Scope.Global)]
+            [Aspect(Scope.Global)]
             abstract class TypeClass
             {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Type.Before, Target.Method)]
         public void Before(){}
             }
     }";
@@ -51,10 +51,10 @@ namespace AspectInjector.Analyzer.Test.Analyzers
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass<T>
     {
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Type.Before, Target.Method)]
         public void Before(){}
     }
 }";
@@ -70,12 +70,12 @@ namespace TestNameSpace
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {
         public TypeClass(string value){}
 
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Type.Before, Target.Method)]
         public void Before(){}
     }
 }";
@@ -92,12 +92,12 @@ namespace TestNameSpace
 using System;
 namespace TestNameSpace
 {    
-    [Aspect(Aspect.Scope.Global, Factory = typeof(FakeFactory))]
+    [Aspect(Scope.Global, Factory = typeof(FakeFactory))]
     class TypeClass
     {
         public TypeClass(string value){}
 
-        [Advice(Advice.Type.Before, Advice.Target.Method)]
+        [Advice(Advice.Type.Before, Target.Method)]
         public void Before(){}
     }
 
@@ -119,7 +119,7 @@ namespace TestNameSpace
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {
     }

@@ -28,12 +28,12 @@ PM> Install-Package AspectInjector
 
 Aspect is a class which contains a set of advices - methods which should be injected to certain points in the code. Each advice has mandatory attributes which define a kind of target class members (constructor, getter, setter, regular method etc.) and join points - points in the code where this advice should be injected (before target member, after or both). Aspects and advices are marked with appropriate attributes. For example, we have a class with one method marked as advice:
 ```C#
-[Aspect(Aspect.Scope.Instance)]
+[Aspect(Scope.Instance)]
 class TraceAspect
 {
 	private int count;
 	
-	[Advice(Advice.Type.Before, Advice.Target.Method)]
+	[Advice(Advice.Type.Before, Target.Method)]
 	public void CallCountTrace()
 	{
 		Console.WriteLine("Call #{0}", count);
@@ -143,7 +143,7 @@ public class NotifyPropertyChangedAspect : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler PropertyChanged;
 
-    [Advice(Advice.Type.After, Advice.Target.Setter)]
+    [Advice(Advice.Type.After, Target.Setter)]
     public void RaisePropertyChanged(
         [AdviceArgument(AdviceArgument.Source.Instance)] object targetInstance,
         [AdviceArgument(AdviceArgument.Source.TargetName)] string propertyName)

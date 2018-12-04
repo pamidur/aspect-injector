@@ -42,43 +42,43 @@ namespace AspectInjector.Analyzer.Analyzers
             if (attr.AttributeConstructor == null)
                 return;
 
-            var source = (Advice.Argument.Source)attr.ConstructorArguments[0].Value;
+            var source = (Source)attr.ConstructorArguments[0].Value;
 
 
-            if (source == Advice.Argument.Source.Arguments && param.Type.ToDisplayString() != "object[]")
+            if (source == Source.Arguments && param.Type.ToDisplayString() != "object[]")
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentMustHaveValidType, location, param.Name, $"object[]"));
 
-            if (source == Advice.Argument.Source.Instance && param.Type.SpecialType != SpecialType.System_Object)
+            if (source == Source.Instance && param.Type.SpecialType != SpecialType.System_Object)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentMustHaveValidType, location, param.Name, $"object"));
 
-            if (source == Advice.Argument.Source.Method && param.Type.ToDisplayString() != WellKnown.MethodBase)
+            if (source == Source.Method && param.Type.ToDisplayString() != WellKnown.MethodBase)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentMustHaveValidType, location, param.Name, WellKnown.MethodBase));
 
-            if (source == Advice.Argument.Source.Name && param.Type.SpecialType != SpecialType.System_String)
+            if (source == Source.Name && param.Type.SpecialType != SpecialType.System_String)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentMustHaveValidType, location, param.Name, "string"));
 
-            if (source == Advice.Argument.Source.ReturnType && param.Type.ToDisplayString() != WellKnown.Type)
+            if (source == Source.ReturnType && param.Type.ToDisplayString() != WellKnown.Type)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentMustHaveValidType, location, param.Name, WellKnown.Type));
 
-            if (source == Advice.Argument.Source.ReturnValue && param.Type.SpecialType != SpecialType.System_Object)
+            if (source == Source.ReturnValue && param.Type.SpecialType != SpecialType.System_Object)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentMustHaveValidType, location, param.Name, "object"));
 
-            if (source == Advice.Argument.Source.Target && param.Type.ToDisplayString() != "System.Func<object[], object>")
+            if (source == Source.Target && param.Type.ToDisplayString() != "System.Func<object[], object>")
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentMustHaveValidType, location, param.Name, "System.Func<object[],object>"));
 
-            if (source == Advice.Argument.Source.Type && param.Type.ToDisplayString() != WellKnown.Type)
+            if (source == Source.Type && param.Type.ToDisplayString() != WellKnown.Type)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentMustHaveValidType, location, param.Name, WellKnown.Type));
 
 
             if (adviceattr == null || adviceattr.AttributeConstructor == null)
                 return;
 
-            var adviceType = (Advice.Kind)adviceattr.ConstructorArguments[0].Value;
+            var adviceType = (Kind)adviceattr.ConstructorArguments[0].Value;
 
-            if (source == Advice.Argument.Source.Target && adviceType != Advice.Kind.Around)
+            if (source == Source.Target && adviceType != Kind.Around)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentIsAlwaysNull, location, param.Name, $"for '{adviceType}' advice"));
 
-            if (source == Advice.Argument.Source.ReturnValue && adviceType != Advice.Kind.After)
+            if (source == Source.ReturnValue && adviceType != Kind.After)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentIsAlwaysNull, location, param.Name, $"for '{adviceType}' advice"));
          }
     }

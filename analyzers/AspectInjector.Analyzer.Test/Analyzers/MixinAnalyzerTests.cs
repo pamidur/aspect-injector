@@ -15,7 +15,7 @@ namespace AspectInjector.Analyzer.Test.Analyzers
 namespace TestNameSpace
 {
     [Mixin(typeof(DummyClass))]
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {   
     }
@@ -35,7 +35,7 @@ namespace TestNameSpace
 namespace TestNameSpace
 {
     [Mixin(typeof(IDummyInterface))]
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {   
     }
@@ -56,7 +56,7 @@ namespace TestNameSpace
 {
     [Mixin(typeof(IDummyInterface))]
     [Mixin(typeof(IDummyInterface2))]
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass : object
     {   
     }

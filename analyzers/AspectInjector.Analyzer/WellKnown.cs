@@ -1,14 +1,15 @@
-﻿using System;
+﻿using AspectInjector.Broker;
+using System;
 using System.Reflection;
 
 namespace AspectInjector.Analyzer
 {
     internal static class WellKnown
     {
-        public static readonly string AdviceType = typeof(Broker.Advice).FullName;
-        public static readonly string AdviceArgumentType = typeof(Broker.Advice.Argument).FullName.Replace("+", ".");
-        public static readonly string MixinType = typeof(Broker.Mixin).FullName;
-        public static readonly string AspectType = typeof(Broker.Aspect).FullName;
+        public static readonly string AdviceType = typeof(Advice).FullName;
+        public static readonly string AdviceArgumentType = typeof(Argument).FullName;
+        public static readonly string MixinType = typeof(Mixin).FullName;
+        public static readonly string AspectType = typeof(Aspect).FullName;
 
         public static readonly string MethodBase = typeof(MethodBase).FullName;
 

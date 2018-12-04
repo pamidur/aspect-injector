@@ -14,6 +14,11 @@ namespace AspectInjector.Broker
         /// <param name="interface">Interface to implement.</param>
         public Mixin(Type @interface)
         {
+            Interface = @interface;
         }
+        /// <summary>
+        /// Interface injected into targets.
+        /// </summary>
+        public Type Interface { get; }
     }
 }

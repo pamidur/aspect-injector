@@ -14,10 +14,10 @@ namespace AspectInjector.Analyzer.Test.Analyzers
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Kind.Before)]
+        [Advice(Kind.Before)]
         public static void Before(){}
     }
 }";
@@ -32,10 +32,10 @@ namespace TestNameSpace
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Kind.Before)]
+        [Advice(Kind.Before)]
         private void Before(){}
     }
 }";
@@ -51,10 +51,10 @@ namespace TestNameSpace
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Kind.Before)]
+        [Advice(Kind.Before)]
         public void Before<T>(){}
     }
 }";
@@ -70,10 +70,10 @@ namespace TestNameSpace
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Kind.Before)]
+        [Advice(Kind.Before)]
         public int Before(){ return 1; }
     }
 }";
@@ -89,10 +89,10 @@ namespace TestNameSpace
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Kind.Around)]
+        [Advice(Kind.Around)]
         public void Around(){ }
     }
 }";
@@ -108,11 +108,11 @@ namespace TestNameSpace
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Kind.Before)]
-        public void Before(string data, int val, [Advice.Argument(Advice.Argument.Source.Instance)] object i){ }
+        [Advice(Kind.Before)]
+        public void Before(string data, int val, [Argument(Source.Instance)] object i){ }
     }
 }";
 
@@ -132,7 +132,7 @@ namespace TestNameSpace
 {
     class TypeClass
     {   
-        [Advice(Advice.Kind.Before)]
+        [Advice(Kind.Before)]
         public void Before(){}
     }
 }";

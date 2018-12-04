@@ -12,11 +12,11 @@ namespace AspectInjector.Tests.General
         public static extern int MessageBox(IntPtr hWnd, String text, String caption, int options);
     }
 
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     [Injection(typeof(UnmanagedTests_Aspect))]
     internal class UnmanagedTests_Aspect : Attribute
     {
-        [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
+        [Advice(Kind.After, Targets = Target.Method)]
         public void Trace()
         {
         }

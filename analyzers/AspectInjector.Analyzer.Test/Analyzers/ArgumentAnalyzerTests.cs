@@ -15,10 +15,10 @@ namespace AspectInjector.Analyzer.Test.Analyzers
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {
-        public static void Before([Advice.Argument(Advice.Argument.Source.Instance)] object i){}
+        public static void Before([Argument(Source.Instance)] object i){}
     }
 }";
             var expected = DiagnosticResult.From(Rules.ArgumentMustBePartOfAdvice, 7, 36);
@@ -32,19 +32,19 @@ namespace TestNameSpace
 @"using AspectInjector.Broker;
 namespace TestNameSpace
 {
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     class TypeClass
     {
-        [Advice(Advice.Kind.Before)]
+        [Advice(Kind.Before)]
         public void Before(
-            [Advice.Argument(Advice.Argument.Source.Instance)] int i,
-            [Advice.Argument(Advice.Argument.Source.Type)] int t,
-            [Advice.Argument(Advice.Argument.Source.Method)] int m,
-            [Advice.Argument(Advice.Argument.Source.Name)] int n,
-            [Advice.Argument(Advice.Argument.Source.Arguments)] int a,
-            [Advice.Argument(Advice.Argument.Source.ReturnType)] int rt,
-            [Advice.Argument(Advice.Argument.Source.ReturnValue)] int rv,
-            [Advice.Argument(Advice.Argument.Source.Target)] int target 
+            [Argument(Source.Instance)] int i,
+            [Argument(Source.Type)] int t,
+            [Argument(Source.Method)] int m,
+            [Argument(Source.Name)] int n,
+            [Argument(Source.Arguments)] int a,
+            [Argument(Source.ReturnType)] int rt,
+            [Argument(Source.ReturnValue)] int rv,
+            [Argument(Source.Target)] int target 
         )
         { }
     }

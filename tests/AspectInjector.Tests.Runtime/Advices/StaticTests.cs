@@ -43,25 +43,25 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(StaticTests_AroundAspect1))]
         internal class StaticTests_AroundAspect1 : Attribute
         {
-            [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
-            public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
+            [Advice(Kind.Around, Targets = Target.Method)]
+            public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
+                [Argument(Source.Arguments)] object[] arguments)
             {
                 return target(new object[] { arguments[0], arguments[1], arguments[2], true, arguments[4] });
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(StaticTests_AroundAspect2))]
         internal class StaticTests_AroundAspect2 : Attribute
         {
-            [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
-            public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
+            [Advice(Kind.Around, Targets = Target.Method)]
+            public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
+                [Argument(Source.Arguments)] object[] arguments)
             {
                 return target(new object[] { arguments[0], arguments[1], arguments[2], arguments[3], true });
             }
@@ -79,12 +79,12 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(StaticTests_BeforeAspect))]
         internal class StaticTests_BeforeAspect : Attribute
         {
             //Property
-            [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
+            [Advice(Kind.Before, Targets = Target.Method)]
             public void BeforeMethod() { Checker.Passed = true; }
         }
     }

@@ -101,7 +101,6 @@ namespace AspectInjector.Tests.Advices
             var obj = new object();
             object outObj;
             var val = 1;
-            int outVal;
 
             Checker.Passed = false;
 
@@ -110,7 +109,7 @@ namespace AspectInjector.Tests.Advices
                 out outObj,
                 val,
                 ref val,
-                out outVal);
+                out int outVal);
 
             Assert.True(Checker.Passed);
         }
@@ -131,12 +130,12 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_InstanceAspect))]
         internal class ArgumentsTests_InstanceAspect : Attribute
         {
-            [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
-            public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Instance)] object instance)
+            [Advice(Kind.Before, Targets = Target.Method)]
+            public void BeforeMethod([Argument(Source.Instance)] object instance)
             {
                 Checker.Passed = instance != null;
             }
@@ -150,12 +149,12 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_StaticInstanceAspect))]
         internal class ArgumentsTests_StaticInstanceAspect:Attribute
         {
-            [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
-            public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Instance)] object instance)
+            [Advice(Kind.Before, Targets = Target.Method)]
+            public void BeforeMethod([Argument(Source.Instance)] object instance)
             {
                 Checker.Passed = instance == null;
             }
@@ -169,12 +168,12 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_ReturnTypeAspect))]
         internal class ArgumentsTests_ReturnTypeAspect: Attribute
         {
-            [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
-            public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Type)] System.Type type)
+            [Advice(Kind.Before, Targets = Target.Method)]
+            public void BeforeMethod([Argument(Source.Type)] System.Type type)
             {
                 Checker.Passed = type == typeof(ArgumentsTests_ReturnTypeTarget);
             }
@@ -196,12 +195,12 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_StaticMethodAspect))]
         internal class ArgumentsTests_StaticMethodAspect : Attribute
         {
-            [Advice(Advice.Kind.Before, Targets = Advice.Target.Method | Advice.Target.Constructor)]
-            public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Method)] MethodBase method)
+            [Advice(Kind.Before, Targets = Target.Method | Target.Constructor)]
+            public void BeforeMethod([Argument(Source.Method)] MethodBase method)
             {
                 Checker.Passed = method != null;
             }
@@ -244,12 +243,12 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_MethodAspect))]
         internal class ArgumentsTests_MethodAspect:Attribute
         {
-            [Advice(Advice.Kind.Before, Targets = Advice.Target.Method | Advice.Target.Constructor)]
-            public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Method)] MethodBase method)
+            [Advice(Kind.Before, Targets = Target.Method | Target.Constructor)]
+            public void BeforeMethod([Argument(Source.Method)] MethodBase method)
             {
                 Checker.Passed = method != null;
             }
@@ -265,12 +264,12 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_ArgumentsAspect))]
         internal class ArgumentsTests_ArgumentsAspect:Attribute
         {
-            [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
-            public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Arguments)] object[] args)
+            [Advice(Kind.Before, Targets = Target.Method)]
+            public void BeforeMethod([Argument(Source.Arguments)] object[] args)
             {
                 Checker.Passed =
                     args[0] != null && args[1] != null && args[2] == null &&
@@ -286,12 +285,12 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_StaticArgumentsAspect))]
         internal class ArgumentsTests_StaticArgumentsAspect :Attribute
         {
-            [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
-            public void BeforeMethod([Advice.Argument(Advice.Argument.Source.Arguments)] object[] args)
+            [Advice(Kind.Before, Targets = Target.Method)]
+            public void BeforeMethod([Argument(Source.Arguments)] object[] args)
             {
                 Checker.Passed = (int)args[0] == 1 && (string)args[1] == "2";
             }
@@ -305,12 +304,12 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_AroundMethodAspect))]
         internal class ArgumentsTests_AroundMethodAspect : Attribute
         {
-            [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
-            public object BeforeMethod([Advice.Argument(Advice.Argument.Source.Method)] MethodBase method)
+            [Advice(Kind.Around, Targets = Target.Method)]
+            public object BeforeMethod([Argument(Source.Method)] MethodBase method)
             {
                 Checker.Passed = method.Name == "Fact";
                 return null;
@@ -326,12 +325,12 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_AroundRetValAspect))]
         internal class ArgumentsTests_AroundRetValAspect:Attribute
         {
-            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
-            public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object ret)
+            [Advice(Kind.After, Targets = Target.Method)]
+            public void AfterMethod([Argument(Source.ReturnValue)] object ret)
             {
                 Checker.Passed = ret != null;
             }
@@ -344,11 +343,11 @@ namespace AspectInjector.Tests.Advices
         }
 
         [Injection(typeof(ArgumentsTests_PropertyTarget_Aspect))]
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         class ArgumentsTests_PropertyTarget_Aspect : Attribute
         {
-            [Advice(Advice.Kind.Before)]
-            public void TestName([Advice.Argument(Advice.Argument.Source.Name)] string name)
+            [Advice(Kind.Before)]
+            public void TestName([Argument(Source.Name)] string name)
             {
                 Checker.Passed = name == "Fact";
             }

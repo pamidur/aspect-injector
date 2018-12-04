@@ -32,7 +32,7 @@
 //        }
 
 //        [Mixin(typeof(IInheritanceTests))]
-//        [Aspect(Aspect.Scope.Global)]
+//        [Aspect(Scope.Global)]
 //        public class InheritanceTests_Aspect : IInheritanceTests
 //        {
 //            public string GetAspectType()

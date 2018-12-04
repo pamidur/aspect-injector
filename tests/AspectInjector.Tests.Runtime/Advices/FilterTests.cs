@@ -27,13 +27,13 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(FilterTests_Aspect))]
         public class FilterTests_Aspect : Attribute
         {
             public int Counter = 0;
 
-            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
+            [Advice(Kind.After, Targets = Target.Method)]
             public void AfterMethod()
             {
                 Counter++;

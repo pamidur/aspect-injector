@@ -33,7 +33,7 @@ using AspectInjector.Broker;
     namespace TestNameSpace
     {
         [Mixin(typeof(DummyClass))]
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         class TypeClass
         {   
         }
@@ -86,7 +86,7 @@ using AspectInjector.Broker;
     namespace TestNameSpace
     {
         [Mixin(typeof(IDummyInterface))]
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         class TypeClass
         {   
         }
@@ -119,7 +119,7 @@ using AspectInjector.Broker;
     namespace TestNameSpace
     {
         [Mixin(typeof(IDummyInterface))]
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         class TypeClass : IDummyInterface
         {   
         }
@@ -146,7 +146,7 @@ using AspectInjector.Broker;
     {
         [Mixin(typeof(IDummyInterface))]
         [Mixin(typeof(IDummyInterface2))]
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         class TypeClass : object
         {   
         }
@@ -192,7 +192,7 @@ using AspectInjector.Broker;
     {
         [Mixin(typeof(IDummyInterface))]
         [Mixin(typeof(IDummyInterface2))]
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         class TypeClass : object, IDummyInterface, IDummyInterface2
         {   
         }
@@ -252,7 +252,7 @@ using AspectInjector.Broker;
 //    namespace TestNameSpace
 //    {
 //        [Mixin(typeof(IDummyInterface))]
-//        [Aspect(Aspect.Scope.Global)]
+//        [Aspect(Scope.Global)]
 //        class TypeClass : IDummyInterface
 //        {   
 //        }

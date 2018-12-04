@@ -127,7 +127,7 @@ namespace AspectInjector.Core.Models
 
             FieldReference aspectField;
 
-            if (overrideTarget.IsStatic || aspect.Scope == Aspect.Scope.Global)
+            if (overrideTarget.IsStatic || aspect.Scope == Scope.Global)
                 aspectField = GetGlobalAspectField(aspect);
             else
             {

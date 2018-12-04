@@ -1,4 +1,5 @@
-﻿using AspectInjector.Core.Contracts;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 
@@ -6,7 +7,7 @@ namespace AspectInjector.Core.Advice.Effects
 {
     internal class AroundAdviceEffect : AdviceEffectBase
     {
-        public override Broker.Advice.Kind Kind => Broker.Advice.Kind.Around;
+        public override Kind Kind => Kind.Around;
 
         public override bool IsApplicableFor(IMemberDefinition target)
         {

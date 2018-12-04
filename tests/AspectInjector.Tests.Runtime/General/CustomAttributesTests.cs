@@ -93,11 +93,11 @@ namespace AspectInjector.Tests.General
             public double D { get; }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         public class TestAspect
         {
-            [Advice(Advice.Kind.Before)]
-            public void Before2([Advice.Argument(Advice.Argument.Source.Injections)] Attribute[] data)
+            [Advice(Kind.Before)]
+            public void Before2([Argument(Source.Injections)] Attribute[] data)
             {
                 var a = data.OfType<TestInjection2>().FirstOrDefault();
                 if (a == null) return;
@@ -109,8 +109,8 @@ namespace AspectInjector.Tests.General
                     && a.Fa.Length == 0 && a.Ba[0] == true && a.Type == typeof(TestClass) && a.E == StringComparison.InvariantCulture;
             }
 
-            [Advice(Advice.Kind.Before)]
-            public void Before([Advice.Argument(Advice.Argument.Source.Injections)] Attribute[] data)
+            [Advice(Kind.Before)]
+            public void Before([Argument(Source.Injections)] Attribute[] data)
             {
                 var a = data.OfType<TestInjection>().FirstOrDefault();
                 if (a == null) return;
@@ -182,11 +182,11 @@ namespace AspectInjector.Tests.General
         }
     }
 
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     public class CustomAttributesTests_Aspect
     {
-        [Advice(Advice.Kind.After)]
-        public void AfterMethod([Advice.Argument(Advice.Argument.Source.Injections)] Attribute[] data)
+        [Advice(Kind.After)]
+        public void AfterMethod([Argument(Source.Injections)] Attribute[] data)
         {
             var a = (data[0] as CustomAttributesTestsAttribute);
 
@@ -204,11 +204,11 @@ namespace AspectInjector.Tests.General
     {
     }
 
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     public class CustomAttributesTests_MultipleAspect
     {
-        [Advice(Advice.Kind.After)]
-        public void AfterMethod([Advice.Argument(Advice.Argument.Source.Injections)] Attribute[] data)
+        [Advice(Kind.After)]
+        public void AfterMethod([Argument(Source.Injections)] Attribute[] data)
         {
             Checker.Passed = data.Length == 2
                 && data[0] is CustomAttributesTests_Multiple1Attribute

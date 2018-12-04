@@ -14,12 +14,17 @@ namespace AspectInjector.Broker
         /// <param name="aspect">Aspect to inject.</param>
         public Injection(Type aspect)
         {
+            Aspect = aspect;
         }
 
         /// <summary>
         /// Specifies priority for this cut. The higher priority the earlier execution.
         /// </summary>
         public ushort Priority { get; set; }
+        /// <summary>
+        /// Aspect type that is being injected.
+        /// </summary>
+        public Type Aspect { get; }
 
         ///// <summary>
         ///// Specifies subsequent members filter by name. The aspect will be applied to selected members as well. <code>null</code> means - all members.

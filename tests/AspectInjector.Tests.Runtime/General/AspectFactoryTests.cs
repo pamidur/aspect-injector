@@ -21,13 +21,13 @@ namespace AspectInjector.Tests.General
     {
     }
 
-    [Aspect(Aspect.Scope.PerInstance, Factory = typeof(AspectFactory))]
+    [Aspect(Scope.PerInstance, Factory = typeof(AspectFactory))]
     [Injection(typeof(AspectFactoryTests_Aspect))]
     public class AspectFactoryTests_Aspect : Attribute
     {
         private static object aaa;
 
-        [Advice(Advice.Kind.After, Targets = Advice.Target.Constructor)]
+        [Advice(Kind.After, Targets = Target.Constructor)]
         public void Fact()
         {
         }

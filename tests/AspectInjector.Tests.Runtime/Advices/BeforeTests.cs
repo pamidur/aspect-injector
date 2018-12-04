@@ -97,35 +97,35 @@ namespace AspectInjector.Tests.Advices
     }
 
     //aspects
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     [Injection(typeof(BeforeTests_Aspect))]
     internal class BeforeTests_Aspect : Attribute
     {
         //Property
-        [Advice(Advice.Kind.Before, Targets = Advice.Target.Setter)]
+        [Advice(Kind.Before, Targets = Target.Setter)]
         public void BeforeSetter() { Checker.Passed = true; }
 
-        [Advice(Advice.Kind.Before, Targets = Advice.Target.Getter)]
+        [Advice(Kind.Before, Targets = Target.Getter)]
         public void BeforeGetter() { Checker.Passed = true; }
 
         //Event
-        [Advice(Advice.Kind.Before, Targets = Advice.Target.EventAdd)]
+        [Advice(Kind.Before, Targets = Target.EventAdd)]
         public void BeforeEventAdd() { Checker.Passed = true; }
 
-        [Advice(Advice.Kind.Before, Targets = Advice.Target.EventRemove)]
+        [Advice(Kind.Before, Targets = Target.EventRemove)]
         public void BeforeEventRemove() { Checker.Passed = true; }
 
         //Method
-        [Advice(Advice.Kind.Before, Targets = Advice.Target.Method)]
+        [Advice(Kind.Before, Targets = Target.Method)]
         public void BeforeMethod() { Checker.Passed = true; }
     }
 
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect( Scope.Global)]
     [Injection(typeof(BeforeTests_BeforeConstructorAspect))]
     internal class BeforeTests_BeforeConstructorAspect : Attribute
     {
-        [Advice(Advice.Kind.Before, Targets = Advice.Target.Constructor)]
-        public void BeforeConstructor([Advice.Argument(Advice.Argument.Source.Instance)] object instance)
+        [Advice(Kind.Before, Targets = Target.Constructor)]
+        public void BeforeConstructor([Argument(Source.Instance)] object instance)
         {
             if (instance != null)
                 Checker.Passed = true;
@@ -133,11 +133,11 @@ namespace AspectInjector.Tests.Advices
     }
 
     [Mixin(typeof(IDisposable))]
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     [Injection(typeof(BeforeTests_BeforeConstructorWithInterfaceAspect))]
     internal class BeforeTests_BeforeConstructorWithInterfaceAspect : Attribute, IDisposable
     {
-        [Advice(Advice.Kind.Before, Targets = Advice.Target.Constructor)]
+        [Advice(Kind.Before, Targets = Target.Constructor)]
         public void BeforeConstructor() { Checker.Passed = true; }
 
         public void Dispose()

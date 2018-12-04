@@ -4,14 +4,12 @@ using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System.Collections.Generic;
-using static AspectInjector.Broker.Advice;
 
 namespace AspectInjector.Core.Advice.Effects
 {
     internal abstract class AdviceEffectBase : Effect
     {
         public Target Target { get; set; }
-        public AccessModifier WithAccess { get; set; }
 
         public MethodDefinition Method { get; set; }
         public List<AdviceArgument> Arguments { get; set; } = new List<AdviceArgument>();
@@ -20,22 +18,22 @@ namespace AspectInjector.Core.Advice.Effects
 
         public override bool IsApplicableFor(IMemberDefinition target)
         {
-            if (Target.HasFlag(Target.Method) && target is MethodDefinition method && method.IsNormalMethod())
+            if ((Target & Target.Method) != 0 && target is MethodDefinition method && method.IsNormalMethod())
                 return IsApplicableForModifier(method);
 
-            if (Target.HasFlag(Target.Constructor) && target is MethodDefinition ctor && ctor.IsConstructor)
+            if ((Target & Target.Constructor) != 0 && target is MethodDefinition ctor && ctor.IsConstructor)
                 return IsApplicableForModifier(ctor);
 
-            if (Target.HasFlag(Target.Setter) && target is PropertyDefinition setter && setter.SetMethod != null)
+            if ((Target & Target.Setter) != 0 && target is PropertyDefinition setter && setter.SetMethod != null)
                 return IsApplicableForModifier(setter.SetMethod);
 
-            if (Target.HasFlag(Target.Getter) && target is PropertyDefinition getter && getter.GetMethod != null)
+            if ((Target & Target.Getter) != 0 && target is PropertyDefinition getter && getter.GetMethod != null)
                 return IsApplicableForModifier(getter.GetMethod);
 
-            if (Target.HasFlag(Target.EventAdd) && target is EventDefinition add && add.AddMethod != null)
+            if ((Target & Target.EventAdd) != 0 && target is EventDefinition add && add.AddMethod != null)
                 return IsApplicableForModifier(add.AddMethod);
 
-            if (Target.HasFlag(Target.EventRemove) && target is EventDefinition remove && remove.RemoveMethod != null)
+            if ((Target & Target.EventRemove) != 0 && target is EventDefinition remove && remove.RemoveMethod != null)
                 return IsApplicableForModifier(remove.RemoveMethod);
 
             return false;
@@ -45,17 +43,17 @@ namespace AspectInjector.Core.Advice.Effects
         protected bool IsApplicableForModifier(MethodDefinition target)
         {
             if (
-                (WithAccess.HasFlag(AccessModifier.Instance) && !target.IsStatic)
-                || (WithAccess.HasFlag(AccessModifier.Static) && target.IsStatic)
+                ((Target & Target.Instance) != 0 && !target.IsStatic)
+                || ((Target & Target.Static) != 0 && target.IsStatic)
                 )
             {
                 if (
-                    (WithAccess.HasFlag(AccessModifier.Private) && target.IsPrivate)
-                    || (WithAccess.HasFlag(AccessModifier.Public) && target.IsPublic)
-                    || (WithAccess.HasFlag(AccessModifier.Protected) && target.IsFamily)
-                    || (WithAccess.HasFlag(AccessModifier.ProtectedInternal) && target.IsFamilyOrAssembly)
-                    || (WithAccess.HasFlag(AccessModifier.ProtectedPrivate) && target.IsFamilyAndAssembly)
-                    || (WithAccess.HasFlag(AccessModifier.Internal) && target.IsAssembly)
+                    ((Target & Target.Private) != 0 && target.IsPrivate)
+                    || ((Target & Target.Public) != 0 && target.IsPublic)
+                    || ((Target & Target.Protected) != 0 && target.IsFamily)
+                    || ((Target & Target.ProtectedInternal) != 0 && target.IsFamilyOrAssembly)
+                    || ((Target & Target.ProtectedPrivate) != 0 && target.IsFamilyAndAssembly)
+                    || ((Target & Target.Internal) != 0 && target.IsAssembly)
                     )
                     return true;
             }
@@ -65,9 +63,7 @@ namespace AspectInjector.Core.Advice.Effects
 
         protected override bool IsEqualTo(Effect effect)
         {
-            var other = effect as AdviceEffectBase;
-
-            if (other == null)
+            if (!(effect is AdviceEffectBase other))
                 return false;
 
             return other.Target == Target && other.Kind == Kind && other.Method == Method;

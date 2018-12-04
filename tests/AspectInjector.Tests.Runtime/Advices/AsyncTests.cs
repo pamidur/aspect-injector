@@ -98,41 +98,41 @@ namespace AspectInjector.Tests.Advices
             return testData;
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(AsyncTests_ArgumentsAspect))]
         public class AsyncTests_ArgumentsAspect : Attribute
         {
-            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
-            public void AfterMethod([Advice.Argument(Advice.Argument.Source.ReturnValue)] object value,
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args
+            [Advice(Kind.After, Targets = Target.Method)]
+            public void AfterMethod([Argument(Source.ReturnValue)] object value,
+                [Argument(Source.Arguments)] object[] args
                 )
             {
                 Checker.Passed = args[0].ToString() == "args_test" && value != null;
             }
         }
 
-        [Aspect(Aspect.Scope.PerInstance)]
+        [Aspect(Scope.PerInstance)]
         [Injection(typeof(AsyncTests_SimpleAspect))]
         public class AsyncTests_SimpleAspect : Attribute
         {
-            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
+            [Advice(Kind.After, Targets = Target.Method)]
             public void AfterMethod(
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
-                [Advice.Argument(Advice.Argument.Source.Instance)] object th
+                [Argument(Source.Arguments)] object[] args,
+                [Argument(Source.Instance)] object th
                 )
             {
                 Checker.Passed = AsyncTests.Data;
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(AsyncTests_SimpleAspectGlobal))]
         public class AsyncTests_SimpleAspectGlobal : Attribute
         {
-            [Advice(Advice.Kind.After, Targets = Advice.Target.Method)]
+            [Advice(Kind.After, Targets = Target.Method)]
             public void AfterMethod(
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
-                [Advice.Argument(Advice.Argument.Source.Instance)] object th
+                [Argument(Source.Arguments)] object[] args,
+                [Argument(Source.Instance)] object th
 
                 )
             {

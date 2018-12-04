@@ -1,11 +1,12 @@
-﻿using AspectInjector.Core.Contracts;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
 
 namespace AspectInjector.Core.Advice.Effects
 {
     internal class BeforeAdviceEffect : AdviceEffectBase
     {
-        public override Broker.Advice.Kind Kind => Broker.Advice.Kind.Before;
+        public override Kind Kind => Kind.Before;
 
         public override bool Validate(AspectDefinition aspect, ILogger log)
         {

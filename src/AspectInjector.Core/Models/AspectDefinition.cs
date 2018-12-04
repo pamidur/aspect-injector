@@ -1,4 +1,5 @@
-﻿using AspectInjector.Core.Contracts;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using Mono.Cecil;
 using System.Collections.Generic;

@@ -1,10 +1,10 @@
-﻿using AspectInjector.Core.Advice.Effects;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Advice.Weavers.Processes;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
-using static AspectInjector.Broker.Advice;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
@@ -19,7 +19,7 @@ namespace AspectInjector.Core.Advice.Weavers
             _log = log;
         }
 
-        public virtual bool CanWeave(Injection injection)
+        public virtual bool CanWeave(Models.Injection injection)
         {
             var result =
                 (injection.Effect is BeforeAdviceEffect || injection.Effect is AfterAdviceEffect) &&
@@ -35,7 +35,7 @@ namespace AspectInjector.Core.Advice.Weavers
             return result;
         }
 
-        public void Weave(Injection injection)
+        public void Weave(Models.Injection injection)
         {
             var effect = (AdviceEffectBase)injection.Effect;
 
@@ -80,7 +80,7 @@ namespace AspectInjector.Core.Advice.Weavers
             _log.LogError(CompilationMessage.From($"Unsupported target {injection.Target.GetType().Name}", injection.Target));
         }
 
-        protected virtual void WeaveMethod(MethodDefinition method, Injection injection)
+        protected virtual void WeaveMethod(MethodDefinition method, Models.Injection injection)
         {
             if (injection.Effect is AfterAdviceEffect)
             {

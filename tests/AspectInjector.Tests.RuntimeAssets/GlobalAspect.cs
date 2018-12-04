@@ -11,7 +11,7 @@ namespace AspectInjector.Tests.Assets
 
     }
 
-    [Aspect(Aspect.Scope.Global)]
+    [Aspect(Scope.Global)]
     [Mixin(typeof(IAssetIface1Wrapper<Asset2>.IAssetIface1<Asset1>))]
     public class GlobalAspect : TestAspectBase, IAssetIface1Wrapper<Asset2>.IAssetIface1<Asset1>
     {
@@ -22,17 +22,17 @@ namespace AspectInjector.Tests.Assets
 
         
 
-        [Advice(Advice.Kind.After)]
+        [Advice(Kind.After)]
         public void After(
-            [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
-            //[Advice.Argument(Advice.Argument.Source.Attributes)] Attribute[] attrs,
-            [Advice.Argument(Advice.Argument.Source.Instance)] object _this,
-            [Advice.Argument(Advice.Argument.Source.Method)] MethodBase method,
-            [Advice.Argument(Advice.Argument.Source.Name)] string name,
-            [Advice.Argument(Advice.Argument.Source.ReturnType)] Type retType,
-            [Advice.Argument(Advice.Argument.Source.ReturnValue)] object retVal,
-            [Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
-            [Advice.Argument(Advice.Argument.Source.Type)] Type hostType
+            [Argument(Source.Arguments)] object[] args,
+            //[Argument(Source.Attributes)] Attribute[] attrs,
+            [Argument(Source.Instance)] object _this,
+            [Argument(Source.Method)] MethodBase method,
+            [Argument(Source.Name)] string name,
+            [Argument(Source.ReturnType)] Type retType,
+            [Argument(Source.ReturnValue)] object retVal,
+            [Argument(Source.Target)] Func<object[], object> target,
+            [Argument(Source.Type)] Type hostType
             )
         {
             base.LogArguments(args, AfterExecuted);
@@ -48,17 +48,17 @@ namespace AspectInjector.Tests.Assets
             TestLog.Write(AfterExecuted);
         }
 
-        [Advice(Advice.Kind.Before)]
+        [Advice(Kind.Before)]
         public void Before(
-            [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
-            //[Advice.Argument(Advice.Argument.Source.Attributes)] Attribute[] attrs,
-            [Advice.Argument(Advice.Argument.Source.Instance)] object _this,
-            [Advice.Argument(Advice.Argument.Source.Method)] MethodBase method,
-            [Advice.Argument(Advice.Argument.Source.Name)] string name,
-            [Advice.Argument(Advice.Argument.Source.ReturnType)] Type retType,
-            [Advice.Argument(Advice.Argument.Source.ReturnValue)] object retVal,
-            [Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
-            [Advice.Argument(Advice.Argument.Source.Type)] Type hostType
+            [Argument(Source.Arguments)] object[] args,
+            //[Argument(Source.Attributes)] Attribute[] attrs,
+            [Argument(Source.Instance)] object _this,
+            [Argument(Source.Method)] MethodBase method,
+            [Argument(Source.Name)] string name,
+            [Argument(Source.ReturnType)] Type retType,
+            [Argument(Source.ReturnValue)] object retVal,
+            [Argument(Source.Target)] Func<object[], object> target,
+            [Argument(Source.Type)] Type hostType
             )
         {
             base.LogArguments(args, BeforeExecuted);
@@ -74,17 +74,17 @@ namespace AspectInjector.Tests.Assets
             TestLog.Write(BeforeExecuted);
         }
 
-        [Advice(Advice.Kind.Around)]
+        [Advice(Kind.Around)]
         public object Around(
-            [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
-            //[Advice.Argument(Advice.Argument.Source.Attributes)] Attribute[] attrs,
-            [Advice.Argument(Advice.Argument.Source.Instance)] object _this,
-            [Advice.Argument(Advice.Argument.Source.Method)] MethodBase method,
-            [Advice.Argument(Advice.Argument.Source.Name)] string name,
-            [Advice.Argument(Advice.Argument.Source.ReturnType)] Type retType,
-            [Advice.Argument(Advice.Argument.Source.ReturnValue)] object retVal,
-            [Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
-            [Advice.Argument(Advice.Argument.Source.Type)] Type hostType
+            [Argument(Source.Arguments)] object[] args,
+            //[Argument(Source.Attributes)] Attribute[] attrs,
+            [Argument(Source.Instance)] object _this,
+            [Argument(Source.Method)] MethodBase method,
+            [Argument(Source.Name)] string name,
+            [Argument(Source.ReturnType)] Type retType,
+            [Argument(Source.ReturnValue)] object retVal,
+            [Argument(Source.Target)] Func<object[], object> target,
+            [Argument(Source.Type)] Type hostType
             )
         {
             base.LogArguments(args, AroundEnter);

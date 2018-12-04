@@ -1,4 +1,5 @@
-﻿using AspectInjector.Core.Advice.Effects;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Fluent.Models;
@@ -7,7 +8,6 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Linq;
-using static AspectInjector.Broker.Advice.Argument;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
@@ -16,12 +16,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
     {
         protected readonly MethodDefinition _target;
         protected readonly TEffect _effect;
-        protected readonly Injection _injection;
+        protected readonly Models.Injection _injection;
         protected readonly ExtendedTypeSystem _ts;
         protected readonly ILogger _log;
         protected readonly AspectDefinition _aspect;
 
-        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, Injection injection)
+        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, Models.Injection injection)
         {
             _log = log;
             _target = target;

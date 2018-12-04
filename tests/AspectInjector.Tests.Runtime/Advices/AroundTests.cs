@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Broker;
+using static AspectInjector.Broker.Advice;
 using System;
 using System.Reflection;
 using Xunit;
@@ -170,25 +171,25 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(AroundTests_Aspect1))]
         internal class AroundTests_Aspect1 : Attribute
         {
-            [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
-            public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
+            [Advice(Kind.Around, Targets = Target.Method)]
+            public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
+                [Argument(Source.Arguments)] object[] arguments)
             {
                 return target(new object[] { arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], true, arguments[7] });
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(AroundTests_Aspect2))]
         internal class AroundTests_Aspect2 : Attribute
         {
-            [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
-            public object AroundMethod([Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target,
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments)
+            [Advice(Kind.Around, Targets = Target.Method)]
+            public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
+                [Argument(Source.Arguments)] object[] arguments)
             {
                 return target(new object[] { arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], arguments[6], true });
             }
@@ -204,14 +205,14 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
-        [Aspect(Aspect.Scope.Global)]
+        [Aspect(Scope.Global)]
         [Injection(typeof(AroundTests_ArgumentsModificationAspect))]
         internal class AroundTests_ArgumentsModificationAspect : Attribute
         {
-            [Advice(Advice.Kind.Around, Targets = Advice.Target.Method)]
+            [Advice(Kind.Around, Targets = Target.Method)]
             public object AroundMethod(
-                [Advice.Argument(Advice.Argument.Source.Arguments)] object[] args,
-                [Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> target
+                [Argument(Source.Arguments)] object[] args,
+                [Argument(Source.Target)] Func<object[], object> target
                 )
             {
                 args[0] = 2;
