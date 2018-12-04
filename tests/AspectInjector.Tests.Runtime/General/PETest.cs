@@ -1,51 +1,69 @@
-﻿//using Xunit;
-//using Microsoft.Win32;
-//using System;
-//using System.Diagnostics;
-//using System.IO;
-//using System.Linq;
-//using System.Reflection;
+﻿using AspectInjector.Tests.Assets;
+using ILVerify;
+using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.PortableExecutable;
+using Xunit;
 
-//namespace AspectInjector.Tests.General
-//{
-//    [TestClass]
-//    public class PETest
-//    {
-//        [TestMethod]
-//        public void General_PEIntegrity_IsOk()
-//        {
-//            var sdkFolder = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\NETFXSDK\\4.6", "InstallationFolder", null) as string;
-//            if (null == sdkFolder)
-//                throw new InvalidOperationException("Could not find Windows SDK v10.0A installation folder.");
+namespace AspectInjector.Tests.General
+{
+    public class Resolver : ResolverBase
+    {
+        public Resolver()
+        {
+            LocalDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            SystemDir = Path.GetDirectoryName(typeof(string).Assembly.Location);
 
-//            var peverify = Directory.GetFiles(sdkFolder, "peverify.exe", SearchOption.AllDirectories).First();
+            References = AppDomain.CurrentDomain.GetAssemblies().Where(a=>!a.IsDynamic).ToArray();
+        }
+        public string LocalDir { get; }
+        public string SystemDir { get; }
+        public Assembly[] References { get; }
 
-//    //        if(latestSdk == null)
-//    //            throw new InvalidOperationException("Could not find Windows SDK.");            
+        protected override PEReader ResolveCore(string simpleName)
+        {
+            if (!simpleName.EndsWith(".dll")) simpleName += ".dll";
 
-//    //        var sdkFolder = sdksNodes.OpenSubKey(latestSdk).GetValue("InstallationFolder", null) as string;
+            var path = References.FirstOrDefault(r => Path.GetFileName(r.Location) == simpleName)?.Location;
 
-//    //        if (sdkFolder == null)
-//    //            throw new InvalidOperationException($"SDK folder is not found for net {latestSdk}.");
+            if (!File.Exists(path)) path = Path.Combine(LocalDir, simpleName);
+            if (!File.Exists(path)) path = Path.Combine(SystemDir, simpleName);
+            if (!File.Exists(path)) return null;
 
-//    //        var peverify = Directory.GetFiles(sdkFolder, "peverify.exe", SearchOption.AllDirectories).First();
+            var fm = new FileStream(path, FileMode.Open, FileAccess.Read);
+            return new PEReader(fm);
+        }
+    }
 
+    public class PETest
+    {
+        private readonly Resolver _resolver;
+        private readonly Verifier _verifier;
+        private AssemblyName _systemModule = new AssemblyName("mscorlib");
 
-//    //        var assemblyPath = Assembly.GetExecutingAssembly().Location;
+        public PETest()
+        {
+            _resolver = new Resolver();
+            _verifier = new Verifier(_resolver);
+            _verifier.SetSystemModuleName(_systemModule);
+        }
 
-//    //        var proc = Process.Start(new ProcessStartInfo(peverify, assemblyPath) { UseShellExecute = false });
+        [Fact]
+        public void IL_Runtime_Is_CorrectGeneral()
+        {
+            var assembly = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
+            var result = _verifier.Verify(_resolver.Resolve(assembly)).ToArray();
+            Assert.Empty(result);
+        }
 
-//    //        proc.WaitForExit();
-
-//    //        Assert.Equal(0, proc.ExitCode);
-//    //    }
-//    //}
-
-    
-//    //public class PETest
-//    //{
-//    //    [Fact]
-//    //    public void General_PEIntegrity_IsOk()
-//    //    {
-//    //        var sdksNodes = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64).OpenSubKey("SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\NETFXSDK\\");
-//    //        var latestSdk = sdksNodes.GetSubKeyNames().OrderByDescending(s => s).FirstOrDefault();
+        [Fact]
+        public void IL_RuntimeAssets_Is_CorrectGeneral()
+        {
+            var assembly = Path.GetFileName(typeof(TestLog).Assembly.Location);
+            var result = _verifier.Verify(_resolver.Resolve(assembly)).ToArray();
+            Assert.Empty(result);
+        }
+    }
+}
