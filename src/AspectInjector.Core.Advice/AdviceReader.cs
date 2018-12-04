@@ -45,10 +45,10 @@ namespace AspectInjector.Core.Advice
 
                     advice.Method = method;
                     advice.Target = ca.GetPropertyValue<Target>(nameof(Broker.Advice.Targets));
-                    if (advice.Target == Target.Any) advice.Target = (Target)byte.MaxValue;
+                    if (advice.Target == 0) advice.Target = Target.Any;
 
                     advice.WithAccess = ca.GetPropertyValue<AccessModifier>(nameof(Broker.Advice.WithAccess));
-                    if (advice.WithAccess == AccessModifier.Any) advice.WithAccess = (AccessModifier)byte.MaxValue;
+                    if (advice.WithAccess == 0) advice.WithAccess = AccessModifier.Any;
 
                     advice.Arguments = ExtractArguments(method);
 

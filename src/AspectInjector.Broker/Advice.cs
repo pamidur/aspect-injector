@@ -54,11 +54,6 @@ namespace AspectInjector.Broker
         public enum Target : byte
         {
             /// <summary>
-            /// Advice method is injected into any target's member.
-            /// </summary>
-            Any = 0,
-
-            /// <summary>
             /// Advice method is injected into target's constructors.
             /// </summary>
             Constructor = 1,
@@ -86,7 +81,12 @@ namespace AspectInjector.Broker
             /// <summary>
             /// Advice method is injected into target's event unsubscribe handlers.
             /// </summary>
-            EventRemove = 32
+            EventRemove = 32,
+
+            /// <summary>
+            /// Advice method is injected into any target's member.
+            /// </summary>
+            Any = Constructor + Method + Getter + Setter + EventAdd + EventRemove
         }
 
         /// <summary>

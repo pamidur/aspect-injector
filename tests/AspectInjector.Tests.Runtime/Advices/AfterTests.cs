@@ -16,7 +16,7 @@ namespace AspectInjector.Tests.Advices
         {
             Checker.Passed = false;
 
-            _afterTestClass.Fact("");
+            _afterTestClass.TestMethod("");
             Assert.True(Checker.Passed);
         }
 
@@ -112,7 +112,7 @@ namespace AspectInjector.Tests.Advices
     [AfterTests_AfterMethodAspect]
     internal class AfterTests_AfterMethodTarget
     {
-        public void Fact(string data)
+        public void TestMethod(string data)
         {
         }
 

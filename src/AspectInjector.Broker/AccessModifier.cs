@@ -9,11 +9,6 @@ namespace AspectInjector.Broker
     public enum AccessModifier : byte
     {
         /// <summary>
-        /// All members.
-        /// </summary>
-        Any = 0,
-
-        /// <summary>
         /// Private members.
         /// </summary>
         Private = 1,
@@ -44,6 +39,11 @@ namespace AspectInjector.Broker
         Public = 32,
 
         /// <summary>
+        /// Members of any access.
+        /// </summary>
+        AnyAccess = Private + Internal + Protected + ProtectedInternal + ProtectedPrivate + Public,
+
+        /// <summary>
         /// Static members.
         /// </summary>
         Static = 64,
@@ -51,6 +51,16 @@ namespace AspectInjector.Broker
         /// <summary>
         /// Non static members.
         /// </summary>
-        Instance = 128
+        Instance = 128,
+
+        /// <summary>
+        /// Members of any scope.
+        /// </summary>
+        AnyScope = Instance + Static,
+
+        /// <summary>
+        /// All members.
+        /// </summary>
+        Any = AnyAccess + AnyScope
     }
 }

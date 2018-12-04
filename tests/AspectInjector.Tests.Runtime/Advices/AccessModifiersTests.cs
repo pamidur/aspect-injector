@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Broker;
 using System;
+using System.Reflection;
 using Xunit;
 
 namespace AspectInjector.Tests.Runtime.Advices
@@ -11,51 +12,39 @@ namespace AspectInjector.Tests.Runtime.Advices
         [Fact]
         public void Advices_Inject_Into_Internal_Static()
         {
-            Checker.Passed = false;
             TestTarget.InternalStatic();
-            Assert.True(Checker.Passed);
         }
 
         [Fact]
         public void Advices_Inject_Into_Internal()
         {
-            Checker.Passed = false;
             _testClass.Internal();
-            Assert.True(Checker.Passed);
         }
 
         [Fact]
         public void Advices_Inject_Skips_Public()
         {
-            Checker.Passed = false;
             _testClass.Public();
-            Assert.False(Checker.Passed);
         }
 
         [AccessTestAspect]
         internal class TestTarget
         {
-            public void Public()
-            {
-            }
-
-            internal void Internal()
-            {
-            }
-
-            internal static void InternalStatic()
-            {
-            }
+            public void Public() { }
+            internal void Internal() => Assert.True(false);
+            internal static void InternalStatic() => Assert.True(false);
         }
 
         [Aspect(Aspect.Scope.Global)]
         [Injection(typeof(AccessTestAspect))]
         internal class AccessTestAspect : Attribute
         {
-            [Advice(Advice.Kind.Before, WithAccess = AccessModifier.Internal | AccessModifier.Static | AccessModifier.Instance)]
-            public void BeforeMethod()
+            [Advice(Advice.Kind.Around, WithAccess = AccessModifier.Internal | AccessModifier.AnyScope)]
+            public object Around([Advice.Argument(Advice.Argument.Source.Method)] MethodBase method)
             {
-                Checker.Passed = true;
+                Assert.True(method.IsAssembly);
+                Assert.False(method.IsPublic);
+                return null;
             }
         }
     }
