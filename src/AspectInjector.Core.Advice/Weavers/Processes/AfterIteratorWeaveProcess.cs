@@ -13,7 +13,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AfterIteratorWeaveProcess : AfterStateMachineWeaveProcessBase
     {
-        public AfterIteratorWeaveProcess(ILogger log, MethodDefinition target, Injection injection)
+        public AfterIteratorWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)
         {
 

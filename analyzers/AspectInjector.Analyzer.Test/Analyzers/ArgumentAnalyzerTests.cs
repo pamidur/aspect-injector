@@ -44,7 +44,8 @@ namespace TestNameSpace
             [Argument(Source.Arguments)] int a,
             [Argument(Source.ReturnType)] int rt,
             [Argument(Source.ReturnValue)] int rv,
-            [Argument(Source.Target)] int target 
+            [Argument(Source.Target)] int target, 
+            [Argument(Source.Injections)] int inj
         )
         { }
     }
@@ -60,6 +61,7 @@ namespace TestNameSpace
                 DiagnosticResult.From(Rules.ArgumentIsAlwaysNull, 15, 14),
                 DiagnosticResult.From(Rules.ArgumentMustHaveValidType, 16, 14),
                 DiagnosticResult.From(Rules.ArgumentIsAlwaysNull, 16, 14),
+                DiagnosticResult.From(Rules.ArgumentMustHaveValidType, 17, 14),
 
             };
             VerifyCSharpDiagnostic(test, expected);

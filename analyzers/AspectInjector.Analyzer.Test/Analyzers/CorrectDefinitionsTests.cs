@@ -33,7 +33,8 @@ namespace TestNameSpace
             [Argument(Source.Method)] System.Reflection.MethodBase m,            
             [Argument(Source.Name)] string n,
             [Argument(Source.Arguments)] object[] a,
-            [Argument(Source.ReturnType)] Type rt            
+            [Argument(Source.ReturnType)] Type rt,
+            [Argument(Source.Injections)] Attribute[] inj
         ){}
 
         [Advice(Kind.After)]
@@ -44,7 +45,8 @@ namespace TestNameSpace
             [Argument(Source.Name)] string n,
             [Argument(Source.Arguments)] object[] a,
             [Argument(Source.ReturnType)] Type rt,            
-            [Argument(Source.ReturnValue)] object rv            
+            [Argument(Source.ReturnValue)] object rv,
+            [Argument(Source.Injections)] Attribute[] inj
         ){}
 
         [Advice(Kind.Around)]
@@ -55,7 +57,8 @@ namespace TestNameSpace
             [Argument(Source.Name)] string n,
             [Argument(Source.Arguments)] object[] a,
             [Argument(Source.ReturnType)] Type rt,            
-            [Argument(Source.Target)] Func<object[],object> target          
+            [Argument(Source.Target)] Func<object[],object> target,
+            [Argument(Source.Injections)] Attribute[] inj
         ){ return null; }
 
     }

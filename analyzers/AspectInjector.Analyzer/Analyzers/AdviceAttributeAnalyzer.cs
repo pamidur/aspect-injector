@@ -29,8 +29,7 @@ namespace AspectInjector.Analyzer.Analyzers
             if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.AdviceType)
                 return;
 
-            var method = context.ContainingSymbol as IMethodSymbol;
-            if (method == null)
+            if (!(context.ContainingSymbol is IMethodSymbol method))
                 return;
 
             var location = context.Node.GetLocation();

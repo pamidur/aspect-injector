@@ -19,7 +19,7 @@ namespace AspectInjector.Core.Advice.Weavers
             _log = log;
         }
 
-        public virtual bool CanWeave(Models.Injection injection)
+        public virtual bool CanWeave(Models.InjectionDefinition injection)
         {
             var result =
                 (injection.Effect is BeforeAdviceEffect || injection.Effect is AfterAdviceEffect) &&
@@ -35,7 +35,7 @@ namespace AspectInjector.Core.Advice.Weavers
             return result;
         }
 
-        public void Weave(Models.Injection injection)
+        public void Weave(Models.InjectionDefinition injection)
         {
             var effect = (AdviceEffectBase)injection.Effect;
 
@@ -80,7 +80,7 @@ namespace AspectInjector.Core.Advice.Weavers
             _log.LogError(CompilationMessage.From($"Unsupported target {injection.Target.GetType().Name}", injection.Target));
         }
 
-        protected virtual void WeaveMethod(MethodDefinition method, Models.Injection injection)
+        protected virtual void WeaveMethod(MethodDefinition method, Models.InjectionDefinition injection)
         {
             if (injection.Effect is AfterAdviceEffect)
             {

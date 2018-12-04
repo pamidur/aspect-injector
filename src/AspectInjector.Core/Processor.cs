@@ -152,7 +152,7 @@ namespace AspectInjector.Core
             }
         }
 
-        private List<Injection> ExcludeAspectInjections(IEnumerable<Injection> injections, IEnumerable<AspectDefinition> aspects)
+        private List<InjectionDefinition> ExcludeAspectInjections(IEnumerable<InjectionDefinition> injections, IEnumerable<AspectDefinition> aspects)
         {
             var aspectTypes = new HashSet<TypeDefinition>(aspects.Select(a => a.Host));
             return injections.Where(i => !aspectTypes.Contains(i.Target.DeclaringType)).ToList();

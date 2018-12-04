@@ -18,7 +18,7 @@ namespace AspectInjector.Core.Services
             _log = logger;
         }
 
-        public IReadOnlyCollection<Injection> ReadAll(AssemblyDefinition assembly)
+        public IReadOnlyCollection<InjectionDefinition> ReadAll(AssemblyDefinition assembly)
         {
             var aspects = ExtractInjections(assembly);
 
@@ -42,9 +42,9 @@ namespace AspectInjector.Core.Services
             return aspects.ToList();
         }
 
-        protected virtual IEnumerable<Injection> ExtractInjections(ICustomAttributeProvider target)
+        protected virtual IEnumerable<InjectionDefinition> ExtractInjections(ICustomAttributeProvider target)
         {
-            var injections = Enumerable.Empty<Injection>();
+            var injections = Enumerable.Empty<InjectionDefinition>();
 
             foreach (var trigger in target.CustomAttributes
                 .Select(a => new { attribute = a, injections = a.AttributeType.Resolve().CustomAttributes.Where(t => t.AttributeType.FullName == WellKnownTypes.Injection).ToArray() })
@@ -55,9 +55,9 @@ namespace AspectInjector.Core.Services
             return injections;
         }
 
-        private IEnumerable<Injection> ParseInjectionAttribute(ICustomAttributeProvider target, CustomAttribute trigger, CustomAttribute[] injectionAttrs)
+        private IEnumerable<InjectionDefinition> ParseInjectionAttribute(ICustomAttributeProvider target, CustomAttribute trigger, CustomAttribute[] injectionAttrs)
         {
-            var injections = Enumerable.Empty<Injection>();
+            var injections = Enumerable.Empty<InjectionDefinition>();
 
             foreach (var injectionAttr in injectionAttrs)
             {
@@ -78,9 +78,9 @@ namespace AspectInjector.Core.Services
             return injections;
         }
 
-        private IEnumerable<Injection> FindApplicableMembers(ICustomAttributeProvider target, AspectDefinition aspect, ushort priority, CustomAttribute trigger)
+        private IEnumerable<InjectionDefinition> FindApplicableMembers(ICustomAttributeProvider target, AspectDefinition aspect, ushort priority, CustomAttribute trigger)
         {
-            var result = Enumerable.Empty<Injection>();
+            var result = Enumerable.Empty<InjectionDefinition>();
 
             if (target is AssemblyDefinition assm)
                 result = result.Concat(assm.Modules.SelectMany(nt => FindApplicableMembers(nt, aspect, priority, trigger)));
@@ -103,12 +103,12 @@ namespace AspectInjector.Core.Services
             return result;
         }
 
-        private IEnumerable<Injection> CreateInjections(IMemberDefinition target, AspectDefinition aspect, ushort priority, CustomAttribute trigger)
+        private IEnumerable<InjectionDefinition> CreateInjections(IMemberDefinition target, AspectDefinition aspect, ushort priority, CustomAttribute trigger)
         {
             if (target is TypeDefinition && target.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.Aspect))
-                return Enumerable.Empty<Injection>();
+                return Enumerable.Empty<InjectionDefinition>();
 
-            return aspect.Effects.Where(e => e.IsApplicableFor(target)).Select(e => new Injection()
+            return aspect.Effects.Where(e => e.IsApplicableFor(target)).Select(e => new InjectionDefinition()
             {
                 Target = target,
                 Source = aspect,
@@ -118,7 +118,7 @@ namespace AspectInjector.Core.Services
             });
         }
 
-        private Injection MergeInjections(Injection a1, Injection a2)
+        private InjectionDefinition MergeInjections(InjectionDefinition a1, InjectionDefinition a2)
         {
             a1.Priority = Enumerable.Max(new[] { a1.Priority, a2.Priority });
             a1.Triggers = a1.Triggers.Concat(a2.Triggers).Distinct().ToList();

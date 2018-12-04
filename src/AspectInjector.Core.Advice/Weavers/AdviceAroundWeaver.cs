@@ -15,13 +15,13 @@ namespace AspectInjector.Core.Advice.Weavers
         {
         }
 
-        public override bool CanWeave(Injection injection)
+        public override bool CanWeave(InjectionDefinition injection)
         {
             return injection.Effect is AroundAdviceEffect &&
                 (injection.Target is EventDefinition || injection.Target is PropertyDefinition || injection.Target is MethodDefinition);
         }
 
-        protected override void WeaveMethod(MethodDefinition method, Injection injection)
+        protected override void WeaveMethod(MethodDefinition method, InjectionDefinition injection)
         {
             if (injection.Effect is AroundAdviceEffect)
             {

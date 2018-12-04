@@ -6,6 +6,6 @@ namespace AspectInjector.Core.Contracts
 {
     public interface IInjectionReader
     {
-        IReadOnlyCollection<Injection> ReadAll(AssemblyDefinition assembly);
+        IReadOnlyCollection<InjectionDefinition> ReadAll(AssemblyDefinition assembly);
     }
 }

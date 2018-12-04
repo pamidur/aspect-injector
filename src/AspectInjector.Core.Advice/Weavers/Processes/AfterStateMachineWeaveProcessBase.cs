@@ -14,7 +14,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         protected readonly FieldDefinition _originalThis;
         protected readonly TypeDefinition _stateMachine;
 
-        public AfterStateMachineWeaveProcessBase(ILogger log, MethodDefinition target, Injection injection) : base(log, target, injection)
+        public AfterStateMachineWeaveProcessBase(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
         {
             _stateMachine = GetStateMachine();
             _originalThis = _target.IsStatic ? null : GetThisField();

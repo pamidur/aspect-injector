@@ -18,7 +18,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private VariableDefinition _retvar;
 
-        public AdviceAfterProcess(ILogger log, MethodDefinition target, Models.Injection injection)
+        public AdviceAfterProcess(ILogger log, MethodDefinition target, Models.InjectionDefinition injection)
             : base(log, target, injection)
         {
             if (_target.ReturnType.FullName != WellKnownTypes.Void && _effect.Arguments.Any(a => a.Source == Source.ReturnValue))

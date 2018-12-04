@@ -6,8 +6,8 @@ namespace AspectInjector.Core.Contracts
     {
         byte Priority { get; }
 
-        void Weave(Injection injection);
+        void Weave(InjectionDefinition injection);
 
-        bool CanWeave(Injection injection);
+        bool CanWeave(InjectionDefinition injection);
     }
 }

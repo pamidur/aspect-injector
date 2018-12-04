@@ -15,13 +15,13 @@ namespace AspectInjector.Core.Advice.Weavers
         {
         }
 
-        public override bool CanWeave(Injection injection)
+        public override bool CanWeave(InjectionDefinition injection)
         {
             var target = injection.Target as MethodDefinition;
             return injection.Effect is AfterAdviceEffect && target != null && (target.IsAsync() || target.IsIterator());
         }
 
-        protected override void WeaveMethod(MethodDefinition method, Injection injection)
+        protected override void WeaveMethod(MethodDefinition method, InjectionDefinition injection)
         {
             if (method.IsAsync())
                 new AfterAsyncWeaveProcess(_log, method, injection).Execute();

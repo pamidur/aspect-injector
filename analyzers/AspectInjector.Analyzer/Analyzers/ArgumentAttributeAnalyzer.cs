@@ -69,6 +69,9 @@ namespace AspectInjector.Analyzer.Analyzers
             if (source == Source.Type && param.Type.ToDisplayString() != WellKnown.Type)
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentMustHaveValidType, location, param.Name, WellKnown.Type));
 
+            if (source == Source.Injections && param.Type.ToDisplayString() != "System.Attribute[]")
+                context.ReportDiagnostic(Diagnostic.Create(Rules.ArgumentMustHaveValidType, location, param.Name, "System.Attribute[]"));
+
 
             if (adviceattr == null || adviceattr.AttributeConstructor == null)
                 return;

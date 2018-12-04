@@ -16,12 +16,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
     {
         protected readonly MethodDefinition _target;
         protected readonly TEffect _effect;
-        protected readonly Models.Injection _injection;
+        protected readonly Models.InjectionDefinition _injection;
         protected readonly ExtendedTypeSystem _ts;
         protected readonly ILogger _log;
         protected readonly AspectDefinition _aspect;
 
-        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, Models.Injection injection)
+        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, Models.InjectionDefinition injection)
         {
             _log = log;
             _target = target;
