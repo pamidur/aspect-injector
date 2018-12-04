@@ -54,6 +54,8 @@ namespace AspectInjector.Core.Fluent.Models
             MethodBase = md.ImportReference(typeof(MethodBase));
             Type = md.ImportReference(typeof(Type));
 
+            Attribute = md.ImportReference(typeof(Attribute));
+
             DebuggerHiddenAttribute = md.ImportReference(typeof(DebuggerHiddenAttribute));
             DebuggerStepThroughAttribute = md.ImportReference(typeof(DebuggerStepThroughAttribute));
             CompilerGeneratedAttribute = md.ImportReference(typeof(CompilerGeneratedAttribute));
@@ -152,6 +154,8 @@ namespace AspectInjector.Core.Fluent.Models
         public TypeReference Byte { get; private set; }
 
         public TypeReference Char { get; private set; }
+
+        public TypeReference Attribute { get; private set; }
 
         public TypeReference CompilerGeneratedAttribute { get; private set; }
 

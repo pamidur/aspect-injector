@@ -13,11 +13,11 @@ namespace AspectInjector.Tests.General
             var a = new TestClass();
 
             Checker.Passed = false;
-            //a.Do();
+            a.Do();
             Assert.True(Checker.Passed);
 
             Checker.Passed = false;
-            //a.Do2();
+            a.Do2();
             Assert.True(Checker.Passed);
         }
 
@@ -28,9 +28,6 @@ namespace AspectInjector.Tests.General
 
             [TestInjection2(2, new object[] { new object[] { 0.5f, true }, 1, typeof(TestInjection2) }, new double[] { 12d, -0.777d }, new float[] { }, new bool[] { true }, typeof(TestClass), StringComparison.InvariantCulture)]
             public void Do2() { }
-
-            [TestInjection2(new object[] { new object[] { } })]
-            public void Do3() { }
         }
 
         [Injection(typeof(TestAspect))]
@@ -105,7 +102,7 @@ namespace AspectInjector.Tests.General
 
 
 
-                Checker.Passed = (int)a.O == 2 && (float)((object[])a.Oa[0])[0] == 0.5f && (bool)((object[])a.Oa[0])[0] == true
+                Checker.Passed = (int)a.O == 2 && (float)((object[])a.Oa[0])[0] == 0.5f && (bool)((object[])a.Oa[0])[1] == true
                     && (int)a.Oa[1] == 1 && (Type)a.Oa[2] == typeof(TestInjection2) && a.Da[0] == 12d && a.Da[1] == -0.777d
                     && a.Fa.Length == 0 && a.Ba[0] == true && a.Type == typeof(TestClass) && a.E == StringComparison.InvariantCulture;
                     }

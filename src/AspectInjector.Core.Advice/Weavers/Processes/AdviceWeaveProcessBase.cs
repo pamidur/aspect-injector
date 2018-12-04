@@ -6,7 +6,6 @@ using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using static AspectInjector.Broker.Advice.Argument;
 
@@ -128,7 +127,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             }
             ).ToArray();
 
-            pc.CreateArray<Attribute>(elements);
+            pc.CreateArray(_ts.Attribute, elements);
         }
 
         protected virtual void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
@@ -137,7 +136,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 il.Load(p).ByVal(p.ParameterType)
             ).ToArray();
 
-            pc.CreateArray<object>(elements);
+            pc.CreateArray(_ts.Object, elements);
         }
 
         protected virtual void LoadNameArgument(PointCut pc, AdviceArgument parameter)

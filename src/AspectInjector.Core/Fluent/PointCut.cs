@@ -25,6 +25,14 @@ namespace AspectInjector.Core.Models
 
         public MethodDefinition Method { get { return _proc.Body.Method; } }
 
+        public ExtendedTypeSystem TypeSystem => _typeSystem;
+
+        public PointCut Append(Instruction instruction)
+        {
+            _proc.SafeInsertBefore(_refInst, instruction);
+            return this;
+        }
+
         public virtual PointCut CreatePointCut(Instruction instruction)
         {
             return new PointCut(_proc, instruction);
@@ -33,25 +41,6 @@ namespace AspectInjector.Core.Models
         public void Return()
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ret));
-        }
-
-        public PointCut CreateArray<T>(params Action<PointCut>[] elements)
-        {
-            return CreateArray(_typeSystem.Import(typeof(T)), elements);
-        }
-
-        public PointCut CreateArray(TypeReference elementType, params Action<PointCut>[] elements)
-        {
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, elements.Length));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Newarr, elementType));
-
-            for (var i = 0; i < elements.Length; i++)
-            {
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Dup));
-                SetByIndex(i, elements[i]);
-            }
-
-            return this;
         }
 
         public PointCut Call(MethodReference method, Action<PointCut> args = null)
@@ -274,29 +263,7 @@ namespace AspectInjector.Core.Models
             var argIndex = _proc.Body.Method.HasThis ? par.Index + 1 : par.Index;
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldarg, argIndex));
             return this;
-        }
-
-        public PointCut GetByIndex(int index)
-        {
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, index));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldelem_Ref));
-            return this;
-        }
-
-        public PointCut SetByIndex(int index, Action<PointCut> value)
-        {
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, index));
-            value(this);
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stelem_Ref));
-            return this;
-        }
-
-        public PointCut GetAddrByIndex(int index, TypeReference type)
-        {
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldc_I4, index));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldelema, type));
-            return this;
-        }
+        }        
 
         public PointCut ByVal(TypeReference typeOnStack)
         {
@@ -423,7 +390,7 @@ namespace AspectInjector.Core.Models
             var val = argument.Value;
 
             if (val.GetType().IsArray)
-                CreateArray(_typeSystem.Import(argument.Type.GetElementType()), ((Array)val).Cast<object>().Select<object, Action<PointCut>>(v => il => Value(v)).ToArray());
+                this.CreateArray(_typeSystem.Import(argument.Type.GetElementType()), ((Array)val).Cast<object>().Select<object, Action<PointCut>>(v => il => Value(v)).ToArray());
             else
             {
                 Value(val);

@@ -132,7 +132,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     });
 
                     foreach (var refPar in refList)
-                        il = il.Load(argsParam).SetByIndex(refPar.Item1, val => val.Load(refPar.Item2).ByVal(refPar.Item2.VariableType));
+                        il = il.Load(argsParam).SetByIndex(_ts.Object, refPar.Item1,  val => val.Load(refPar.Item2).ByVal(refPar.Item2.VariableType));
 
                     if (original.ReturnType.FullName == WellKnownTypes.Void)
                         il = il.Value((object)null);

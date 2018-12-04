@@ -59,7 +59,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                                il.Load(p).ByVal(p.ParameterType)
                            ).ToArray();
 
-                        v.CreateArray<object>(elements);
+                        v.CreateArray(_ts.Object, elements);
                     }));
             }
 
@@ -88,14 +88,14 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             if (_originalThis != null)
                 LoadOriginalThis(pc);
             else
-                pc.Value((object)null);
+                pc.Value(null);
         }
 
         protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
         {
             pc.This().Load(GetArgsField());
         }
-        
+
         protected abstract MethodDefinition FindOrCreateAfterStateMachineMethod();
     }
 }
