@@ -8,13 +8,12 @@ using System.Linq;
 namespace AspectInjector.Analyzer.Analyzers
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class MixinAttributeAnalyzer : DiagnosticAnalyzer
+    public class InjectionAttributeAnalyzer : DiagnosticAnalyzer
     {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
-                EffectRules.MixinSupportsOnlyInterfaces
-                , EffectRules.EffectMustBePartOfAspect
-                , EffectRules.MixinSupportsOnlyAspectInterfaces
+                InjectionRules.InjectionMustReferToAspect
+                , InjectionRules.InjectionMustBeAttribute
                 );
 
         public override void Initialize(AnalysisContext context)
@@ -26,13 +25,14 @@ namespace AspectInjector.Analyzer.Analyzers
         {
             var attr = context.ContainingSymbol.GetAttributes().FirstOrDefault(a => a.ApplicationSyntaxReference.Span == context.Node.Span);
 
-            if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.MixinType)
+            if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.InjectionType)
                 return;
 
             var location = context.Node.GetLocation();
 
-            if (!context.ContainingSymbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
-                context.ReportDiagnostic(Diagnostic.Create(EffectRules.EffectMustBePartOfAspect, location, context.ContainingSymbol.Name));
+
+            if (context.ContainingSymbol.ContainingType.ToDisplayString() != WellKnown.Attribute)
+                context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustBeAttribute, location, context.ContainingSymbol.Name));
 
             if (attr.AttributeConstructor == null)
                 return;
@@ -42,11 +42,8 @@ namespace AspectInjector.Analyzer.Analyzers
             if (arg.TypeKind == TypeKind.Error)
                 return;
 
-            if (arg.TypeKind != TypeKind.Interface)
-                context.ReportDiagnostic(Diagnostic.Create(EffectRules.MixinSupportsOnlyInterfaces, location, arg.Name));
-            else if (context.ContainingSymbol is INamedTypeSymbol aspectClass && !aspectClass.AllInterfaces.Any(i => i == arg))
-                context.ReportDiagnostic(Diagnostic.Create(EffectRules.MixinSupportsOnlyAspectInterfaces, location, ImmutableDictionary<string, string>.Empty.Add(WellKnown.MixinTypeProperty, arg.Name), context.ContainingSymbol.Name, arg.Name));
-
+            if (!arg.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
+                context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustReferToAspect, location, arg.Name));           
         }
     }
 }

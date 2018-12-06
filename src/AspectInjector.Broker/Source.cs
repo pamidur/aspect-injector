@@ -6,7 +6,7 @@ namespace AspectInjector.Broker
     /// <summary>
     /// Advice argument sources enumeration.
     /// </summary>
-    public enum Source
+    public enum Source : byte
     {
         /// <summary>
         /// Target's instance or <c>null</c> if target is static.

@@ -1,4 +1,5 @@
 using AspectInjector.Analyzer.Analyzers;
+using AspectInjector.Rules;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TestHelper;
 using Xunit;
@@ -21,7 +22,7 @@ namespace TestNameSpace
         public static void Before(){}
     }
 }";
-            var expected = DiagnosticResult.From(Rules.AdviceMustHaveValidSingnature, 7, 10);
+            var expected = DiagnosticResult.From(EffectRules.AdviceMustHaveValidSingnature, 7, 10);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -40,7 +41,7 @@ namespace TestNameSpace
     }
 }";
 
-            var expected = DiagnosticResult.From(Rules.AdviceMustHaveValidSingnature, 7, 10);
+            var expected = DiagnosticResult.From(EffectRules.AdviceMustHaveValidSingnature, 7, 10);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -59,7 +60,7 @@ namespace TestNameSpace
     }
 }";
 
-            var expected = DiagnosticResult.From(Rules.AdviceMustHaveValidSingnature, 7, 10);
+            var expected = DiagnosticResult.From(EffectRules.AdviceMustHaveValidSingnature, 7, 10);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -78,7 +79,7 @@ namespace TestNameSpace
     }
 }";
 
-            var expected = DiagnosticResult.From(Rules.AdviceMustHaveValidSingnature, 7, 10);
+            var expected = DiagnosticResult.From(EffectRules.AdviceMustHaveValidSingnature, 7, 10);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -97,7 +98,7 @@ namespace TestNameSpace
     }
 }";
 
-            var expected = DiagnosticResult.From(Rules.AdviceMustHaveValidSingnature, 7, 10);
+            var expected = DiagnosticResult.From(EffectRules.AdviceMustHaveValidSingnature, 7, 10);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -117,8 +118,8 @@ namespace TestNameSpace
 }";
 
             var expected = new[]{
-                DiagnosticResult.From(Rules.AdviceArgumentMustBeBound, 8, 35),
-                DiagnosticResult.From(Rules.AdviceArgumentMustBeBound, 8, 45),
+                DiagnosticResult.From(EffectRules.AdviceArgumentMustBeBound, 8, 35),
+                DiagnosticResult.From(EffectRules.AdviceArgumentMustBeBound, 8, 45),
             };
             VerifyCSharpDiagnostic(test, expected);
         }
@@ -136,7 +137,7 @@ namespace TestNameSpace
         public void Before(){}
     }
 }";
-            var expected = DiagnosticResult.From(Rules.EffectMustBePartOfAspect, 6, 10);
+            var expected = DiagnosticResult.From(EffectRules.EffectMustBePartOfAspect, 6, 10);
             VerifyCSharpDiagnostic(test, expected);
         }
 

@@ -1,4 +1,5 @@
 using AspectInjector.Analyzer.Analyzers;
+using AspectInjector.Rules;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TestHelper;
 using Xunit;
@@ -21,7 +22,7 @@ namespace AspectInjector.Analyzer.Test.Analyzers
         public void Before(){}
             }
     }";
-            var expected = DiagnosticResult.From(Rules.AspectMustHaveValidSignature, 4, 14);
+            var expected = DiagnosticResult.From(AspectRules.AspectMustHaveValidSignature, 4, 14);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -40,7 +41,7 @@ namespace AspectInjector.Analyzer.Test.Analyzers
             }
     }";
 
-            var expected = DiagnosticResult.From(Rules.AspectMustHaveValidSignature, 4, 14);
+            var expected = DiagnosticResult.From(AspectRules.AspectMustHaveValidSignature, 4, 14);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -59,7 +60,7 @@ namespace TestNameSpace
     }
 }";
 
-            var expected = DiagnosticResult.From(Rules.AspectMustHaveValidSignature, 4, 6);
+            var expected = DiagnosticResult.From(AspectRules.AspectMustHaveValidSignature, 4, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -80,7 +81,7 @@ namespace TestNameSpace
     }
 }";
 
-            var expected = DiagnosticResult.From(Rules.AspectMustHaveContructorOrFactory, 4, 6);
+            var expected = DiagnosticResult.From(AspectRules.AspectMustHaveContructorOrFactory, 4, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -108,7 +109,7 @@ namespace TestNameSpace
     }
 }";
 
-            var expected = DiagnosticResult.From(Rules.AspectFactoryMustContainFactoryMethod, 5, 6);
+            var expected = DiagnosticResult.From(AspectRules.AspectFactoryMustContainFactoryMethod, 5, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -124,7 +125,7 @@ namespace TestNameSpace
     {
     }
 }";
-            var expected = DiagnosticResult.From(Rules.AspectShouldContainEffect, 4, 6);
+            var expected = DiagnosticResult.From(AspectRules.AspectShouldContainEffect, 4, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 

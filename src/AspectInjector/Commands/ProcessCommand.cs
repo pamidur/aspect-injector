@@ -3,9 +3,10 @@ using AspectInjector.Core.Advice;
 using AspectInjector.Core.Advice.Weavers;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Mixin;
-using AspectInjector.Core.Models;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Services;
 using AspectInjector.Core.Utils;
+using AspectInjector.Rules;
 using DryIoc;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace AspectInjector.Commands
                 return 1;
             }
 
-            var log = new ConsoleLogger();
+            var log = new Logger();
             var processor = CreateProcessor(log);
 
             var resolver = new KnownReferencesAssemblyResolver();
@@ -53,12 +54,11 @@ namespace AspectInjector.Commands
             }
             catch (Exception e)
             {
-                log.LogError(CompilationMessage.From(e.ToString()));
+                log.Log(GeneralRules.CompilationMustSecceedIfNoOtherErrors, e.ToString());
             }
 
             return log.IsErrorThrown ? 1 : 0;
         }
-
         private Processor CreateProcessor(ILogger log)
         {
             var container = new Container();

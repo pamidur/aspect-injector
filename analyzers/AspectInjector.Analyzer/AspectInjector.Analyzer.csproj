@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
+    <ProjectReference Include="..\..\src\AspectInjector.Rules\AspectInjector.Rules.csproj" />
   </ItemGroup>
 
 </Project>

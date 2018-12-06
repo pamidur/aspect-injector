@@ -1,4 +1,5 @@
 using AspectInjector.Analyzer.Analyzers;
+using AspectInjector.Rules;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TestHelper;
 using Xunit;
@@ -23,7 +24,7 @@ namespace TestNameSpace
     class DummyClass{}
 }";
 
-            var expected = DiagnosticResult.From(Rules.MixinSupportsOnlyInterfaces, 4, 6);
+            var expected = DiagnosticResult.From(EffectRules.MixinSupportsOnlyInterfaces, 4, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -43,7 +44,7 @@ namespace TestNameSpace
     interface IDummyInterface{}
 }";
 
-            var expected = DiagnosticResult.From(Rules.MixinSupportsOnlyAspectInterfaces, 4, 6);
+            var expected = DiagnosticResult.From(EffectRules.MixinSupportsOnlyAspectInterfaces, 4, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -65,8 +66,8 @@ namespace TestNameSpace
     interface IDummyInterface2{}
 }";
             var expected = new[] {
-                DiagnosticResult.From(Rules.MixinSupportsOnlyAspectInterfaces, 4, 6),
-                DiagnosticResult.From(Rules.MixinSupportsOnlyAspectInterfaces, 5, 6),
+                DiagnosticResult.From(EffectRules.MixinSupportsOnlyAspectInterfaces, 4, 6),
+                DiagnosticResult.From(EffectRules.MixinSupportsOnlyAspectInterfaces, 5, 6),
             };
 
             VerifyCSharpDiagnostic(test, expected);
@@ -87,7 +88,7 @@ namespace TestNameSpace
 
     interface IDummyInterface{}
 }";
-            var expected = DiagnosticResult.From(Rules.EffectMustBePartOfAspect, 4, 6);
+            var expected = DiagnosticResult.From(EffectRules.EffectMustBePartOfAspect, 4, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 

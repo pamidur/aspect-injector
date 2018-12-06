@@ -1,3 +1,4 @@
+using AspectInjector.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -16,7 +17,7 @@ namespace AspectInjector.Analyzer.CodeFixes
     {
         public sealed override ImmutableArray<string> FixableDiagnosticIds =>
             ImmutableArray.Create(
-                Rules.AspectMustHaveValidSignature.Id
+                AspectRules.AspectMustHaveValidSignature.Id
                 );
 
 
@@ -24,7 +25,7 @@ namespace AspectInjector.Analyzer.CodeFixes
         {
             var diagnostic = context.Diagnostics.First();
 
-            if (diagnostic.Id == Rules.AspectMustHaveValidSignature.Id)
+            if (diagnostic.Id == AspectRules.AspectMustHaveValidSignature.Id)
                 context.RegisterCodeFix(CodeAction.Create(
                     title: $"Fix Aspect signature",
                     createChangedDocument: c => RemoveModifier(context.Document, diagnostic.Location.SourceSpan.Start, c)),

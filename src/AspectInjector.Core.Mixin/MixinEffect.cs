@@ -1,7 +1,7 @@
-﻿using System;
-using AspectInjector.Core.Contracts;
+﻿using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using AspectInjector.Rules;
 using Mono.Cecil;
 
 namespace AspectInjector.Core.Mixin
@@ -27,19 +27,21 @@ namespace AspectInjector.Core.Mixin
 
         public override bool Validate(AspectDefinition aspect, ILogger log)
         {
+            var result = true;
+
             if (!InterfaceType.Resolve().IsInterface)
             {
-                log.LogError(CompilationMessage.From($"{InterfaceType.FullName} is not an interface.", aspect.Host));
-                return false;
+                log.Log(EffectRules.MixinSupportsOnlyInterfaces, aspect.Host, InterfaceType.Name);
+                result = false;
             }
 
             if (!aspect.Host.Implements(InterfaceType))
             {
-                log.LogError(CompilationMessage.From($"{aspect.Host.FullName} should implement {InterfaceType.FullName}.", aspect.Host));
-                return false;
+                log.Log(EffectRules.MixinSupportsOnlyAspectInterfaces, aspect.Host, aspect.Host.Name, InterfaceType.Name);
+                result = false;
             }
 
-            return true;
+            return result;
         }
 
         public override string ToString()

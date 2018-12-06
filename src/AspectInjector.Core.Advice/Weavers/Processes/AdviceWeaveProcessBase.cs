@@ -1,9 +1,11 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
+using AspectInjector.Rules;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
@@ -16,12 +18,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
     {
         protected readonly MethodDefinition _target;
         protected readonly TEffect _effect;
-        protected readonly Models.InjectionDefinition _injection;
+        protected readonly InjectionDefinition _injection;
         protected readonly ExtendedTypeSystem _ts;
         protected readonly ILogger _log;
         protected readonly AspectDefinition _aspect;
 
-        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, Models.InjectionDefinition injection)
+        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, InjectionDefinition injection)
         {
             _log = log;
             _target = target;
@@ -49,7 +51,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     case Source.ReturnValue: LoadReturnValueArgument(pc, arg); break;
                     case Source.Target: LoadTargetArgument(pc, arg); break;
                     case Source.Type: LoadTypeArgument(pc, arg); break;
-                    default: _log.LogError(CompilationMessage.From($"Unknown argument source {arg.Source.ToString()}", _target)); break;
+                    default: _log.Log(GeneralRules.UnknownCompilationOption,_target,$"Unknown argument source '{arg.Source.ToString()}'"); break;
                 }
             }
         }
@@ -61,14 +63,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected virtual void LoadTargetArgument(PointCut pc, AdviceArgument parameter)
         {
-            _log.LogWarning(CompilationMessage.From($"Advice {_effect.Kind.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", _effect.Method));
             pc.Null();
         }
 
         protected virtual void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
         {
-            _log.LogWarning(CompilationMessage.From($"Advice {_effect.Kind.ToString()} does not support {parameter.Source.ToString()} argument and will always return null", _effect.Method));
-            pc.Null();
+           pc.Null();
         }
 
         protected virtual void LoadReturnTypeArgument(PointCut pc, AdviceArgument parameter)

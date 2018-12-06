@@ -1,10 +1,10 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
+using AspectInjector.Rules;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
-using static AspectInjector.Broker.Aspect;
 
 namespace AspectInjector.Core.Models
 {
@@ -54,31 +54,40 @@ namespace AspectInjector.Core.Models
 
         public bool Validate(ILogger log)
         {
+            var result = true;
+
             if (!Effects.Any())
-                log.LogWarning(CompilationMessage.From($"Type {Host.FullName} has defined as an aspect, but lacks any effect.", Host));
+                log.Log(AspectRules.AspectShouldContainEffect, Host, Host.Name);
 
             if (Host.HasGenericParameters)
             {
-                log.LogError(CompilationMessage.From($"Aspect {Host.FullName} should not have generic parameters.", Host));
-                return false;
+                log.Log(AspectRules.AspectMustHaveValidSignature, Host, Host.Name, AspectRules.Literals.HasGenericParams);
+                result = false;
             }
 
             if (Host.IsAbstract)
             {
-                log.LogError(CompilationMessage.From($"Aspect {Host.FullName} cannot be static nor abstract.", Host));
-                return false;
+                if (Host.IsSealed)
+                    log.Log(AspectRules.AspectMustHaveValidSignature, Host, Host.Name, AspectRules.Literals.IsStatic);
+                else
+                    log.Log(AspectRules.AspectMustHaveValidSignature, Host, Host.Name, AspectRules.Literals.IsAbstract);
+
+                result = false;
             }
 
             if (GetFactoryMethod() == null)
             {
                 if (Factory != null)
-                    log.LogError(CompilationMessage.From($"Type {Factory.FullName} should have 'public static object GetInstance(Type)' method in order to be aspect factory.", Host));
+                    log.Log(AspectRules.AspectFactoryMustContainFactoryMethod, Host, Factory.Name);
                 else
-                    log.LogError(CompilationMessage.From($"Aspect {Host.FullName} has no parameterless public constructor nor valid factory.", Host.Methods.First(m => m.IsConstructor && !m.IsStatic)));
-                return false;
+                    log.Log(AspectRules.AspectMustHaveContructorOrFactory, Host, Host.Name);
+
+                result = false;
             }
 
-            return Effects.All(e => e.Validate(this, log));
+            var effectsValid = Effects.All(e => e.Validate(this, log));
+
+            return result && effectsValid;
         }
     }
 }

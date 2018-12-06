@@ -1,7 +1,9 @@
 using AspectInjector.Broker;
+using AspectInjector.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -12,9 +14,10 @@ namespace AspectInjector.Analyzer.Analyzers
     {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
-                Rules.EffectMustBePartOfAspect
-                , Rules.AdviceMustHaveValidSingnature
-                , Rules.AdviceArgumentMustBeBound
+                EffectRules.EffectMustBePartOfAspect
+                , EffectRules.AdviceMustHaveValidSingnature
+                , EffectRules.AdviceArgumentMustBeBound,
+                GeneralRules.UnknownCompilationOption
                 );
 
         public override void Initialize(AnalysisContext context)
@@ -35,36 +38,44 @@ namespace AspectInjector.Analyzer.Analyzers
             var location = context.Node.GetLocation();
 
             if (!method.ContainingSymbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
-                context.ReportDiagnostic(Diagnostic.Create(Rules.EffectMustBePartOfAspect, location, method.ContainingSymbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(EffectRules.EffectMustBePartOfAspect, location, method.ContainingSymbol.Name));
 
             if (method.IsStatic)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "is static"));
+                context.ReportDiagnostic(Diagnostic.Create(EffectRules.AdviceMustHaveValidSingnature, location, method.Name, EffectRules.Literals.IsStatic));
 
             if (method.IsGenericMethod)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "is generic"));
+                context.ReportDiagnostic(Diagnostic.Create(EffectRules.AdviceMustHaveValidSingnature, location, method.Name, EffectRules.Literals.IsGeneric));
 
             if (method.DeclaredAccessibility != Accessibility.Public)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "is not public"));
+                context.ReportDiagnostic(Diagnostic.Create(EffectRules.AdviceMustHaveValidSingnature, location, method.Name, EffectRules.Literals.IsNotPublic));
 
             foreach (var param in method.Parameters)
                 if (!param.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AdviceArgumentType))
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceArgumentMustBeBound, param.Locations.First(), param.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.AdviceArgumentMustBeBound, param.Locations.First(), param.Name));
 
             if (attr.AttributeConstructor == null)
                 return;
 
             var atype = (Kind)attr.ConstructorArguments[0].Value;
 
+            if(!Enum.IsDefined(typeof(Kind),atype))
+                context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption, location, GeneralRules.Literals.UnknownAdviceKind(atype.ToString())));
+                        
+
             if (atype == Kind.Around)
             {
                 if (method.ReturnType.SpecialType != SpecialType.System_Object)
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "does not return 'object' for Around"));
+                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.AdviceMustHaveValidSingnature, location, method.Name, EffectRules.Literals.MustBeObjectForAround));
             }
             else
             {
                 if (method.ReturnType.SpecialType != SpecialType.System_Void)
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.AdviceMustHaveValidSingnature, location, method.Name, "does not return 'void' for After or Before"));
+                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.AdviceMustHaveValidSingnature, location, method.Name, EffectRules.Literals.MustBeVoidForInline));
             }
+
+            var atarget = attr.NamedArguments.FirstOrDefault(n=>n.Key == nameof(Advice.Targets)).Value.Value;
+            if (atarget is Target t && t > Target.Any)
+                context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption, location, GeneralRules.Literals.UnknownAdviceTarget(t.ToString())));
         }
     }
 }

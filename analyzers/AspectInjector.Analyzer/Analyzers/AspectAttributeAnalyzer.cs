@@ -1,6 +1,9 @@
+using AspectInjector.Broker;
+using AspectInjector.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -11,10 +14,11 @@ namespace AspectInjector.Analyzer.Analyzers
     {        
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
             ImmutableArray.Create(
-                Rules.AspectMustHaveValidSignature
-                , Rules.AspectMustHaveContructorOrFactory
-                , Rules.AspectFactoryMustContainFactoryMethod
-                , Rules.AspectShouldContainEffect
+                AspectRules.AspectMustHaveValidSignature
+                , AspectRules.AspectMustHaveContructorOrFactory
+                , AspectRules.AspectFactoryMustContainFactoryMethod
+                , AspectRules.AspectShouldContainEffect
+                , GeneralRules.UnknownCompilationOption
                 );
 
         public override void Initialize(AnalysisContext context)
@@ -33,22 +37,27 @@ namespace AspectInjector.Analyzer.Analyzers
             if (symbol == null)
                 return;
 
+            var scope = (Scope)attr.ConstructorArguments[0].Value;
+
             var factory = attr.NamedArguments.FirstOrDefault(n => n.Key == nameof(Broker.Aspect.Factory)).Value.Value;
             var ctor = symbol.Constructors.FirstOrDefault(m => m.Parameters.IsEmpty);
 
             var location = context.Node.GetLocation();
 
+            if (!Enum.IsDefined(typeof(Scope), scope))
+                context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption, location, GeneralRules.Literals.UnknownAspectScope(scope.ToString())));
+
             if (symbol.IsStatic)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustHaveValidSignature, location, symbol.Name, "is static"));
+                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveValidSignature, location, symbol.Name, AspectRules.Literals.IsStatic));
 
             if (symbol.IsAbstract)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustHaveValidSignature, location, symbol.Name, "is abstract"));
+                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveValidSignature, location, symbol.Name, AspectRules.Literals.IsAbstract));
 
             if (symbol.IsGenericType)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustHaveValidSignature, location, symbol.Name, "has generic parameters"));
+                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveValidSignature, location, symbol.Name, AspectRules.Literals.HasGenericParams));
 
             if (!symbol.IsStatic && factory == null && ctor == null)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectMustHaveContructorOrFactory, location, symbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveContructorOrFactory, location, symbol.Name));
 
             if (factory is INamedTypeSymbol named)
             {
@@ -61,7 +70,7 @@ namespace AspectInjector.Analyzer.Analyzers
                     || method.Parameters.Length != 1
                     || method.Parameters[0].Type.ToDisplayString() != WellKnown.Type)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.AspectFactoryMustContainFactoryMethod, location, symbol.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectFactoryMustContainFactoryMethod, location, symbol.Name));
                 }
             }
 
@@ -72,7 +81,7 @@ namespace AspectInjector.Analyzer.Analyzers
             var hasMixins = symbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.MixinType);
 
             if(!hasMixins && !hasAdvices)
-                context.ReportDiagnostic(Diagnostic.Create(Rules.AspectShouldContainEffect, location, symbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectShouldContainEffect, location, symbol.Name));
         }
     }
 }

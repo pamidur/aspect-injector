@@ -1,6 +1,8 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using AspectInjector.Rules;
 
 namespace AspectInjector.Core.Advice.Effects
 {
@@ -10,13 +12,15 @@ namespace AspectInjector.Core.Advice.Effects
 
         public override bool Validate(AspectDefinition aspect, ILogger log)
         {
+            var result = base.Validate(aspect, log);
+
             if (Method.ReturnType != Method.Module.TypeSystem.Void)
             {
-                log.LogError(CompilationMessage.From($"Advice {Method.FullName} should be void.", aspect.Host));
-                return false;
+                log.Log(EffectRules.AdviceMustHaveValidSingnature, Method, Method.Name, EffectRules.Literals.MustBeVoidForInline);
+                result = false;
             }
 
-            return base.Validate(aspect, log);
+            return result;
         }
     }
 }

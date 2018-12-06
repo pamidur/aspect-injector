@@ -1,14 +1,12 @@
-﻿using AspectInjector.Core.Advice.Effects;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using System.Linq;
-using System;
 using System.Collections.Generic;
-using AspectInjector.Broker;
+using System.Linq;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
@@ -18,7 +16,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private VariableDefinition _retvar;
 
-        public AdviceAfterProcess(ILogger log, MethodDefinition target, Models.InjectionDefinition injection)
+        public AdviceAfterProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)
         {
             if (_target.ReturnType.FullName != WellKnownTypes.Void && _effect.Arguments.Any(a => a.Source == Source.ReturnValue))

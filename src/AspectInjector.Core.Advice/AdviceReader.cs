@@ -3,11 +3,11 @@ using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using AspectInjector.Rules;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static AspectInjector.Broker.Advice;
 
 namespace AspectInjector.Core.Advice
 {
@@ -40,12 +40,16 @@ namespace AspectInjector.Core.Advice
                     var advice = CreateEffect(adviceType);
                     if (advice == null)
                     {
-                        _log.LogError(CompilationMessage.From($"Unknown advice type {adviceType.ToString()}", method));
+                        _log.Log(GeneralRules.UnknownCompilationOption, method, $"Unknown advice kind '{adviceType.ToString()}'");
                         continue;
                     }
 
                     advice.Method = method;
                     advice.Target = ca.GetPropertyValue<Target>(nameof(Broker.Advice.Targets));
+
+                    if (advice.Target > Target.Any)
+                        _log.Log(GeneralRules.UnknownCompilationOption, method, $"Unknown advice target '{advice.Target.ToString()}'");
+
                     if ((advice.Target & Target.AnyScope) == 0) advice.Target = advice.Target ^ Target.AnyScope;
                     if ((advice.Target & Target.AnyMember) == 0) advice.Target = advice.Target ^ Target.AnyMember;
                     if ((advice.Target & Target.AnyAccess) == 0) advice.Target = advice.Target ^ Target.AnyAccess;
@@ -66,12 +70,14 @@ namespace AspectInjector.Core.Advice
             foreach (var par in method.Parameters)
             {
                 var argAttr = par.CustomAttributes.FirstOrDefault(ca => ca.AttributeType.FullName == WellKnownTypes.Argument);
+                if (argAttr == null)                
+                    _log.Log(EffectRules.AdviceArgumentMustBeBound, method, par.Name);               
+                
 
-                if (argAttr == null)
-                {
-                    _log.LogError(CompilationMessage.From("Unbound arguments are not supported.", method));
-                    continue;
-                }
+                var source = argAttr.GetConstructorValue<Source>(0);
+                if (!Enum.IsDefined(typeof(Source), source))                
+                    _log.Log(GeneralRules.UnknownCompilationOption, method, $"Unknown argument source '{source.ToString()}'");
+                
 
                 args.Add(new AdviceArgument
                 {

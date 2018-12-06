@@ -135,7 +135,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                         il = il.Load(argsParam).SetByIndex(_ts.Object, refPar.Item1,  val => val.Load(refPar.Item2).ByVal(refPar.Item2.VariableType));
 
                     if (original.ReturnType.FullName == WellKnownTypes.Void)
-                        il = il.Value((object)null);
+                        il = il.Value(null);
                     else if (original.ReturnType.IsValueType || original.ReturnType.IsGenericParameter)
                         il = il.ByVal(original.ReturnType);
 

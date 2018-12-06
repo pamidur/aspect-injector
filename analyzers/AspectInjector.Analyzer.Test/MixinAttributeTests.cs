@@ -1,5 +1,6 @@
 using AspectInjector.Analyzer.Analyzers;
 using AspectInjector.Analyzer.CodeFixes;
+using AspectInjector.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -43,8 +44,8 @@ using AspectInjector.Broker;
     }";
             var expected = new DiagnosticResult
             {
-                Id = Rules.MixinSupportsOnlyInterfaces.Id,
-                Message = string.Format((string)Rules.MixinSupportsOnlyInterfaces.MessageFormat, "DummyClass"),
+                Id = EffectRules.MixinSupportsOnlyInterfaces.Id,
+                Message = string.Format((string)EffectRules.MixinSupportsOnlyInterfaces.MessageFormat, "DummyClass"),
                 Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {
@@ -96,8 +97,8 @@ using AspectInjector.Broker;
     }";
             var expected = new DiagnosticResult
             {
-                Id = Rules.MixinSupportsOnlyAspectInterfaces.Id,
-                Message = string.Format((string)Rules.MixinSupportsOnlyAspectInterfaces.MessageFormat, "TypeClass", "IDummyInterface"),
+                Id = EffectRules.MixinSupportsOnlyAspectInterfaces.Id,
+                Message = string.Format((string)EffectRules.MixinSupportsOnlyAspectInterfaces.MessageFormat, "TypeClass", "IDummyInterface"),
                 Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {
@@ -157,8 +158,8 @@ using AspectInjector.Broker;
     }";
             var expected1 = new DiagnosticResult
             {
-                Id = Rules.MixinSupportsOnlyAspectInterfaces.Id,
-                Message = string.Format((string)Rules.MixinSupportsOnlyAspectInterfaces.MessageFormat, "TypeClass", "IDummyInterface"),
+                Id = EffectRules.MixinSupportsOnlyAspectInterfaces.Id,
+                Message = string.Format((string)EffectRules.MixinSupportsOnlyAspectInterfaces.MessageFormat, "TypeClass", "IDummyInterface"),
                 Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {
@@ -168,8 +169,8 @@ using AspectInjector.Broker;
 
             var expected2 = new DiagnosticResult
             {
-                Id = Rules.MixinSupportsOnlyAspectInterfaces.Id,
-                Message = string.Format((string)Rules.MixinSupportsOnlyAspectInterfaces.MessageFormat, "TypeClass", "IDummyInterface2"),
+                Id = EffectRules.MixinSupportsOnlyAspectInterfaces.Id,
+                Message = string.Format((string)EffectRules.MixinSupportsOnlyAspectInterfaces.MessageFormat, "TypeClass", "IDummyInterface2"),
                 Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {
@@ -229,8 +230,8 @@ using AspectInjector.Broker;
     }";
             var expected = new DiagnosticResult
             {
-                Id = Rules.EffectMustBePartOfAspect.Id,
-                Message = string.Format((string)Rules.EffectMustBePartOfAspect.MessageFormat, "TypeClass"),
+                Id = EffectRules.EffectMustBePartOfAspect.Id,
+                Message = string.Format((string)EffectRules.EffectMustBePartOfAspect.MessageFormat, "TypeClass"),
                 Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {

@@ -2,6 +2,7 @@
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using AspectInjector.Rules;
 using Mono.Cecil;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -34,16 +35,16 @@ namespace AspectInjector.Core.Services
                 var effects = ExtractEffects(type).ToList();
                 var aspect = ExtractAspectAttribute(type);
 
-                if (aspect != null)                
+                if (aspect != null)
                     aspectDef = new AspectDefinition
                     {
                         Host = type,
                         Scope = aspect.GetConstructorValue<Scope>(0),
                         Factory = aspect.GetPropertyValue<TypeReference>(nameof(Aspect.Factory)),
                         Effects = effects
-                    };                
+                    };
                 else if (effects.Any())
-                    _log.LogWarning(CompilationMessage.From($"Type {type.FullName} has effects, but is not marked as an aspect. Concider using [Aspect] attribute.", type));
+                    _log.Log(EffectRules.EffectMustBePartOfAspect, type, type.Name);
 
                 _cache.AddOrUpdate(type, aspectDef, (k, o) => aspectDef);
             }

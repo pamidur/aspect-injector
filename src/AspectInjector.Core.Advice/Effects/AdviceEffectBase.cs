@@ -2,8 +2,10 @@
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using AspectInjector.Rules;
 using Mono.Cecil;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AspectInjector.Core.Advice.Effects
 {
@@ -71,25 +73,41 @@ namespace AspectInjector.Core.Advice.Effects
 
         public override bool Validate(AspectDefinition aspect, ILogger log)
         {
+            ValidateSupportedArguments(aspect, log);
+
+            var result = true;
+
             if (Method.IsStatic)
             {
-                log.LogError(CompilationMessage.From($"Advice {Method.FullName} must not be static.", aspect.Host));
-                return false;
+                log.Log(EffectRules.AdviceMustHaveValidSingnature, Method, Method.Name, EffectRules.Literals.IsStatic);
+                result = false;
             }
 
             if (!Method.IsPublic)
             {
-                log.LogError(CompilationMessage.From($"Advice {Method.FullName} must be public.", aspect.Host));
-                return false;
+                log.Log(EffectRules.AdviceMustHaveValidSingnature, Method, Method.Name, EffectRules.Literals.IsNotPublic);
+                result = false;
             }
 
             if (Method.HasGenericParameters)
             {
-                log.LogError(CompilationMessage.From($"Advice {Method.FullName} must not be generic.", aspect.Host));
-                return false;
+                log.Log(EffectRules.AdviceMustHaveValidSingnature, Method, Method.Name, EffectRules.Literals.IsGeneric);
+                result = false;
             }
 
-            return true;
+            return result;
+        }
+
+        protected virtual void ValidateSupportedArguments(AspectDefinition aspectDefinition,ILogger log)
+        {
+            var wrongArgs = Arguments.Where(a => a.Source == Source.Target || a.Source == Source.ReturnValue).ToArray();
+            LogWrongArgs(wrongArgs, aspectDefinition, log);
+        }
+
+        protected void LogWrongArgs(AdviceArgument[] wrongArgs, AspectDefinition aspectDefinition, ILogger log)
+        {
+            foreach (var arg in wrongArgs)
+                log.Log(EffectRules.ArgumentIsAlwaysNull, Method, arg.Parameter.Name, Kind.ToString());
         }
 
         public override string ToString()

@@ -24,7 +24,7 @@
     <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="_AspectExitCode" />
     </Exec>
-    <Error Text="Aspect Injector processing has failed. See other errors." Condition="'$(_AspectExitCode)' != '0'" Code="ASI0001"  File="AspectInjector"/>
+    <Error Text="Aspect Injector processing has failed. See other errors." Condition="'$(_AspectExitCode)' != '0'" Code="AI_ERR0"  File="AspectInjector"/>
   </Target>
 
   <Target Name="_ASI_ResignAssembly" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true' AND '$(_InjectionNeeded)' == 'true' " DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
@@ -35,7 +35,7 @@
     <Exec Command="$(_SignCommand)" Condition="'$(_SignCommand)' != ''" EchoOff="true" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="_SignExitCode" />
     </Exec>
-    <Error Text="Aspect Injector cannot re-sing assembly. Try rebuid solution." Condition="'$(_SignExitCode)' != '0'" Code="ASI0002" File="AspectInjector"/>
+    <Error Text="Aspect Injector cannot re-sing assembly. Try rebuid solution." Condition="'$(_SignExitCode)' != '0'" Code="AI_ERR0" File="AspectInjector"/>
   </Target>
 
   <Target Name="_ASI_TouchTimestampFile" Condition="'$(_InjectionNeeded)' == 'true'">

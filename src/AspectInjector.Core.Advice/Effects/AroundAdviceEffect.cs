@@ -1,7 +1,10 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using AspectInjector.Rules;
 using Mono.Cecil;
+using System.Linq;
 
 namespace AspectInjector.Core.Advice.Effects
 {
@@ -19,13 +22,21 @@ namespace AspectInjector.Core.Advice.Effects
 
         public override bool Validate(AspectDefinition aspect, ILogger log)
         {
+            var result = base.Validate(aspect, log);
+
             if (Method.ReturnType != Method.Module.TypeSystem.Object)
             {
-                log.LogError(CompilationMessage.From($"Around advice {Method.FullName} should return an object. Could return null.", aspect.Host));
-                return false;
+                log.Log(EffectRules.AdviceMustHaveValidSingnature, Method, Method.Name, EffectRules.Literals.MustBeObjectForAround);
+                result = false;
             }
 
-            return base.Validate(aspect, log);
+            return result;
+        }
+
+        protected override void ValidateSupportedArguments(AspectDefinition aspectDefinition, ILogger log)
+        {
+            var wrongArgs = Arguments.Where(a => a.Source == Source.ReturnValue).ToArray();
+            LogWrongArgs(wrongArgs, aspectDefinition, log);
         }
     }
 }

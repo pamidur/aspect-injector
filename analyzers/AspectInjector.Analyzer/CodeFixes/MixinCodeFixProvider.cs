@@ -1,4 +1,5 @@
 using AspectInjector.Analyzer.Analyzers;
+using AspectInjector.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -17,14 +18,14 @@ namespace AspectInjector.Analyzer.CodeFixes
     {
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
-            get { return ImmutableArray.Create(Rules.MixinSupportsOnlyAspectInterfaces.Id); }
+            get { return ImmutableArray.Create(EffectRules.MixinSupportsOnlyAspectInterfaces.Id); }
         }
 
         public sealed override Task RegisterCodeFixesAsync(CodeFixContext context)
         {
             var diagnostic = context.Diagnostics.First();
 
-            if (diagnostic.Id == Rules.MixinSupportsOnlyAspectInterfaces.Id)
+            if (diagnostic.Id == EffectRules.MixinSupportsOnlyAspectInterfaces.Id)
                 context.RegisterCodeFix(CodeAction.Create(
                     title: $"Add interface '{diagnostic.Properties[WellKnown.MixinTypeProperty]}' to Aspect",
                     createChangedDocument: c => ImplementInterface(context.Document, diagnostic, c)),

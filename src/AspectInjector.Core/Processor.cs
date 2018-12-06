@@ -1,6 +1,8 @@
 ﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
+using AspectInjector.Rules;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.IO;
@@ -32,17 +34,21 @@ namespace AspectInjector.Core
 
         public void Process(string assemblyFile, IAssemblyResolver resolver, bool optimize)
         {
-            _log.LogInfo($"Aspect Injector has started for {Path.GetFileName(assemblyFile)}");
+            _log.Log(GeneralRules.Info, $"Started for {Path.GetFileName(assemblyFile)}");
 
             var pdbPresent = AreSymbolsFound(assemblyFile);
             var assembly = ReadAssembly(assemblyFile, resolver, pdbPresent);
 
-            ProcessAssembly(assembly, optimize);
+            var modified = ProcessAssembly(assembly, optimize);
 
             if (!_log.IsErrorThrown)
             {
-                _log.LogInfo("Assembly has been patched.");
-                WriteAssembly(assembly, assemblyFile, pdbPresent);
+                if (modified)
+                {
+                    _log.Log(GeneralRules.Info, "Assembly has been patched.");
+                    WriteAssembly(assembly, assemblyFile, pdbPresent);
+                }
+                else _log.Log(GeneralRules.Info, "No patching required.");
             }
         }
 
@@ -65,7 +71,7 @@ namespace AspectInjector.Core
                 ReadSymbols = readSymbols
             });
 
-            _log.LogInfo("Assembly has been read.");
+            _log.Log(GeneralRules.Info, "Assembly has been read.");
 
             return assembly;
         }
@@ -76,14 +82,14 @@ namespace AspectInjector.Core
                 new WriterParameters()
                 {
                     WriteSymbols = writeSymbols,
-                        ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
-                    });
+                    ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
+                });
 
             assembly.MainModule.SymbolReader.Dispose();
             assembly.Dispose();
             assembly = null;
 
-            _log.LogInfo("Assembly has been written.");
+            _log.Log(GeneralRules.Info, "Assembly has been written.");
         }
 
         private bool AreSymbolsFound(string dllPath)
@@ -95,35 +101,38 @@ namespace AspectInjector.Core
                 return true;
             }
 
-            _log.LogInfo($"Symbols not found on {pdbPath}. Proceeding without...");
+            _log.Log(GeneralRules.Info, $"Symbols not found on {pdbPath}. Proceeding without...");
             return false;
         }
 
-        public void ProcessAssembly(AssemblyDefinition assembly, bool optimize)
+        public bool ProcessAssembly(AssemblyDefinition assembly, bool optimize)
         {
             var aspects = _aspectExtractor.ReadAll(assembly);
-            _log.LogInfo($"Found {aspects.Count} aspects");
+            _log.Log(GeneralRules.Info, $"Found {aspects.Count} aspects");
 
             var injections = _injectionCollector.ReadAll(assembly).ToList();
-            _log.LogInfo($"Found {injections.Count} injections");
+            _log.Log(GeneralRules.Info, $"Found {injections.Count} injections");
 
             if (_log.IsErrorThrown)
-                return;
+                return false;
 
-            if (aspects.Count != 0)
+            var hasAspects = aspects.Count != 0;
+            var hasInjections = injections.Count != 0;
+
+            if (hasAspects)
             {
-                _log.LogInfo($"Processing aspects...");
+                _log.Log(GeneralRules.Info, "Processing aspects...");
                 foreach (var aspect in aspects)
                     _aspectWeaver.WeaveGlobalAssests(aspect);
             }
 
-            if (injections.Count != 0)
+            if (hasInjections)
             {
-                _log.LogInfo($"Processing injections...");
+                _log.Log(GeneralRules.Info, "Processing injections...");
 
                 foreach (var injector in _effectWeavers.OrderByDescending(i => i.Priority))
                 {
-                    _log.LogInfo($"Executing {injector.GetType().Name}...");
+                    _log.Log(GeneralRules.Info, $"Executing {injector.GetType().Name}...");
 
                     foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key).ToList())
                         foreach (var injection in prioritizedInjections.OrderByDescending(i => i.Effect.Priority))
@@ -135,21 +144,28 @@ namespace AspectInjector.Core
                 }
 
                 foreach (var injection in injections)
-                    _log.LogError(CompilationMessage.From($"Couldn't find weaver for {injection.ToString()}", injection.Target));
+                    _log.Log(GeneralRules.UnexpectedCompilerBehaviour, injection.Target, $"Couldn't find weaver for => {injection.ToString()}");
             }
 
-            if (optimize)
-                _log.LogInfo($"Cleanup and optimize...");
-            else
-                _log.LogInfo($"Cleanup...");
-
-            foreach (var module in assembly.Modules)
+            if (hasAspects || hasInjections)
             {
                 if (optimize)
-                    EditorFactory.Optimize(module);
+                    _log.Log(GeneralRules.Info, "Cleanup and optimize...");
+                else
+                    _log.Log(GeneralRules.Info, "Cleanup...");
 
-                EditorFactory.CleanUp(module);
+                foreach (var module in assembly.Modules)
+                {
+                    if (optimize)
+                        EditorFactory.Optimize(module);
+
+                    EditorFactory.CleanUp(module);
+                }
+
+                return true;
             }
+
+            return false;
         }
 
         private List<InjectionDefinition> ExcludeAspectInjections(IEnumerable<InjectionDefinition> injections, IEnumerable<AspectDefinition> aspects)

@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using AspectInjector.Rules;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,7 +67,7 @@ namespace AspectInjector.Core.Services
 
                 if (aspect == null)
                 {
-                    _log.LogError(CompilationMessage.From($"Type {aspectRef.FullName} should be an aspect class.", target));
+                    _log.Log(InjectionRules.InjectionMustReferToAspect, target, aspectRef.Name);
                     continue;
                 }
 
