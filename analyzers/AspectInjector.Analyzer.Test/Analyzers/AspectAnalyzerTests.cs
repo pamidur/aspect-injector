@@ -9,6 +9,24 @@ namespace AspectInjector.Analyzer.Test.Analyzers
     public class AspectAnalyzerTests : CorrectDefinitionsTests
     {
         [Fact]
+        public void Aspect_Must_Have_Valid_Scope()
+        {
+            var test =
+@"using AspectInjector.Broker;
+namespace TestNameSpace
+{
+    [Aspect((Scope)18)]
+    public class TypeClass
+    {
+        [Advice(Advice.Type.Before)]
+        public void Before(){}
+    }
+}";
+            var expected = DiagnosticResult.From(GeneralRules.UnknownCompilationOption, 4, 14);
+            VerifyCSharpDiagnostic(test, expected);
+        }
+
+        [Fact]
         public void Aspect_Must_Not_Be_Static()
         {
             var test =
