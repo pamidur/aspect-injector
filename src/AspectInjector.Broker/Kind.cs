@@ -3,7 +3,7 @@
     /// <summary>
     /// Advice method injection points enumeration.
     /// </summary>
-    public enum Kind
+    public enum Kind : byte
     {
         /// <summary>
         /// Advice method is called before target method.

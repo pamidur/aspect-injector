@@ -11,7 +11,7 @@ namespace AspectInjector.Analyzer.Analyzers
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class AspectAttributeAnalyzer : DiagnosticAnalyzer
-    {        
+    {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
             ImmutableArray.Create(
                 AspectRules.AspectMustHaveValidSignature
@@ -37,15 +37,23 @@ namespace AspectInjector.Analyzer.Analyzers
             if (symbol == null)
                 return;
 
-            var scope = (Scope)attr.ConstructorArguments[0].Value;
-
             var factory = attr.NamedArguments.FirstOrDefault(n => n.Key == nameof(Aspect.Factory)).Value.Value;
             var ctor = symbol.Constructors.FirstOrDefault(m => m.Parameters.IsEmpty);
 
             var location = context.Node.GetLocation();
 
-            if (!Enum.IsDefined(typeof(Scope), scope))
-                context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption, location, GeneralRules.Literals.UnknownAspectScope(scope.ToString())));
+            if (attr.AttributeConstructor != null)
+            {
+                var scopeArg = attr.ConstructorArguments[0].Value;
+                if (scopeArg != null)
+                {
+                    var scope = (Scope)Enum.ToObject(typeof(Scope), scopeArg);
+
+                    if (!Enum.IsDefined(typeof(Scope), scope))
+                        context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption, location, GeneralRules.Literals.UnknownAspectScope(scope.ToString())));
+                }
+            }
+
 
             if (symbol.IsStatic)
                 context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveValidSignature, location, symbol.Name, AspectRules.Literals.IsStatic));
@@ -80,7 +88,7 @@ namespace AspectInjector.Analyzer.Analyzers
 
             var hasMixins = symbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.MixinType);
 
-            if(!hasMixins && !hasAdvices)
+            if (!hasMixins && !hasAdvices)
                 context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectShouldContainEffect, location, symbol.Name));
         }
     }

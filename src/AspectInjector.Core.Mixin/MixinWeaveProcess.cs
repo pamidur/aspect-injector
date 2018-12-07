@@ -1,6 +1,8 @@
-﻿using AspectInjector.Core.Extensions;
+﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
+using AspectInjector.Rules;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
@@ -16,12 +18,20 @@ namespace AspectInjector.Core.Mixin
         private readonly ExtendedTypeSystem _ts;
         private readonly AspectDefinition _aspect;
 
-        public MixinWeaveProcess(TypeDefinition target, AspectDefinition aspect, MixinEffect effect)
+        public MixinWeaveProcess(ILogger log, IMemberDefinition target, AspectDefinition aspect, MixinEffect effect)
         {
-            _target = target;
+            switch (target)
+            {
+                case TypeDefinition td: _target = td; break;
+                case MethodDefinition md: _target = md.DeclaringType; break;
+                case PropertyDefinition pd: _target = pd.DeclaringType; break;
+                case EventDefinition ed: _target = ed.DeclaringType; break;
+                default: log.Log(GeneralRules.UnexpectedCompilerBehaviour, _target, $"Unexpected mixin target '{target.ToString()}'"); break;
+            }
+
             _aspect = aspect;
             _effect = effect;
-            _ts = target.Module.GetTypeSystem();
+            _ts = _target.Module.GetTypeSystem();
         }
 
         public void Execute()
@@ -100,7 +110,7 @@ namespace AspectInjector.Core.Mixin
         {
             var eventName = $"{@interface.FullName}.{originalEvent.Name}";
             var eventType = @interface.ResolveIfGeneric(_ts.Import(originalEvent.AddMethod ?? originalEvent.RemoveMethod).Parameters[0].ParameterType);
-                        
+
             var ed = _target.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.Match(eventType));
             if (ed == null)
             {

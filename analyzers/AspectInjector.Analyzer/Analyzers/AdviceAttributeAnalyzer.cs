@@ -56,26 +56,33 @@ namespace AspectInjector.Analyzer.Analyzers
             if (attr.AttributeConstructor == null)
                 return;
 
-            var atype = (Kind)attr.ConstructorArguments[0].Value;
-
-            if(!Enum.IsDefined(typeof(Kind),atype))
-                context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption, location, GeneralRules.Literals.UnknownAdviceKind(atype.ToString())));
-                        
-
-            if (atype == Kind.Around)
+            var kindArg = attr.ConstructorArguments[0].Value;
+            if (kindArg != null)
             {
-                if (method.ReturnType.SpecialType != SpecialType.System_Object)
-                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.AdviceMustHaveValidSingnature, location, method.Name, EffectRules.Literals.MustBeObjectForAround));
-            }
-            else
-            {
-                if (method.ReturnType.SpecialType != SpecialType.System_Void)
-                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.AdviceMustHaveValidSingnature, location, method.Name, EffectRules.Literals.MustBeVoidForInline));
+                var kind = (Kind)Enum.ToObject(typeof(Kind), kindArg);
+
+                if (!Enum.IsDefined(typeof(Kind), kind))
+                    context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption, location, GeneralRules.Literals.UnknownAdviceKind(kind.ToString())));
+
+                if (kind == Kind.Around)
+                {
+                    if (method.ReturnType.SpecialType != SpecialType.System_Object)
+                        context.ReportDiagnostic(Diagnostic.Create(EffectRules.AdviceMustHaveValidSingnature, location, method.Name, EffectRules.Literals.MustBeObjectForAround));
+                }
+                else
+                {
+                    if (method.ReturnType.SpecialType != SpecialType.System_Void)
+                        context.ReportDiagnostic(Diagnostic.Create(EffectRules.AdviceMustHaveValidSingnature, location, method.Name, EffectRules.Literals.MustBeVoidForInline));
+                }
             }
 
-            var atarget = attr.NamedArguments.FirstOrDefault(n=>n.Key == nameof(Advice.Targets)).Value.Value;
-            if (atarget is Target t && t > Target.Any)
-                context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption, location, GeneralRules.Literals.UnknownAdviceTarget(t.ToString())));
+            var atarget = attr.NamedArguments.FirstOrDefault(n => n.Key == nameof(Advice.Targets)).Value.Value;
+            if (atarget != null)
+            {
+                var t = (Target)Enum.ToObject(typeof(Target), atarget);
+                if (t > Target.Any)
+                    context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption, location, GeneralRules.Literals.UnknownAdviceTarget(t.ToString())));
+            }
         }
     }
 }

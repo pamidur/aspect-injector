@@ -2,7 +2,7 @@
 
 namespace AspectInjector.SampleApps.Freezable
 {
-    [Inject(typeof(FreezableAspect))]
+    [Freezable]
     class SampleClass
     {
         public string Text { get; set; }

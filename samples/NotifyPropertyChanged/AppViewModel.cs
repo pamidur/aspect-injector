@@ -1,13 +1,13 @@
-﻿using AspectInjector.Broker;
-
-namespace AspectInjector.SampleApps.NotifyPropertyChanged
+﻿namespace AspectInjector.SampleApps.NotifyPropertyChanged
 {
     public class AppViewModel
     {
-        [Inject(typeof(NotifyAspect))]
+        [Notify(NotifyAlso = nameof(Fullname))]
         public string FirstName { get; set; }
 
-        [Inject(typeof(NotifyAspect))]
+        [Notify(NotifyAlso = nameof(Fullname))]
         public string LastName { get; set; }
+
+        public string Fullname => $"{FirstName} {LastName}";
     }
 }

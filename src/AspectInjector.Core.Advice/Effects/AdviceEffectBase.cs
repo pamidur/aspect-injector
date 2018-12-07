@@ -112,7 +112,7 @@ namespace AspectInjector.Core.Advice.Effects
 
         public override string ToString()
         {
-            return $"{Kind.ToString()}{Target.ToString()}";
+            return $"{Kind.ToString()}::{Target.ToString()}";
         }
     }
 }

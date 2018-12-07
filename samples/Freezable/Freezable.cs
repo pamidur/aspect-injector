@@ -3,9 +3,10 @@ using System;
 
 namespace AspectInjector.SampleApps.Freezable
 {
-    [Aspect(Aspect.Scope.PerInstance)]
+    [Aspect(Scope.PerInstance)]
     [Mixin(typeof(IFreezable))]
-    class FreezableAspect : IFreezable
+    [Injection(typeof(Freezable))]
+    class Freezable : Attribute, IFreezable
     {
         public bool IsFrozen { get; set; }
 
@@ -14,7 +15,7 @@ namespace AspectInjector.SampleApps.Freezable
             IsFrozen = true;
         }
 
-        [Advice(Advice.Type.Before, Advice.Target.Setter)]
+        [Advice(Kind.Before, Targets = Target.Public | Target.Setter)]
         public void CheckIfFrozen()
         {
             if (IsFrozen)

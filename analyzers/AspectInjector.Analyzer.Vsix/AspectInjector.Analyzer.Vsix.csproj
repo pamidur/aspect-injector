@@ -64,6 +64,10 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\AspectInjector.Rules\AspectInjector.Rules.csproj">
+      <Project>{20ed44a4-9d35-41f2-a317-c1eb9923379e}</Project>
+      <Name>AspectInjector.Rules</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj">
       <Project>{EB78F1E8-4CEB-45D1-90EB-57A159E606C0}</Project>
       <Name>AspectInjector.Analyzer</Name>

@@ -4,13 +4,15 @@ using System.Diagnostics;
 
 namespace AspectInjector.Samples.Logging.Aspects
 {
-    [Aspect(Aspect.Scope.Global)]
-    class LoggingAspect
+    [Aspect(Scope.Global)]
+    [Injection(typeof(Log))]
+    internal class Log : Attribute
     {
-        [Advice(Advice.Type.Around, Advice.Target.Method)]
-        public object HandleMethod([Advice.Argument(Advice.Argument.Source.Name)] string name,
-            [Advice.Argument(Advice.Argument.Source.Arguments)] object[] arguments,
-            [Advice.Argument(Advice.Argument.Source.Target)] Func<object[], object> method)
+        [Advice(Kind.Around, Targets = Target.Method)]
+        public object HandleMethod(
+            [Argument(Source.Name)] string name,
+            [Argument(Source.Arguments)] object[] arguments,
+            [Argument(Source.Target)] Func<object[], object> method)
         {
             Console.WriteLine($"Executing method {name}");
 

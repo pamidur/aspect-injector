@@ -3,7 +3,7 @@
     /// <summary>
     /// Advice creation scope enumeration.
     /// </summary>
-    public enum Scope
+    public enum Scope : byte
     {
         /// <summary>
         /// Aspect is created and used as singleton. Default value.

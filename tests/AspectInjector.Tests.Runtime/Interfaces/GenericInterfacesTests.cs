@@ -1,145 +1,106 @@
-﻿//using AspectInjector.Broker;
-//using Xunit;
-//using System;
-//using System.IO;
+﻿using AspectInjector.Broker;
+using Xunit;
+using System;
+using System.IO;
 
-//namespace AspectInjector.Tests.Interfaces
-//{
-//    
-//    public class GenericInterfacesTests
-//    {
-//        [Broker.Inject(typeof(Aspect))]
-//        public class TestClass
-//        {
-//            public TestClass()
-//            {
-//            }
-//        }
+namespace AspectInjector.Tests.Interfaces
+{
+    public class GenericInterfacesTests
+    {
+        [Fact]
+        public void Interfaces_OpenGenericMethod()
+        {
+            var ti = (ITestInterface)new GenericMethodTestClass();
+            var r1 = ti.Get<string>("data");
 
-//        public interface ITestInterface<in TI, out TO>
-//        {
-//            TO Get { get; }
+            Assert.Equal("datawashere", r1);
 
-//            TI Set { set; }
-//        }
+            var r2 = ti.Get<int>(1);
 
-//        [Mixin(typeof(ITestInterface<string, int>))]
-//        [Broker.Aspect(Broker.Aspect.Scope.Global)]
-//        public class Aspect : ITestInterface<string, int>
-//        {
-//            public int Get
-//            {
-//                get
-//                {
-//                    throw new NotImplementedException();
-//                }
-//            }
+            Assert.Equal(2, r2);
+        }
 
-//            public string Set
-//            {
-//                set
-//                {
-//                    throw new NotImplementedException();
-//                }
-//            }
-//        }
-//    }
+        [MyAspect]
+        public class GenericMethodTestClass
+        {
+            public GenericMethodTestClass()
+            {
+            }
+        }
 
-//    
-//    public class GenericInterfacesTests2
-//    {
-//        [Fact]
-//        public void Interfaces_OpenGenericMethod()
-//        {
-//            var ti = (ITestInterface)new TestClass();
-//            var r1 = ti.Get<string>("data");
+        public interface ITestInterface
+        {
+            TO Get<TO>(TO data);
+        }
 
-//            Assert.AreEqual(r1, "datawashere");
+        [Mixin(typeof(ITestInterface))]
+        [Aspect(Scope.Global)]
+        [Injection(typeof(MyAspect))]
+        public class MyAspect : Attribute, ITestInterface
+        {
+            TO ITestInterface.Get<TO>(TO data)
+            {
+                if (data is string)
+                    return (TO)(object)(data.ToString() + "washere");
 
-//            var r2 = ti.Get<int>(1);
+                return (TO)(object)(((int)(object)data) + 1);
+            }
+        }
+    }
 
-//            Assert.AreEqual(r2, 2);
-//        }
 
-//        [Broker.Inject(typeof(Aspect))]
-//        public class TestClass
-//        {
-//            public TestClass()
-//            {
-//            }
-//        }
+    public class GenericInterfacesTests3
+    {
+        [Fact]
+        public void Interfaces_OpenGenericMethodInClosedGenericType()
+        {
+            var data4 = "ref";
 
-//        public interface ITestInterface
-//        {
-//            TO Get<TO>(TO data);
-//        }
+            var ti = (IfaceWrapClass<string>.ITestInterface<StreamReader>)new OpenGenericTestClass();
+            var r1 = ti.Get<string>("data", "123", new StreamReader(new MemoryStream()), ref data4);
 
-//        [Mixin(typeof(ITestInterface))]
-//        [Broker.Aspect(Broker.Aspect.Scope.Global)]
-//        public class Aspect : ITestInterface
-//        {
-//            TO ITestInterface.Get<TO>(TO data)
-//            {
-//                if (data is string)
-//                    return (TO)(object)(data.ToString() + "washere");
+            Assert.Equal("data123washereref", r1);
 
-//                return (TO)(object)(((int)(object)data) + 1);
-//            }
-//        }
-//    }
+            var r2 = ti.Get<int>(1, "123", new StreamReader(new MemoryStream()), ref data4);
 
-//    
-//    public class GenericInterfacesTests3
-//    {
-//        [Fact]
-//        public void Interfaces_OpenGenericMethodInClosedGenericType()
-//        {
-//            var data4 = "ref";
+            Assert.Equal("5", r2);
+        }
 
-//            var ti = (IfaceWrapClass<string>.ITestInterface<StreamReader>)new TestClass();
-//            var r1 = ti.Get<string>("data", "123", new StreamReader(new MemoryStream()), ref data4);
+        [MyAspect]
+        public class OpenGenericTestClass
+        {
+            public OpenGenericTestClass()
+            {
+            }
+        }
 
-//            Assert.AreEqual(r1, "data123washereref");
+        public class IfaceWrapClass<TH>
+            where TH : class
+        {
+            public interface ITestInterface<T1> : ITestInterface2<TH, T1>
+                where T1 : TextReader
+            {
+            }
 
-//            var r2 = ti.Get<int>(1, "123", new StreamReader(new MemoryStream()), ref data4);
+            public interface ITestInterface2<T1, T2>
+                where T1 : TH
+            {
+                T1 Get<TO>(TO data, T1 data2, T2 data3, ref string data4);
+            }
+        }
 
-//            Assert.AreEqual(r2, "5");
-//        }
+        [Mixin(typeof(IfaceWrapClass<string>.ITestInterface<StreamReader>))]
+        [Aspect(Scope.Global)]
+        [Injection(typeof(MyAspect))]
+        public class MyAspect : Attribute, IfaceWrapClass<string>.ITestInterface<StreamReader>
+        {
+            public string Get<TO>(TO data, string data2, StreamReader data3, ref string data4)
+            {
+                if (data is string)
+                    return (data.ToString() + data2 + "washere" + data4);
 
-//        [Broker.Inject(typeof(Aspect))]
-//        public class TestClass
-//        {
-//            public TestClass()
-//            {
-//            }
-//        }
-
-//        public class IfaceWrapClass<TH>
-//            where TH : class
-//        {
-//            public interface ITestInterface<T1> : ITestInterface2<TH, T1>
-//                where T1 : TextReader
-//            {
-//            }
-
-//            public interface ITestInterface2<T1, T2>
-//                where T1 : TH
-//            {
-//                T1 Get<TO>(TO data, T1 data2, T2 data3, ref string data4);
-//            }
-//        }
-
-//        [Mixin(typeof(IfaceWrapClass<string>.ITestInterface<StreamReader>))]
-//        [Broker.Aspect(Broker.Aspect.Scope.Global)]
-//        public class Aspect : IfaceWrapClass<string>.ITestInterface<StreamReader>
-//        {
-//            public string Get<TO>(TO data, string data2, StreamReader data3, ref string data4)
-//            {
-//                if (data is string)
-//                    return (data.ToString() + data2 + "washere" + data4);
-
-//                return (((int)(object)data) + 1 + data2.Length).ToString();
-//            }
-//        }
-//    }
-//}
+                return (((int)(object)data) + 1 + data2.Length).ToString();
+            }
+        }
+    }
+}

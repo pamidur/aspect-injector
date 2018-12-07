@@ -1,49 +1,51 @@
-﻿//using AspectInjector.Broker;
-//using Xunit;
+﻿using AspectInjector.Broker;
+using System;
+using Xunit;
 
-//namespace AspectInjector.Tests.Interfaces
-//{
-//    
-//    public class InheritanceTests
-//    {
-//        [Fact]
-//        public void Interfaces_InjectionSupportsInheritance()
-//        {
-//            var ti = (IInheritanceTests)new InheritanceTests_Target();
-//            var r1 = ti.GetAspectType();
+namespace AspectInjector.Tests.Interfaces
+{
 
-//            var tib = (IInheritanceTests)new InheritanceTests_Base();
-//            var r2 = tib.GetAspectType();
+    public class InheritanceTests
+    {
+        [Fact]
+        public void Interfaces_InjectionSupportsInheritance()
+        {
+            var ti = (IInheritanceTests)new InheritanceTests_Target();
+            var r1 = ti.GetAspectType();
 
-//            Assert.AreEqual(r1, r2);
-//        }
+            var tib = (IInheritanceTests)new InheritanceTests_Base();
+            var r2 = tib.GetAspectType();
 
-//        [Inject(typeof(InheritanceTests_Aspect))]
-//        public class InheritanceTests_Base { }
+            Assert.Equal(r1, r2);
+        }
 
-//        [Inject(typeof(InheritanceTests_Aspect))]
-//        public class InheritanceTests_Target : InheritanceTests_Base { }
+        [InheritanceTests_Aspect]
+        public class InheritanceTests_Base { }
 
-//        public interface IInheritanceTests
-//        {
-//            string GetAspectType();
+        [InheritanceTests_Aspect]
+        public class InheritanceTests_Target : InheritanceTests_Base { }
 
-//            int GetAspectHash();
-//        }
+        public interface IInheritanceTests
+        {
+            string GetAspectType();
 
-//        [Mixin(typeof(IInheritanceTests))]
-//        [Aspect(Scope.Global)]
-//        public class InheritanceTests_Aspect : IInheritanceTests
-//        {
-//            public string GetAspectType()
-//            {
-//                return GetType().ToString();
-//            }
+            int GetAspectHash();
+        }
 
-//            public int GetAspectHash()
-//            {
-//                return GetHashCode();
-//            }
-//        }
-//    }
-//}
+        [Mixin(typeof(IInheritanceTests))]
+        [Aspect(Scope.Global)]
+        [Injection(typeof(InheritanceTests_Aspect))]
+        public class InheritanceTests_Aspect : Attribute, IInheritanceTests
+        {
+            public string GetAspectType()
+            {
+                return GetType().ToString();
+            }
+
+            public int GetAspectHash()
+            {
+                return GetHashCode();
+            }
+        }
+    }
+}

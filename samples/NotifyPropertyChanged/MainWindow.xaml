@@ -8,6 +8,7 @@
             <TextBox Text="{Binding LastName,UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Text="{Binding FirstName}" />
             <TextBlock Text="{Binding LastName}" />
+            <TextBlock Text="{Binding Fullname}" />
         </StackPanel>
     </Grid>
 </Window>

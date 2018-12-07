@@ -12,14 +12,14 @@ namespace AspectInjector.Core.Mixin
 
         public override bool IsApplicableFor(IMemberDefinition target)
         {
-            return target is TypeDefinition;
+            return target is TypeDefinition || target is PropertyDefinition || target is EventDefinition || target is MethodDefinition;
         }
 
         protected override bool IsEqualTo(Effect effect)
         {
             var other = effect as MixinEffect;
 
-            if (effect == null)
+            if (other == null)
                 return false;
 
             return other.InterfaceType.Match(InterfaceType);

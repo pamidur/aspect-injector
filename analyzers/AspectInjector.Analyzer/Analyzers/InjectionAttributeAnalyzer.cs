@@ -2,6 +2,7 @@ using AspectInjector.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -30,20 +31,24 @@ namespace AspectInjector.Analyzer.Analyzers
 
             var location = context.Node.GetLocation();
 
+            var compilation = context.SemanticModel.Compilation;
 
-            if (context.ContainingSymbol.ContainingType.ToDisplayString() != WellKnown.Attribute)
+            var attributeType = compilation.GetTypeByMetadataName(typeof(Attribute).FullName);
+
+            if (context.ContainingSymbol is ITypeSymbol type && !compilation.ClassifyConversion(type, attributeType).IsImplicit)
                 context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustBeAttribute, location, context.ContainingSymbol.Name));
 
             if (attr.AttributeConstructor == null)
                 return;
 
-            var arg = (INamedTypeSymbol)attr.ConstructorArguments[0].Value;
+            if (attr.ConstructorArguments[0].Value is INamedTypeSymbol arg)
+            {
+                if (arg.TypeKind == TypeKind.Error)
+                    return;
 
-            if (arg.TypeKind == TypeKind.Error)
-                return;
-
-            if (!arg.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
-                context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustReferToAspect, location, arg.Name));           
+                if (!arg.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
+                    context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustReferToAspect, location, arg.Name));
+            }
         }
     }
 }

@@ -38,9 +38,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AspectInjector.Broker, Version=1.0.1.0, Culture=neutral, PublicKeyToken=a29e12442a3d3609, processorArchitecture=MSIL">
-      <HintPath>..\packages\AspectInjector.1.0.1\lib\net45\AspectInjector.Broker.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="AspectInjector.Broker, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a29e12442a3d3609, processorArchitecture=MSIL">
+      <HintPath>..\packages\AspectInjector.2.0.0-beta1\lib\netstandard2.0\AspectInjector.Broker.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -85,14 +84,17 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\AspectInjector.2.0.0-beta1\analyzers\dotnet\cs\AspectInjector.Analyzer.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\AspectInjector.2.0.0-beta1\build\AspectInjector.targets" Condition="Exists('..\packages\AspectInjector.2.0.0-beta1\build\AspectInjector.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-   <Error Condition="!Exists('..\packages\AspectInjector.1.0.1\build\AspectInjector.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AspectInjector.1.0.1\build\AspectInjector.targets'))" />
+    <Error Condition="!Exists('..\packages\AspectInjector.2.0.0-beta1\build\AspectInjector.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AspectInjector.2.0.0-beta1\build\AspectInjector.targets'))" />
   </Target>
-  <Import Project="..\packages\AspectInjector.1.0.1\build\AspectInjector.targets" Condition="Exists('..\packages\AspectInjector.1.0.1\build\AspectInjector.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -37,16 +37,16 @@ namespace AspectInjector.Analyzer.Analyzers
             if (attr.AttributeConstructor == null)
                 return;
 
-            var arg = (INamedTypeSymbol)attr.ConstructorArguments[0].Value;
+            if (attr.ConstructorArguments[0].Value is INamedTypeSymbol arg)
+            {
+                if (arg.TypeKind == TypeKind.Error)
+                    return;
 
-            if (arg.TypeKind == TypeKind.Error)
-                return;
-
-            if (arg.TypeKind != TypeKind.Interface)
-                context.ReportDiagnostic(Diagnostic.Create(EffectRules.MixinSupportsOnlyInterfaces, location, arg.Name));
-            else if (context.ContainingSymbol is INamedTypeSymbol aspectClass && !aspectClass.AllInterfaces.Any(i => i == arg))
-                context.ReportDiagnostic(Diagnostic.Create(EffectRules.MixinSupportsOnlyAspectInterfaces, location, ImmutableDictionary<string, string>.Empty.Add(WellKnown.MixinTypeProperty, arg.Name), context.ContainingSymbol.Name, arg.Name));
-
+                if (arg.TypeKind != TypeKind.Interface)
+                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.MixinSupportsOnlyInterfaces, location, arg.Name));
+                else if (context.ContainingSymbol is INamedTypeSymbol aspectClass && !aspectClass.AllInterfaces.Any(i => i == arg))
+                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.MixinSupportsOnlyAspectInterfaces, location, ImmutableDictionary<string, string>.Empty.Add(WellKnown.MixinTypeProperty, arg.Name), context.ContainingSymbol.Name, arg.Name));
+            }
         }
     }
 }

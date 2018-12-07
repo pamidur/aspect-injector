@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace AspectInjector.Samples.Logging.Services
 {
-    [Inject(typeof(LoggingAspect))]
+    [Log]
     public class SampleService
     {
         public int GetCount()
