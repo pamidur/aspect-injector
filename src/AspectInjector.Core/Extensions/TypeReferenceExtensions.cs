@@ -27,24 +27,7 @@ namespace AspectInjector.Core.Extensions
                 return false;
 
             return tr1.FullName == tr2.FullName;
-
-            //return FQN.FromTypeReference(tr1).Equals(FQN.FromTypeReference(tr2));
         }
-
-        //public static bool IsSubTypeOf(this TypeDefinition tr, Type type)
-        //{
-        //    var subTypeFqn = FQN.FromType(type);
-
-        //    var isSubType = false;
-
-        //    do
-        //    {
-        //        isSubType = FQN.FromTypeReference(tr).Equals(subTypeFqn);
-        //        tr = tr.BaseType.Resolve();
-        //    } while (tr != null);
-
-        //    return isSubType;
-        //}
 
         public static IEnumerable<TypeDefinition> GetTypesTree(this TypeDefinition type)
         {

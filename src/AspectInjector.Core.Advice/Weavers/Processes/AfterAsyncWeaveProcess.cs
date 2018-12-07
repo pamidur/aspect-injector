@@ -55,7 +55,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 _stateMachine.Methods.Add(afterMethod);
 
-                afterMethod.GetEditor().Mark<DebuggerHiddenAttribute>();
+                afterMethod.GetEditor().Mark(_ts.DebuggerHiddenAttribute);
                 afterMethod.GetEditor().Instead(pc => pc.Return());
 
                 VariableDefinition resvar = null;

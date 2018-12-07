@@ -141,14 +141,12 @@ namespace AspectInjector.Core.Fluent
             return _md.Body.Instructions.First();
         }
 
-        public void Mark<T>() where T : Attribute
+        public void Mark(TypeReference attribute)
         {
-            var attrType = typeof(T);
-
-            if (_md.CustomAttributes.Any(ca => ca.AttributeType.FullName == attrType.FullName))
+            if (_md.CustomAttributes.Any(ca => ca.AttributeType.FullName == attribute.FullName))
                 return;
 
-            var constructor = _md.Module.ImportReference(attrType).Resolve()
+            var constructor = _md.Module.ImportReference(attribute).Resolve()
                 .Methods.First(m => m.IsConstructor && !m.IsStatic);
 
             _md.CustomAttributes.Add(new CustomAttribute(_typeSystem.Import(constructor)));
