@@ -1,8 +1,7 @@
-﻿using System;
-namespace AspectInjector.Samples.Security.Services
+﻿namespace AspectInjector.Samples.Security.Services
 {
     public interface ISecurityService
     {
-        bool HasPermission(Guid userId, string permission);
+        bool CurrentUserHasPermission(string permission);
     }
 }

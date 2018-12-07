@@ -4,6 +4,6 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AspectInjector" Version="2.0.0-beta1" />
+    <PackageReference Include="AspectInjector" Version="2.0.0-beta2" />
   </ItemGroup>
 </Project>

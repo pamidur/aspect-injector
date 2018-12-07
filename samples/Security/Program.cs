@@ -14,8 +14,8 @@ namespace AspectInjector.Samples.Security
             try
             {
                 var service = new SampleService();
-                service.UpdateUserSettings(Guid.NewGuid());
-                service.UpdateGlobalSettings(Guid.NewGuid());
+                service.UpdateUserSettings();
+                service.UpdateGlobalSettings();
             }
             catch (Exception ex)
             {
