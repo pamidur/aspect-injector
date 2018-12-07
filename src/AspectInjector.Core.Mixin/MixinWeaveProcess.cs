@@ -188,7 +188,7 @@ namespace AspectInjector.Core.Mixin
             if (!definition.IsInterface)
                 throw new NotSupportedException(typeReference.Name + " should be an interface");
 
-            var nestedIfaces = definition.Interfaces.Select(i => typeReference.IsGenericInstance ? (typeReference).MakeCallReference(i.InterfaceType) : i.InterfaceType);
+            var nestedIfaces = definition.Interfaces.Select(i => typeReference.IsGenericInstance ? typeReference.ParametrizeGenericInstance((GenericInstanceType)i.InterfaceType) : i.InterfaceType).ToArray();
 
             return new[] { typeReference }.Concat(nestedIfaces);
         }
