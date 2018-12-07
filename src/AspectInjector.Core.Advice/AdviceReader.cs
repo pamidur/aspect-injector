@@ -2,6 +2,7 @@
 using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
+using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
 using Mono.Cecil;
@@ -40,7 +41,7 @@ namespace AspectInjector.Core.Advice
                     var advice = CreateEffect(adviceType);
                     if (advice == null)
                     {
-                        _log.Log(GeneralRules.UnknownCompilationOption, method, $"Unknown advice kind '{adviceType.ToString()}'");
+                        _log.Log(GeneralRules.UnknownCompilationOption, method, GeneralRules.Literals.UnknownAdviceKind(adviceType.ToString()));
                         continue;
                     }
 
@@ -48,7 +49,7 @@ namespace AspectInjector.Core.Advice
                     advice.Target = ca.GetPropertyValue<Target>(nameof(Broker.Advice.Targets));
 
                     if (advice.Target > Target.Any)
-                        _log.Log(GeneralRules.UnknownCompilationOption, method, $"Unknown advice target '{advice.Target.ToString()}'");
+                        _log.Log(GeneralRules.UnknownCompilationOption, method, GeneralRules.Literals.UnknownAdviceTarget(advice.Target.ToString()));
 
                     if ((advice.Target & Target.AnyScope) == 0) advice.Target = advice.Target ^ Target.AnyScope;
                     if ((advice.Target & Target.AnyMember) == 0) advice.Target = advice.Target ^ Target.AnyMember;
@@ -67,22 +68,63 @@ namespace AspectInjector.Core.Advice
         {
             var args = new List<AdviceArgument>();
 
-            foreach (var par in method.Parameters)
+            foreach (var param in method.Parameters)
             {
-                var argAttr = par.CustomAttributes.FirstOrDefault(ca => ca.AttributeType.FullName == WellKnownTypes.Argument);
-                if (argAttr == null)                
-                    _log.Log(EffectRules.AdviceArgumentMustBeBound, method, par.Name);               
-                
+                var argAttr = param.CustomAttributes.FirstOrDefault(ca => ca.AttributeType.FullName == WellKnownTypes.Argument);
+                if (argAttr == null)
+                    _log.Log(EffectRules.AdviceArgumentMustBeBound, method, param.Name);
 
-                var source = argAttr.GetConstructorValue<Source>(0);
-                if (!Enum.IsDefined(typeof(Source), source))                
-                    _log.Log(GeneralRules.UnknownCompilationOption, method, $"Unknown argument source '{source.ToString()}'");
-                
+                var source = argAttr.GetConstructorValue<Source>(0);                    
+
+                var ts = method.Module.GetTypeSystem();
+
+                switch (source)
+                {
+                    case Source.Arguments:
+                        if (!param.ParameterType.Match(ts.ObjectArray))
+                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.ObjectArray);
+                        break;
+                    case Source.Instance:
+                        if (!param.ParameterType.Match(ts.Object))
+                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
+                        break;
+                    case Source.Method:
+                        if (!param.ParameterType.Match(ts.MethodBase))
+                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.MethodBase);
+                        break;
+                    case Source.Name:
+                        if (!param.ParameterType.Match(ts.String))
+                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.String);
+                        break;
+                    case Source.ReturnType:
+                        if (!param.ParameterType.Match(ts.Type))
+                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
+                        break;
+                    case Source.ReturnValue:
+                        if (!param.ParameterType.Match(ts.Object))
+                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
+                        break;
+                    case Source.Type:
+                        if (!param.ParameterType.Match(ts.Type))
+                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
+                        break;
+                    case Source.Injections:
+                        if (!param.ParameterType.Match(ts.MakeArrayType(ts.Attribute)))
+                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.AttributeArray);
+                        break;
+                    case Source.Target:
+                        if (!param.ParameterType.Match(ts.MakeGenericInstanceType(ts.FuncGeneric2, ts.ObjectArray, ts.Object)))
+                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.TargetFunc);
+                        break;
+                    default:
+                        _log.Log(GeneralRules.UnknownCompilationOption, method, GeneralRules.Literals.UnknownArgumentSource(source.ToString()));
+                        break;
+                }
 
                 args.Add(new AdviceArgument
                 {
                     Source = argAttr.GetConstructorValue<Source>(0),
-                    Parameter = par
+                    Parameter = param
                 });
             }
 

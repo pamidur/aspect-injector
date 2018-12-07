@@ -56,6 +56,9 @@ namespace AspectInjector.Core.Models
         {
             var result = true;
 
+            if(Scope!= Scope.Global && Scope!= Scope.PerInstance)
+                log.Log(GeneralRules.UnknownCompilationOption, Host, GeneralRules.Literals.UnknownAspectScope(Scope.ToString()));
+
             if (!Effects.Any())
                 log.Log(AspectRules.AspectShouldContainEffect, Host, Host.Name);
 

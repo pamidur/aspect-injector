@@ -54,7 +54,7 @@ namespace AspectInjector.Commands
             }
             catch (Exception e)
             {
-                log.Log(GeneralRules.CompilationMustSecceedIfNoOtherErrors, e.ToString());
+                log.Log(GeneralRules.CompilationMustSecceedIfNoOtherErrors, $"Processing failure: {e.ToString()}");
             }
 
             return log.IsErrorThrown ? 1 : 0;

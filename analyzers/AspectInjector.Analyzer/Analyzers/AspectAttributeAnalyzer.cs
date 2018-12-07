@@ -39,7 +39,7 @@ namespace AspectInjector.Analyzer.Analyzers
 
             var scope = (Scope)attr.ConstructorArguments[0].Value;
 
-            var factory = attr.NamedArguments.FirstOrDefault(n => n.Key == nameof(Broker.Aspect.Factory)).Value.Value;
+            var factory = attr.NamedArguments.FirstOrDefault(n => n.Key == nameof(Aspect.Factory)).Value.Value;
             var ctor = symbol.Constructors.FirstOrDefault(m => m.Parameters.IsEmpty);
 
             var location = context.Node.GetLocation();

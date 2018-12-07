@@ -22,7 +22,7 @@ namespace TestNameSpace
         public void Before(){}
     }
 }";
-            var expected = DiagnosticResult.From(GeneralRules.UnknownCompilationOption, 4, 14);
+            var expected = DiagnosticResult.From(GeneralRules.UnknownCompilationOption, 4, 6);
             VerifyCSharpDiagnostic(test, expected);
         }
 

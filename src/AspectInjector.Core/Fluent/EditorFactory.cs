@@ -1,5 +1,4 @@
-﻿using AspectInjector.Core.Fluent.Models;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using System.Collections.Generic;

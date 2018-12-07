@@ -1,6 +1,5 @@
 ﻿using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
-using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
 using Mono.Cecil;
 using System;

@@ -12,7 +12,7 @@ namespace AspectInjector.Rules
 
         public static readonly DiagnosticDescriptor InjectionMustBeAttribute =
             GeneralRules.Make("AI_I001",
-                "Injection trigger must an Attribute class",
+                "Injection trigger must be an Attribute class",
                 "'{0}' is not an Attribute",
                 "Injection Attribute can only mark an attribute class.");
     }

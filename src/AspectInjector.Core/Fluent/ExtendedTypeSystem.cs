@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace AspectInjector.Core.Fluent.Models
+namespace AspectInjector.Core.Fluent
 {
     public class ExtendedTypeSystem
     {

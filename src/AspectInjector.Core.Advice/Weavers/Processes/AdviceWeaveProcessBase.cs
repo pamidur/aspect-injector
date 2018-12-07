@@ -3,7 +3,6 @@ using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
-using AspectInjector.Core.Fluent.Models;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
 using Mono.Cecil;
@@ -51,7 +50,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     case Source.ReturnValue: LoadReturnValueArgument(pc, arg); break;
                     case Source.Target: LoadTargetArgument(pc, arg); break;
                     case Source.Type: LoadTypeArgument(pc, arg); break;
-                    default: _log.Log(GeneralRules.UnknownCompilationOption,_target,$"Unknown argument source '{arg.Source.ToString()}'"); break;
+                    default: _log.Log(GeneralRules.UnexpectedCompilerBehaviour, _target, $"Unexpected argument source '{arg.Source.ToString()}'"); break;
                 }
             }
         }
@@ -68,7 +67,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected virtual void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
         {
-           pc.Null();
+            pc.Null();
         }
 
         protected virtual void LoadReturnTypeArgument(PointCut pc, AdviceArgument parameter)

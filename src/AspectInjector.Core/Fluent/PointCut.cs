@@ -1,7 +1,6 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Fluent;
-using AspectInjector.Core.Fluent.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
@@ -14,18 +13,17 @@ namespace AspectInjector.Core.Models
     {
         private readonly ILProcessor _proc;
         private readonly Instruction _refInst;
-        private readonly ExtendedTypeSystem _typeSystem;
 
         public PointCut(ILProcessor proc, Instruction instruction)
         {
             _proc = proc;
             _refInst = instruction;
-            _typeSystem = proc.Body.Method.Module.GetTypeSystem();
+            TypeSystem = proc.Body.Method.Module.GetTypeSystem();
         }
 
         public MethodDefinition Method { get { return _proc.Body.Method; } }
 
-        public ExtendedTypeSystem TypeSystem => _typeSystem;
+        public ExtendedTypeSystem TypeSystem { get; }
 
         public PointCut Append(Instruction instruction)
         {
@@ -47,7 +45,7 @@ namespace AspectInjector.Core.Models
         {
             args?.Invoke(this);
 
-            var methodRef = _proc.Body.Method.MakeCallReference(_typeSystem.Import(method));
+            var methodRef = _proc.Body.Method.MakeCallReference(TypeSystem.Import(method));
             var def = method.Resolve();
 
             var code = OpCodes.Call;
@@ -98,7 +96,7 @@ namespace AspectInjector.Core.Models
         {
             val?.Invoke(this);
 
-            var fieldRef = _proc.Body.Method.MakeCallReference(_typeSystem.Import(field));
+            var fieldRef = _proc.Body.Method.MakeCallReference(TypeSystem.Import(field));
             //var fieldRef2 = _proc.Body.Method.ParametrizeGenericChild(_typeSystem.Import(field));
 
             var fieldDef = field.Resolve();
@@ -149,7 +147,7 @@ namespace AspectInjector.Core.Models
             var field = FindField(type, fieldName);
             if (field == null)
             {
-                field = new FieldDefinition(fieldName, FieldAttributes.Family, _typeSystem.Import(aspect.Host));
+                field = new FieldDefinition(fieldName, FieldAttributes.Family, TypeSystem.Import(aspect.Host));
                 type.Fields.Add(field);
 
                 InjectInitialization(GetInstanсeAspectsInitializer(type), field, aspect.CreateAspectInstance);
@@ -185,7 +183,7 @@ namespace AspectInjector.Core.Models
         public PointCut TypeOf(TypeReference type)
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, _proc.Body.Method.MakeCallReference(type)));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.Type.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle")));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, TypeSystem.Type.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle")));
 
             return this;
         }
@@ -197,7 +195,7 @@ namespace AspectInjector.Core.Models
             if (instanceAspectsInitializer == null)
             {
                 instanceAspectsInitializer = new MethodDefinition(Constants.InstanceAspectsMethodName,
-                    MethodAttributes.Private | MethodAttributes.HideBySig, _typeSystem.Void);
+                    MethodAttributes.Private | MethodAttributes.HideBySig, TypeSystem.Void);
 
                 type.Methods.Add(instanceAspectsInitializer);
 
@@ -225,7 +223,7 @@ namespace AspectInjector.Core.Models
 
         public PointCut Load(FieldReference field)
         {
-            var fieldRef = _proc.Body.Method.MakeCallReference(_typeSystem.Import(field));
+            var fieldRef = _proc.Body.Method.MakeCallReference(TypeSystem.Import(field));
             var fieldDef = field.Resolve();
 
             _proc.SafeInsertBefore(_refInst, CreateInstruction(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, fieldRef));
@@ -273,7 +271,7 @@ namespace AspectInjector.Core.Models
 
                 if (typeOnStack.IsValueType)
                 {
-                    var opcode = _typeSystem.LoadIndirectMap.First(kv => typeOnStack.Match(kv.Key)).Value;
+                    var opcode = TypeSystem.LoadIndirectMap.First(kv => typeOnStack.Match(kv.Key)).Value;
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
                 }
                 else if (typeOnStack.IsGenericParameter)
@@ -298,7 +296,7 @@ namespace AspectInjector.Core.Models
 
                 if (refType.IsValueType)
                 {
-                    var opcode = _typeSystem.SaveIndirectMap.First(kv => refType.Match(kv.Key)).Value;
+                    var opcode = TypeSystem.SaveIndirectMap.First(kv => refType.Match(kv.Key)).Value;
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, refType));
                     _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
                 }
@@ -351,14 +349,14 @@ namespace AspectInjector.Core.Models
             if (expectedType.IsValueType || expectedType.IsGenericParameter)
             {
                 if (!typeOnStack.IsValueType)
-                    _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Unbox_Any, _typeSystem.Import(expectedType)));
+                    _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Unbox_Any, TypeSystem.Import(expectedType)));
             }
             else
             {
                 if (typeOnStack.IsValueType)
-                    _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Box, _typeSystem.Import(typeOnStack)));
-                else if (!expectedType.Match(_typeSystem.Object))
-                    _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Castclass, _typeSystem.Import(expectedType)));
+                    _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Box, TypeSystem.Import(typeOnStack)));
+                else if (!expectedType.Match(TypeSystem.Object))
+                    _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Castclass, TypeSystem.Import(expectedType)));
             }
         }
 
@@ -390,7 +388,7 @@ namespace AspectInjector.Core.Models
             var val = argument.Value;
 
             if (val.GetType().IsArray)
-                this.CreateArray(_typeSystem.Import(argument.Type.GetElementType()), ((Array)val).Cast<object>().Select<object, Action<PointCut>>(v => il => Value(v)).ToArray());
+                this.CreateArray(TypeSystem.Import(argument.Type.GetElementType()), ((Array)val).Cast<object>().Select<object, Action<PointCut>>(v => il => Value(v)).ToArray());
             else
             {
                 Value(val);
@@ -446,7 +444,7 @@ namespace AspectInjector.Core.Models
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, method));
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, method.DeclaringType.MakeCallReference(method.DeclaringType)));
-            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, _typeSystem.MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2)));
+            _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, TypeSystem.MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2)));
 
             return this;
         }
@@ -473,7 +471,7 @@ namespace AspectInjector.Core.Models
 
         public Instruction CreateInstruction(OpCode opCode, FieldReference value)
         {
-            return _proc.Create(opCode, _typeSystem.Import(value));
+            return _proc.Create(opCode, TypeSystem.Import(value));
         }
 
         public Instruction CreateInstruction(OpCode opCode, VariableDefinition value)
@@ -483,12 +481,12 @@ namespace AspectInjector.Core.Models
 
         public Instruction CreateInstruction(OpCode opCode, TypeReference value)
         {
-            return _proc.Create(opCode, _typeSystem.Import(value));
+            return _proc.Create(opCode, TypeSystem.Import(value));
         }
 
         public Instruction CreateInstruction(OpCode opCode, MethodReference value)
         {
-            return _proc.Create(opCode, _typeSystem.Import(value));
+            return _proc.Create(opCode, TypeSystem.Import(value));
         }
 
         public Instruction CreateInstruction(OpCode opCode)

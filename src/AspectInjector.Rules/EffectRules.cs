@@ -13,6 +13,16 @@ namespace AspectInjector.Rules
             public static readonly string MustBeObjectForAround = "must return 'object' for 'Around' advice";
             public static readonly string MustBeVoidForInline = "must be 'void' for 'After' or 'Before' advice";
 
+
+            public static readonly string ObjectArray = "object[]";
+            public static readonly string AttributeArray = "System.Attribute[]";
+            public static readonly string Object = "object";
+            public static readonly string String = "string";
+            public static readonly string Type = "System.Type";
+            public static readonly string MethodBase = "System.Reflection.MethodBase";
+
+            public static readonly string TargetFunc = "System.Func<object[],object>";
+
         }
 
         public static readonly DiagnosticDescriptor EffectMustBePartOfAspect =
