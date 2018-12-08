@@ -25,7 +25,7 @@
     </None>
   </ItemGroup>
 
-  <Import Project="..\..\nuget\AspectInjector.Package\build\AspectInjector.targets" />
+  <Import Project="..\..\nuget\build\AspectInjector.targets" />
 
   <PropertyGroup>
     <_ASI_Location>$(SolutionDir)src\AspectInjector\bin\$(Configuration)\netcoreapp2.1\</_ASI_Location>

@@ -16,10 +16,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Update="NETStandard.Library"/>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="build/*.*" Pack="true" PackagePath="build" />
     <None Include="tools/*.*" Pack="true" PackagePath="tools" />
   </ItemGroup>
@@ -35,8 +31,8 @@
       <PublishAnalyzer>$(TargetDir)../publish_analyzer/</PublishAnalyzer>
     </PropertyGroup>
 
-    <Exec Command="dotnet publish ../../src/AspectInjector/ -o $(PublishMain) -c $(Configuration) --no-build" />
-    <Exec Command="dotnet publish ../../analyzers/AspectInjector.Analyzer/ -o $(PublishAnalyzer) -c $(Configuration) --no-build" />
+    <Exec Command="dotnet publish ../src/AspectInjector/ -o $(PublishMain) -c $(Configuration) --no-build" />
+    <Exec Command="dotnet publish ../analyzers/AspectInjector.Analyzer/ -o $(PublishAnalyzer) -c $(Configuration) --no-build" />
     
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(PublishMain)*.dll">
