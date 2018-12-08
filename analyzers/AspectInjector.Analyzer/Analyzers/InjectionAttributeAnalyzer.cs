@@ -13,8 +13,8 @@ namespace AspectInjector.Analyzer.Analyzers
     {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
-                InjectionRules.InjectionMustReferToAspect
-                , InjectionRules.InjectionMustBeAttribute
+                InjectionRules.InjectionMustReferToAspect.AsDescriptor()
+                , InjectionRules.InjectionMustBeAttribute.AsDescriptor()
                 );
 
         public override void Initialize(AnalysisContext context)
@@ -36,7 +36,7 @@ namespace AspectInjector.Analyzer.Analyzers
             var attributeType = compilation.GetTypeByMetadataName(typeof(Attribute).FullName);
 
             if (context.ContainingSymbol is ITypeSymbol type && !compilation.ClassifyConversion(type, attributeType).IsImplicit)
-                context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustBeAttribute, location, context.ContainingSymbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustBeAttribute.AsDescriptor(), location, context.ContainingSymbol.Name));
 
             if (attr.AttributeConstructor == null)
                 return;
@@ -47,7 +47,7 @@ namespace AspectInjector.Analyzer.Analyzers
                     return;
 
                 if (!arg.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
-                    context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustReferToAspect, location, arg.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustReferToAspect.AsDescriptor(), location, arg.Name));
             }
         }
     }

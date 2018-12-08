@@ -6,7 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DryIoc.dll" Version="3.0.2" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.10.0" PrivateAssets="all"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />

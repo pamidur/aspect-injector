@@ -1,5 +1,4 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.CodeAnalysis;
 
 namespace AspectInjector.Rules
 {
@@ -25,20 +24,20 @@ namespace AspectInjector.Rules
 
         }
 
-        public static readonly DiagnosticDescriptor EffectMustBePartOfAspect =
+        public static readonly Rule EffectMustBePartOfAspect =
             GeneralRules.Make("AI_E000",
                 "Effect must be a part of an Aspect",
                 "'{0}' is not an Aspect",
                 "Unbound Effects are not supported.");
 
 
-        public static readonly DiagnosticDescriptor MixinSupportsOnlyInterfaces =
+        public static readonly Rule MixinSupportsOnlyInterfaces =
             GeneralRules.Make("AI_EM00",
                 "Mixin supports only interfaces",
                 "'{0}' is not an interface",
                 "Non-interface types are not supported in this context.");
 
-        public static readonly DiagnosticDescriptor MixinSupportsOnlyAspectInterfaces =
+        public static readonly Rule MixinSupportsOnlyAspectInterfaces =
             GeneralRules.Make("AI_EM01",
                "Mixin supports only implemented interfaces",
                "'{0}' does not implement '{1}'",
@@ -46,33 +45,33 @@ namespace AspectInjector.Rules
 
         
 
-        public static readonly DiagnosticDescriptor AdviceMustHaveValidSingnature =
+        public static readonly Rule AdviceMustHaveValidSingnature =
             GeneralRules.Make("AI_EA00",
                "Advice must have invalid signature",
                "Advice '{0}' {1}",
                "Advice must be non-static, non-generic, public method. Return 'void' if inline and 'object' otherwise.");      
 
-        public static readonly DiagnosticDescriptor AdviceArgumentMustBeBound =
+        public static readonly Rule AdviceArgumentMustBeBound =
             GeneralRules.Make("AI_EA01",
                "Advice Argument must be bound",
                "Argument '{0}' is unbound",
                "Unbound arguments are not supported.");
 
 
-        public static readonly DiagnosticDescriptor ArgumentMustBePartOfAdvice =
+        public static readonly Rule ArgumentMustBePartOfAdvice =
             GeneralRules.Make("AI_EA02",
                 "Advice Argument must be a part of an Advice",
                 "Method '{0}' is not an Advice",
                 "Unbound Advice Arguments are not supported.");
 
-        public static readonly DiagnosticDescriptor ArgumentIsAlwaysNull =
+        public static readonly Rule ArgumentIsAlwaysNull =
             GeneralRules.Make("AI_EA03",
                "Argument source is always null in this context",
                "Argument '{0}' is always null for '{1}' advice",
                $"Argument source returns null in current context. '{nameof(Source.Target)}' should be used with {nameof(Kind.Around)} advice, and '{nameof(Source.ReturnValue)}' should be used with {nameof(Kind.After)} advice",
-               DiagnosticSeverity.Warning);
+               RuleSeverity.Warning);
 
-        public static readonly DiagnosticDescriptor ArgumentMustHaveValidType =
+        public static readonly Rule ArgumentMustHaveValidType =
             GeneralRules.Make("AI_EA04",
                 "Argument for source has invalid type",
                 "'{0}' has invalid type, {1} expected",

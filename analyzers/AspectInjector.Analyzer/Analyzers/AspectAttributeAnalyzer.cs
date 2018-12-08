@@ -14,11 +14,11 @@ namespace AspectInjector.Analyzer.Analyzers
     {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
             ImmutableArray.Create(
-                AspectRules.AspectMustHaveValidSignature
-                , AspectRules.AspectMustHaveContructorOrFactory
-                , AspectRules.AspectFactoryMustContainFactoryMethod
-                , AspectRules.AspectShouldContainEffect
-                , GeneralRules.UnknownCompilationOption
+                AspectRules.AspectMustHaveValidSignature.AsDescriptor()
+                , AspectRules.AspectMustHaveContructorOrFactory.AsDescriptor()
+                , AspectRules.AspectFactoryMustContainFactoryMethod.AsDescriptor()
+                , AspectRules.AspectShouldContainEffect.AsDescriptor()
+                , GeneralRules.UnknownCompilationOption.AsDescriptor()
                 );
 
         public override void Initialize(AnalysisContext context)
@@ -50,22 +50,22 @@ namespace AspectInjector.Analyzer.Analyzers
                     var scope = (Scope)Enum.ToObject(typeof(Scope), scopeArg);
 
                     if (!Enum.IsDefined(typeof(Scope), scope))
-                        context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption, location, GeneralRules.Literals.UnknownAspectScope(scope.ToString())));
+                        context.ReportDiagnostic(Diagnostic.Create(GeneralRules.UnknownCompilationOption.AsDescriptor(), location, GeneralRules.Literals.UnknownAspectScope(scope.ToString())));
                 }
             }
 
 
             if (symbol.IsStatic)
-                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveValidSignature, location, symbol.Name, AspectRules.Literals.IsStatic));
+                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveValidSignature.AsDescriptor(), location, symbol.Name, AspectRules.Literals.IsStatic));
 
             if (symbol.IsAbstract)
-                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveValidSignature, location, symbol.Name, AspectRules.Literals.IsAbstract));
+                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveValidSignature.AsDescriptor(), location, symbol.Name, AspectRules.Literals.IsAbstract));
 
             if (symbol.IsGenericType)
-                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveValidSignature, location, symbol.Name, AspectRules.Literals.HasGenericParams));
+                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveValidSignature.AsDescriptor(), location, symbol.Name, AspectRules.Literals.HasGenericParams));
 
             if (!symbol.IsStatic && factory == null && ctor == null)
-                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveContructorOrFactory, location, symbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectMustHaveContructorOrFactory.AsDescriptor(), location, symbol.Name));
 
             if (factory is INamedTypeSymbol named)
             {
@@ -78,7 +78,7 @@ namespace AspectInjector.Analyzer.Analyzers
                     || method.Parameters.Length != 1
                     || method.Parameters[0].Type.ToDisplayString() != WellKnown.Type)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectFactoryMustContainFactoryMethod, location, symbol.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectFactoryMustContainFactoryMethod.AsDescriptor(), location, symbol.Name));
                 }
             }
 
@@ -89,7 +89,7 @@ namespace AspectInjector.Analyzer.Analyzers
             var hasMixins = symbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.MixinType);
 
             if (!hasMixins && !hasAdvices)
-                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectShouldContainEffect, location, symbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectShouldContainEffect.AsDescriptor(), location, symbol.Name));
         }
     }
 }

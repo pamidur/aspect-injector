@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Core.Contracts;
+using AspectInjector.Rules;
 using Microsoft.CodeAnalysis;
 using Mono.Cecil.Cil;
 using System;
@@ -11,18 +12,18 @@ namespace AspectInjector
 
         public virtual bool IsErrorThrown { get; private set; }
 
-        public void Log(DiagnosticDescriptor descriptor, SequencePoint sp, params string[] messages)
+        public void Log(Rule rule, SequencePoint sp, params string[] messages)
         {
             var location = sp?.Document == null ? _toolName :
                 $"{sp.Document.Url}({sp.StartLine},{sp.StartColumn},{sp.EndLine},{sp.EndColumn})";
 
-            var message = string.Format(descriptor.MessageFormat.ToString(), messages ?? new string[] { });
+            var message = string.Format(rule.Message.ToString(), messages ?? new string[] { });
 
-            switch (descriptor.DefaultSeverity)
+            switch (rule.Severity)
             {
-                case DiagnosticSeverity.Error: WriteError(descriptor.Id, location, message); IsErrorThrown = true; break;
-                case DiagnosticSeverity.Warning: WriteWarning(descriptor.Id, location, message); break;
-                case DiagnosticSeverity.Info: WriteInfo(descriptor.Id, location, message); break;
+                case RuleSeverity.Error: WriteError(rule.Id, location, message); IsErrorThrown = true; break;
+                case RuleSeverity.Warning: WriteWarning(rule.Id, location, message); break;
+                case RuleSeverity.Info: WriteInfo(rule.Id, location, message); break;
             }
         }
 

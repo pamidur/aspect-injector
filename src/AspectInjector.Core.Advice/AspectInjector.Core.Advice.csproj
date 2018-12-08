@@ -2,10 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>This is Advice injection library of Aspect Injector.</Description>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.10.0" PrivateAssets="all"/>
-  </ItemGroup>  
+  </PropertyGroup> 
   <ItemGroup>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" />

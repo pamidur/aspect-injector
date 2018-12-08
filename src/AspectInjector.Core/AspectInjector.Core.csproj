@@ -7,7 +7,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="Mono.Cecil" Version="0.10.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.10.0" PrivateAssets="all"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />

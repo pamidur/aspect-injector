@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using AspectInjector.Rules;
 using Mono.Cecil.Cil;
 
 namespace AspectInjector.Core.Contracts
@@ -6,6 +6,6 @@ namespace AspectInjector.Core.Contracts
     public interface ILogger
     {
         bool IsErrorThrown { get; }
-        void Log(DiagnosticDescriptor descriptor, SequencePoint sp, params string[] messages);
+        void Log(Rule rule, SequencePoint sp, params string[] messages);
     }
 }

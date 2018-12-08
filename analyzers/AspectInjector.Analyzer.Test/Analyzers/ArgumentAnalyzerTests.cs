@@ -22,7 +22,7 @@ namespace TestNameSpace
         public static void Before([Argument(Source.Instance)] object i){}
     }
 }";
-            var expected = DiagnosticResult.From(EffectRules.ArgumentMustBePartOfAdvice, 7, 36);
+            var expected = DiagnosticResult.From(EffectRules.ArgumentMustBePartOfAdvice.AsDescriptor(), 7, 36);
             VerifyCSharpDiagnostic(test, expected);
         }
 
@@ -52,17 +52,17 @@ namespace TestNameSpace
     }
 }";
             var expected = new[] {
-                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType, 9, 14),
-                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType, 10, 14),
-                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType, 11, 14),
-                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType, 12, 14),
-                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType, 13, 14),
-                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType, 14, 14),
-                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType, 15, 14),
-                DiagnosticResult.From(EffectRules.ArgumentIsAlwaysNull, 15, 14),
-                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType, 16, 14),
-                DiagnosticResult.From(EffectRules.ArgumentIsAlwaysNull, 16, 14),
-                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType, 17, 14),
+                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), 9, 14),
+                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), 10, 14),
+                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), 11, 14),
+                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), 12, 14),
+                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), 13, 14),
+                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), 14, 14),
+                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), 15, 14),
+                DiagnosticResult.From(EffectRules.ArgumentIsAlwaysNull.AsDescriptor(), 15, 14),
+                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), 16, 14),
+                DiagnosticResult.From(EffectRules.ArgumentIsAlwaysNull.AsDescriptor(), 16, 14),
+                DiagnosticResult.From(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), 17, 14),
 
             };
             VerifyCSharpDiagnostic(test, expected);

@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Update="NETStandard.Library" PrivateAssets="all"/>
+    <PackageReference Update="NETStandard.Library"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -54,7 +54,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(PublishAnalyzer)*.dll">
+      <TfmSpecificPackageFile Include="$(PublishAnalyzer)AspectInjector*.dll">
         <PackagePath>analyzers/dotnet/cs</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
