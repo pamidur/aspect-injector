@@ -1,13 +1,14 @@
 ﻿using AspectInjector.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace AspectInjector.Analyzer
 {
     public static class Extensions
     {
-        private static readonly Dictionary<Rule, DiagnosticDescriptor> _descriptorCache = new Dictionary<Rule, DiagnosticDescriptor>();
+        private static readonly ConcurrentDictionary<Rule, DiagnosticDescriptor> _descriptorCache = new ConcurrentDictionary<Rule, DiagnosticDescriptor>();
 
         public static TNode RemoveTokenKeepTrivia<TNode>(this TNode node, SyntaxToken token)
             where TNode : SyntaxNode

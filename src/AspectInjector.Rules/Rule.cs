@@ -2,6 +2,7 @@
 {
     public enum RuleSeverity
     {
+        Hidden,
         Info,
         Warning,
         Error
