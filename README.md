@@ -2,31 +2,31 @@
 ========================
 **Aspect Injector** is a framework for creating and injecting aspects into your .net assemblies.
 
-### Project Status ###
+### Project Status
 [![NuGet](https://img.shields.io/nuget/v/AspectInjector.svg)](https://www.nuget.org/packages/AspectInjector)
 [![NuGet Pre Release](https://img.shields.io/nuget/vpre/AspectInjector.svg)](https://www.nuget.org/packages/AspectInjector)
 [![Build Status](https://travis-ci.org/pamidur/aspect-injector.svg?branch=master)](https://travis-ci.org/pamidur/aspect-injector)
 
-### Download ###
+### Download
 ```bash
 > dotnet add package AspectInjector
 ```
 
-### Features ###
+### Features
 - Compile-time injection
 - Injection Before, After and Around targets
 - Injection into Methods, Properties, Events
 - Injection Interface implementaions
 - Works with any framework that supports netstandard2.0
 - Debugging support
-- Roslyn analyzers for you your convenience (only c# currently)
+- Roslyn analyzers for your convenience (only c# currently)
 
 Check out [samples](samples) and [docs](docs)
 
-### Requirements ###
+### Requirements
 - .NetCore runtime 2.1.6+
 
-### Trivia ###
+### Trivia
 
 #### Create aspect:
 ```C#
