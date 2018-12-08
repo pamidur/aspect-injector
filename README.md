@@ -23,7 +23,7 @@
 
 Check out [samples](samples) and [docs](docs)
 
-### Reuqirements ###
+### Requirements ###
 - .NetCore runtime 2.1.6+
 
 ### Trivia ###
