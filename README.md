@@ -26,6 +26,9 @@ Check out [samples](samples) and [docs](docs)
 ### Requirements
 - .NetCore runtime 2.1.6+
 
+### Known Issues
+- Due to dotnet nuget [bug](https://github.com/NuGet/Home/issues/6091), you'll need to reference AspectInjector into every project when you want your injections work. They've promised to fix it soon
+
 ### Trivia
 
 #### Create aspect:
