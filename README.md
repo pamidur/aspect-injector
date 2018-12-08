@@ -17,7 +17,7 @@
 - Injection Before, After and Around targets
 - Injection into Methods, Properties, Events
 - Injection Interface implementaions
-- Works with any framework that supports netstandard2.0
+- Works with any framework/runtime that supports netstandard2.0
 - Debugging support
 - Roslyn analyzers for your convenience (only c# currently)
 
