@@ -10,8 +10,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <_ASI_Location>$(MSBuildThisFileDirectory)</_ASI_Location>
-    <_ASI_Options></_ASI_Options>
+    <_ASI_Location Condition="'$(_ASI_Location)' == ''">$(MSBuildThisFileDirectory)</_ASI_Location>
+    <_ASI_Options Condition="'$(_ASI_Options)' == ''"></_ASI_Options>
     <_ASI_Process_Options Condition="'$(Optimize)' == 'true'">-o</_ASI_Process_Options>
   </PropertyGroup>
 

@@ -78,14 +78,21 @@ namespace AspectInjector.Core
 
         private void WriteAssembly(AssemblyDefinition assembly, string path, bool writeSymbols)
         {
-            assembly.Write(
-                new WriterParameters()
-                {
-                    WriteSymbols = writeSymbols,
-                    ////StrongNameKeyPair = Sing && !DelaySing ? new StrongNameKeyPair(StrongKeyPath) : null
-                });
+            var param = new WriterParameters();
 
-            assembly.MainModule.SymbolReader.Dispose();
+            if (writeSymbols)
+            {
+                param.WriteSymbols = true;
+
+                //if (assembly.MainModule.SymbolReader != null)
+                //    param.SymbolWriterProvider = assembly.MainModule.SymbolReader.GetWriterProvider();
+            }
+
+            assembly.Write(param);
+
+            if (assembly.MainModule.SymbolReader != null)
+                assembly.MainModule.SymbolReader.Dispose();
+
             assembly.Dispose();
             assembly = null;
 

@@ -192,11 +192,14 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         private void MoveBody(MethodDefinition from, MethodDefinition to)
         {
             foreach (var inst in from.Body.Instructions)            
-                to.Body.Instructions.Add(inst);            
+                to.Body.Instructions.Add(inst);
 
             if (from.DebugInformation.HasSequencePoints)
+            {
+                to.DebugInformation.Scope = from.DebugInformation.Scope;
                 foreach (var sp in from.DebugInformation.SequencePoints)
                     to.DebugInformation.SequencePoints.Add(sp);
+            }
 
             foreach (var var in from.Body.Variables)
                 to.Body.Variables.Add(new VariableDefinition(_ts.Import(var.VariableType)));
