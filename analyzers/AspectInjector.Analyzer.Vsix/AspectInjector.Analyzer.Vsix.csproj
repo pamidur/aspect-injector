@@ -59,14 +59,14 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj">
-      <Project>{0926FE28-73BA-4F73-9188-B196FBBC9410}</Project>
+      <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
       <Name>AspectInjector.Broker</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+      <AdditionalProperties>TargetFramework=netstandard1.3</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="..\..\src\AspectInjector.Rules\AspectInjector.Rules.csproj">
       <Project>{20ed44a4-9d35-41f2-a317-c1eb9923379e}</Project>
       <Name>AspectInjector.Rules</Name>
+      <AdditionalProperties>TargetFramework=netstandard1.3</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="..\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj">
       <Project>{EB78F1E8-4CEB-45D1-90EB-57A159E606C0}</Project>

@@ -42,17 +42,7 @@ using AspectInjector.Broker;
         interface IDummyInterface{}
         class DummyClass{}
     }";
-            var expected = new DiagnosticResult
-            {
-                Id = EffectRules.MixinSupportsOnlyInterfaces.Id,
-                Message = string.Format((string)EffectRules.MixinSupportsOnlyInterfaces.MessageFormat, "DummyClass"),
-                Severity = DiagnosticSeverity.Error,
-                Locations =
-                    new[] {
-                            new DiagnosticResultLocation("Test0.cs", 12, 10)
-                        }
-            };
-
+            var expected = DiagnosticResult.From(EffectRules.MixinSupportsOnlyInterfaces.AsDescriptor(), 12, 10);
             VerifyCSharpDiagnostic(test, expected);
 
             //        var fixtest = @"
@@ -95,17 +85,7 @@ using AspectInjector.Broker;
         interface IDummyInterface{}
         class DummyClass{}
     }";
-            var expected = new DiagnosticResult
-            {
-                Id = EffectRules.MixinSupportsOnlyAspectInterfaces.Id,
-                Message = string.Format((string)EffectRules.MixinSupportsOnlyAspectInterfaces.MessageFormat, "TypeClass", "IDummyInterface"),
-                Severity = DiagnosticSeverity.Error,
-                Locations =
-                    new[] {
-                            new DiagnosticResultLocation("Test0.cs", 12, 10)
-                        }
-            };
-
+            var expected = DiagnosticResult.From(EffectRules.MixinSupportsOnlyAspectInterfaces.AsDescriptor(), 12, 10);
             VerifyCSharpDiagnostic(test, expected);
 
             var fixtest = @"  
@@ -156,27 +136,8 @@ using AspectInjector.Broker;
         interface IDummyInterface2{}
         class DummyClass{}
     }";
-            var expected1 = new DiagnosticResult
-            {
-                Id = EffectRules.MixinSupportsOnlyAspectInterfaces.Id,
-                Message = string.Format((string)EffectRules.MixinSupportsOnlyAspectInterfaces.MessageFormat, "TypeClass", "IDummyInterface"),
-                Severity = DiagnosticSeverity.Error,
-                Locations =
-                    new[] {
-                            new DiagnosticResultLocation("Test0.cs", 12, 10),
-                        }
-            };
-
-            var expected2 = new DiagnosticResult
-            {
-                Id = EffectRules.MixinSupportsOnlyAspectInterfaces.Id,
-                Message = string.Format((string)EffectRules.MixinSupportsOnlyAspectInterfaces.MessageFormat, "TypeClass", "IDummyInterface2"),
-                Severity = DiagnosticSeverity.Error,
-                Locations =
-                    new[] {
-                            new DiagnosticResultLocation("Test0.cs", 13, 10),
-                        }
-            };
+            var expected1 = DiagnosticResult.From(EffectRules.MixinSupportsOnlyAspectInterfaces.AsDescriptor(), 12, 10);
+            var expected2 = DiagnosticResult.From(EffectRules.MixinSupportsOnlyAspectInterfaces.AsDescriptor(), 13, 10);
 
             VerifyCSharpDiagnostic(test, expected1, expected2);
 
@@ -228,17 +189,7 @@ using AspectInjector.Broker;
         interface IDummyInterface{}
         class DummyClass{}
     }";
-            var expected = new DiagnosticResult
-            {
-                Id = EffectRules.EffectMustBePartOfAspect.Id,
-                Message = string.Format((string)EffectRules.EffectMustBePartOfAspect.MessageFormat, "TypeClass"),
-                Severity = DiagnosticSeverity.Error,
-                Locations =
-                    new[] {
-                            new DiagnosticResultLocation("Test0.cs", 12, 10)
-                        }
-            };
-
+            var expected = DiagnosticResult.From(EffectRules.EffectMustBePartOfAspect.AsDescriptor(), 12, 10);
             VerifyCSharpDiagnostic(test, expected);
 
 //            var fixtest = @"

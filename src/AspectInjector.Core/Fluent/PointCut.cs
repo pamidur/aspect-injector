@@ -200,7 +200,7 @@ namespace AspectInjector.Core.Models
                 type.Methods.Add(instanceAspectsInitializer);
 
                 instanceAspectsInitializer.GetEditor().Instead(i => i.Return());
-                instanceAspectsInitializer.GetEditor().Mark<DebuggerHiddenAttribute>();
+                instanceAspectsInitializer.GetEditor().Mark(TypeSystem.DebuggerHiddenAttribute);
 
                 var ctors = type.Methods.Where(c => c.IsConstructor && !c.IsStatic).ToList();
 

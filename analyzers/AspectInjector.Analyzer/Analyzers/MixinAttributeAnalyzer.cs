@@ -12,9 +12,9 @@ namespace AspectInjector.Analyzer.Analyzers
     {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(
-                EffectRules.MixinSupportsOnlyInterfaces
-                , EffectRules.EffectMustBePartOfAspect
-                , EffectRules.MixinSupportsOnlyAspectInterfaces
+                EffectRules.MixinSupportsOnlyInterfaces.AsDescriptor()
+                , EffectRules.EffectMustBePartOfAspect.AsDescriptor()
+                , EffectRules.MixinSupportsOnlyAspectInterfaces.AsDescriptor()
                 );
 
         public override void Initialize(AnalysisContext context)
@@ -32,7 +32,7 @@ namespace AspectInjector.Analyzer.Analyzers
             var location = context.Node.GetLocation();
 
             if (!context.ContainingSymbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AspectType))
-                context.ReportDiagnostic(Diagnostic.Create(EffectRules.EffectMustBePartOfAspect, location, context.ContainingSymbol.Name));
+                context.ReportDiagnostic(Diagnostic.Create(EffectRules.EffectMustBePartOfAspect.AsDescriptor(), location, context.ContainingSymbol.Name));
 
             if (attr.AttributeConstructor == null)
                 return;
@@ -43,9 +43,9 @@ namespace AspectInjector.Analyzer.Analyzers
                     return;
 
                 if (arg.TypeKind != TypeKind.Interface)
-                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.MixinSupportsOnlyInterfaces, location, arg.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.MixinSupportsOnlyInterfaces.AsDescriptor(), location, arg.Name));
                 else if (context.ContainingSymbol is INamedTypeSymbol aspectClass && !aspectClass.AllInterfaces.Any(i => i == arg))
-                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.MixinSupportsOnlyAspectInterfaces, location, ImmutableDictionary<string, string>.Empty.Add(WellKnown.MixinTypeProperty, arg.Name), context.ContainingSymbol.Name, arg.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(EffectRules.MixinSupportsOnlyAspectInterfaces.AsDescriptor(), location, ImmutableDictionary<string, string>.Empty.Add(WellKnown.MixinTypeProperty, arg.Name), context.ContainingSymbol.Name, arg.Name));
             }
         }
     }

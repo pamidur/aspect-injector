@@ -39,7 +39,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _ts.Void);
                 _stateMachine.Methods.Add(afterMethod);
-                afterMethod.GetEditor().Mark<DebuggerHiddenAttribute>();
+                afterMethod.GetEditor().Mark(_ts.DebuggerHiddenAttribute);
                 afterMethod.GetEditor().Instead(pc => pc.Return());
 
                 foreach (var exit in exitPoints.Where(e => e.Previous.OpCode == OpCodes.Ldc_I4 && (int)e.Previous.Operand == 0))

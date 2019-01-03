@@ -16,6 +16,6 @@ script:
 deploy:
   skip_cleanup: true
   provider: script
-  script: dotnet pack ./nuget/AspectInjector.Package/ -c $MODE --no-build -p:Version=$VERSION -p:Product="$PRODUCT" -p:Authors="$AUTHORS" && dotnet nuget push ./nuget/**/*.nupkg -n -s $NUGETURL -k $NUGETKEY
+  script: dotnet pack ./nuget/ -c $MODE --no-build -p:Version=$VERSION -p:Product="$PRODUCT" -p:Authors="$AUTHORS" && dotnet nuget push ./nuget/**/*.nupkg -s $NUGETURL -k $NUGETKEY
   on:
     tags: true

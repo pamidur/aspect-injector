@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Broker;
+using System.Diagnostics;
 
 namespace AspectInjector.SampleApps.Freezable
 {

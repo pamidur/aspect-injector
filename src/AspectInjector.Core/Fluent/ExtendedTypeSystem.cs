@@ -1,8 +1,10 @@
-﻿using Mono.Cecil;
+﻿using AspectInjector.Broker;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -15,6 +17,15 @@ namespace AspectInjector.Core.Fluent
 
         private readonly ModuleDefinition _module;
 
+        private static readonly AssemblyNameReference _corelib;
+
+        static ExtendedTypeSystem()
+        {
+            var netStandard = ModuleDefinition.ReadModule(typeof(Aspect).Assembly.Location).AssemblyReferences.First(r => r.Name == "netstandard");
+            _corelib = netStandard;
+        }
+
+
         #endregion Private Fields
 
         #region Public Constructors
@@ -22,6 +33,8 @@ namespace AspectInjector.Core.Fluent
         public ExtendedTypeSystem(ModuleDefinition md)
         {
             _module = md;
+
+            UpdateCoreLibRef(_module, _corelib);
 
             Boolean = md.TypeSystem.Boolean;
             Byte = md.TypeSystem.Byte;
@@ -44,21 +57,21 @@ namespace AspectInjector.Core.Fluent
 
             ObjectArray = MakeArrayType(Object);
 
-            Task = md.ImportReference(typeof(Task));
-            TaskGeneric = md.ImportReference(typeof(Task<>));
-            TaskCompletionGeneric = md.ImportReference(typeof(TaskCompletionSource<>));
-            ActionGeneric = md.ImportReference(typeof(Action<>));
-            FuncGeneric = md.ImportReference(typeof(Func<>));
-            FuncGeneric2 = md.ImportReference(typeof(Func<,>));
+            Task = GetSystemType(typeof(Task));
+            TaskGeneric = GetSystemType(typeof(Task<>));
+            TaskCompletionGeneric = GetSystemType(typeof(TaskCompletionSource<>));
+            ActionGeneric = GetSystemType(typeof(Action<>));
+            FuncGeneric = GetSystemType(typeof(Func<>));
+            FuncGeneric2 = GetSystemType(typeof(Func<,>));
 
-            MethodBase = md.ImportReference(typeof(MethodBase));
-            Type = md.ImportReference(typeof(Type));
+            MethodBase = GetSystemType(typeof(MethodBase));
+            Type = GetSystemType(typeof(Type));
 
-            Attribute = md.ImportReference(typeof(Attribute));
+            Attribute = GetSystemType(typeof(Attribute));
 
-            DebuggerHiddenAttribute = md.ImportReference(typeof(DebuggerHiddenAttribute));
-            DebuggerStepThroughAttribute = md.ImportReference(typeof(DebuggerStepThroughAttribute));
-            CompilerGeneratedAttribute = md.ImportReference(typeof(CompilerGeneratedAttribute));
+            DebuggerHiddenAttribute = GetSystemType(typeof(DebuggerHiddenAttribute));
+            DebuggerStepThroughAttribute = GetSystemType(typeof(DebuggerStepThroughAttribute));
+            CompilerGeneratedAttribute = GetSystemType(typeof(CompilerGeneratedAttribute));
 
             LoadIndirectMap = new Dictionary<TypeReference, OpCode>
             {
@@ -99,6 +112,28 @@ namespace AspectInjector.Core.Fluent
                 { Single, OpCodes.Stind_R4 },
                 { Double, OpCodes.Stind_R8 },
             };
+        }
+
+        private static void UpdateCoreLibRef(ModuleDefinition module, AssemblyNameReference reference)
+        {
+            if (!module.AssemblyReferences.Any(r => r.Name == reference.Name))
+                module.AssemblyReferences.Add(reference);
+        }
+
+        private TypeReference GetSystemType(Type type)
+        {
+            var tr = new TypeReference(type.Namespace, type.Name, _module, _corelib);
+
+            if (type.IsGenericTypeDefinition)
+            {
+                var arguments = type.GetGenericArguments();
+                for (int i = 0; i < arguments.Length; i++)
+                {
+                    tr.GenericParameters.Add(new GenericParameter(arguments[i].Name, tr));
+                }
+            }
+
+            return tr;
         }
 
         internal FieldReference Import(FieldReference field)

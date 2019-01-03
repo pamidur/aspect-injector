@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard1.3</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -9,13 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.6.2" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.10.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.6.2"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.10.0"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
-    <ProjectReference Include="..\..\src\AspectInjector.Rules\AspectInjector.Rules.csproj" />
+    <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj"/>
+    <ProjectReference Include="..\..\src\AspectInjector.Rules\AspectInjector.Rules.csproj"/>
   </ItemGroup>
 
 </Project>
