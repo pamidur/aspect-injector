@@ -72,7 +72,7 @@ namespace AspectInjector.Core.Advice.Weavers
                 if (target.IsConstructor && effect.Target.HasFlag(Target.Constructor))
                     WeaveMethod(target, injection);
 
-                if (target.IsNormalMethod() && effect.Target.HasFlag(Target.Method))
+                if (!target.IsConstructor && effect.Target.HasFlag(Target.Method))
                     WeaveMethod(target, injection);
 
                 return;

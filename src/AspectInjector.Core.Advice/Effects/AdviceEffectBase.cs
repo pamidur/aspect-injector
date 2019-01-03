@@ -20,7 +20,7 @@ namespace AspectInjector.Core.Advice.Effects
 
         public override bool IsApplicableFor(IMemberDefinition target)
         {
-            if ((Target & Target.Method) != 0 && target is MethodDefinition method && method.IsNormalMethod())
+            if ((Target & Target.Method) != 0 && target is MethodDefinition method && !method.IsConstructor)
                 return IsApplicableForModifier(method);
 
             if ((Target & Target.Constructor) != 0 && target is MethodDefinition ctor && ctor.IsConstructor)

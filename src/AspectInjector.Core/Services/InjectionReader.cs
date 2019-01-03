@@ -34,7 +34,7 @@ namespace AspectInjector.Core.Services
                     aspects = aspects.Concat(type.Events.SelectMany(ExtractInjections));
                     aspects = aspects.Concat(type.Properties.SelectMany(ExtractInjections));
                     //aspects = aspects.Concat(type.Fields.SelectMany(ExtractInjections));
-                    aspects = aspects.Concat(type.Methods.Where(m => m.IsNormalMethod() || m.IsConstructor).SelectMany(ExtractInjections));
+                    aspects = aspects.Concat(type.Methods.SelectMany(ExtractInjections));
                 }
             }
 
@@ -42,6 +42,18 @@ namespace AspectInjector.Core.Services
 
             return aspects.ToList();
         }
+
+        //private IReadOnlyCollection<InjectionDefinition> ReadAll(TypeDefinition type)
+        //{
+        //    var aspects = ExtractInjections(type);
+
+        //    aspects = aspects.Concat(type.Events.SelectMany(ExtractInjections));
+        //    aspects = aspects.Concat(type.Properties.SelectMany(ExtractInjections));
+        //    //aspects = aspects.Concat(type.Fields.SelectMany(ExtractInjections));
+        //    aspects = aspects.Concat(type.Methods.SelectMany(ExtractInjections));
+            
+        //    return aspects.ToArray();
+        //}
 
         protected virtual IEnumerable<InjectionDefinition> ExtractInjections(ICustomAttributeProvider target)
         {
@@ -106,8 +118,7 @@ namespace AspectInjector.Core.Services
 
         private IEnumerable<InjectionDefinition> CreateInjections(IMemberDefinition target, AspectDefinition aspect, ushort priority, CustomAttribute trigger)
         {
-            if (target is TypeDefinition && target.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.Aspect))
-                return Enumerable.Empty<InjectionDefinition>();
+            if (IsAspectMember(target)) return Enumerable.Empty<InjectionDefinition>();
 
             return aspect.Effects.Where(e => e.IsApplicableFor(target)).Select(e => new InjectionDefinition()
             {
@@ -117,6 +128,17 @@ namespace AspectInjector.Core.Services
                 Effect = e,
                 Triggers = new List<CustomAttribute> { trigger }
             });
+        }
+
+        private bool IsAspectMember(IMemberDefinition member)
+        {
+            if (member == null)
+                return false;
+
+            if (member is TypeDefinition type && _aspectReader.Read(type) != null)
+                return true;
+
+            return IsAspectMember(member.DeclaringType);
         }
 
         private InjectionDefinition MergeInjections(InjectionDefinition a1, InjectionDefinition a2)
