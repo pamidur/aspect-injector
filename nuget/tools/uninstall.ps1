@@ -16,7 +16,7 @@ foreach($analyzersPath in $analyzersPaths)
     # Uninstall the language agnostic analyzers.
     if (Test-Path $analyzersPath)
     {
-        foreach ($analyzerFilePath in Get-ChildItem -Path "$analyzersPath\*.Analyzer.dll" -Exclude *.resources.dll)
+        foreach ($analyzerFilePath in Get-ChildItem -Path "$analyzersPath\*.dll" -Exclude *.resources.dll)
         {
             if($project.Object.AnalyzerReferences)
             {
@@ -47,7 +47,7 @@ foreach($analyzersPath in $analyzersPaths)
     $languageAnalyzersPath = join-path $analyzersPath $languageFolder
     if (Test-Path $languageAnalyzersPath)
     {
-        foreach ($analyzerFilePath in Get-ChildItem -Path "$languageAnalyzersPath\*.Analyzer.dll" -Exclude *.resources.dll)
+        foreach ($analyzerFilePath in Get-ChildItem -Path "$languageAnalyzersPath\*.dll" -Exclude *.resources.dll)
         {
             if($project.Object.AnalyzerReferences)
             {
