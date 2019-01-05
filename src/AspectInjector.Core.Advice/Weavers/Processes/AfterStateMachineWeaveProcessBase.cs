@@ -56,7 +56,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     .Store(argsfield, v =>
                     {
                         var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
-                               il.Load(p).ByVal(p.ParameterType)
+                               il.Load(p).Cast(p.ParameterType, _ts.Object)
                            ).ToArray();
 
                         v.CreateArray(_ts.Object, elements);

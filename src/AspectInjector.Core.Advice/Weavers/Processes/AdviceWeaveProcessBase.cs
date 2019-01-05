@@ -77,7 +77,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected virtual void LoadMethodArgument(PointCut pc, AdviceArgument parameter)
         {
-            pc.MethodOf(_target).Cast(_ts.MethodBase);
+            pc.MethodOf(_target).Cast(_ts.Object, _ts.MethodBase);
         }
 
         protected virtual void LoadInstanceArgument(PointCut pc, AdviceArgument parameter)
@@ -132,7 +132,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         protected virtual void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
         {
             var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
-                il.Load(p).ByVal(p.ParameterType)
+                il.Load(p).Cast(p.ParameterType, _ts.Object)
             ).ToArray();
 
             pc.CreateArray(_ts.Object, elements);

@@ -4,7 +4,6 @@ using AspectInjector.Core.Fluent;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Diagnostics;
 using System.Linq;
 
 namespace AspectInjector.Core.Models
@@ -110,11 +109,50 @@ namespace AspectInjector.Core.Models
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stloc, variable));
         }
 
-        public void StoreByRef(ParameterReference par, Action<PointCut> val)
+        public void Store(ParameterReference par, Action<PointCut> val)
         {
-            Load(par);
-            val.Invoke(this);
-            ByRef(par.ParameterType);
+            var argIndex = _proc.Body.Method.HasThis ? par.Index + 1 : par.Index;
+
+            if (par.ParameterType.IsByReference)
+            {                
+                Append(CreateInstruction(OpCodes.Ldarg, argIndex));
+                val.Invoke(this);
+                Append(PickStoreInstruction(par.ParameterType));
+            }
+            else
+            {
+                val.Invoke(this);
+                Append(CreateInstruction(OpCodes.Starg, argIndex));
+            }
+        }
+
+        private Instruction PickStoreInstruction(TypeReference parameterType)
+        {
+            var elemType = ((ByReferenceType)parameterType).ElementType;
+
+            switch (elemType.MetadataType)
+            {
+                case MetadataType.Class: return CreateInstruction(OpCodes.Stind_Ref);
+                case MetadataType.Object: return CreateInstruction(OpCodes.Stind_Ref);
+                case MetadataType.MVar: return CreateInstruction(OpCodes.Stobj, elemType);
+                case MetadataType.Var: return CreateInstruction(OpCodes.Stobj, elemType);
+                case MetadataType.Double: return CreateInstruction(OpCodes.Stind_R8);
+                case MetadataType.Single: return CreateInstruction(OpCodes.Stind_R4);
+                case MetadataType.Int64: return CreateInstruction(OpCodes.Stind_I8);
+                case MetadataType.UInt64: return CreateInstruction(OpCodes.Stind_I8);
+                case MetadataType.Int32: return CreateInstruction(OpCodes.Stind_I4);
+                case MetadataType.UInt32: return CreateInstruction(OpCodes.Stind_I4);
+                case MetadataType.Int16: return CreateInstruction(OpCodes.Stind_I2);
+                case MetadataType.UInt16: return CreateInstruction(OpCodes.Stind_I2);
+                case MetadataType.Byte: return CreateInstruction(OpCodes.Stind_I1);
+                case MetadataType.SByte: return CreateInstruction(OpCodes.Stind_I1);
+                case MetadataType.Boolean: return CreateInstruction(OpCodes.Stind_I1);
+                case MetadataType.Char: return CreateInstruction(OpCodes.Stind_I2);
+                case MetadataType.UIntPtr: return CreateInstruction(OpCodes.Stind_I);
+                case MetadataType.IntPtr: return CreateInstruction(OpCodes.Stind_I);
+            }
+
+            throw new NotSupportedException();
         }
 
         public PointCut LoadAspect(AspectDefinition aspect, MethodDefinition overrideTarget = null, Action<PointCut> overrideThis = null, TypeDefinition overrideSource = null)
@@ -252,7 +290,6 @@ namespace AspectInjector.Core.Models
         public PointCut Pop()
         {
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Pop));
-
             return this;
         }
 
@@ -260,60 +297,36 @@ namespace AspectInjector.Core.Models
         {
             var argIndex = _proc.Body.Method.HasThis ? par.Index + 1 : par.Index;
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldarg, argIndex));
-            return this;
-        }        
-
-        public PointCut ByVal(TypeReference typeOnStack)
-        {
-            if (typeOnStack.IsByReference)
-            {
-                typeOnStack = ((ByReferenceType)typeOnStack).ElementType;
-
-                if (typeOnStack.IsValueType)
-                {
-                    var opcode = TypeSystem.LoadIndirectMap.First(kv => typeOnStack.Match(kv.Key)).Value;
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
-                }
-                else if (typeOnStack.IsGenericParameter)
-                {
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldobj, typeOnStack));
-                }
-                else
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldind_Ref));
-            }
-
-            if (typeOnStack.IsValueType || typeOnStack.IsGenericParameter)
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Box, typeOnStack));
 
             return this;
         }
 
-        public PointCut ByRef(TypeReference refType)
+        private Instruction PickLoadInstruction(TypeReference elemType)
         {
-            if (refType.IsByReference)
+            switch (elemType.MetadataType)
             {
-                refType = ((ByReferenceType)refType).ElementType;
-
-                if (refType.IsValueType)
-                {
-                    var opcode = TypeSystem.SaveIndirectMap.First(kv => refType.Match(kv.Key)).Value;
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, refType));
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(opcode));
-                }
-                else if (refType.IsGenericParameter)
-                {
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, refType));
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stobj, refType));
-                }
-                else
-                {
-                    if (refType.FullName != WellKnownTypes.Object)
-                        Cast(refType);
-                    _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Stind_Ref));
-                }
+                case MetadataType.Class: return CreateInstruction(OpCodes.Ldind_Ref);
+                case MetadataType.Object: return CreateInstruction(OpCodes.Ldind_Ref);
+                case MetadataType.String: return CreateInstruction(OpCodes.Ldind_Ref);
+                case MetadataType.MVar: return CreateInstruction(OpCodes.Ldobj, elemType);
+                case MetadataType.Var: return CreateInstruction(OpCodes.Ldobj, elemType);
+                case MetadataType.Double: return CreateInstruction(OpCodes.Ldind_R8);
+                case MetadataType.Single: return CreateInstruction(OpCodes.Ldind_R4);
+                case MetadataType.Int64: return CreateInstruction(OpCodes.Ldind_I8);
+                case MetadataType.UInt64: return CreateInstruction(OpCodes.Ldind_I8);
+                case MetadataType.Int32: return CreateInstruction(OpCodes.Ldind_I4);
+                case MetadataType.UInt32: return CreateInstruction(OpCodes.Ldind_U4);
+                case MetadataType.Int16: return CreateInstruction(OpCodes.Ldind_I2);
+                case MetadataType.UInt16: return CreateInstruction(OpCodes.Ldind_U2);
+                case MetadataType.Byte: return CreateInstruction(OpCodes.Ldind_U1);
+                case MetadataType.SByte: return CreateInstruction(OpCodes.Ldind_I1);
+                case MetadataType.Boolean: return CreateInstruction(OpCodes.Ldind_U1);
+                case MetadataType.Char: return CreateInstruction(OpCodes.Ldind_U2);
+                case MetadataType.UIntPtr: return CreateInstruction(OpCodes.Ldind_I);
+                case MetadataType.IntPtr: return CreateInstruction(OpCodes.Ldind_I);
             }
 
-            return this;
+            throw new NotSupportedException();
         }
 
         public PointCut Primitive(object value)
@@ -341,8 +354,23 @@ namespace AspectInjector.Core.Models
             return this;
         }
 
-        public void CastSmart(TypeReference typeOnStack, TypeReference expectedType)
+        public void Cast(TypeReference typeOnStack, TypeReference expectedType)
         {
+            if (typeOnStack.Match(expectedType))
+                return;
+
+            if (expectedType.IsByReference)            
+                expectedType = ((ByReferenceType)expectedType).ElementType;            
+
+            if (typeOnStack.Match(expectedType))
+                return;
+
+            if (typeOnStack.IsByReference)
+            {
+                typeOnStack = ((ByReferenceType)typeOnStack).ElementType;
+                Append(PickLoadInstruction(typeOnStack));
+            }
+
             if (typeOnStack.Match(expectedType))
                 return;
 
@@ -353,7 +381,7 @@ namespace AspectInjector.Core.Models
             }
             else
             {
-                if (typeOnStack.IsValueType)
+                if (typeOnStack.IsValueType || typeOnStack.IsGenericParameter)
                     _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Box, TypeSystem.Import(typeOnStack)));
                 else if (!expectedType.Match(TypeSystem.Object))
                     _proc.SafeInsertBefore(_refInst, _proc.Create(OpCodes.Castclass, TypeSystem.Import(expectedType)));
@@ -394,7 +422,7 @@ namespace AspectInjector.Core.Models
                 Value(val);
 
                 if (val is CustomAttributeArgument next)
-                    CastSmart(next.Type, argument.Type);
+                    Cast(next.Type, argument.Type);
             }
         }
 
@@ -445,16 +473,6 @@ namespace AspectInjector.Core.Models
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, method));
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Ldtoken, method.DeclaringType.MakeCallReference(method.DeclaringType)));
             _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Call, TypeSystem.MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2)));
-
-            return this;
-        }
-
-        public PointCut Cast(TypeReference type)
-        {
-            if (type.IsValueType || type.IsGenericParameter)
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Unbox_Any, type));
-            else
-                _proc.SafeInsertBefore(_refInst, CreateInstruction(OpCodes.Castclass, type));
 
             return this;
         }

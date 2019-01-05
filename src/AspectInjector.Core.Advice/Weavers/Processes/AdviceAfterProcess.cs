@@ -58,7 +58,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             if (_retvar == null)
                 pc.Null();
             else
-                pc.Load(_retvar).ByVal(_retvar.VariableType);
+                pc.Load(_retvar).Cast(_retvar.VariableType, _ts.Object);
         }
     }
 }

@@ -6,7 +6,6 @@ using AspectInjector.Core.Models;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -71,12 +70,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 {
                     moveNext.GetEditor().OnInstruction(exit, il =>
                     {
-                        var loadArg = new Action<PointCut>(args => args.Value((object)null));
+                        var loadArg = new Action<PointCut>(args => args.Value(null));
 
                         if (_asyncResult != null)
                         {
                             il.Store(resvar);
-                            loadArg = new Action<PointCut>(args => args.Load(resvar).ByVal(_asyncResult));
+                            loadArg = new Action<PointCut>(args => args.Load(resvar).Cast(resvar.VariableType, _ts.Object));
                         }
 
                         il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine), loadArg);

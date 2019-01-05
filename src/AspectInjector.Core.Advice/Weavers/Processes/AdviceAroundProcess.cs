@@ -104,7 +104,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 {
                     var refList = new List<Tuple<int, VariableDefinition>>();
 
-                    il = il.ThisOrStatic().Call(original.MakeHostInstanceGeneric(_target.DeclaringType), c =>
+                    var targetMethod = original.MakeHostInstanceGeneric(_target.DeclaringType);
+
+                    il = il.ThisOrStatic().Call(targetMethod, c =>
                     {
                         for (int i = 0; i < original.Parameters.Count; i++)
                         {
@@ -118,26 +120,23 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                                 refList.Add(new Tuple<int, VariableDefinition>(i, tempVar));
                                 unwrapper.Body.Variables.Add(tempVar);
 
-                                c.Store(tempVar, v => v.Load(argsParam).GetByIndex(_ts.Object, i).Cast(elementType));
+                                c.Store(tempVar, v => v.Load(argsParam).GetByIndex(_ts.Object, i).Cast(_ts.Object, elementType));
                                 c.LoadRef(tempVar);
                             }
                             else
                             {
-                                c = c.Load(argsParam).GetByIndex(_ts.Object, i);
-
-                                if (p.ParameterType.IsGenericParameter || p.ParameterType.FullName != WellKnownTypes.Object)
-                                    c = c.Cast(p.ParameterType);
+                                c.Load(argsParam).GetByIndex(_ts.Object, i).Cast(_ts.Object, p.ParameterType);
                             }
                         }
                     });
 
                     foreach (var refPar in refList)
-                        il = il.Load(argsParam).SetByIndex(_ts.Object, refPar.Item1,  val => val.Load(refPar.Item2).ByVal(refPar.Item2.VariableType));
+                        il = il.Load(argsParam).SetByIndex(_ts.Object, refPar.Item1,  val => val.Load(refPar.Item2).Cast(refPar.Item2.VariableType, _ts.Object));
 
                     if (original.ReturnType.FullName == WellKnownTypes.Void)
                         il = il.Value(null);
-                    else if (original.ReturnType.IsValueType || original.ReturnType.IsGenericParameter)
-                        il = il.ByVal(original.ReturnType);
+                    else
+                        il.Cast(targetMethod.ReturnType, unwrapper.ReturnType);
 
                     il.Return();
                 });
@@ -166,22 +165,24 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     //args = new object[] { param1, param2 ...};
                     e.Store(argsVar, args => base.LoadArgumentsArgument(args, null));
 
+                    var targetMethod = unwrapper.MakeHostInstanceGeneric(_target.DeclaringType);
+
                     // Unwrapper(args);
-                    e.ThisOrStatic().Call(unwrapper.MakeHostInstanceGeneric(_target.DeclaringType), args => args.Load(argsVar));
+                    e.ThisOrStatic().Call(targetMethod, args => args.Load(argsVar));
 
                     // proxy ref and out params
                     for (int i = 0; i < _target.Parameters.Count; i++)
                     {
                         var p = _target.Parameters[i];
                         if (p.ParameterType.IsByReference)
-                            e.StoreByRef(p, val => e.Load(argsVar).GetByIndex(_ts.Object, i));
+                            e.Store(p, val => e.Load(argsVar).GetByIndex(_ts.Object, i).Cast(_ts.Object,p.ParameterType));
                     }
 
                     //drop if void, cast if not is object
                     if (returnType.FullName == WellKnownTypes.Void)
                         e = e.Pop();
-                    else if (returnType.FullName != WellKnownTypes.Object)
-                        e = e.Cast(returnType);
+                    else 
+                        e.Cast(targetMethod.ReturnType, returnType);
 
                     e.Return();
                 });

@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
+using AspectInjector.Core.Fluent;
 using AspectInjector.Rules;
 using Mono.Cecil;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace AspectInjector.Core.Models
             });
 
             if (Factory != null)
-                c.Cast(Host);
+                c.Cast(Host.Module.GetTypeSystem().Object, Host);
         }
 
         public bool Validate(ILogger log)
