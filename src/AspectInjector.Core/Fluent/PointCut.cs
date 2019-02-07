@@ -135,8 +135,11 @@ namespace AspectInjector.Core.Models
                 case MetadataType.Class: return CreateInstruction(OpCodes.Stind_Ref);
                 case MetadataType.Object: return CreateInstruction(OpCodes.Stind_Ref);
                 case MetadataType.String: return CreateInstruction(OpCodes.Stind_Ref);
+                case MetadataType.Array: return CreateInstruction(OpCodes.Stind_Ref);
                 case MetadataType.MVar: return CreateInstruction(OpCodes.Stobj, elemType);
                 case MetadataType.Var: return CreateInstruction(OpCodes.Stobj, elemType);
+                case MetadataType.ValueType: return CreateInstruction(OpCodes.Stobj, elemType);
+                case MetadataType.GenericInstance: return CreateInstruction(OpCodes.Stobj, elemType);
                 case MetadataType.Double: return CreateInstruction(OpCodes.Stind_R8);
                 case MetadataType.Single: return CreateInstruction(OpCodes.Stind_R4);
                 case MetadataType.Int64: return CreateInstruction(OpCodes.Stind_I8);
@@ -309,8 +312,11 @@ namespace AspectInjector.Core.Models
                 case MetadataType.Class: return CreateInstruction(OpCodes.Ldind_Ref);
                 case MetadataType.Object: return CreateInstruction(OpCodes.Ldind_Ref);
                 case MetadataType.String: return CreateInstruction(OpCodes.Ldind_Ref);
+                case MetadataType.Array: return CreateInstruction(OpCodes.Ldind_Ref);
                 case MetadataType.MVar: return CreateInstruction(OpCodes.Ldobj, elemType);
                 case MetadataType.Var: return CreateInstruction(OpCodes.Ldobj, elemType);
+                case MetadataType.ValueType: return CreateInstruction(OpCodes.Ldobj, elemType);
+                case MetadataType.GenericInstance: return CreateInstruction(OpCodes.Ldobj, elemType);
                 case MetadataType.Double: return CreateInstruction(OpCodes.Ldind_R8);
                 case MetadataType.Single: return CreateInstruction(OpCodes.Ldind_R4);
                 case MetadataType.Int64: return CreateInstruction(OpCodes.Ldind_I8);

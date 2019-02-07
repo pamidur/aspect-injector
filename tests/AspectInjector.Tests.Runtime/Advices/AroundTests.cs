@@ -20,8 +20,10 @@ namespace AspectInjector.Tests.Advices
             int ref2 = 2;
             int out2;
             var str = "";
+            var dt = DateTime.Now;
+            var arr = new[] {1,2,3 };
 
-            a.Do1(new object(), 1, str, ref str, ref ref1, out out1, ref ref2, out out2, false, false);
+            a.Do1<string>(new object(), 1, str, ref str, dt, ref dt,str,ref str, arr, ref arr, ref ref1, out out1, ref ref2, out out2, false, false);
 
             Assert.True(Checker.Passed);
         }
@@ -69,12 +71,16 @@ namespace AspectInjector.Tests.Advices
 
             [AroundTests_Aspect1]
             [AroundTests_Aspect2] //fire first
-            public int Do1(object data, int value, string str, ref string rstr, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
+            public int Do1<T>(object data, int value, string str, ref string rstr, DateTime dt, ref DateTime rdt, T g, ref T rg, int[] arr, ref int[] rarr,  ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
             {
-                var arr = new object[] { str, rstr };
+                var test = new object[] { dt, rdt,arr,rarr,g,rg };
 
-                str = (string)arr[0];
-                rstr = (string)arr[1];
+                dt = (DateTime)test[0];
+                rdt = (DateTime)test[1];
+                arr = (int[])test[2];
+                rarr = (int[])test[3];
+                g = (T)test[4];
+                rg = (T)test[5];
 
                 Checker.Passed = passed && passed2;
 
