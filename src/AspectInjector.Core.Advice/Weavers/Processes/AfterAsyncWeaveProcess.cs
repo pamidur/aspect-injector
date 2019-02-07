@@ -105,7 +105,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             var tgtis = _target.Body.Instructions.Where(i => (i.OpCode == OpCodes.Ldloc || i.OpCode == OpCodes.Ldloca) && i.Operand == _target.Body.Variables[0]).ToList();
             if (tgtis.Count == 0)
-                throw new Exception();
+                throw new Exception("Cannot find injection point.");
 
             editor.OnInstruction(tgtis[0].Next, code);
         }

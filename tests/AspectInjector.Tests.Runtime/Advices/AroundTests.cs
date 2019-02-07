@@ -1,6 +1,6 @@
 ﻿using AspectInjector.Broker;
-using static AspectInjector.Broker.Advice;
 using System;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
@@ -19,8 +19,9 @@ namespace AspectInjector.Tests.Advices
             object out1;
             int ref2 = 2;
             int out2;
+            var str = "";
 
-            a.Do1(new object(), 1, ref ref1, out out1, ref ref2, out out2, false, false);
+            a.Do1(new object(), 1, str, ref str, ref ref1, out out1, ref ref2, out out2, false, false);
 
             Assert.True(Checker.Passed);
         }
@@ -68,8 +69,13 @@ namespace AspectInjector.Tests.Advices
 
             [AroundTests_Aspect1]
             [AroundTests_Aspect2] //fire first
-            public int Do1(object data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
+            public int Do1(object data, int value, string str, ref string rstr, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
             {
+                var arr = new object[] { str, rstr };
+
+                str = (string)arr[0];
+                rstr = (string)arr[1];
+
                 Checker.Passed = passed && passed2;
 
                 testOut = new object();
@@ -171,6 +177,19 @@ namespace AspectInjector.Tests.Advices
             }
         }
 
+
+        [Aspect(Scope.Global)]
+        [Injection(typeof(AroundTests_Simple))]
+        internal class AroundTests_Simple : Attribute
+        {
+            [Advice(Kind.Around, Targets = Target.Method)]
+            public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
+                [Argument(Source.Arguments)] object[] arguments)
+            {
+                return target(arguments);
+            }
+        }
+
         [Aspect(Scope.Global)]
         [Injection(typeof(AroundTests_Aspect1))]
         internal class AroundTests_Aspect1 : Attribute
@@ -179,7 +198,7 @@ namespace AspectInjector.Tests.Advices
             public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
                 [Argument(Source.Arguments)] object[] arguments)
             {
-                return target(new object[] { arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], true, arguments[7] });
+                return target(arguments.Take(arguments.Length - 2).Concat(new object[] { true, arguments.Last() }).ToArray());
             }
         }
 
@@ -191,7 +210,7 @@ namespace AspectInjector.Tests.Advices
             public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
                 [Argument(Source.Arguments)] object[] arguments)
             {
-                return target(new object[] { arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], arguments[6], true });
+                return target(arguments.Take(arguments.Length - 1).Concat(new object[] { true }).ToArray());
             }
         }
 

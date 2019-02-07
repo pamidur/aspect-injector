@@ -17,6 +17,11 @@ namespace AspectInjector.Core.Extensions
             return m.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.IteratorStateMachineAttribute);
         }
 
+        public static bool IsUnsafe(this MethodDefinition m)
+        {
+            return m.ReturnType.IsPointer || m.Parameters.Any(p => p.ParameterType.IsPointer);
+        }
+
         public static bool IsNormalMethod(this MethodDefinition m)
         {
             return !m.IsAddOn && !m.IsRemoveOn && !m.IsSetter && !m.IsGetter && !m.IsConstructor;

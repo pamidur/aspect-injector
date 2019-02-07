@@ -56,7 +56,7 @@ namespace AspectInjector.Core.Fluent
                     //case MetadataType.GenericInstance: return OpCodes.Stelem_Any;
             }
 
-            throw new NotSupportedException();
+            throw new NotSupportedException($"No instruction for {elementType.MetadataType.ToString()}");
         }
 
 
@@ -80,7 +80,7 @@ namespace AspectInjector.Core.Fluent
                     //case MetadataType.GenericInstance: return OpCodes.Stelem_Any;
             }
 
-            throw new NotSupportedException();
+            throw new NotSupportedException($"No instruction for {elementType.MetadataType.ToString()}");
         }
     }
 }

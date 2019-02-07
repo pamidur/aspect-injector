@@ -44,7 +44,7 @@ namespace AspectInjector.Core.Advice.Effects
 
         protected bool IsApplicableForModifier(MethodDefinition target)
         {
-            if (!target.HasBody)
+            if (!target.HasBody || target.IsUnsafe())
                 return false;
 
             if (

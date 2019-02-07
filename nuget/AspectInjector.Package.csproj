@@ -4,10 +4,11 @@
     <PackageId>AspectInjector</PackageId>
     <Title>Aspect Injector - AOP Framework</Title>
     <Description>This library provides attributes-based compile-time AOP framework.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/pamidur/aspect-injector</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png</PackageIconUrl>
-    <RepositoryUrl>https://github.com/pamidur/aspect-injector</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/pamidur/aspect-injector</RepositoryUrl>       
+    <RepositoryType>git</RepositoryType>    
     <PackageTags>AOP aspect aspects injector injection wp8 wp8.1 win8 win8.1 win10 dotnet core notify notifypropertychanged INPC</PackageTags>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <IncludeBuildOutput>False</IncludeBuildOutput>
@@ -16,6 +17,7 @@
 
   <ItemGroup>
     <None Include="build/*.*" Pack="true" PackagePath="build" />
+    <None Include="buildTransitive/*.*" Pack="true" PackagePath="buildTransitive" />
     <None Include="tools/*.*" Pack="true" PackagePath="tools" />
   </ItemGroup>
 

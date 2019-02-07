@@ -10,9 +10,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <_ASI_Loaded>true</_ASI_Loaded>
     <_ASI_Location Condition="'$(_ASI_Location)' == ''">$(MSBuildThisFileDirectory)</_ASI_Location>
     <_ASI_Options Condition="'$(_ASI_Options)' == ''"></_ASI_Options>
-    <_ASI_Process_Options Condition="'$(Optimize)' == 'true'">-o</_ASI_Process_Options>
+    <_ASI_Process_Options Condition="'$(Optimize)' == 'true' AND '$(_ASI_Process_Options)' == ''">-o</_ASI_Process_Options>
   </PropertyGroup>
 
   <Target Name="InjectAspects" AfterTargets="CoreCompile" DependsOnTargets="$(_InjectAspectsDependsOn)"/>

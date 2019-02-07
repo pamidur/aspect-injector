@@ -134,6 +134,7 @@ namespace AspectInjector.Core.Models
             {
                 case MetadataType.Class: return CreateInstruction(OpCodes.Stind_Ref);
                 case MetadataType.Object: return CreateInstruction(OpCodes.Stind_Ref);
+                case MetadataType.String: return CreateInstruction(OpCodes.Stind_Ref);
                 case MetadataType.MVar: return CreateInstruction(OpCodes.Stobj, elemType);
                 case MetadataType.Var: return CreateInstruction(OpCodes.Stobj, elemType);
                 case MetadataType.Double: return CreateInstruction(OpCodes.Stind_R8);
@@ -152,7 +153,7 @@ namespace AspectInjector.Core.Models
                 case MetadataType.IntPtr: return CreateInstruction(OpCodes.Stind_I);
             }
 
-            throw new NotSupportedException();
+            throw new NotSupportedException($"No instruction for {elemType.MetadataType.ToString()}");
         }
 
         public PointCut LoadAspect(AspectDefinition aspect, MethodDefinition overrideTarget = null, Action<PointCut> overrideThis = null, TypeDefinition overrideSource = null)
@@ -326,7 +327,7 @@ namespace AspectInjector.Core.Models
                 case MetadataType.IntPtr: return CreateInstruction(OpCodes.Ldind_I);
             }
 
-            throw new NotSupportedException();
+            throw new NotSupportedException($"No instruction for {elemType.MetadataType.ToString()}");
         }
 
         public PointCut Primitive(object value)
