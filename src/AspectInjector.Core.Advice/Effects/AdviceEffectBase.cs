@@ -44,6 +44,9 @@ namespace AspectInjector.Core.Advice.Effects
 
         protected bool IsApplicableForModifier(MethodDefinition target)
         {
+            if (!target.HasBody)
+                return false;
+
             if (
                 ((Target & Target.Instance) != 0 && !target.IsStatic)
                 || ((Target & Target.Static) != 0 && target.IsStatic)
@@ -98,7 +101,7 @@ namespace AspectInjector.Core.Advice.Effects
             return result;
         }
 
-        protected virtual void ValidateSupportedArguments(AspectDefinition aspectDefinition,ILogger log)
+        protected virtual void ValidateSupportedArguments(AspectDefinition aspectDefinition, ILogger log)
         {
             var wrongArgs = Arguments.Where(a => a.Source == Source.Target || a.Source == Source.ReturnValue).ToArray();
             LogWrongArgs(wrongArgs, aspectDefinition, log);

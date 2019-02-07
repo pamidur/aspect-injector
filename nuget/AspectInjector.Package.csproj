@@ -3,7 +3,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>AspectInjector</PackageId>
     <Title>Aspect Injector - AOP Framework</Title>
-    <Copyright>Copyright © AspectInjector Team 2018</Copyright>
     <Description>This library provides attributes-based compile-time AOP framework.</Description>
     <PackageProjectUrl>https://github.com/pamidur/aspect-injector</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png</PackageIconUrl>

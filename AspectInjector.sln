@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_solution", "_solution", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
+		after.AspectInjector.sln.targets = after.AspectInjector.sln.targets
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
 		LICENSE = LICENSE
 		package.png = package.png
 		README.md = README.md
@@ -41,7 +44,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Analyzer.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Analyzer.Vsix", "analyzers\AspectInjector.Analyzer.Vsix\AspectInjector.Analyzer.Vsix.csproj", "{06F6709E-56E5-41ED-9BC1-55A8F648DD72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Rules", "src\AspectInjector.Rules\AspectInjector.Rules.csproj", "{20ED44A4-9D35-41F2-A317-C1EB9923379E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Rules", "src\AspectInjector.Rules\AspectInjector.Rules.csproj", "{20ED44A4-9D35-41F2-A317-C1EB9923379E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
