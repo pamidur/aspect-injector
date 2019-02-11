@@ -224,7 +224,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                origin.ReturnType);
 
             foreach (var gparam in origin.GenericParameters)
-                method.GenericParameters.Add(new GenericParameter(gparam.Name, method));
+                method.GenericParameters.Add(gparam.Clone(method,_ts));
 
             if (origin.ReturnType.IsGenericParameter && ((GenericParameter)origin.ReturnType).Owner == origin)
                 method.ReturnType = method.GenericParameters[origin.GenericParameters.IndexOf((GenericParameter)origin.ReturnType)];

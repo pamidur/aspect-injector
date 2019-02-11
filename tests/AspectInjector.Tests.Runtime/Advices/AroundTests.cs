@@ -2,6 +2,8 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
 using Xunit;
 
 namespace AspectInjector.Tests.Advices
@@ -23,7 +25,9 @@ namespace AspectInjector.Tests.Advices
             var dt = DateTime.Now;
             var arr = new[] {1,2,3 };
 
-            a.Do1<string>(new object(), 1, str, ref str, dt, ref dt,str,ref str, arr, ref arr, ref ref1, out out1, ref ref2, out out2, false, false);
+            var sb = new StringBuilder();
+
+            a.Do1<StringBuilder>(new object(), 1, str, ref str, dt, ref dt, sb, ref sb, arr, ref arr, ref ref1, out out1, ref ref2, out out2, false, false);
 
             Assert.True(Checker.Passed);
         }
@@ -55,6 +59,8 @@ namespace AspectInjector.Tests.Advices
             Assert.True(Checker.Passed);
         }
 
+        
+
         internal class AroundTests_Target
         {
             [AroundTests_Aspect1]
@@ -71,7 +77,8 @@ namespace AspectInjector.Tests.Advices
 
             [AroundTests_Aspect1]
             [AroundTests_Aspect2] //fire first
-            public int Do1<T>(object data, int value, string str, ref string rstr, DateTime dt, ref DateTime rdt, T g, ref T rg, int[] arr, ref int[] rarr,  ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
+            public T Do1<T>(object data, int value, string str, ref string rstr, DateTime dt, ref DateTime rdt, T g, ref T rg, int[] arr, ref int[] rarr,  ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, bool passed, bool passed2)
+                where T : ISerializable
             {
                 var test = new object[] { dt, rdt,arr,rarr,g,rg };
 
@@ -87,7 +94,7 @@ namespace AspectInjector.Tests.Advices
                 testOut = new object();
                 testOutValue = 1;
 
-                return 1;
+                return g;
             }
 
             [AroundTests_Aspect1]

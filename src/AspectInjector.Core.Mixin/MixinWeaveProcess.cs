@@ -72,7 +72,7 @@ namespace AspectInjector.Core.Mixin
                 _target.Methods.Add(proxy);
 
                 foreach (var gp in ifaceMethod.GenericParameters)
-                    proxy.GenericParameters.Add(new GenericParameter(gp.Name, proxy));
+                    proxy.GenericParameters.Add(gp.Clone(proxy, _ts));
 
                 proxy.GetEditor().Mark(_ts.DebuggerHiddenAttribute);
                 proxy.ReturnType = _ts.Import(ifaceMethod.ResolveIfGeneric(ifaceMethod.ReturnType));
