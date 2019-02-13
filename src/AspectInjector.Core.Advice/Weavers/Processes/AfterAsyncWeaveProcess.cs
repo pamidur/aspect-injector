@@ -29,7 +29,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override TypeDefinition GetStateMachine()
         {
-            return _target.CustomAttributes.First(ca => ca.AttributeType.FullName == WellKnownTypes.AsyncStateMachineAttribute)
+            return _target.CustomAttributes.First(ca => ca.AttributeType.Match(_ts.AsyncStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0).Resolve();
         }
 

@@ -3,8 +3,26 @@ using System.Linq;
 
 namespace FluentIL.Extensions
 {
-    public static class MemberReferenceExtensions
+    public static class CecilReferenceExtensions
     {
+        public static bool Match(this TypeReference tr1, TypeReference tr2)
+        {
+            if (tr1 == null || tr2 == null)
+                return false;
+
+            if (tr1 == tr2) return true;
+
+            return tr1.FullName == tr2.FullName;
+        }
+
+        public static bool Implements(this TypeReference tr, TypeReference @interface)
+        {
+            var td = tr.Resolve();
+            var ti = @interface;
+
+            return td.Interfaces.Any(i => i.InterfaceType.Match(ti)) || (td.BaseType != null && td.BaseType.Implements(ti));
+        }
+
         public static bool IsAsync(this MethodDefinition m)
         {
             return m.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.AsyncStateMachineAttribute);

@@ -142,7 +142,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     foreach (var refPar in refList)
                         il = il.Load(argsParam).SetByIndex(_ts.Object, refPar.Item1, val => val.Load(refPar.Item2).Cast(refPar.Item2.VariableType, _ts.Object));
 
-                    if (original.ReturnType.FullName == WellKnownTypes.Void)
+                    if (original.ReturnType.Match(_ts.Void))
                         il = il.Value(null);
                     else
                         il = il.Cast(targetMethod.ReturnType, unwrapper.ReturnType);
@@ -188,7 +188,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     }
 
                     //drop if void, cast if not is object
-                    if (returnType.FullName == WellKnownTypes.Void)
+                    if (returnType.Match(_ts.Void))
                         e = e.Pop();
                     else
                         e = e.Cast(targetMethod.ReturnType, returnType);

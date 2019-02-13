@@ -4,6 +4,7 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using FluentIL;
+using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         public AdviceAfterProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)
         {
-            if (_target.ReturnType.FullName != WellKnownTypes.Void && _effect.Arguments.Any(a => a.Source == Source.ReturnValue))
+            if (!_target.ReturnType.Match(_ts.Void) && _effect.Arguments.Any(a => a.Source == Source.ReturnValue))
                 _retvar = GetOrCreateRetVar();
         }
 

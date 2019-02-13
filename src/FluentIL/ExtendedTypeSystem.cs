@@ -70,6 +70,9 @@ namespace FluentIL
             DebuggerStepThroughAttribute = GetSystemType(typeof(DebuggerStepThroughAttribute));
             CompilerGeneratedAttribute = GetSystemType(typeof(CompilerGeneratedAttribute));
 
+            IteratorStateMachineAttribute = GetSystemType(typeof(IteratorStateMachineAttribute));
+            AsyncStateMachineAttribute = GetSystemType(typeof(AsyncStateMachineAttribute));
+
             GetTypeFromHandleMethod = Type.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle");
             GetMethodFromHandleMethod = MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2);
         }
@@ -143,69 +146,44 @@ namespace FluentIL
         #region Public Properties
 
         public TypeReference ActionGeneric { get; private set; }
-
         public TypeReference Boolean { get; private set; }
-
         public TypeReference Byte { get; private set; }
-
         public TypeReference Char { get; private set; }
 
         public TypeReference Attribute { get; private set; }
-
         public TypeReference CompilerGeneratedAttribute { get; private set; }
-
+        public TypeReference IteratorStateMachineAttribute { get; private set; }
+        public TypeReference AsyncStateMachineAttribute { get; private set; }
         public TypeReference DebuggerHiddenAttribute { get; internal set; }
-
         public TypeReference DebuggerStepThroughAttribute { get; private set; }
 
         public TypeReference Double { get; private set; }
-
         public TypeReference FuncGeneric { get; private set; }
-
         public TypeReference FuncGeneric2 { get; private set; }
-
         public TypeReference Int16 { get; private set; }
-
         public TypeReference Int32 { get; private set; }
-
         public TypeReference Int64 { get; private set; }
-
         public TypeReference IntPtr { get; private set; }
-
         public TypeReference MethodBase { get; private set; }
-
         public TypeReference Object { get; private set; }
-
         public TypeReference ObjectArray { get; private set; }
 
         public MethodReference GetTypeFromHandleMethod { get; private set; }
-
         public MethodReference GetMethodFromHandleMethod { get; private set; }
 
         public TypeReference SByte { get; private set; }
-
         public TypeReference Single { get; private set; }
-
         public TypeReference String { get; private set; }
-
         public TypeReference Task { get; private set; }
 
         public TypeReference TaskCompletionGeneric { get; private set; }
-
         public TypeReference TaskGeneric { get; private set; }
-
         public TypeReference Type { get; private set; }
-
         public TypeReference TypedReference { get; private set; }
-
         public TypeReference UInt16 { get; private set; }
-
         public TypeReference UInt32 { get; private set; }
-
         public TypeReference UInt64 { get; private set; }
-
         public TypeReference UIntPtr { get; private set; }
-
         public TypeReference Void { get; private set; }
 
         #endregion Public Properties

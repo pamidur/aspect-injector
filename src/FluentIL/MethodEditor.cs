@@ -27,11 +27,9 @@ namespace FluentIL
         {
             if (!Method.HasBody) return;
 
-            var il = Method.Body.GetEditor();
-            var before = GetPreviousInst(GetCodeStart(), il);
-            action(new Cut(il, before));
-
-            if (before.OpCode == OpCodes.Nop) il.SafeRemove(before);
+            var cut = new Cut(Method.Body, GetCodeStart())
+                .Prev()
+                .Here(action);
         }
 
         public void BeforeExit(PointCut action)
@@ -40,15 +38,9 @@ namespace FluentIL
 
             foreach (var ret in Method.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList())
             {
-                var il = Method.Body.GetEditor();
-                var nop = il.Create(OpCodes.Nop);
-
-                il.InsertAfter(ret, il.Create(OpCodes.Ret));
-                il.SafeReplace(ret, nop);
-
-                action(new Cut(il, nop));
-
-                il.SafeRemove(nop);
+                var cut = new Cut(Method.Body, ret);
+                cut.Here(action).Write(OpCodes.Ret);
+                cut.Remove();
             }
         }
 
@@ -61,24 +53,9 @@ namespace FluentIL
             if (!Method.Body.Instructions.Contains(instruction))
                 throw new ArgumentException("Wrong instruction.");
 
-            var il = Method.Body.GetEditor();
-            var before = GetPreviousInst(instruction, il);
-
-            action(new Cut(il, before));
-
-            if (before.OpCode == OpCodes.Nop) il.SafeRemove(before);
-        }
-
-        private Instruction GetPreviousInst(Instruction instruction, ILProcessor il)
-        {
-            var before = instruction.Previous;
-            if (before == null)
-            {
-                before = il.Create(OpCodes.Nop);
-                il.InsertBefore(instruction, before);
-            }
-
-            return before;
+            var cut = new Cut(Method.Body, instruction)
+                .Prev()
+                .Here(action);
         }
 
         public void Instead(PointCut action)

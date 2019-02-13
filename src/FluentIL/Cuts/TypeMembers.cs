@@ -58,14 +58,12 @@ namespace FluentIL
 
         public static Cut Load(this Cut cut, ParameterReference par)
         {
-            var argIndex = cut.Method.HasThis ? par.Index + 1 : par.Index;
-            return cut.Write(OpCodes.Ldarg, argIndex);
+            return cut.Write(OpCodes.Ldarg, par.Resolve());
         }
 
         public static Cut LoadRef(this Cut cut, ParameterReference par)
         {
-            var argIndex = cut.Method.HasThis ? par.Index + 1 : par.Index;
-            return cut.Write(OpCodes.Ldarga, argIndex);
+            return cut.Write(OpCodes.Ldarga, par.Resolve());
         }
 
         public static Cut Store(this Cut cut, ParameterReference par, PointCut value = null)
@@ -80,7 +78,7 @@ namespace FluentIL
             {
                 return cut
                     .Here(value)
-                    .Write(OpCodes.Starg, cut.Method.HasThis ? par.Index + 1 : par.Index);
+                    .Write(OpCodes.Starg, par.Resolve());
             }
         }
     }

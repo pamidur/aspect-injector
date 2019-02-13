@@ -1,36 +1,53 @@
-﻿using FluentIL.Extensions;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Linq;
 
 namespace FluentIL
 {
     public delegate Cut PointCut(Cut cut);
 
-    public class Cut
+    public struct Cut
     {
-        private readonly ILProcessor _proc;
+        private readonly bool _entry;
+        private readonly bool _exit;
         private readonly Instruction _refInst;
+        private readonly MethodBody _body;
 
-        public ExtendedTypeSystem TypeSystem { get; }
-        public MethodDefinition Method { get; }
+        public ExtendedTypeSystem TypeSystem => _body.Method.Module.GetTypeSystem();
+        public MethodDefinition Method => _body.Method;
 
-        public Cut(ILProcessor proc, Instruction instruction)
+        public Cut(MethodBody body, bool entry, bool exit)
         {
-            _proc = proc;
+            if (!entry && !exit) throw new ArgumentException();
+
+            _body = body;
+            _entry = entry;
+            _exit = exit;
+            _refInst = null;
+        }
+
+        public Cut(MethodBody body, Instruction instruction)
+        {
             _refInst = instruction ?? throw new ArgumentNullException(nameof(instruction));
-            Method = proc.Body.Method;
-            TypeSystem = Method.Module.GetTypeSystem();
+            _body = body ?? throw new ArgumentNullException(nameof(body));
+
+            _entry = false;
+            _exit = false;
         }
 
         public Cut Next()
         {
-            return new Cut(_proc, _refInst.Next);
+            if (_entry) return this;
+            if (_body.Instructions[_body.Instructions.Count - 1] == _refInst) return new Cut(_body, false, true);
+            return new Cut(_body, _refInst.Next);
         }
 
         public Cut Prev()
         {
-            return new Cut(_proc, _refInst.Previous);
+            if (_exit) return this;
+            if (_body.Instructions.Count != 0 && _body.Instructions[0] == _refInst) return new Cut(_body, true, false);
+            return new Cut(_body, _refInst.Previous);
         }
 
         public Cut Here(PointCut pc)
@@ -39,45 +56,52 @@ namespace FluentIL
             return pc(this);
         }
 
-        public Cut Write(params Instruction[] instructions)
+        public Cut Write(Instruction instruction)
         {
-            if (instructions.Length == 0)
-                return this;
-
-            var refi = _refInst;
-
-            for (int i = 0; i < instructions.Length; i++)
+            if (_entry)
             {
-                Instruction inst = instructions[i];
-                refi = _proc.SafeInsertAfter(refi, inst);
-            }
+                _body.Instructions.Insert(0, instruction);
 
-            return new Cut(_proc, refi);
+                foreach (var handler in _body.ExceptionHandlers.Where(h => h.HandlerStart == null).ToList())
+                    handler.HandlerStart = _refInst;
+            }
+            else if (_exit || _refInst == _body.Instructions[_body.Instructions.Count - 1])
+            {
+                _body.Instructions.Add(instruction);
+
+                if (!_exit)
+                    foreach (var handler in _body.ExceptionHandlers.Where(h => h.HandlerEnd == null).ToList())
+                        handler.HandlerEnd = _refInst;
+            }
+            else
+                _body.Instructions.Insert(_body.Instructions.IndexOf(_refInst) + 1, instruction);
+
+            return new Cut(_body, instruction);
         }
 
         public Instruction Emit(OpCode opCode, object operand)
         {
             switch (operand)
-            {
-                case Cut pc: return _proc.Create(opCode, pc._refInst);
-                case TypeReference tr: return _proc.Create(opCode, TypeSystem.Import(tr));
-                case MethodReference mr: return _proc.Create(opCode, TypeSystem.Import(mr));
-                case CallSite cs: return _proc.Create(opCode, cs);
-                case FieldReference fr: return _proc.Create(opCode, TypeSystem.Import(fr));
-                case string str: return _proc.Create(opCode, str);
-                case char c: return _proc.Create(opCode, c);
-                case byte b: return _proc.Create(opCode, b);
-                case sbyte sb: return _proc.Create(opCode, sb);
-                case int i: return _proc.Create(opCode, i);
-                case short i: return _proc.Create(opCode, i);
-                case ushort i: return _proc.Create(opCode, i);
-                case long l: return _proc.Create(opCode, l);
-                case float f: return _proc.Create(opCode, f);
-                case double d: return _proc.Create(opCode, d);
-                case Instruction inst: return _proc.Create(opCode, inst);
-                case Instruction[] insts: return _proc.Create(opCode, insts);
-                case VariableDefinition vd: return _proc.Create(opCode, vd);
-                case ParameterDefinition pd: return _proc.Create(opCode, pd);
+            {                
+                case Cut pc: return Instruction.Create(opCode, pc._refInst ?? throw new InvalidOperationException());
+                case TypeReference tr: return Instruction.Create(opCode, TypeSystem.Import(tr));
+                case MethodReference mr: return Instruction.Create(opCode, TypeSystem.Import(mr));
+                case CallSite cs: return Instruction.Create(opCode, cs);
+                case FieldReference fr: return Instruction.Create(opCode, TypeSystem.Import(fr));
+                case string str: return Instruction.Create(opCode, str);
+                case char c: return Instruction.Create(opCode, c);
+                case byte b: return Instruction.Create(opCode, b);
+                case sbyte sb: return Instruction.Create(opCode, sb);
+                case int i: return Instruction.Create(opCode, i);
+                case short i: return Instruction.Create(opCode, i);
+                case ushort i: return Instruction.Create(opCode, i);
+                case long l: return Instruction.Create(opCode, l);
+                case float f: return Instruction.Create(opCode, f);
+                case double d: return Instruction.Create(opCode, d);
+                case Instruction inst: return Instruction.Create(opCode, inst);
+                case Instruction[] insts: return Instruction.Create(opCode, insts);
+                case VariableDefinition vd: return Instruction.Create(opCode, vd);
+                case ParameterDefinition pd: return Instruction.Create(opCode, pd);
 
                 default: throw new NotSupportedException($"Not supported operand type '{operand.GetType()}'");
             }
@@ -85,7 +109,63 @@ namespace FluentIL
 
         public Instruction Emit(OpCode opCode)
         {
-            return _proc.Create(opCode);
+            return Instruction.Create(opCode);
         }
+
+        public Cut Replace(Instruction instruction)
+        {
+            if (_exit || _entry) return Write(instruction);
+
+            Redirect(_refInst, instruction, instruction);
+            _body.Instructions[_body.Instructions.IndexOf(_refInst)] = instruction;
+
+            return new Cut(_body, instruction);
+        }
+
+        public Cut Remove()
+        {
+            var prevCut = Prev();
+
+            var next = _refInst.Next;
+            var prev = _refInst.Previous;
+
+            Redirect(_refInst, next, prev);
+            _body.Instructions.Remove(_refInst);
+
+            return prevCut;
+        }
+
+        private void Redirect(Instruction source, Instruction to, Instruction from)
+        {
+            var refs = _body.Instructions.Where(i => i.Operand == source).ToList();
+
+            if (refs.Any())
+            {
+                if (to == null)
+                    throw new InvalidOperationException();
+
+                foreach (var rref in refs)
+                    rref.Operand = to;
+            }
+
+            foreach (var handler in _body.ExceptionHandlers)
+            {
+                if (handler.FilterStart == source)
+                    handler.FilterStart = to ?? throw new InvalidOperationException();
+
+                if (handler.HandlerEnd == source)
+                    handler.HandlerEnd = from ?? throw new InvalidOperationException();
+
+                if (handler.HandlerStart == source)
+                    handler.HandlerStart = to ?? throw new InvalidOperationException();
+
+                if (handler.TryEnd == source)
+                    handler.TryEnd = from ?? throw new InvalidOperationException();
+
+                if (handler.TryStart == source)
+                    handler.TryStart = to ?? throw new InvalidOperationException();
+            }
+        }
+
     }
 }
