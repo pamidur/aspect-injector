@@ -23,7 +23,7 @@ namespace AspectInjector.Core.Extensions
             }
 
             var instruction = SkipAspectInitializers(me.Method, me.GetCodeStart());
-            action(new Cut(method.GetEditor(), instruction));
+            action(new Cut(method.GetEditor(), instruction).Prev());
         }
 
         public static Cut LoadAspect(this Cut cut, AspectDefinition aspect)
@@ -60,7 +60,7 @@ namespace AspectInjector.Core.Extensions
         {
             if (method.IsConstructor && !method.IsStatic)
             {
-                if (instruction.OpCode == OpCodes.Ldarg && (int)instruction.Operand == 0
+                if ((instruction.OpCode == OpCodes.Ldarg_0 || (instruction.OpCode == OpCodes.Ldarg && (int)instruction.Operand == 0))
                     && instruction.Next.OpCode == OpCodes.Call
                     && ((MethodReference)instruction.Next.Operand).Name == Constants.InstanceAspectsMethodName
                     )
