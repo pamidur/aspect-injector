@@ -1,5 +1,6 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 using System;
 using System.Linq;
 
@@ -12,25 +13,28 @@ namespace FluentIL
         private readonly bool _entry;
         private readonly bool _exit;
         private readonly Instruction _refInst;
-        private readonly MethodBody _body;
+        private readonly MethodEditor _method;
 
-        public ExtendedTypeSystem TypeSystem => _body.Method.Module.GetTypeSystem();
-        public MethodDefinition Method => _body.Method;
+        public ExtendedTypeSystem TypeSystem => _method.TypeSystem;
+        public MethodDefinition Method => _method.Method;
 
-        public Cut(MethodBody body, bool entry, bool exit)
+        private Collection<Instruction> Instructions => _method.Method.Body.Instructions;
+        private MethodBody Body => _method.Method.Body;
+
+        public Cut(MethodEditor method, bool entry, bool exit)
         {
             if (!entry && !exit) throw new ArgumentException();
 
-            _body = body;
+            _method = method;
             _entry = entry;
             _exit = exit;
             _refInst = null;
         }
 
-        public Cut(MethodBody body, Instruction instruction)
+        public Cut(MethodEditor method, Instruction instruction)
         {
             _refInst = instruction ?? throw new ArgumentNullException(nameof(instruction));
-            _body = body ?? throw new ArgumentNullException(nameof(body));
+            _method = method ?? throw new ArgumentNullException(nameof(method));
 
             _entry = false;
             _exit = false;
@@ -39,15 +43,15 @@ namespace FluentIL
         public Cut Next()
         {
             if (_entry) return this;
-            if (_body.Instructions[_body.Instructions.Count - 1] == _refInst) return new Cut(_body, false, true);
-            return new Cut(_body, _refInst.Next);
+            if (Instructions[Instructions.Count - 1] == _refInst) return new Cut(_method, false, true);
+            return new Cut(_method, _refInst.Next);
         }
 
         public Cut Prev()
         {
             if (_exit) return this;
-            if (_body.Instructions.Count != 0 && _body.Instructions[0] == _refInst) return new Cut(_body, true, false);
-            return new Cut(_body, _refInst.Previous);
+            if (Instructions.Count != 0 && Instructions[0] == _refInst) return new Cut(_method, true, false);
+            return new Cut(_method, _refInst.Previous);
         }
 
         public Cut Here(PointCut pc)
@@ -60,23 +64,23 @@ namespace FluentIL
         {
             if (_entry)
             {
-                _body.Instructions.Insert(0, instruction);
+                Instructions.Insert(0, instruction);
 
-                foreach (var handler in _body.ExceptionHandlers.Where(h => h.HandlerStart == null).ToList())
+                foreach (var handler in Body.ExceptionHandlers.Where(h => h.HandlerStart == null).ToList())
                     handler.HandlerStart = _refInst;
             }
-            else if (_exit || _refInst == _body.Instructions[_body.Instructions.Count - 1])
+            else if (_exit || _refInst == Instructions[Instructions.Count - 1])
             {
-                _body.Instructions.Add(instruction);
+                Instructions.Add(instruction);
 
                 if (!_exit)
-                    foreach (var handler in _body.ExceptionHandlers.Where(h => h.HandlerEnd == null).ToList())
+                    foreach (var handler in Body.ExceptionHandlers.Where(h => h.HandlerEnd == null).ToList())
                         handler.HandlerEnd = _refInst;
             }
             else
-                _body.Instructions.Insert(_body.Instructions.IndexOf(_refInst) + 1, instruction);
+                Instructions.Insert(Instructions.IndexOf(_refInst) + 1, instruction);
 
-            return new Cut(_body, instruction);
+            return new Cut(_method, instruction);
         }
 
         public Instruction Emit(OpCode opCode, object operand)
@@ -117,9 +121,9 @@ namespace FluentIL
             if (_exit || _entry) return Write(instruction);
 
             Redirect(_refInst, instruction, instruction);
-            _body.Instructions[_body.Instructions.IndexOf(_refInst)] = instruction;
+            Instructions[Instructions.IndexOf(_refInst)] = instruction;
 
-            return new Cut(_body, instruction);
+            return new Cut(_method, instruction);
         }
 
         public Cut Remove()
@@ -130,14 +134,14 @@ namespace FluentIL
             var prev = _refInst.Previous;
 
             Redirect(_refInst, next, prev);
-            _body.Instructions.Remove(_refInst);
+            Instructions.Remove(_refInst);
 
             return prevCut;
         }
 
         private void Redirect(Instruction source, Instruction to, Instruction from)
         {
-            var refs = _body.Instructions.Where(i => i.Operand == source).ToList();
+            var refs = Instructions.Where(i => i.Operand == source).ToList();
 
             if (refs.Any())
             {
@@ -148,7 +152,7 @@ namespace FluentIL
                     rref.Operand = to;
             }
 
-            foreach (var handler in _body.ExceptionHandlers)
+            foreach (var handler in Body.ExceptionHandlers)
             {
                 if (handler.FilterStart == source)
                     handler.FilterStart = to ?? throw new InvalidOperationException();

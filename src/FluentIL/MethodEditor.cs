@@ -27,7 +27,7 @@ namespace FluentIL
         {
             if (!Method.HasBody) return;
 
-            var cut = new Cut(Method.Body, GetCodeStart())
+            var cut = new Cut(this, GetCodeStart())
                 .Prev()
                 .Here(action);
         }
@@ -38,14 +38,10 @@ namespace FluentIL
 
             foreach (var ret in Method.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList())
             {
-                var cut = new Cut(Method.Body, ret);
+                var cut = new Cut(this, ret);
                 cut.Here(action).Write(OpCodes.Ret);
                 cut.Remove();
             }
-        }
-
-        public void OnException(PointCut action)
-        {
         }
 
         public void Before(Instruction instruction, PointCut action)
@@ -53,22 +49,17 @@ namespace FluentIL
             if (!Method.Body.Instructions.Contains(instruction))
                 throw new ArgumentException("Wrong instruction.");
 
-            var cut = new Cut(Method.Body, instruction)
+            new Cut(this, instruction)
                 .Prev()
                 .Here(action);
         }
 
         public void Instead(PointCut action)
         {
-            var proc = Method.Body.GetEditor();
-            var instruction = proc.Create(OpCodes.Nop);
-
             Method.Body.Instructions.Clear();
-            proc.Append(instruction);
 
-            Before(instruction, action);
-
-            proc.Remove(instruction);
+            new Cut(this, true, true)
+                .Here(action);
         }
 
         public Instruction GetCodeStart()
@@ -82,8 +73,6 @@ namespace FluentIL
 
         protected Instruction FindBaseClassCtorCall()
         {
-            var proc = Method.Body.GetEditor();
-
             if (!Method.IsConstructor)
                 throw new Exception(Method.ToString() + " is not ctor.");
 

@@ -1,5 +1,4 @@
 ﻿using Mono.Cecil;
-using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,23 +7,8 @@ namespace FluentIL
 {
     public static class EditorFactory
     {
-        private static readonly Dictionary<MethodBody, ILProcessor> _processors = new Dictionary<MethodBody, ILProcessor>();
         private static readonly Dictionary<ModuleDefinition, ExtendedTypeSystem> _typeSystems = new Dictionary<ModuleDefinition, ExtendedTypeSystem>();
         private static readonly Dictionary<MethodDefinition, MethodEditor> _methodEditors = new Dictionary<MethodDefinition, MethodEditor>();
-
-        public static ILProcessor GetEditor(this MethodBody mb)
-        {
-            lock (_processors)
-            {
-                if (!_processors.TryGetValue(mb, out var result))
-                {
-                    result = mb.GetILProcessor();
-                    _processors.Add(mb, result);
-                }
-
-                return result;
-            }
-        }
 
         public static MethodEditor GetEditor(this MethodDefinition md)
         {
@@ -56,17 +40,14 @@ namespace FluentIL
 
         public static void Optimize(ModuleDefinition module)
         {
-            foreach (var body in _processors.Keys.Where(b=>b.Method.Module == module))
-                body.OptimizeMacros();
+            foreach (var method in _methodEditors.Keys.Where(b=>b.Module == module))
+                method.Body.OptimizeMacros();
         }
 
         public static void CleanUp(ModuleDefinition module)
         {
-            foreach (var body in _processors.Keys.Where(b => b.Method.Module == module).ToList())
-            {
-                _processors.Remove(body);
-                _methodEditors.Remove(body.Method);
-            }
+            foreach (var method in _methodEditors.Keys.Where(b => b.Module == module).ToList())            
+                _methodEditors.Remove(method);            
 
             _typeSystems.Remove(module);
         }

@@ -23,7 +23,7 @@ namespace AspectInjector.Core.Extensions
             }
 
             var instruction = SkipAspectInitializers(me.Method, me.GetCodeStart());
-            action(new Cut(method.Body, instruction));
+            action(new Cut(method.GetEditor(), instruction));
         }
 
         public static Cut LoadAspect(this Cut cut, AspectDefinition aspect)
