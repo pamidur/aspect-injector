@@ -1,8 +1,8 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
-using AspectInjector.Core.Fluent;
 using AspectInjector.Rules;
+using FluentIL;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +21,7 @@ namespace AspectInjector.Core.Models
 
         public TypeReference Factory { get; set; }
 
-        private MethodReference GetFactoryMethod()
+        public MethodReference GetFactoryMethod()
         {
             if (_factoryMethod == null)
             {
@@ -39,18 +39,6 @@ namespace AspectInjector.Core.Models
             }
 
             return _factoryMethod;
-        }
-
-        public void CreateAspectInstance(PointCut c)
-        {
-            c = c.Call(GetFactoryMethod(), arg =>
-            {
-                if (Factory != null)
-                    arg.TypeOf(Host);
-            });
-
-            if (Factory != null)
-                c.Cast(Host.Module.GetTypeSystem().Object, Host);
         }
 
         public bool Validate(ILogger log)

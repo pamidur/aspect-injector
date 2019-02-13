@@ -1,15 +1,12 @@
-﻿using AspectInjector.Broker;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+﻿using Mono.Cecil;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace AspectInjector.Core.Fluent
+namespace FluentIL
 {
     public class ExtendedTypeSystem
     {
@@ -21,7 +18,7 @@ namespace AspectInjector.Core.Fluent
 
         static ExtendedTypeSystem()
         {
-            var netStandard = ModuleDefinition.ReadModule(typeof(Aspect).Assembly.Location).AssemblyReferences.First(r => r.Name == "netstandard");
+            var netStandard = ModuleDefinition.ReadModule(typeof(ExtendedTypeSystem).Assembly.Location).AssemblyReferences.First(r => r.Name == "netstandard");
             _corelib = netStandard;
         }
 
@@ -72,6 +69,9 @@ namespace AspectInjector.Core.Fluent
             DebuggerHiddenAttribute = GetSystemType(typeof(DebuggerHiddenAttribute));
             DebuggerStepThroughAttribute = GetSystemType(typeof(DebuggerStepThroughAttribute));
             CompilerGeneratedAttribute = GetSystemType(typeof(CompilerGeneratedAttribute));
+
+            GetTypeFromHandleMethod = Type.Resolve().Methods.First(m => m.Name == "GetTypeFromHandle");
+            GetMethodFromHandleMethod = MethodBase.Resolve().Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2);
         }
 
         private static void UpdateCoreLibRef(ModuleDefinition module, AssemblyNameReference reference)
@@ -177,6 +177,10 @@ namespace AspectInjector.Core.Fluent
         public TypeReference Object { get; private set; }
 
         public TypeReference ObjectArray { get; private set; }
+
+        public MethodReference GetTypeFromHandleMethod { get; private set; }
+
+        public MethodReference GetMethodFromHandleMethod { get; private set; }
 
         public TypeReference SByte { get; private set; }
 

@@ -4,7 +4,7 @@ using Mono.Cecil.Rocks;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AspectInjector.Core.Fluent
+namespace FluentIL
 {
     public static class EditorFactory
     {

@@ -11,5 +11,6 @@
   <ItemGroup>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Rules\AspectInjector.Rules.csproj" />
+    <ProjectReference Include="..\FluentIL\FluentIL.csproj" />
   </ItemGroup>
 </Project>

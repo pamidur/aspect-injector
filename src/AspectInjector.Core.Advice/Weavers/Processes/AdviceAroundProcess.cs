@@ -1,13 +1,13 @@
 ﻿using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
-using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
+using FluentIL;
+using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
@@ -38,7 +38,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             );
         }
 
-        protected override void LoadTargetArgument(PointCut pc, AdviceArgument parameter)
+        protected override Cut LoadTargetArgument(Cut pc, AdviceArgument parameter)
         {
             var targetFuncType = _ts.MakeGenericInstanceType(
                 _ts.FuncGeneric2,
@@ -48,12 +48,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var targetFuncCtor = targetFuncType.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic).MakeHostInstanceGeneric(targetFuncType);
             var targetMethod = _wrapper.MakeCallReference(GetOrCreateUnwrapper().MakeHostInstanceGeneric(_target.DeclaringType));
 
-            pc.ThisOrNull().Call(targetFuncCtor, args => args.Load(targetMethod));
+            return pc.ThisOrNull().Call(targetFuncCtor, args => args.Delegate(targetMethod));
         }
 
-        protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
+        protected override Cut LoadArgumentsArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.Load(_wrapper.Parameters[0]);
+            return pc.Load(_wrapper.Parameters[0]);
         }
 
         public MethodDefinition GetNextWrapper()
@@ -120,25 +120,34 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                                 refList.Add(new Tuple<int, VariableDefinition>(i, tempVar));
                                 unwrapper.Body.Variables.Add(tempVar);
 
-                                c.Store(tempVar, v => v.Load(argsParam).GetByIndex(_ts.Object, i).Cast(_ts.Object, elementType));
-                                c.LoadRef(tempVar);
+                                c = c
+                                .Store(tempVar, v => v
+                                    .Load(argsParam)
+                                    .GetByIndex(_ts.Object, i)
+                                    .Cast(_ts.Object, elementType))
+                                .LoadRef(tempVar);
                             }
                             else
                             {
-                                c.Load(argsParam).GetByIndex(_ts.Object, i).Cast(_ts.Object, p.ParameterType);
+                                c = c
+                                .Load(argsParam)
+                                .GetByIndex(_ts.Object, i)
+                                .Cast(_ts.Object, p.ParameterType);
                             }
                         }
+
+                        return c;
                     });
 
                     foreach (var refPar in refList)
-                        il = il.Load(argsParam).SetByIndex(_ts.Object, refPar.Item1,  val => val.Load(refPar.Item2).Cast(refPar.Item2.VariableType, _ts.Object));
+                        il = il.Load(argsParam).SetByIndex(_ts.Object, refPar.Item1, val => val.Load(refPar.Item2).Cast(refPar.Item2.VariableType, _ts.Object));
 
                     if (original.ReturnType.FullName == WellKnownTypes.Void)
                         il = il.Value(null);
                     else
-                        il.Cast(targetMethod.ReturnType, unwrapper.ReturnType);
+                        il = il.Cast(targetMethod.ReturnType, unwrapper.ReturnType);
 
-                    il.Return();
+                    return il.Return();
                 });
 
             return unwrapper;
@@ -163,28 +172,28 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     _target.Body.InitLocals = true;
 
                     //args = new object[] { param1, param2 ...};
-                    e.Store(argsVar, args => base.LoadArgumentsArgument(args, null));
+                    e = e.Store(argsVar, args => base.LoadArgumentsArgument(args, null));
 
                     var targetMethod = unwrapper.MakeHostInstanceGeneric(_target.DeclaringType);
 
                     // Unwrapper(args);
-                    e.ThisOrStatic().Call(targetMethod, args => args.Load(argsVar));
+                    e = e.ThisOrStatic().Call(targetMethod, args => args.Load(argsVar));
 
                     // proxy ref and out params
                     for (int i = 0; i < _target.Parameters.Count; i++)
                     {
                         var p = _target.Parameters[i];
                         if (p.ParameterType.IsByReference)
-                            e.Store(p, val => e.Load(argsVar).GetByIndex(_ts.Object, i).Cast(_ts.Object,p.ParameterType));
+                            e = e.Store(p, val => val.Load(argsVar).GetByIndex(_ts.Object, i).Cast(_ts.Object, p.ParameterType));
                     }
 
                     //drop if void, cast if not is object
                     if (returnType.FullName == WellKnownTypes.Void)
                         e = e.Pop();
-                    else 
-                        e.Cast(targetMethod.ReturnType, returnType);
+                    else
+                        e = e.Cast(targetMethod.ReturnType, returnType);
 
-                    e.Return();
+                    return e.Return();
                 });
 
             return original;
@@ -192,7 +201,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private void MoveBody(MethodDefinition from, MethodDefinition to)
         {
-            foreach (var inst in from.Body.Instructions)            
+            foreach (var inst in from.Body.Instructions)
                 to.Body.Instructions.Add(inst);
 
             if (from.DebugInformation.HasSequencePoints)
@@ -224,7 +233,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                origin.ReturnType);
 
             foreach (var gparam in origin.GenericParameters)
-                method.GenericParameters.Add(gparam.Clone(method,_ts));
+                method.GenericParameters.Add(gparam.Clone(method, _ts));
 
             if (origin.ReturnType.IsGenericParameter && ((GenericParameter)origin.ReturnType).Owner == origin)
                 method.ReturnType = method.GenericParameters[origin.GenericParameters.IndexOf((GenericParameter)origin.ReturnType)];

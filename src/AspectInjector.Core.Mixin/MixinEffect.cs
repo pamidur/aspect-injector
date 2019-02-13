@@ -2,6 +2,7 @@
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
+using FluentIL.Extensions;
 using Mono.Cecil;
 
 namespace AspectInjector.Core.Mixin
@@ -17,9 +18,7 @@ namespace AspectInjector.Core.Mixin
 
         protected override bool IsEqualTo(Effect effect)
         {
-            var other = effect as MixinEffect;
-
-            if (other == null)
+            if (!(effect is MixinEffect other))
                 return false;
 
             return other.InterfaceType.Match(InterfaceType);

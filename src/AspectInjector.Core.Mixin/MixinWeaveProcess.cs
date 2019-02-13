@@ -1,12 +1,12 @@
 ﻿using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
-using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
+using FluentIL;
+using FluentIL.Extensions;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace AspectInjector.Core.Mixin
@@ -88,7 +88,12 @@ namespace AspectInjector.Core.Mixin
                 proxy.GetEditor().Instead(
                     e => e
                     .LoadAspect(_aspect)
-                    .Call(ifaceMethod, args => proxy.Parameters.ToList().ForEach(p => args.Load(p)))
+                    .Call(ifaceMethod, args =>
+                    {
+                        foreach (var pp in proxy.Parameters)
+                            args = args.Load(pp);
+                        return args;
+                    })
                     .Return()
                     );
             }

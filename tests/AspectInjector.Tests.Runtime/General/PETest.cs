@@ -41,7 +41,7 @@ namespace AspectInjector.Tests.General
     {
         private readonly Resolver _resolver;
         private readonly Verifier _verifier;
-        private AssemblyName _systemModule = new AssemblyName("mscorlib");
+        private readonly AssemblyName _systemModule = new AssemblyName("mscorlib");
 
         public PETest()
         {

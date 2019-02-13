@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Fluent;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using FluentIL;
 using Mono.Cecil;
 using System.Linq;
 
@@ -44,7 +45,7 @@ namespace AspectInjector.Core.Services
                     cctor.GetEditor().Instead(i => i.Return());
                 }
 
-                cctor.GetEditor().OnInit(i => i.Store(singletonField, aspect.CreateAspectInstance));
+                cctor.GetEditor().AfterEntry(i => i.Store(singletonField, val => val.CreateAspectInstance(aspect)));
             }
 
             aspect.Host.IsBeforeFieldInit = false;

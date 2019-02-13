@@ -1,8 +1,9 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Fluent;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using FluentIL;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Collections.Generic;
@@ -39,26 +40,29 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public override void Execute()
         {
-            _target.GetEditor().OnExit(
-                il =>
+            _target.GetEditor().BeforeExit(
+                cut =>
                 {
                     if (_retvar != null)
-                        il.Store(_retvar);
+                        cut = cut.Store(_retvar);
 
-                    il.LoadAspect(_aspect);
-                    il.Call(_effect.Method, LoadAdviceArgs);
+                    cut = cut
+                    .LoadAspect(_aspect)
+                    .Call(_effect.Method, LoadAdviceArgs);
 
                     if (_retvar != null)
-                        il.Load(_retvar);
+                        cut = cut.Load(_retvar);
+
+                    return cut;
                 });
         }
 
-        protected override void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
+        protected override Cut LoadReturnValueArgument(Cut pc, AdviceArgument parameter)
         {
             if (_retvar == null)
-                pc.Null();
+                return pc.Null();
             else
-                pc.Load(_retvar).Cast(_retvar.VariableType, _ts.Object);
+                return pc.Load(_retvar).Cast(_retvar.VariableType, _ts.Object);
         }
     }
 }

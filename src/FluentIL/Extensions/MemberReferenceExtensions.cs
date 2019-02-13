@@ -1,9 +1,7 @@
-﻿using AspectInjector.Core.Fluent;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
-namespace AspectInjector.Core.Extensions
+namespace FluentIL.Extensions
 {
     public static class MemberReferenceExtensions
     {

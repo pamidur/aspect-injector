@@ -1,8 +1,9 @@
 ﻿using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
-using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
+using FluentIL;
+using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
@@ -68,20 +69,22 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 foreach (var exit in exitPoints)
                 {
-                    moveNext.GetEditor().OnInstruction(exit, il =>
+                    moveNext.GetEditor().Before(exit, il =>
                     {
-                        var loadArg = new Action<PointCut>(args => args.Value(null));
+                        var loadArg = new PointCut(args => args.Value(null));
 
                         if (_asyncResult != null)
                         {
-                            il.Store(resvar);
-                            loadArg = new Action<PointCut>(args => args.Load(resvar).Cast(resvar.VariableType, _ts.Object));
+                            il = il.Store(resvar);
+                            loadArg = new PointCut(args => args.Load(resvar).Cast(resvar.VariableType, _ts.Object));
                         }
 
-                        il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine), loadArg);
+                        il = il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine), loadArg);
 
                         if (_asyncResult != null)
-                            il.Load(resvar);
+                            il = il.Load(resvar);
+
+                        return il;
                     });
                 }
             }
@@ -89,17 +92,17 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             return afterMethod;
         }
 
-        protected override void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
+        protected override Cut LoadReturnValueArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.Load(pc.Method.Parameters[0]);
+            return pc.Load(pc.Method.Parameters[0]);
         }
 
-        protected override void LoadReturnTypeArgument(PointCut pc, AdviceArgument parameter)
+        protected override Cut LoadReturnTypeArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.TypeOf(_asyncResult ?? _ts.Void);
+            return pc.TypeOf(_asyncResult ?? _ts.Void);
         }
 
-        protected override void InsertStateMachineCall(Action<PointCut> code)
+        protected override void InsertStateMachineCall(PointCut code)
         {
             var editor = _target.GetEditor();
 
@@ -107,7 +110,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             if (tgtis.Count == 0)
                 throw new Exception("Cannot find injection point.");
 
-            editor.OnInstruction(tgtis[0].Next, code);
+            editor.Before(tgtis[0].Next, code);
         }
     }
 }

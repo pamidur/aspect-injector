@@ -2,12 +2,11 @@
 using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
-using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
+using FluentIL;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using System;
 using System.Linq;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
@@ -35,66 +34,69 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public abstract void Execute();
 
-        protected void LoadAdviceArgs(PointCut pc)
+        protected Cut LoadAdviceArgs(Cut cut)
         {
             foreach (var arg in _effect.Arguments.OrderBy(a => a.Parameter.Index))
             {
                 switch (arg.Source)
                 {
-                    case Source.Arguments: LoadArgumentsArgument(pc, arg); break;
-                    case Source.Injections: LoadInjectionsArgument(pc, arg); break;
-                    case Source.Instance: LoadInstanceArgument(pc, arg); break;
-                    case Source.Method: LoadMethodArgument(pc, arg); break;
-                    case Source.Name: LoadNameArgument(pc, arg); break;
-                    case Source.ReturnType: LoadReturnTypeArgument(pc, arg); break;
-                    case Source.ReturnValue: LoadReturnValueArgument(pc, arg); break;
-                    case Source.Target: LoadTargetArgument(pc, arg); break;
-                    case Source.Type: LoadTypeArgument(pc, arg); break;
+                    case Source.Arguments: cut = LoadArgumentsArgument(cut, arg); break;
+                    case Source.Injections: cut = LoadInjectionsArgument(cut, arg); break;
+                    case Source.Instance: cut = LoadInstanceArgument(cut, arg); break;
+                    case Source.Method: cut = LoadMethodArgument(cut, arg); break;
+                    case Source.Name: cut = LoadNameArgument(cut, arg); break;
+                    case Source.ReturnType: cut = LoadReturnTypeArgument(cut, arg); break;
+                    case Source.ReturnValue: cut = LoadReturnValueArgument(cut, arg); break;
+                    case Source.Target: cut = LoadTargetArgument(cut, arg); break;
+                    case Source.Type: cut = LoadTypeArgument(cut, arg); break;
                     default: _log.Log(GeneralRules.UnexpectedCompilerBehaviour, _target, $"Unexpected argument source '{arg.Source.ToString()}'"); break;
                 }
             }
+            return cut;
         }
 
-        protected virtual void LoadTypeArgument(PointCut pc, AdviceArgument parameter)
+        protected virtual Cut LoadTypeArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.TypeOf(_target.DeclaringType);
+            return pc.TypeOf(_target.DeclaringType);
         }
 
-        protected virtual void LoadTargetArgument(PointCut pc, AdviceArgument parameter)
+        protected virtual Cut LoadTargetArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.Null();
+            return pc.Null();
         }
 
-        protected virtual void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
+        protected virtual Cut LoadReturnValueArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.Null();
+            return pc.Null();
         }
 
-        protected virtual void LoadReturnTypeArgument(PointCut pc, AdviceArgument parameter)
+        protected virtual Cut LoadReturnTypeArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.TypeOf(_target.ReturnType);
+            return pc.TypeOf(_target.ReturnType);
         }
 
-        protected virtual void LoadMethodArgument(PointCut pc, AdviceArgument parameter)
+        protected virtual Cut LoadMethodArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.MethodOf(_target).Cast(_ts.Object, _ts.MethodBase);
+            return pc.MethodOf(_target).Cast(_ts.Object, _ts.MethodBase);
         }
 
-        protected virtual void LoadInstanceArgument(PointCut pc, AdviceArgument parameter)
+        protected virtual Cut LoadInstanceArgument(Cut pc, AdviceArgument parameter)
         {
-            if (_target.IsStatic)
-                pc.Null();
-            else
-                pc.This();
+            return pc.ThisOrNull();
         }
 
-        protected virtual void LoadInjectionsArgument(PointCut pc, AdviceArgument parameter)
+        protected virtual Cut LoadInjectionsArgument(Cut pc, AdviceArgument parameter)
         {
-            var elements = _injection.Triggers.Select<CustomAttribute, Action<PointCut>>(ca => il =>
+            var elements = _injection.Triggers.Select<CustomAttribute, PointCut>(ca => il =>
             {
                 var ctor = ca.Constructor.Resolve();
-                void ctorParams(PointCut ilc) => ca.ConstructorArguments.Select(caa => ilc.Value(caa)).ToArray();
-                il.Call(ctor, ctorParams);
+
+                il = il.Call(ctor, new PointCut(ilc =>
+                {
+                    foreach (var caa in ca.ConstructorArguments)
+                        ilc = ilc.Value(caa);
+                    return ilc;
+                }));
 
                 if (ca.Properties.Any() || ca.Fields.Any())
                 {
@@ -104,43 +106,47 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     _target.Body.Variables.Add(attrvar);
                     _target.Body.InitLocals = true;
 
-                    il.Store(attrvar);
+                    il = il.Store(attrvar);
 
                     foreach (var namedArg in ca.Properties)
                     {
                         var prop = catype.Properties.First(p => p.Name == namedArg.Name).SetMethod;
 
-                        il.Load(attrvar);
-                        il.Call(prop, ilp => ilp.Value(namedArg.Argument));
+                        il = il
+                        .Load(attrvar)
+                        .Call(prop, ilp => ilp.Value(namedArg.Argument));
                     }
 
                     foreach (var namedArg in ca.Fields)
                     {
                         var field = catype.Fields.First(p => p.Name == namedArg.Name);
 
-                        il.Load(attrvar);
-                        il.Store(field, ilf => ilf.Value(namedArg.Argument));
+                        il = il
+                        .Load(attrvar)
+                        .Store(field, ilf => ilf.Value(namedArg.Argument));
                     }
-                    il.Load(attrvar);
+                    il = il.Load(attrvar);
                 }
+
+                return il;
             }
             ).ToArray();
 
-            pc.CreateArray(_ts.Attribute, elements);
+            return pc.CreateArray(_ts.Attribute, elements);
         }
 
-        protected virtual void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
+        protected virtual Cut LoadArgumentsArgument(Cut pc, AdviceArgument parameter)
         {
-            var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
+            var elements = _target.Parameters.Select<ParameterDefinition, PointCut>(p => il =>
                 il.Load(p).Cast(p.ParameterType, _ts.Object)
             ).ToArray();
 
-            pc.CreateArray(_ts.Object, elements);
+            return pc.CreateArray(_ts.Object, elements);
         }
 
-        protected virtual void LoadNameArgument(PointCut pc, AdviceArgument parameter)
+        protected virtual Cut LoadNameArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.Value(_injection.Target.Name);
+            return pc.Value(_injection.Target.Name);
         }
     }
 }

@@ -3,7 +3,7 @@ using Mono.Cecil.Rocks;
 using System;
 using System.Linq;
 
-namespace AspectInjector.Core.Extensions
+namespace FluentIL.Extensions
 {
     public static class GenericProcessingExtension
     {

@@ -1,7 +1,8 @@
 ﻿using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Fluent;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
+using FluentIL;
 using Mono.Cecil;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
@@ -15,7 +16,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public override void Execute()
         {
-            _target.GetEditor().OnEntry(
+            _target.GetEditor().OnAspectsInitialized(
                 e => e
                 .LoadAspect(_aspect)
                 .Call(_effect.Method, LoadAdviceArgs)

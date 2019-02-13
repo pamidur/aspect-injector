@@ -1,7 +1,6 @@
-﻿using AspectInjector.Core.Fluent;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 
-namespace AspectInjector.Core.Extensions
+namespace FluentIL.Extensions
 {
     public static class ClonningExtensions
     {

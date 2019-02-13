@@ -1,10 +1,10 @@
 ﻿using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
-using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
+using FluentIL;
+using FluentIL.Extensions;
 using Mono.Cecil;
-using System;
 using System.Linq;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
@@ -55,45 +55,44 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     .Dup()
                     .Store(argsfield, v =>
                     {
-                        var elements = _target.Parameters.Select<ParameterDefinition, Action<PointCut>>(p => il =>
+                        var elements = _target.Parameters.Select<ParameterDefinition, PointCut>(p => il =>
                                il.Load(p).Cast(p.ParameterType, _ts.Object)
                            ).ToArray();
 
-                        v.CreateArray(_ts.Object, elements);
+                        return v.CreateArray(_ts.Object, elements);
                     }));
             }
 
             return argsfield;
         }
 
-        protected abstract void InsertStateMachineCall(Action<PointCut> code);
+        protected abstract void InsertStateMachineCall(PointCut code);
 
         public override void Execute()
         {
-            FindOrCreateAfterStateMachineMethod().GetEditor().OnExit(
+            FindOrCreateAfterStateMachineMethod().GetEditor().BeforeExit(
                 e => e
-                .LoadAspect(_aspect, _target, LoadOriginalThis, _target.DeclaringType)
+                .LoadAspect(_aspect, _target, LoadOriginalThis)
                 .Call(_effect.Method, LoadAdviceArgs)
             );
         }
 
-        protected void LoadOriginalThis(PointCut pc)
+        protected Cut LoadOriginalThis(Cut pc)
         {
-            if (_originalThis != null)
-                pc.This().Load(_originalThis);
+            return _originalThis == null ? pc : pc.This().Load(_originalThis);
         }
 
-        protected override void LoadInstanceArgument(PointCut pc, AdviceArgument parameter)
+        protected override Cut LoadInstanceArgument(Cut pc, AdviceArgument parameter)
         {
             if (_originalThis != null)
-                LoadOriginalThis(pc);
+                return LoadOriginalThis(pc);
             else
-                pc.Value(null);
+                return pc.Value(null);
         }
 
-        protected override void LoadArgumentsArgument(PointCut pc, AdviceArgument parameter)
+        protected override Cut LoadArgumentsArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.This().Load(GetArgsField());
+            return pc.This().Load(GetArgsField());
         }
 
         protected abstract MethodDefinition FindOrCreateAfterStateMachineMethod();

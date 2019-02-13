@@ -1,12 +1,12 @@
 ﻿using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
-using AspectInjector.Core.Fluent;
 using AspectInjector.Core.Models;
+using FluentIL;
+using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Diagnostics;
 using System.Linq;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
@@ -44,9 +44,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 foreach (var exit in exitPoints.Where(e => e.Previous.OpCode == OpCodes.Ldc_I4 && (int)e.Previous.Operand == 0))
                 {
-                    moveNextEditor.OnInstruction(exit, il =>
+                    moveNextEditor.Before(exit, il =>
                     {
-                        il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine));
+                        return il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine));
                     });
                 }
             }
@@ -55,19 +55,19 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         }
 
 
-        protected override void LoadReturnValueArgument(PointCut pc, AdviceArgument parameter)
+        protected override Cut LoadReturnValueArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.This();
+            return pc.This();
         }
 
-        protected override void LoadReturnTypeArgument(PointCut pc, AdviceArgument parameter)
+        protected override Cut LoadReturnTypeArgument(Cut pc, AdviceArgument parameter)
         {
-            pc.TypeOf(_stateMachine.Interfaces.First(i => i.InterfaceType.Name.StartsWith("IEnumerable`1")).InterfaceType);
+            return pc.TypeOf(_stateMachine.Interfaces.First(i => i.InterfaceType.Name.StartsWith("IEnumerable`1")).InterfaceType);
         }
 
-        protected override void InsertStateMachineCall(Action<PointCut> code)
+        protected override void InsertStateMachineCall(PointCut code)
         {
-            _target.GetEditor().OnExit(code);
+            _target.GetEditor().BeforeExit(code);
         }
     }
 }

@@ -1,39 +1,40 @@
-﻿using AspectInjector.Core.Models;
+﻿using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 
-namespace AspectInjector.Core.Fluent
+namespace FluentIL
 {
     public static class Arrays
     {
-        public static PointCut CreateArray(this PointCut pc, TypeReference elementType, params Action<PointCut>[] elements)
+        public static Cut CreateArray(this Cut pc, TypeReference elementType, params PointCut[] elements)
         {
-            pc = pc.Append(pc.CreateInstruction(OpCodes.Ldc_I4, elements.Length));
-            pc = pc.Append(pc.CreateInstruction(OpCodes.Newarr, elementType));
+            pc = pc
+                .Write(OpCodes.Ldc_I4, elements.Length)
+                .Write(OpCodes.Newarr, elementType);
 
             for (var i = 0; i < elements.Length; i++)
             {
-                pc = pc.Append(pc.CreateInstruction(OpCodes.Dup));
-                SetByIndex(pc, elementType, i, elements[i]);
+                pc = pc.Write(OpCodes.Dup);
+                pc = SetByIndex(pc, elementType, i, elements[i]);
             }
 
             return pc;
         }
 
-        public static PointCut GetByIndex(this PointCut pc, TypeReference elementType, int index)
+        public static Cut GetByIndex(this Cut pc, TypeReference elementType, int index)
         {
-            pc = pc.Append(pc.CreateInstruction(OpCodes.Ldc_I4, index));
-            pc = pc.Append(pc.CreateInstruction(GetLoadOpcode(elementType)));
-            return pc;
+            return pc
+                .Write(OpCodes.Ldc_I4, index)
+                .Write(GetLoadOpcode(elementType));
         }
 
-        public static PointCut SetByIndex(this PointCut pc, TypeReference elementType, int index, Action<PointCut> value)
+        public static Cut SetByIndex(this Cut pc, TypeReference elementType, int index, PointCut value)
         {
-            pc = pc.Append(pc.CreateInstruction(OpCodes.Ldc_I4, index));
-            value(pc);
-            pc = pc.Append(pc.CreateInstruction(GetStoreOpcode(elementType)));
-            return pc;
+            return pc
+                .Write(OpCodes.Ldc_I4, index)
+                .Here(value)
+                .Write(GetStoreOpcode(elementType));
         }
 
         private static OpCode GetLoadOpcode(TypeReference elementType)

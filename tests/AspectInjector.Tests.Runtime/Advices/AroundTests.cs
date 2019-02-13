@@ -18,16 +18,14 @@ namespace AspectInjector.Tests.Advices
             var a = new AroundTests_Target();
 
             object ref1 = new object();
-            object out1;
             int ref2 = 2;
-            int out2;
             var str = "";
             var dt = DateTime.Now;
             var arr = new[] {1,2,3 };
 
             var sb = new StringBuilder();
 
-            a.Do1<StringBuilder>(new object(), 1, str, ref str, dt, ref dt, sb, ref sb, arr, ref arr, ref ref1, out out1, ref ref2, out out2, false, false);
+            a.Do1<StringBuilder>(new object(), 1, str, ref str, dt, ref dt, sb, ref sb, arr, ref arr, ref ref1, out object out1, ref ref2, out int out2, false, false);
 
             Assert.True(Checker.Passed);
         }
@@ -40,11 +38,9 @@ namespace AspectInjector.Tests.Advices
             var a = new AroundTests_Target();
 
             object ref1 = new object();
-            object out1;
             int ref2 = 2;
-            int out2;
 
-            a.Do2(new object(), 1, ref ref1, out out1, ref ref2, out out2, false, false);
+            a.Do2(new object(), 1, ref ref1, out object out1, ref ref2, out int out2, false, false);
 
             Assert.True(Checker.Passed);
         }
