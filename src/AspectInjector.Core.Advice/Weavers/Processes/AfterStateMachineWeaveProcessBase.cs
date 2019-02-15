@@ -5,22 +5,25 @@ using AspectInjector.Core.Models;
 using FluentIL;
 using FluentIL.Extensions;
 using Mono.Cecil;
+using System;
 using System.Linq;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal abstract class AfterStateMachineWeaveProcessBase : AdviceWeaveProcessBase<AfterAdviceEffect>
     {
-        protected readonly FieldDefinition _originalThis;
         protected readonly TypeDefinition _stateMachine;
+        private readonly Func<FieldDefinition> _originalThis;
+        protected readonly TypeReference _stateMachineRef;
 
         public AfterStateMachineWeaveProcessBase(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
         {
-            _stateMachine = GetStateMachine();
-            _originalThis = _target.IsStatic ? null : GetThisField();
+            _stateMachineRef = GetStateMachine();
+            _stateMachine = _stateMachineRef.Resolve();
+            _originalThis = _target.IsStatic ? (Func<FieldDefinition>) null : () => GetThisField();
         }
 
-        protected abstract TypeDefinition GetStateMachine();
+        protected abstract TypeReference GetStateMachine();
 
         private FieldDefinition GetThisField()
         {
@@ -33,7 +36,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 InsertStateMachineCall(
                     e => e
-                    .Dup()
                     .Store(thisfield, v => v.This())
                     );
             }
@@ -52,7 +54,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 InsertStateMachineCall(
                     e => e
-                    .Dup()
                     .Store(argsfield, v =>
                     {
                         var elements = _target.Parameters.Select<ParameterDefinition, PointCut>(p => il =>
@@ -70,7 +71,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public override void Execute()
         {
-            FindOrCreateAfterStateMachineMethod().GetEditor().BeforeExit(
+            FindOrCreateAfterStateMachineMethod().Body.BeforeExit(
                 e => e
                 .LoadAspect(_aspect, _target, LoadOriginalThis)
                 .Call(_effect.Method, LoadAdviceArgs)
@@ -79,7 +80,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected Cut LoadOriginalThis(Cut pc)
         {
-            return _originalThis == null ? pc : pc.This().Load(_originalThis);
+            return _originalThis == null ? pc : pc.This().Load(_originalThis());
         }
 
         protected override Cut LoadInstanceArgument(Cut pc, AdviceArgument parameter)

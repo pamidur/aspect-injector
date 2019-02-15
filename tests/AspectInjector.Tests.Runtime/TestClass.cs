@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 namespace AspectInjector.Tests.Runtime
 {
     internal static partial class TestClassWrapper<T1>
+        where T1 : struct
     {
         public partial class TestClass<T2>
+            where T2 : class
         {
             public TestClass()
             {
@@ -49,6 +51,7 @@ namespace AspectInjector.Tests.Runtime
                 ref int ar1, ref Asset1 ar2, ref T1 ar3, ref T2 ar4, ref T3 ar5,
                 out int ao1, out Asset1 ao2, out T1 ao3, out T2 ao4, out T3 ao5
                 )
+                where T3: class
             {
                 TestLog.Write(Events.FactEnter);
 
@@ -70,6 +73,7 @@ namespace AspectInjector.Tests.Runtime
                 ref int ar1, ref Asset1 ar2, ref T1 ar3, ref T2 ar4, ref T3 ar5,
                 out int ao1, out Asset1 ao2, out T1 ao3, out T2 ao4, out T3 ao5
                 )
+                where T3 : class
             {
                 TestLog.Write(Events.TestStaticMethodEnter);
 
@@ -87,6 +91,7 @@ namespace AspectInjector.Tests.Runtime
             [InjectInstanceAspect]
             [InjectGlobalAspect]
             public IEnumerable<Tuple<int, Asset1, T1, T2, T3>> TestIteratorMethod<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
+                where T3 : class
             {
                 TestLog.Write(Events.TestIteratorMethodEnter);
 
@@ -101,6 +106,7 @@ namespace AspectInjector.Tests.Runtime
             [InjectInstanceAspect]
             [InjectGlobalAspect]
             public static IEnumerable<Tuple<int, Asset1, T1, T2, T3>> TestStaticIteratorMethod<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
+                where T3 : class
             {
                 TestLog.Write(Events.TestStaticIteratorMethodEnter);
 
@@ -115,6 +121,7 @@ namespace AspectInjector.Tests.Runtime
             [InjectInstanceAspect]
             [InjectGlobalAspect]
             public async Task<Tuple<int, Asset1, T1, T2, T3>> TestAsyncMethod1<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
+                where T3 : class
             {
                 TestLog.Write(Events.TestAsyncMethodEnter);
 
@@ -128,6 +135,7 @@ namespace AspectInjector.Tests.Runtime
             [InjectInstanceAspect]
             [InjectGlobalAspect]
             public static async Task<Tuple<int, Asset1, T1, T2, T3>> TestStaticAsyncMethod1<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
+                where T3 : class
             {
                 TestLog.Write(Events.TestStaticAsyncMethodEnter);
 
@@ -141,6 +149,7 @@ namespace AspectInjector.Tests.Runtime
             [InjectInstanceAspect]
             [InjectGlobalAspect]
             public async Task TestAsyncMethod2<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
+                where T3 : class
             {
                 TestLog.Write(Events.TestAsyncMethodEnter);
 
@@ -152,6 +161,7 @@ namespace AspectInjector.Tests.Runtime
             [InjectInstanceAspect]
             [InjectGlobalAspect]
             public static async Task TestStaticAsyncMethod2<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
+                where T3 : class
             {
                 TestLog.Write(Events.TestStaticAsyncMethodEnter);
 
@@ -163,6 +173,7 @@ namespace AspectInjector.Tests.Runtime
             [InjectInstanceAspect]
             [InjectGlobalAspect]
             public async void TestAsyncMethod3<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
+                where T3 : class
             {
                 TestLog.Write(Events.TestAsyncMethodEnter);
 
@@ -174,6 +185,7 @@ namespace AspectInjector.Tests.Runtime
             [InjectInstanceAspect]
             [InjectGlobalAspect]
             public static async void TestStaticAsyncMethod3<T3>(int a1, Asset1 a2, T1 a3, T2 a4, T3 a5)
+                where T3 : class
             {
                 TestLog.Write(Events.TestStaticAsyncMethodEnter);
 

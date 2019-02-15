@@ -16,7 +16,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public override void Execute()
         {
-            _target.GetEditor().OnAspectsInitialized(
+            _target.Body.OnAspectsInitialized(
                 e => e
                 .LoadAspect(_aspect)
                 .Call(_effect.Method, LoadAdviceArgs)

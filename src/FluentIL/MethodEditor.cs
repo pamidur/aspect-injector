@@ -1,89 +1,69 @@
 ﻿using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
 using System;
 using System.Linq;
 
 namespace FluentIL
 {
-    public class MethodEditor
+    public static class MethodEditor
     {
-        public MethodDefinition Method { get; }
-        public ExtendedTypeSystem TypeSystem { get; }
-
-        internal MethodEditor(MethodDefinition md)
+        public static void AfterEntry(this MethodBody body, PointCut action)
         {
-            Method = md;
-            Method.Body?.SimplifyMacros();
-            TypeSystem = md.Module.GetTypeSystem();
-        }
-
-        /// <summary>
-        /// After Entry and Base Ctor Call.
-        /// </summary>
-        /// <param name="action"></param>
-        public void AfterEntry(PointCut action)
-        {
-            if (!Method.HasBody) return;
-
-            var cut = new Cut(this, GetCodeStart())
+            var cut = new Cut(body, GetCodeStart(body))
                 .Prev()
                 .Here(action);
         }
 
-        public void BeforeExit(PointCut action)
+        public static void BeforeExit(this MethodBody body, PointCut action)
         {
-            if (!Method.HasBody) return;
-
-            foreach (var ret in Method.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList())
+            foreach (var ret in body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList())
             {
-                var cut = new Cut(this, ret);
+                var cut = new Cut(body, ret);
                 cut.Here(action).Write(OpCodes.Ret);
                 cut.Remove();
             }
         }
 
-        public void Before(Instruction instruction, PointCut action)
+        public static void Before(this MethodBody body, Instruction instruction, PointCut action)
         {
-            if (!Method.Body.Instructions.Contains(instruction))
+            if (!body.Instructions.Contains(instruction))
                 throw new ArgumentException("Wrong instruction.");
 
-            new Cut(this, instruction)
+            new Cut(body, instruction)
                 .Prev()
                 .Here(action);
         }
 
-        public void Instead(PointCut action)
+        public static void Instead(this MethodBody body, PointCut action)
         {
-            Method.Body.Instructions.Clear();
+            body.Instructions.Clear();
 
-            new Cut(this, true, true)
+            new Cut(body, true, true)
                 .Here(action);
         }
 
-        public Instruction GetCodeStart()
+        public static void Mark(this MethodDefinition method, TypeReference attribute)
         {
-            var instruction = Method.IsConstructor && !Method.IsStatic ?
-                FindBaseClassCtorCall() :
-                GetMethodOriginalEntryPoint();
+            if (method.CustomAttributes.Any(ca => ca.AttributeType.FullName == attribute.FullName))
+                return;
 
-            return instruction;
+            var constructor = method.Module.ImportReference(attribute).Resolve()
+                .Methods.First(m => m.IsConstructor && !m.IsStatic);
+
+            method.CustomAttributes.Add(new CustomAttribute(method.Module.ImportReference(constructor)));
         }
 
-        protected Instruction FindBaseClassCtorCall()
+        public static Instruction GetCodeStart(this MethodBody body)
         {
-            if (!Method.IsConstructor)
-                throw new Exception(Method.ToString() + " is not ctor.");
+            if (body.Method.DeclaringType.IsValueType || !body.Method.IsConstructor || body.Method.IsStatic)
+                return body.Method.Body.Instructions.First();
 
-            if (Method.DeclaringType.IsValueType)
-                return Method.Body.Instructions.First();
-
-            var point = Method.Body.Instructions.FirstOrDefault(
+            var point = body.Instructions.FirstOrDefault(
                 i => i != null && i.OpCode == OpCodes.Call && i.Operand is MethodReference
                     && ((MethodReference)i.Operand).Resolve().IsConstructor
-                    && (((MethodReference)i.Operand).DeclaringType.Match(Method.DeclaringType.BaseType)
-                        || ((MethodReference)i.Operand).DeclaringType.Match(Method.DeclaringType)));
+                    && (((MethodReference)i.Operand).DeclaringType.Match(body.Method.DeclaringType.BaseType)
+                        || ((MethodReference)i.Operand).DeclaringType.Match(body.Method.DeclaringType)));
 
             if (point == null)
                 throw new Exception("Cannot find base class ctor call");
@@ -91,20 +71,49 @@ namespace FluentIL
             return point.Next;
         }
 
-        protected Instruction GetMethodOriginalEntryPoint()
+        public static void OnLoadField(this MethodBody body, FieldReference field, PointCut pc, Instruction startingFrom = null)
         {
-            return Method.Body.Instructions.First();
+            var fieldDef = field.Resolve();
+
+            if (fieldDef.IsStatic)
+                body.OnEveryOccasionOf(i =>
+                (i.OpCode == OpCodes.Ldsfld || i.OpCode == OpCodes.Ldsflda) && i.Operand is FieldReference f && f.DeclaringType.Match(field.DeclaringType) && f.Resolve() == fieldDef
+                , pc, startingFrom);
+            else
+                body.OnEveryOccasionOf(i =>
+                (i.OpCode == OpCodes.Ldfld || i.OpCode == OpCodes.Ldflda) && i.Operand is FieldReference f && f.DeclaringType.Match(field.DeclaringType) && f.Resolve() == fieldDef
+                , pc, startingFrom);
         }
 
-        public void Mark(TypeReference attribute)
+        public static void OnStoreVar(this MethodBody body, VariableReference variable, PointCut pc, Instruction startingFrom = null)
         {
-            if (Method.CustomAttributes.Any(ca => ca.AttributeType.FullName == attribute.FullName))
-                return;
+            body.OnEveryOccasionOf(i =>
+                ((i.OpCode == OpCodes.Stloc || i.OpCode == OpCodes.Stloc_S) && ((i.Operand is int n && n == variable.Index) || (i.Operand is VariableDefinition v && v.Index == variable.Index))) ||
+                (variable.Index == 0 && i.OpCode == OpCodes.Stloc_0) ||
+                (variable.Index == 1 && i.OpCode == OpCodes.Stloc_1) ||
+                (variable.Index == 2 && i.OpCode == OpCodes.Stloc_2) ||
+                (variable.Index == 3 && i.OpCode == OpCodes.Stloc_3)
+            , pc, startingFrom);
+        }
 
-            var constructor = Method.Module.ImportReference(attribute).Resolve()
-                .Methods.First(m => m.IsConstructor && !m.IsStatic);
+        public static void OnCall(this MethodBody body, MethodReference method, PointCut pc, Instruction startingFrom = null)
+        {
+            body.OnEveryOccasionOf(i =>
+                (i.OpCode == OpCodes.Call || i.OpCode == OpCodes.Calli || i.OpCode == OpCodes.Callvirt || i.OpCode == OpCodes.Newobj)
+                && i.Operand is MethodReference mref && mref.DeclaringType.Match(method.DeclaringType) && mref.Resolve() == method.Resolve()
+            , pc, startingFrom);
+        }
 
-            Method.CustomAttributes.Add(new CustomAttribute(TypeSystem.Import(constructor)));
+        public static void OnEveryOccasionOf(this MethodBody body, Func<Instruction, bool> predicate, PointCut pc, Instruction startingFrom = null)
+        {
+            var insts = body.Instructions;
+            var start = startingFrom == null ? 0 : insts.IndexOf(startingFrom);
+
+            var icol = insts.Skip(start).ToArray();
+
+            foreach (var curi in icol)
+                if (predicate(curi))
+                    new Cut(body, curi).Here(pc);
         }
     }
 }

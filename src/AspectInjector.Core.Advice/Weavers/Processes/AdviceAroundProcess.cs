@@ -30,7 +30,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         {
             _wrapper = GetNextWrapper();
 
-            _wrapper.GetEditor().Instead(
+            _wrapper.Body.Instead(
                 e => e
                 .LoadAspect(_aspect)
                 .Call(_effect.Method, LoadAdviceArgs)
@@ -64,7 +64,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var newWrapper = DuplicateMethodDefinition(GetOrCreateUnwrapper());
             newWrapper.IsPrivate = true;
             newWrapper.Name = $"{_wrapperNamePrefix}{(prevWrapper == null ? 0 : prevWrapper.i + 1)}";
-            newWrapper.GetEditor().Mark(_ts.DebuggerHiddenAttribute);
+            newWrapper.Mark(_ts.DebuggerHiddenAttribute);
 
             RedirectPreviousWrapper(prevWrapper == null ? _target : prevWrapper.m, newWrapper);
 
@@ -95,11 +95,11 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var argsParam = new ParameterDefinition(_ts.ObjectArray);
             unwrapper.Parameters.Add(argsParam);
             unwrapper.Body.InitLocals = true;
-            unwrapper.GetEditor().Mark(_ts.DebuggerHiddenAttribute);
+            unwrapper.Mark(_ts.DebuggerHiddenAttribute);
 
             var original = WrapEntryPoint(unwrapper);
 
-            unwrapper.GetEditor().Instead(
+            unwrapper.Body.Instead(
                 il =>
                 {
                     var refList = new List<Tuple<int, VariableDefinition>>();
@@ -163,7 +163,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             MoveBody(_target, original);
 
-            _target.GetEditor().Instead(
+            _target.Body.Instead(
                 e =>
                 {
                     //var args = null;

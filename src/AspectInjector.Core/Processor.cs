@@ -4,6 +4,8 @@ using AspectInjector.Core.Models;
 using AspectInjector.Rules;
 using FluentIL;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -133,6 +135,16 @@ namespace AspectInjector.Core
                     _aspectWeaver.WeaveGlobalAssests(aspect);
             }
 
+            var modifiedBodies = new List<MethodBody>();
+            CutEvents.OnModify = mb =>
+            {
+                if (!modifiedBodies.Contains(mb))
+                {
+                    mb.SimplifyMacros();
+                    modifiedBodies.Add(mb);
+                }
+            };
+
             if (hasInjections)
             {
                 _log.Log(GeneralRules.Info, "Processing injections...");
@@ -157,18 +169,13 @@ namespace AspectInjector.Core
             if (hasAspects || hasInjections)
             {
                 if (optimize)
-                    _log.Log(GeneralRules.Info, "Cleanup and optimize...");
-                else
-                    _log.Log(GeneralRules.Info, "Cleanup...");
-
-                foreach (var module in assembly.Modules)
                 {
-                    if (optimize)
-                        EditorFactory.Optimize(module);
-
-                    EditorFactory.CleanUp(module);
+                    _log.Log(GeneralRules.Info, "Optimizing...");
+                    foreach (var mb in modifiedBodies)
+                        mb.OptimizeMacros();
                 }
 
+                _log.Log(GeneralRules.Info, "Processing is done.");
                 return true;
             }
 

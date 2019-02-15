@@ -6,6 +6,7 @@ using FluentIL;
 using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -19,18 +20,21 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             typeof(AsyncTaskMethodBuilder<>),
             typeof(AsyncVoidMethodBuilder)
         };
-
+        private readonly FieldDefinition _builderField;
+        private readonly TypeReference _builder;
         private readonly TypeReference _asyncResult;
 
         public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
         {
-            _asyncResult = (_stateMachine.Fields.First(f => f.Name == "<>t__builder").FieldType as IGenericInstance)?.GenericArguments.FirstOrDefault();
+            _builderField = _stateMachine.Fields.First(f => f.Name == "<>t__builder"); 
+            _builder = _builderField.FieldType;
+            _asyncResult = (_builder as IGenericInstance)?.GenericArguments.FirstOrDefault();
         }
 
-        protected override TypeDefinition GetStateMachine()
+        protected override TypeReference GetStateMachine()
         {
             return _target.CustomAttributes.First(ca => ca.AttributeType.Match(_ts.AsyncStateMachineAttribute))
-                .GetConstructorValue<TypeReference>(0).Resolve();
+                .GetConstructorValue<TypeReference>(0);
         }
 
         protected override MethodDefinition FindOrCreateAfterStateMachineMethod()
@@ -41,22 +45,13 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             {
                 var moveNext = _stateMachine.Methods.First(m => m.Name == "MoveNext");
 
-                var exitPoints = moveNext.Body.Instructions.Where(i =>
-                {
-                    if (i.OpCode != OpCodes.Call)
-                        return false;
-
-                    var method = ((MethodReference)i.Operand).Resolve();
-                    return method.Name == "SetResult" && _supportedMethodBuilders.Any(bt => method.DeclaringType.FullName == bt.FullName);
-                }).ToList();
-
                 afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _ts.Void);
                 afterMethod.Parameters.Add(new ParameterDefinition(_ts.Object));
 
                 _stateMachine.Methods.Add(afterMethod);
 
-                afterMethod.GetEditor().Mark(_ts.DebuggerHiddenAttribute);
-                afterMethod.GetEditor().Instead(pc => pc.Return());
+                afterMethod.Mark(_ts.DebuggerHiddenAttribute);
+                afterMethod.Body.Instead(pc => pc.Return());
 
                 VariableDefinition resvar = null;
 
@@ -67,26 +62,28 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     moveNext.Body.InitLocals = true;
                 }
 
-                foreach (var exit in exitPoints)
+                MethodReference setResultCall = _builder.Resolve().Methods.First(m => m.Name == "SetResult");
+                if (_asyncResult != null) setResultCall = setResultCall.MakeHostInstanceGeneric(_builder);
+                
+                moveNext.Body.OnCall(setResultCall, il =>
                 {
-                    moveNext.GetEditor().Before(exit, il =>
+                    il = il.Prev();
+
+                    var loadArg = new PointCut(args => args.Value(null));
+
+                    if (_asyncResult != null)
                     {
-                        var loadArg = new PointCut(args => args.Value(null));
+                        il = il.Store(resvar);
+                        loadArg = new PointCut(args => args.Load(resvar).Cast(resvar.VariableType, _ts.Object));
+                    }
 
-                        if (_asyncResult != null)
-                        {
-                            il = il.Store(resvar);
-                            loadArg = new PointCut(args => args.Load(resvar).Cast(resvar.VariableType, _ts.Object));
-                        }
+                    il = il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine), loadArg);
 
-                        il = il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine), loadArg);
+                    if (_asyncResult != null)
+                        il = il.Load(resvar);
 
-                        if (_asyncResult != null)
-                            il = il.Load(resvar);
-
-                        return il;
-                    });
-                }
+                    return il;
+                });
             }
 
             return afterMethod;
@@ -104,13 +101,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void InsertStateMachineCall(PointCut code)
         {
-            var editor = _target.GetEditor();
+            var method = _builder.Resolve().Methods.First(m => m.Name == "Start").MakeHostInstanceGeneric(_builder);
 
-            var tgtis = _target.Body.Instructions.Where(i => (i.OpCode == OpCodes.Ldloc || i.OpCode == OpCodes.Ldloca) && i.Operand == _target.Body.Variables[0]).ToList();
-            if (tgtis.Count == 0)
-                throw new Exception("Cannot find injection point.");
+            var v = _target.Body.Variables.First(vr => vr.VariableType.Resolve().Match(_stateMachine));
+            var loadVar = v.VariableType.IsValueType ? (PointCut)(c => c.LoadRef(v)) : c => c.Load(v);
 
-            editor.Before(tgtis[0].Next, code);
+            _target.Body.OnCall(method, cut => cut.Prev().Prev().Prev().Here(loadVar).Here(code));
         }
     }
 }

@@ -11,19 +11,27 @@ namespace AspectInjector.Core.Extensions
 {
     public static class FluentExtensions
     {
-        public static void OnAspectsInitialized(this MethodEditor me, PointCut action)
+        public static void OnAspectsInitialized(this MethodBody body, PointCut action)
         {
-            var method = me.Method;
+            var method = body.Method;
             if (!method.HasBody) return;
 
             if (!method.IsConstructor || method.IsStatic)
             {
-                me.AfterEntry(action);
+                body.AfterEntry(action);
                 return;
             }
 
-            var instruction = SkipAspectInitializers(me.Method, me.GetCodeStart());
-            action(new Cut(method.GetEditor(), instruction).Prev());
+            MethodReference initializer = method.DeclaringType.Methods.FirstOrDefault(m => m.Name == Constants.InstanceAspectsMethodName);
+
+            if (initializer == null)
+            {
+                body.AfterEntry(action);
+                return;
+            }
+
+            initializer = initializer.MakeHostInstanceGeneric(method.DeclaringType);
+            body.OnCall(initializer, action);
         }
 
         public static Cut LoadAspect(this Cut cut, AspectDefinition aspect)
@@ -56,22 +64,6 @@ namespace AspectInjector.Core.Extensions
             return cut;
         }
 
-        private static Instruction SkipAspectInitializers(MethodDefinition method, Instruction instruction)
-        {
-            if (method.IsConstructor && !method.IsStatic)
-            {
-                if ((instruction.OpCode == OpCodes.Ldarg_0 || (instruction.OpCode == OpCodes.Ldarg && (int)instruction.Operand == 0))
-                    && instruction.Next.OpCode == OpCodes.Call
-                    && ((MethodReference)instruction.Next.Operand).Name == Constants.InstanceAspectsMethodName
-                    )
-                {
-                    return instruction.Next.Next;
-                }
-            }
-
-            return instruction;
-        }
-
         private static FieldReference GetInstanceAspectField(AspectDefinition aspect, TypeDefinition source, Cut cut)
         {
             var type = source;
@@ -101,13 +93,13 @@ namespace AspectInjector.Core.Extensions
 
                 type.Methods.Add(instanceAspectsInitializer);
 
-                instanceAspectsInitializer.GetEditor().Instead(i => i.Return());
-                instanceAspectsInitializer.GetEditor().Mark(cut.TypeSystem.DebuggerHiddenAttribute);
+                instanceAspectsInitializer.Body.Instead(i => i.Return());
+                instanceAspectsInitializer.Mark(cut.TypeSystem.DebuggerHiddenAttribute);
 
                 var ctors = type.Methods.Where(c => c.IsConstructor && !c.IsStatic).ToList();
 
                 foreach (var ctor in ctors)
-                    ctor.GetEditor().AfterEntry(i => i.This().Call(instanceAspectsInitializer.MakeHostInstanceGeneric(cut.Method.DeclaringType)));
+                    ctor.Body.AfterEntry(i => i.This().Call(instanceAspectsInitializer.MakeHostInstanceGeneric(cut.Method.DeclaringType)));
             }
 
             return instanceAspectsInitializer;
@@ -130,7 +122,7 @@ namespace AspectInjector.Core.Extensions
             PointCut factory
             )
         {
-            initMethod.GetEditor().AfterEntry(
+            initMethod.Body.AfterEntry(
                 e => e
                 .IfEqual(
                     l => l.This().Load(field),

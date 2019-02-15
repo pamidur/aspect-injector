@@ -32,7 +32,19 @@ namespace FluentIL.Extensions
             }
 
             return reference;
-        }      
+        }
+
+        public static FieldReference MakeHostInstanceGeneric(
+                                  this FieldReference self,
+                                  TypeReference context)
+        {
+            var reference = new FieldReference(
+                self.Name,
+                self.FieldType,
+                context.MakeCallReference(self.DeclaringType));
+
+            return reference;
+        }
 
         public static FieldReference MakeCallReference(this MemberReference member, FieldReference reference)
         {

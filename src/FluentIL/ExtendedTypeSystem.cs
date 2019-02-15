@@ -83,7 +83,7 @@ namespace FluentIL
                 module.AssemblyReferences.Add(reference);
         }
 
-        private TypeReference GetSystemType(Type type)
+        public TypeReference GetSystemType(Type type)
         {
             var tr = new TypeReference(type.Namespace, type.Name, _module, _corelib);
 

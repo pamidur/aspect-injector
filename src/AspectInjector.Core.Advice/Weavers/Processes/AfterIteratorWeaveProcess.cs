@@ -6,7 +6,6 @@ using FluentIL;
 using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using System;
 using System.Linq;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
@@ -19,10 +18,10 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         }
 
-        protected override TypeDefinition GetStateMachine()
+        protected override TypeReference GetStateMachine()
         {
             return _target.CustomAttributes.First(ca => ca.AttributeType.Match(_ts.IteratorStateMachineAttribute))
-                .GetConstructorValue<TypeReference>(0).Resolve();
+                .GetConstructorValue<TypeReference>(0);
         }
 
         protected override MethodDefinition FindOrCreateAfterStateMachineMethod()
@@ -33,22 +32,17 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             {
                 var moveNext = _stateMachine.Methods.First(m => m.Name == "MoveNext");
 
-                var moveNextEditor = moveNext.GetEditor();
-
-                var exitPoints = moveNext.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList();
-
                 afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _ts.Void);
                 _stateMachine.Methods.Add(afterMethod);
-                afterMethod.GetEditor().Mark(_ts.DebuggerHiddenAttribute);
-                afterMethod.GetEditor().Instead(pc => pc.Return());
+                afterMethod.Mark(_ts.DebuggerHiddenAttribute);
+                afterMethod.Body.Instead(pc => pc.Return());
 
-                foreach (var exit in exitPoints.Where(e => e.Previous.OpCode == OpCodes.Ldc_I4 && (int)e.Previous.Operand == 0))
-                {
-                    moveNextEditor.Before(exit, il =>
-                    {
-                        return il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine));
-                    });
-                }
+                moveNext.Body.OnEveryOccasionOf(
+                    i =>
+                        i.Next != null && i.Next.OpCode == OpCodes.Ret &&
+                        (i.OpCode == OpCodes.Ldc_I4_0 || ((i.OpCode == OpCodes.Ldc_I4 || i.OpCode == OpCodes.Ldc_I4_S) && (int)i.Operand == 0)),
+                    il =>
+                        il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine)));
             }
 
             return afterMethod;
@@ -67,7 +61,10 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void InsertStateMachineCall(PointCut code)
         {
-            _target.GetEditor().BeforeExit(code);
+            var stateMachineCtors = _stateMachine.Methods.Where(m => m.IsConstructor).ToArray();
+
+            foreach (var ctor in stateMachineCtors)
+                _target.Body.OnCall(ctor.MakeHostInstanceGeneric(_stateMachineRef), cut => cut.Dup().Here(code));
         }
     }
 }

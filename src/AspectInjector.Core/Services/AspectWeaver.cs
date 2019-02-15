@@ -42,10 +42,10 @@ namespace AspectInjector.Core.Services
 
                     aspect.Host.Methods.Add(cctor);
 
-                    cctor.GetEditor().Instead(i => i.Return());
+                    cctor.Body.Instead(i => i.Return());
                 }
 
-                cctor.GetEditor().AfterEntry(i => i.Store(singletonField, val => val.CreateAspectInstance(aspect)));
+                cctor.Body.AfterEntry(i => i.Store(singletonField, val => val.CreateAspectInstance(aspect)));
             }
 
             aspect.Host.IsBeforeFieldInit = false;

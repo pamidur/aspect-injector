@@ -41,7 +41,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public override void Execute()
         {
-            _target.GetEditor().BeforeExit(
+            _target.Body.BeforeExit(
                 cut =>
                 {
                     if (_retvar != null)
