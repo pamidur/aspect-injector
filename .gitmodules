@@ -1,0 +1,3 @@
+[submodule "src/FluentIL"]
+	path = src/FluentIL
+	url = git@github.com:pamidur/fluent-il.git:/src
