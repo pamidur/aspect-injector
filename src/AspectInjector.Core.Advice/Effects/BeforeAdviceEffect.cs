@@ -3,6 +3,8 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
+using FluentIL;
+using FluentIL.Extensions;
 
 namespace AspectInjector.Core.Advice.Effects
 {
@@ -14,7 +16,7 @@ namespace AspectInjector.Core.Advice.Effects
         {
             var result = base.Validate(aspect, log);
 
-            if (Method.ReturnType != Method.Module.TypeSystem.Void)
+            if (!Method.ReturnType.Match(StandardTypes.Void))
             {
                 log.Log(EffectRules.AdviceMustHaveValidSingnature, Method, Method.Name, EffectRules.Literals.MustBeVoidForInline);
                 result = false;

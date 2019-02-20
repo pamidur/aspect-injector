@@ -3,11 +3,22 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace FluentIL
 {
     public static class Values
     {
+        private static readonly MethodReference _getTypeFromHandleMethod =
+            StandardTypes.Type.Resolve()
+            .Methods.First(m => m.Name == "GetTypeFromHandle")
+            .MakeHostInstanceGeneric(StandardTypes.Type);
+
+        private static readonly MethodReference _getMethodFromHandleMethod =
+            StandardTypes.GetType(typeof(MethodBase)).Resolve()
+            .Methods.First(m => m.Name == "GetMethodFromHandle" && m.Parameters.Count == 2)
+            .MakeHostInstanceGeneric(StandardTypes.GetType(typeof(MethodBase)));
+
         public static Cut Pop(this Cut pc) => pc
             .Write(OpCodes.Pop);
 
@@ -22,12 +33,12 @@ namespace FluentIL
 
         public static Cut TypeOf(this Cut pc, TypeReference type) => pc
             .Write(OpCodes.Ldtoken, pc.Method.MakeCallReference(type))
-            .Write(OpCodes.Call, pc.TypeSystem.GetTypeFromHandleMethod);
+            .Write(OpCodes.Call, _getTypeFromHandleMethod);
 
         public static Cut MethodOf(this Cut pc, MethodReference method) => pc
             .Write(OpCodes.Ldtoken, method)
             .Write(OpCodes.Ldtoken, method.DeclaringType.MakeCallReference(method.DeclaringType))
-            .Write(OpCodes.Call, pc.TypeSystem.GetMethodFromHandleMethod);
+            .Write(OpCodes.Call, _getMethodFromHandleMethod);
 
         public static Cut Value(this Cut pc, object value)
         {
@@ -103,7 +114,7 @@ namespace FluentIL
             {
                 if (typeOnStack.IsValueType || typeOnStack.IsGenericParameter)
                     return cut.Write(OpCodes.Box, typeOnStack);
-                else if (!expectedType.Match(cut.TypeSystem.Object))
+                else if (!expectedType.Match(StandardTypes.Object))
                     return cut.Write(OpCodes.Castclass, expectedType);
                 else
                     return cut;
@@ -180,7 +191,7 @@ namespace FluentIL
 
             if (val.GetType().IsArray)
                 pc = pc.CreateArray(
-                    pc.TypeSystem.Import(argument.Type.GetElementType()),
+                    argument.Type.GetElementType(),
                     ((Array)val).Cast<object>().Select<object, PointCut>(v => il => il.Value(v)).ToArray()
                     );
             else

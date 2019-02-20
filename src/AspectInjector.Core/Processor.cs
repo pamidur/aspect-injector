@@ -47,6 +47,9 @@ namespace AspectInjector.Core
             {
                 if (modified)
                 {
+                    foreach (var m in assembly.Modules)
+                        StandardTypes.UpdateCoreLibRef(m);
+
                     _log.Log(GeneralRules.Info, "Assembly has been patched.");
                     WriteAssembly(assembly, assemblyFile, pdbPresent);
                 }

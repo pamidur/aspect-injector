@@ -4,7 +4,7 @@ namespace FluentIL.Extensions
 {
     public static class ClonningExtensions
     {
-        public static GenericParameter Clone(this GenericParameter gparam, IGenericParameterProvider target, ExtendedTypeSystem ts)
+        public static GenericParameter Clone(this GenericParameter gparam, IGenericParameterProvider target)
         {
             var ngp = new GenericParameter(gparam.Name, target)
             {
@@ -19,10 +19,10 @@ namespace FluentIL.Extensions
             };
 
             foreach (var gc in gparam.Constraints)
-                ngp.Constraints.Add(ts.Import(gc));
+                ngp.Constraints.Add(target.Module.ImportReference(gc));
 
             foreach (var subgp in gparam.GenericParameters)
-                ngp.GenericParameters.Add(subgp.Clone(target,ts));
+                ngp.GenericParameters.Add(subgp.Clone(target));
 
             return ngp;
         }

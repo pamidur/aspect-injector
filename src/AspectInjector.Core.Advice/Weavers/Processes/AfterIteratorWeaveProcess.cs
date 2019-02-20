@@ -6,12 +6,16 @@ using FluentIL;
 using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AfterIteratorWeaveProcess : AfterStateMachineWeaveProcessBase
     {
+        private static readonly TypeReference _iteratorStateMachineAttribute = StandardTypes.GetType(typeof(IteratorStateMachineAttribute));
+
         public AfterIteratorWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)
         {
@@ -20,7 +24,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override TypeReference GetStateMachine()
         {
-            return _target.CustomAttributes.First(ca => ca.AttributeType.Match(_ts.IteratorStateMachineAttribute))
+            return _target.CustomAttributes.First(ca => ca.AttributeType.Match(_iteratorStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);
         }
 
@@ -32,9 +36,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             {
                 var moveNext = _stateMachine.Methods.First(m => m.Name == "MoveNext");
 
-                afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _ts.Void);
+                afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _stateMachine.Module.ImportReference(StandardTypes.Void));
                 _stateMachine.Methods.Add(afterMethod);
-                afterMethod.Mark(_ts.DebuggerHiddenAttribute);
+                afterMethod.Mark(WellKnownTypes.DebuggerHiddenAttribute);
                 afterMethod.Body.Instead(pc => pc.Return());
 
                 moveNext.Body.OnEveryOccasionOf(

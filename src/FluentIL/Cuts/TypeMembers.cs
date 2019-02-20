@@ -32,7 +32,7 @@ namespace FluentIL
 
         public static Cut Load(this Cut cut, FieldReference field)
         {
-            var fieldRef = cut.Method.MakeCallReference(cut.TypeSystem.Import(field));
+            var fieldRef = cut.Method.MakeCallReference(cut.Import(field));
             var fieldDef = field.Resolve();
 
             return cut.Write(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, fieldRef);
@@ -40,7 +40,7 @@ namespace FluentIL
 
         public static Cut LoadRef(this Cut cut, FieldReference field)
         {
-            var fieldRef = cut.Method.MakeCallReference(cut.TypeSystem.Import(field));
+            var fieldRef = cut.Method.MakeCallReference(cut.Import(field));
             var fieldDef = field.Resolve();
 
             return cut.Write(fieldDef.IsStatic ? OpCodes.Ldsflda : OpCodes.Ldflda, fieldRef);
@@ -48,7 +48,7 @@ namespace FluentIL
 
         public static Cut Store(this Cut cut, FieldReference field, PointCut value = null)
         {
-            var fieldRef = cut.Method.MakeCallReference(cut.TypeSystem.Import(field));
+            var fieldRef = cut.Method.MakeCallReference(cut.Import(field));
             var fieldDef = field.Resolve();
 
             return cut

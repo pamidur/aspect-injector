@@ -3,6 +3,7 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Rules;
 using FluentIL;
+using FluentIL.Extensions;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,8 +31,8 @@ namespace AspectInjector.Core.Models
                     _factoryMethod = Factory.Resolve().Methods.FirstOrDefault(m =>
                     m.IsStatic && m.IsPublic
                     && m.Name == Constants.AspectFactoryMethodName
-                    && m.ReturnType.FullName == FluentIL.WellKnownTypes.Object
-                    && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.FullName == FluentIL.WellKnownTypes.Type
+                    && m.ReturnType.Match(StandardTypes.Object)
+                    && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.Match(StandardTypes.Type)
                     );
                 }
                 else

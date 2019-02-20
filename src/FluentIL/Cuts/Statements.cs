@@ -15,7 +15,7 @@ namespace FluentIL
         {
             if (args != null) cut = cut.Here(args);
 
-            var methodRef = cut.Method.MakeCallReference(cut.TypeSystem.Import(method));
+            var methodRef = cut.Method.MakeCallReference(cut.Import(method));
             var methodDef = method.Resolve();
 
             var code = OpCodes.Call;

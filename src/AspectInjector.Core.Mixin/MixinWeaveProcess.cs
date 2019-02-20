@@ -15,7 +15,6 @@ namespace AspectInjector.Core.Mixin
     {
         private readonly TypeDefinition _target;
         private readonly MixinEffect _effect;
-        private readonly ExtendedTypeSystem _ts;
         private readonly AspectDefinition _aspect;
 
         public MixinWeaveProcess(ILogger log, IMemberDefinition target, AspectDefinition aspect, MixinEffect effect)
@@ -31,7 +30,6 @@ namespace AspectInjector.Core.Mixin
 
             _aspect = aspect;
             _effect = effect;
-            _ts = _target.Module.GetTypeSystem();
         }
 
         public void Execute()
@@ -41,7 +39,7 @@ namespace AspectInjector.Core.Mixin
             foreach (var iface in ifaceTree)
                 if (_target.Interfaces.All(i => !i.InterfaceType.Match(iface)))
                 {
-                    var ifaceRef = _ts.Import(iface);
+                    var ifaceRef = _target.Module.ImportReference(iface);
 
                     _target.Interfaces.Add(new InterfaceImplementation(ifaceRef));
 
@@ -67,21 +65,21 @@ namespace AspectInjector.Core.Mixin
             {
                 proxy = new MethodDefinition(methodName,
                     MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
-                     _ts.Import(ifaceMethod.ReturnType));
+                     _target.Module.ImportReference(ifaceMethod.ReturnType));
 
                 _target.Methods.Add(proxy);
 
                 foreach (var gp in ifaceMethod.GenericParameters)
-                    proxy.GenericParameters.Add(gp.Clone(proxy, _ts));
+                    proxy.GenericParameters.Add(gp.Clone(proxy));
 
-                proxy.Mark(_ts.DebuggerHiddenAttribute);
-                proxy.ReturnType = _ts.Import(ifaceMethod.ResolveIfGeneric(ifaceMethod.ReturnType));
+                proxy.Mark(WellKnownTypes.DebuggerHiddenAttribute);
+                proxy.ReturnType = _target.Module.ImportReference(ifaceMethod.ResolveIfGeneric(ifaceMethod.ReturnType));
 
                 if (ifaceMethod.Resolve().IsSpecialName)
                     proxy.IsSpecialName = true;
 
                 foreach (var parameter in ifaceMethod.Parameters)
-                    proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _ts.Import(ifaceMethod.ResolveIfGeneric(parameter.ParameterType))));
+                    proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _target.Module.ImportReference(ifaceMethod.ResolveIfGeneric(parameter.ParameterType))));
 
                 proxy.Overrides.Add(ifaceMethod);
 
@@ -103,10 +101,10 @@ namespace AspectInjector.Core.Mixin
 
         protected void CreateMethodProxy(MethodDefinition originalMethod, TypeReference @interface)
         {
-            var method = _ts.Import(originalMethod);
+            var method = _target.Module.ImportReference(originalMethod);
 
             if (@interface.IsGenericInstance)
-                method = _ts.Import(originalMethod.MakeHostInstanceGeneric(@interface));
+                method = _target.Module.ImportReference(originalMethod.MakeHostInstanceGeneric(@interface));
 
             GetOrCreateMethodProxy(method);
         }
@@ -114,25 +112,25 @@ namespace AspectInjector.Core.Mixin
         protected void CreateEventProxy(EventDefinition originalEvent, TypeReference @interface)
         {
             var eventName = $"{@interface.FullName}.{originalEvent.Name}";
-            var eventType = @interface.ResolveIfGeneric(_ts.Import(originalEvent.AddMethod ?? originalEvent.RemoveMethod).Parameters[0].ParameterType);
+            var eventType = @interface.ResolveIfGeneric(_target.Module.ImportReference(originalEvent.AddMethod ?? originalEvent.RemoveMethod).Parameters[0].ParameterType);
 
             var ed = _target.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.Match(eventType));
             if (ed == null)
             {
-                ed = new EventDefinition(eventName, EventAttributes.None, _ts.Import(eventType));
+                ed = new EventDefinition(eventName, EventAttributes.None, _target.Module.ImportReference(eventType));
 
                 if (originalEvent.AddMethod != null)
                 {
-                    MethodReference method = _ts.Import(originalEvent.AddMethod);
-                    if (@interface.IsGenericInstance) method = _ts.Import(originalEvent.AddMethod.MakeHostInstanceGeneric(@interface));
+                    MethodReference method = _target.Module.ImportReference(originalEvent.AddMethod);
+                    if (@interface.IsGenericInstance) method = _target.Module.ImportReference(originalEvent.AddMethod.MakeHostInstanceGeneric(@interface));
 
                     ed.AddMethod = GetOrCreateMethodProxy(method);
                 }
 
                 if (originalEvent.RemoveMethod != null)
                 {
-                    MethodReference method = _ts.Import(originalEvent.RemoveMethod);
-                    if (@interface.IsGenericInstance) method = _ts.Import(originalEvent.RemoveMethod.MakeHostInstanceGeneric(@interface));
+                    MethodReference method = _target.Module.ImportReference(originalEvent.RemoveMethod);
+                    if (@interface.IsGenericInstance) method = _target.Module.ImportReference(originalEvent.RemoveMethod.MakeHostInstanceGeneric(@interface));
 
                     ed.RemoveMethod = GetOrCreateMethodProxy(method);
                 }
@@ -167,9 +165,9 @@ namespace AspectInjector.Core.Mixin
                 propertyType = propertyType ?? setMethod.ResolveIfGeneric(setMethod.Parameters[0].ParameterType);
             }
 
-            propertyType = _ts.Import(propertyType);
-            if (getMethod != null) getMethod = _ts.Import(getMethod);
-            if (setMethod != null) setMethod = _ts.Import(setMethod);
+            propertyType = _target.Module.ImportReference(propertyType);
+            if (getMethod != null) getMethod = _target.Module.ImportReference(getMethod);
+            if (setMethod != null) setMethod = _target.Module.ImportReference(setMethod);
 
             var pd = _target.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.Match(propertyType));
             if (pd == null)

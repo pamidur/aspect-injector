@@ -6,8 +6,8 @@ using FluentIL;
 using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -15,25 +15,22 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AfterAsyncWeaveProcess : AfterStateMachineWeaveProcessBase
     {
-        private static readonly Type[] _supportedMethodBuilders = new[] {
-            typeof(AsyncTaskMethodBuilder),
-            typeof(AsyncTaskMethodBuilder<>),
-            typeof(AsyncVoidMethodBuilder)
-        };
+        private static readonly TypeReference _asyncStateMachineAttribute = StandardTypes.GetType(typeof(AsyncStateMachineAttribute));
+
         private readonly FieldDefinition _builderField;
         private readonly TypeReference _builder;
         private readonly TypeReference _asyncResult;
 
         public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
         {
-            _builderField = _stateMachine.Fields.First(f => f.Name == "<>t__builder"); 
+            _builderField = _stateMachine.Fields.First(f => f.Name == "<>t__builder");
             _builder = _builderField.FieldType;
             _asyncResult = (_builder as IGenericInstance)?.GenericArguments.FirstOrDefault();
         }
 
         protected override TypeReference GetStateMachine()
         {
-            return _target.CustomAttributes.First(ca => ca.AttributeType.Match(_ts.AsyncStateMachineAttribute))
+            return _target.CustomAttributes.First(ca => ca.AttributeType.Match(_asyncStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);
         }
 
@@ -45,12 +42,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             {
                 var moveNext = _stateMachine.Methods.First(m => m.Name == "MoveNext");
 
-                afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _ts.Void);
-                afterMethod.Parameters.Add(new ParameterDefinition(_ts.Object));
+                afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _stateMachine.Module.ImportReference(StandardTypes.Void));
+                afterMethod.Parameters.Add(new ParameterDefinition(_stateMachine.Module.ImportReference(StandardTypes.Object)));
 
                 _stateMachine.Methods.Add(afterMethod);
 
-                afterMethod.Mark(_ts.DebuggerHiddenAttribute);
+                afterMethod.Mark(WellKnownTypes.DebuggerHiddenAttribute);
                 afterMethod.Body.Instead(pc => pc.Return());
 
                 VariableDefinition resvar = null;
@@ -64,7 +61,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 MethodReference setResultCall = _builder.Resolve().Methods.First(m => m.Name == "SetResult");
                 if (_asyncResult != null) setResultCall = setResultCall.MakeHostInstanceGeneric(_builder);
-                
+
                 moveNext.Body.OnCall(setResultCall, il =>
                 {
                     il = il.Prev();
@@ -74,7 +71,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     if (_asyncResult != null)
                     {
                         il = il.Store(resvar);
-                        loadArg = new PointCut(args => args.Load(resvar).Cast(resvar.VariableType, _ts.Object));
+                        loadArg = new PointCut(args => args.Load(resvar).Cast(resvar.VariableType, StandardTypes.Object));
                     }
 
                     il = il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine), loadArg);
@@ -96,7 +93,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override Cut LoadReturnTypeArgument(Cut pc, AdviceArgument parameter)
         {
-            return pc.TypeOf(_asyncResult ?? _ts.Void);
+            return pc.TypeOf(_asyncResult ?? StandardTypes.Void);
         }
 
         protected override void InsertStateMachineCall(PointCut code)

@@ -75,46 +75,44 @@ namespace AspectInjector.Core.Advice
                 if (argAttr == null)
                     _log.Log(EffectRules.AdviceArgumentMustBeBound, method, param.Name);
 
-                var source = argAttr.GetConstructorValue<Source>(0);                    
-
-                var ts = method.Module.GetTypeSystem();
-
+                var source = argAttr.GetConstructorValue<Source>(0);
+                
                 switch (source)
                 {
                     case Source.Arguments:
-                        if (!param.ParameterType.Match(ts.ObjectArray))
+                        if (!param.ParameterType.Match(StandardTypes.ObjectArray))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.ObjectArray);
                         break;
                     case Source.Instance:
-                        if (!param.ParameterType.Match(ts.Object))
+                        if (!param.ParameterType.Match(StandardTypes.Object))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
                         break;
                     case Source.Method:
-                        if (!param.ParameterType.Match(ts.MethodBase))
+                        if (!param.ParameterType.Match(WellKnownTypes.MethodBase))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.MethodBase);
                         break;
                     case Source.Name:
-                        if (!param.ParameterType.Match(ts.String))
+                        if (!param.ParameterType.Match(StandardTypes.String))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.String);
                         break;
                     case Source.ReturnType:
-                        if (!param.ParameterType.Match(ts.Type))
+                        if (!param.ParameterType.Match(StandardTypes.Type))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
                         break;
                     case Source.ReturnValue:
-                        if (!param.ParameterType.Match(ts.Object))
+                        if (!param.ParameterType.Match(StandardTypes.Object))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
                         break;
                     case Source.Type:
-                        if (!param.ParameterType.Match(ts.Type))
+                        if (!param.ParameterType.Match(StandardTypes.Type))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
                         break;
                     case Source.Injections:
-                        if (!param.ParameterType.Match(ts.MakeArrayType(ts.Attribute)))
+                        if (!param.ParameterType.Match(WellKnownTypes.AttributeArray))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.AttributeArray);
                         break;
                     case Source.Target:
-                        if (!param.ParameterType.Match(ts.MakeGenericInstanceType(ts.FuncGeneric2, ts.ObjectArray, ts.Object)))
+                        if (!param.ParameterType.Match(WellKnownTypes.Func_ObjectArray_Object))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.TargetFunc);
                         break;
                     default:

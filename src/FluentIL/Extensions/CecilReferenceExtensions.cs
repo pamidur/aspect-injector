@@ -1,10 +1,14 @@
 ﻿using Mono.Cecil;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace FluentIL.Extensions
 {
     public static class CecilReferenceExtensions
     {
+        private static readonly TypeReference _asyncStateMachineAttribute = StandardTypes.GetType(typeof(AsyncStateMachineAttribute));
+        private static readonly TypeReference _iteratorStateMachineAttribute = StandardTypes.GetType(typeof(IteratorStateMachineAttribute));
+
         public static bool Match(this TypeReference tr1, TypeReference tr2)
         {
             if (tr1 == null || tr2 == null)
@@ -25,12 +29,12 @@ namespace FluentIL.Extensions
 
         public static bool IsAsync(this MethodDefinition m)
         {
-            return m.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.AsyncStateMachineAttribute);
+            return m.CustomAttributes.Any(a => a.AttributeType.Match(_asyncStateMachineAttribute));
         }
 
         public static bool IsIterator(this MethodDefinition m)
         {
-            return m.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.IteratorStateMachineAttribute);
+            return m.CustomAttributes.Any(a => a.AttributeType.Match(_iteratorStateMachineAttribute));
         }
 
         public static bool IsUnsafe(this MethodDefinition m)

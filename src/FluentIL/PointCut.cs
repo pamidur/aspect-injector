@@ -20,7 +20,6 @@ namespace FluentIL
         private readonly Instruction _refInst;
         private readonly MethodBody _body;
 
-        public ExtendedTypeSystem TypeSystem => _body.Method.Module.GetTypeSystem();
         public MethodDefinition Method => _body.Method;
 
         private Collection<Instruction> Instructions => _body.Instructions;
@@ -33,8 +32,6 @@ namespace FluentIL
             _entry = entry;
             _exit = exit;
             _refInst = null;
-
-            CutEvents.OnModify(_body);
         }
 
         public Cut(MethodBody body, Instruction instruction)
@@ -43,9 +40,7 @@ namespace FluentIL
             _body = body ?? throw new ArgumentNullException(nameof(body));
 
             _entry = false;
-            _exit = false;
-
-            CutEvents.OnModify(_body);
+            _exit = false;           
         }
 
         public Cut Next()
@@ -70,6 +65,8 @@ namespace FluentIL
 
         public Cut Write(Instruction instruction)
         {
+            CutEvents.OnModify(_body);
+
             if (_entry)
             {
                 Instructions.Insert(0, instruction);
@@ -96,10 +93,10 @@ namespace FluentIL
             switch (operand)
             {                
                 case Cut pc: return Instruction.Create(opCode, pc._refInst ?? throw new InvalidOperationException());
-                case TypeReference tr: return Instruction.Create(opCode, TypeSystem.Import(tr));
-                case MethodReference mr: return Instruction.Create(opCode, TypeSystem.Import(mr));
+                case TypeReference tr: return Instruction.Create(opCode, Method.Module.ImportReference(tr));
+                case MethodReference mr: return Instruction.Create(opCode, Method.Module.ImportReference(mr));
                 case CallSite cs: return Instruction.Create(opCode, cs);
-                case FieldReference fr: return Instruction.Create(opCode, TypeSystem.Import(fr));
+                case FieldReference fr: return Instruction.Create(opCode, Method.Module.ImportReference(fr));
                 case string str: return Instruction.Create(opCode, str);
                 case char c: return Instruction.Create(opCode, c);
                 case byte b: return Instruction.Create(opCode, b);
@@ -126,6 +123,8 @@ namespace FluentIL
 
         public Cut Replace(Instruction instruction)
         {
+            CutEvents.OnModify(_body);
+
             if (_exit || _entry) return Write(instruction);
 
             Redirect(_refInst, instruction, instruction);
@@ -136,6 +135,8 @@ namespace FluentIL
 
         public Cut Remove()
         {
+            CutEvents.OnModify(_body);
+
             var prevCut = Prev();
 
             var next = _refInst.Next;

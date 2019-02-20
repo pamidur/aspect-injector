@@ -23,13 +23,11 @@ namespace AspectInjector.Core.Services
 
         private void EnsureSingletonField(AspectDefinition aspect)
         {
-            var ts = aspect.Host.Module.GetTypeSystem();
-
             var singletonField = aspect.Host.Fields.FirstOrDefault(m => m.Name == Constants.AspectGlobalField);
 
             if (singletonField == null)
             {
-                singletonField = new FieldDefinition(Constants.AspectGlobalField, FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.InitOnly, ts.Import(aspect.Host));
+                singletonField = new FieldDefinition(Constants.AspectGlobalField, FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.InitOnly, aspect.Host);
                 aspect.Host.Fields.Add(singletonField);
 
                 var cctor = aspect.Host.Methods.FirstOrDefault(c => c.IsConstructor && c.IsStatic);
@@ -38,7 +36,7 @@ namespace AspectInjector.Core.Services
                 {
                     cctor = new MethodDefinition(".cctor",
                         MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
-                            ts.Void);
+                            aspect.Host.Module.ImportReference(StandardTypes.Void));
 
                     aspect.Host.Methods.Add(cctor);
 

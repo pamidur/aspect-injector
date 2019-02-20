@@ -151,5 +151,17 @@ namespace FluentIL.Extensions
             else
                 throw new Exception("Cannot resolve generic parameter");
         }
+
+        public static TypeReference MakeGenericInstanceReference(this TypeReference openGenericType, params TypeReference[] arguments)
+        {
+            if (openGenericType.GenericParameters.Count != arguments.Length)
+                throw new ArgumentException("Generic arguments number mismatch", "arguments");
+
+            var instance = new GenericInstanceType(openGenericType);
+            foreach (var argument in arguments)
+                instance.GenericArguments.Add(argument);
+
+            return instance;
+        }
     }
 }

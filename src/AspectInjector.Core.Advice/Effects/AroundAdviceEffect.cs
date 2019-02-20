@@ -3,6 +3,8 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
+using FluentIL;
+using FluentIL.Extensions;
 using Mono.Cecil;
 using System.Linq;
 
@@ -24,7 +26,7 @@ namespace AspectInjector.Core.Advice.Effects
         {
             var result = base.Validate(aspect, log);
 
-            if (Method.ReturnType != Method.Module.TypeSystem.Object)
+            if (!Method.ReturnType.Match(StandardTypes.Object))
             {
                 log.Log(EffectRules.AdviceMustHaveValidSingnature, Method, Method.Name, EffectRules.Literals.MustBeObjectForAround);
                 result = false;

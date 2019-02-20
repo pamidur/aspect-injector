@@ -5,6 +5,7 @@ using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AspectInjector.Core.Extensions
@@ -59,7 +60,7 @@ namespace AspectInjector.Core.Extensions
             cut = cut.Call(aspect.GetFactoryMethod(), arg => aspect.Factory != null ? arg.TypeOf(aspect.Host) : arg);
 
             if (aspect.Factory != null)
-                cut = cut.Cast(cut.TypeSystem.Object, aspect.Host);
+                cut = cut.Cast(StandardTypes.Object, aspect.Host);
 
             return cut;
         }
@@ -73,7 +74,7 @@ namespace AspectInjector.Core.Extensions
             var field = FindField(type, fieldName);
             if (field == null)
             {
-                field = new FieldDefinition(fieldName, FieldAttributes.Family, cut.TypeSystem.Import(aspect.Host));
+                field = new FieldDefinition(fieldName, FieldAttributes.Family, cut.Import(aspect.Host));
                 type.Fields.Add(field);
 
                 InjectInitialization(GetInstanсeAspectsInitializer(type, cut), field, c => c.CreateAspectInstance(aspect));
@@ -89,12 +90,12 @@ namespace AspectInjector.Core.Extensions
             if (instanceAspectsInitializer == null)
             {
                 instanceAspectsInitializer = new MethodDefinition(Constants.InstanceAspectsMethodName,
-                    MethodAttributes.Private | MethodAttributes.HideBySig, cut.TypeSystem.Void);
+                    MethodAttributes.Private | MethodAttributes.HideBySig, type.Module.ImportReference(StandardTypes.Void));
 
                 type.Methods.Add(instanceAspectsInitializer);
 
                 instanceAspectsInitializer.Body.Instead(i => i.Return());
-                instanceAspectsInitializer.Mark(cut.TypeSystem.DebuggerHiddenAttribute);
+                instanceAspectsInitializer.Mark(WellKnownTypes.DebuggerHiddenAttribute);
 
                 var ctors = type.Methods.Where(c => c.IsConstructor && !c.IsStatic).ToList();
 

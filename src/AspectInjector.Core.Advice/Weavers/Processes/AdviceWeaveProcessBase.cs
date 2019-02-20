@@ -5,6 +5,7 @@ using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
 using FluentIL;
+using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Linq;
@@ -17,7 +18,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         protected readonly MethodDefinition _target;
         protected readonly TEffect _effect;
         protected readonly InjectionDefinition _injection;
-        protected readonly ExtendedTypeSystem _ts;
         protected readonly ILogger _log;
         protected readonly AspectDefinition _aspect;
 
@@ -28,8 +28,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             _effect = (TEffect)injection.Effect;
             _injection = injection;
             _aspect = injection.Source;
-
-            _ts = target.Module.GetTypeSystem();
         }
 
         public abstract void Execute();
@@ -77,7 +75,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected virtual Cut LoadMethodArgument(Cut pc, AdviceArgument parameter)
         {
-            return pc.MethodOf(_target).Cast(_ts.Object, _ts.MethodBase);
+            return pc.MethodOf(_target).Cast(StandardTypes.Object, WellKnownTypes.MethodBase);
         }
 
         protected virtual Cut LoadInstanceArgument(Cut pc, AdviceArgument parameter)
@@ -102,7 +100,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 {
                     var catype = ca.AttributeType.Resolve();
 
-                    var attrvar = new VariableDefinition(_ts.Import(ca.AttributeType));
+                    var attrvar = new VariableDefinition(il.Import(ca.AttributeType));
                     _target.Body.Variables.Add(attrvar);
                     _target.Body.InitLocals = true;
 
@@ -132,16 +130,16 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             }
             ).ToArray();
 
-            return pc.CreateArray(_ts.Attribute, elements);
+            return pc.CreateArray(StandardTypes.Attribute, elements);
         }
 
         protected virtual Cut LoadArgumentsArgument(Cut pc, AdviceArgument parameter)
         {
             var elements = _target.Parameters.Select<ParameterDefinition, PointCut>(p => il =>
-                il.Load(p).Cast(p.ParameterType, _ts.Object)
+                il.Load(p).Cast(p.ParameterType, StandardTypes.Object)
             ).ToArray();
 
-            return pc.CreateArray(_ts.Object, elements);
+            return pc.CreateArray(StandardTypes.Object, elements);
         }
 
         protected virtual Cut LoadNameArgument(Cut pc, AdviceArgument parameter)

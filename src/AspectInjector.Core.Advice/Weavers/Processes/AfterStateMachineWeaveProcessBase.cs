@@ -49,7 +49,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             if (argsfield == null)
             {
-                argsfield = new FieldDefinition(Constants.MovedArgs, FieldAttributes.Public, _ts.ObjectArray);
+                argsfield = new FieldDefinition(Constants.MovedArgs, FieldAttributes.Public, _stateMachine.Module.ImportReference(StandardTypes.ObjectArray));
                 _stateMachine.Fields.Add(argsfield);
 
                 InsertStateMachineCall(
@@ -57,10 +57,10 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     .Store(argsfield, v =>
                     {
                         var elements = _target.Parameters.Select<ParameterDefinition, PointCut>(p => il =>
-                               il.Load(p).Cast(p.ParameterType, _ts.Object)
+                               il.Load(p).Cast(p.ParameterType, StandardTypes.Object)
                            ).ToArray();
 
-                        return v.CreateArray(_ts.Object, elements);
+                        return v.CreateArray(StandardTypes.Object, elements);
                     }));
             }
 

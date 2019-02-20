@@ -21,7 +21,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         public AdviceAfterProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)
         {
-            if (!_target.ReturnType.Match(_ts.Void) && _effect.Arguments.Any(a => a.Source == Source.ReturnValue))
+            if (!_target.ReturnType.Match(StandardTypes.Void) && _effect.Arguments.Any(a => a.Source == Source.ReturnValue))
                 _retvar = GetOrCreateRetVar();
         }
 
@@ -63,7 +63,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             if (_retvar == null)
                 return pc.Null();
             else
-                return pc.Load(_retvar).Cast(_retvar.VariableType, _ts.Object);
+                return pc.Load(_retvar).Cast(_retvar.VariableType, StandardTypes.Object);
         }
     }
 }
