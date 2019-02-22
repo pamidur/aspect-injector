@@ -12,15 +12,14 @@
   <PropertyGroup>
     <_ASI_Loaded>true</_ASI_Loaded>
     <_ASI_Location Condition="'$(_ASI_Location)' == ''">$(MSBuildThisFileDirectory)</_ASI_Location>
-    <_ASI_Options Condition="'$(_ASI_Options)' == ''"></_ASI_Options>
-    <_ASI_Process_Options Condition="'$(Optimize)' == 'true' AND '$(_ASI_Process_Options)' == ''">-o</_ASI_Process_Options>
+    <_ASI_Options Condition="'$(Optimize)' == 'true'">$(_ASI_Options) -o</_ASI_Options>
   </PropertyGroup>
 
   <Target Name="InjectAspects" AfterTargets="CoreCompile" DependsOnTargets="$(_InjectAspectsDependsOn)"/>
 
   <Target Name="_ASI_InjectAspectsCore" Condition="'$(_InjectionNeeded)' == 'true'">
     <PropertyGroup>
-      <ProcessCmd>dotnet &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_ASI_Options) process &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(_ASI_Process_Options) @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
+      <ProcessCmd>dotnet &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_ASI_Options) &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
     </PropertyGroup>
     <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="_AspectExitCode" />

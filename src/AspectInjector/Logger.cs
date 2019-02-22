@@ -1,6 +1,5 @@
 ﻿using AspectInjector.Core.Contracts;
 using AspectInjector.Rules;
-using Microsoft.CodeAnalysis;
 using Mono.Cecil.Cil;
 using System;
 
