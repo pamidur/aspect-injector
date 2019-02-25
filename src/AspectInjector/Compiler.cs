@@ -5,9 +5,9 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Mixin;
 using AspectInjector.Core.Services;
-using AspectInjector.Core.Utils;
 using AspectInjector.Rules;
 using DryIoc;
+using FluentIL.Resolvers;
 using System;
 using System.IO;
 
