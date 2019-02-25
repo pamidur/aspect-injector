@@ -1,8 +1,7 @@
-﻿using AspectInjector.Rules;
+﻿using FluentIL.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 namespace AspectInjector.Analyzer
 {

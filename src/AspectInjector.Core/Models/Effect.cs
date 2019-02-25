@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Core.Contracts;
+using FluentIL.Logging;
 using Mono.Cecil;
 using System;
 using System.Linq;

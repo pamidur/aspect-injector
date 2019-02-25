@@ -4,6 +4,7 @@ using AspectInjector.Core.Extensions;
 using AspectInjector.Rules;
 using FluentIL;
 using FluentIL.Extensions;
+using FluentIL.Logging;
 using Mono.Cecil;
 using System.Collections.Generic;
 using System.Linq;

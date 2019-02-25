@@ -1,4 +1,6 @@
-﻿namespace AspectInjector.Rules
+﻿using FluentIL.Common;
+
+namespace AspectInjector.Rules
 {
     public static class AspectRules
     {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FluentIL.Common;
+using System;
 
 namespace AspectInjector.Rules
 {
@@ -15,7 +16,7 @@ namespace AspectInjector.Rules
             public static readonly Func<string, string> UnknownAspectScope = s => $"Unknown aspect scope '{s}'";
         }
 
-        public static readonly Rule Info =
+        public static readonly Rule Info = 
             Make("AI_INFO",
                 "Info message",
                 "{0}",

@@ -58,6 +58,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\external\FluentIL\src\FluentIL.Common\FluentIL.Common.csproj">
+      <Project>{7bd22418-f4a9-422b-9fde-a20708ba0648}</Project>
+      <Name>FluentIL.Common</Name>
+      <AdditionalProperties>TargetFramework=netstandard1.3</AdditionalProperties>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj">
       <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
       <Name>AspectInjector.Broker</Name>

@@ -2,14 +2,12 @@
 using AspectInjector.Core.Advice;
 using AspectInjector.Core.Advice.Weavers;
 using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Mixin;
 using AspectInjector.Core.Services;
 using AspectInjector.Rules;
 using DryIoc;
-using FluentIL.Resolvers;
+using FluentIL.Logging;
 using System;
-using System.IO;
 
 namespace AspectInjector
 {
@@ -21,24 +19,9 @@ namespace AspectInjector
             var log = container.Resolve<ILogger>();
 
             try
-            {
-                if (!File.Exists(filename)) throw new FileNotFoundException("Target not found", filename);
-
-                var resolver = new KnownReferencesAssemblyResolver();
-                resolver.AddSearchDirectory(Path.GetDirectoryName(filename));
-
-                foreach (var refr in references)
-                {
-                    if (!File.Exists(refr)) throw new FileNotFoundException("Reference not found", filename);
-                    resolver.AddReference(refr);
-                }
-
+            {  
                 var processor = container.Resolve<Processor>();
-                processor.Process(filename, resolver, optimize);
-            }
-            catch (FileNotFoundException e)
-            {
-                log.Log(GeneralRules.CompilationMustSecceedIfNoOtherErrors, $"{e.Message}: '{e.FileName}'");
+                processor.Process(filename, references, optimize);
             }
             catch (Exception e)
             {
@@ -57,7 +40,7 @@ namespace AspectInjector
             container.Register<IAspectReader, AspectReader>(Reuse.Singleton);
             container.Register<IAspectWeaver, AspectWeaver>(Reuse.Singleton);
             container.Register<IInjectionReader, InjectionReader>(Reuse.Singleton);
-            container.Register<ILogger, Logger>(Reuse.Singleton);
+            container.RegisterDelegate<ILogger>(c => new ConsoleLogger("AspectInjector"), Reuse.Singleton);
 
             //register effects
 

@@ -5,6 +5,7 @@ using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using FluentIL;
 using FluentIL.Extensions;
+using FluentIL.Logging;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Collections.Generic;

@@ -3,6 +3,7 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
+using FluentIL.Logging;
 using Mono.Cecil;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

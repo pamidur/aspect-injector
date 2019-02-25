@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Broker;
+using FluentIL.Common;
 
 namespace AspectInjector.Rules
 {

@@ -6,6 +6,7 @@ using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
 using FluentIL.Extensions;
+using FluentIL.Logging;
 using Mono.Cecil;
 
 namespace AspectInjector.Core.Advice.Weavers

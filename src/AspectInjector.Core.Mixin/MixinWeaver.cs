@@ -1,5 +1,6 @@
 ﻿using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
+using FluentIL.Logging;
 
 namespace AspectInjector.Core.Mixin
 {

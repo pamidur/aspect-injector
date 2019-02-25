@@ -9,7 +9,7 @@
     <PackageReference Include="Mono.Cecil" Version="0.10.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\external\FluentIL\src\FluentIL.csproj" />
+    <ProjectReference Include="..\..\external\FluentIL\src\FluentIL\FluentIL.csproj" />
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Rules\AspectInjector.Rules.csproj" />
   </ItemGroup>

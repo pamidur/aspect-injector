@@ -5,6 +5,7 @@ using AspectInjector.Core.Models;
 using AspectInjector.Rules;
 using FluentIL;
 using FluentIL.Extensions;
+using FluentIL.Logging;
 
 namespace AspectInjector.Core.Advice.Effects
 {

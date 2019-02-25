@@ -2,6 +2,7 @@
 using AspectInjector.Core.Advice.Weavers.Processes;
 using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
+using FluentIL.Logging;
 using Mono.Cecil;
 using System;
 
