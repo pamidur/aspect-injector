@@ -54,7 +54,9 @@
       <TfmSpecificPackageFile Include="$(PublishAnalyzer)AspectInjector*.dll">
         <PackagePath>analyzers/dotnet/cs</PackagePath>
       </TfmSpecificPackageFile>
-    </ItemGroup>
-    
+      <TfmSpecificPackageFile Include="$(PublishAnalyzer)FluentIL*.dll">
+        <PackagePath>analyzers/dotnet/cs</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>    
   </Target>
 </Project>
