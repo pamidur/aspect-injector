@@ -8,12 +8,13 @@ using AspectInjector.Rules;
 using DryIoc;
 using FluentIL.Logging;
 using System;
+using System.Collections.Generic;
 
 namespace AspectInjector
 {
     public class Compiler
     {
-        public int Execute(string filename, ArraySegment<string> references, bool optimize)
+        public int Execute(string filename, IReadOnlyList<string> references, bool optimize)
         {
             var container = GetAppContainer();
             var log = container.Resolve<ILogger>();

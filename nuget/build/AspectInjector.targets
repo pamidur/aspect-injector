@@ -11,15 +11,19 @@
 
   <PropertyGroup>
     <_ASI_Loaded>true</_ASI_Loaded>
-    <_ASI_Location Condition="'$(_ASI_Location)' == ''">$(MSBuildThisFileDirectory)</_ASI_Location>
+    <_ASI_Location Condition="'$(_ASI_Location)' == ''">$(MSBuildThisFileDirectory)../../build/_bin/</_ASI_Location>
     <_ASI_Options Condition="'$(Optimize)' == 'true'">$(_ASI_Options) -o</_ASI_Options>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <_ASI_RefsFileExt>._asi_refs</_ASI_RefsFileExt>
   </PropertyGroup>
 
   <Target Name="InjectAspects" AfterTargets="CoreCompile" DependsOnTargets="$(_InjectAspectsDependsOn)"/>
 
   <Target Name="_ASI_InjectAspectsCore" Condition="'$(_InjectionNeeded)' == 'true'">
     <PropertyGroup>
-      <ProcessCmd>dotnet &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_ASI_Options) &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; @(ReferencePath->'"%(Fullpath)"', ' ')</ProcessCmd>
+      <ProcessCmd>dotnet &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_ASI_Options) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot;</ProcessCmd>
     </PropertyGroup>
     <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="_AspectExitCode" />
@@ -39,7 +43,7 @@
   </Target>
 
   <Target Name="_ASI_TouchTimestampFile" Condition="'$(_InjectionNeeded)' == 'true'">
-    <Touch Files="%(IntermediateAssembly.FullPath)._asi_ts" AlwaysCreate="true" Time="%(IntermediateAssembly.ModifiedTime)"/>
+    <Touch Files="%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)" AlwaysCreate="true" Time="%(IntermediateAssembly.ModifiedTime)"/>
     <PropertyGroup>
       <_InjectionNeeded>false</_InjectionNeeded>
     </PropertyGroup>
@@ -47,7 +51,7 @@
 
   <Target Name="_ASI_CheckAssemblyChanged">
     <ItemGroup>
-      <_TimeStampFiles Include="%(IntermediateAssembly.FullPath)._asi_ts" />
+      <_TimeStampFiles Include="%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)" />
     </ItemGroup>
     <PropertyGroup>
       <_TSOld>%(_TimeStampFiles.ModifiedTime)</_TSOld>
@@ -56,6 +60,11 @@
     <PropertyGroup>
       <_InjectionNeeded Condition="'$(_TSOld)' != '$(_TSNew)' AND '$(_TSNew)' != '' ">true</_InjectionNeeded>
     </PropertyGroup>
+    <WriteLinesToFile Condition="'$(_InjectionNeeded)' == 'true'"
+        File="%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)"
+        Lines="@(ReferencePath)"
+        Overwrite="true"
+        Encoding="Unicode"/>
     <Message Text="Assembly requires injection." Condition="'$(_InjectionNeeded)' == 'true'"/>
   </Target>
 
