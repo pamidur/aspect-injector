@@ -1,8 +1,8 @@
 ﻿using Mono.Cecil;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace AspectInjector.Core.Utils
 {
@@ -21,7 +21,7 @@ namespace AspectInjector.Core.Utils
 
             foreach (var extension in extensions)
             {
-                string file = _references.FirstOrDefault(r => Path.GetFileName(r) == name.Name + extension);
+                string file = _references.FirstOrDefault(r => string.Equals(Path.GetFileName(r), name.Name + extension, StringComparison.InvariantCultureIgnoreCase));
                 if (file == null || !File.Exists(file))
                     continue;
                 try
