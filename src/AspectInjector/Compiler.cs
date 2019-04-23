@@ -14,7 +14,7 @@ namespace AspectInjector
 {
     public class Compiler
     {
-        public int Execute(string filename, IReadOnlyList<string> references, bool optimize)
+        public int Execute(string filename, IReadOnlyList<string> references, bool optimize, bool verbose)
         {
             var container = GetAppContainer();
             var log = container.Resolve<ILogger>();
@@ -22,7 +22,7 @@ namespace AspectInjector
             try
             {  
                 var processor = container.Resolve<Processor>();
-                processor.Process(filename, references, optimize);
+                processor.Process(filename, references, optimize, verbose);
             }
             catch (Exception e)
             {
