@@ -24,7 +24,14 @@ namespace AspectInjector.Broker
         /// Target method.-
         /// Should be of type <see cref="MethodBase" />.
         /// </summary>
+        [Obsolete("Use Source.Metadata instead.")]
         Method = 3,
+
+        /// <summary>
+        /// Target method metadata.
+        /// Should be of type <see cref="MethodBase" />.
+        /// </summary>
+        Metadata = 3,
 
         /// <summary>
         /// Target method delegate. Usage <example>Target(<see cref="Arguments"/>)</example> for chaining methods.
@@ -62,6 +69,13 @@ namespace AspectInjector.Broker
         /// Set of injections that trigger this advice./>.
         /// Should be of type <see cref="Attribute" />[].
         /// </summary>
-        Injections = 9
+        [Obsolete("Use Source.Triggers instead")]        
+        Injections = 9,
+
+        /// <summary>
+        /// Set of injections that trigger this advice./>.
+        /// Should be of type <see cref="Attribute" />[].
+        /// </summary>
+        Triggers = 9
     }
 }

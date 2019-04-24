@@ -1,10 +1,5 @@
 ## Aspect Injector Docs
-- [How it works](readme.md)
-- [Terminology](#this) _(on this page)_
-- [Defining Aspects](aspect.md)
-- [Injecting Aspects](injection.md)
-- [Advice Effect](advice.md)
-- [Mixin Effect](mixin.md)
+- [ <- to contents...](readme.md)
 
 ### <a name="this"></a>Terminology
 We're trying to use the same terminology as other frameworks do. So if are falimial with those, you're familiar with Aspect Injector.
@@ -16,5 +11,7 @@ We're trying to use the same terminology as other frameworks do. So if are falim
 - **Advice** - a type of effect that describes how method is modified. It can used to inject some code before, after and instead of a method. [more](advice.md)
 
 - **Mixin** - a type of effect that describes how class is modified. It can be used to alter classes implemented interfaces. [more](mixin.md)
+
+- **Trigger** - dotnet attribute that tells AspectInjector which aspect should be injected into target. [more](injection.md)
 
 - **Injection**(or Pointcut) - process of consumption of aspects. Aspect consumer can use injections to leverage aspect's logic. [more](injection.md)

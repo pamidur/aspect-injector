@@ -1,13 +1,8 @@
 ## Aspect Injector Docs
-- [How it works](readme.md)
-- [Terminology](terminology.md)
-- [Defining Aspects](#this) _(on this page)_
-- [Injecting Aspects](injection.md)
-- [Advice Effect](advice.md)
-- [Mixin Effect](mixin.md)
+- [ <- to contents...](readme.md)
 
 ### <a name="this"></a>Defining Aspects
-You start define an Aspect by putting ```[Aspect]``` attribute onto class. 
+One starts define an Aspect by putting ```[Aspect]``` attribute onto class. 
 Class defined as an aspect cannot be ```abstract```, ```static```, and generic. Otherwise you'll get an [error](errors/readme.md).
 ```c#
 [Aspect(Scope.Global)]

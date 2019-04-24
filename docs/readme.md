@@ -4,6 +4,7 @@
 - [Defining Aspects](aspect.md)
 - [Injecting Aspects](injection.md)
 - [Advice Effect](advice.md)
+- [Advice Effect Arguments](advicearguments.md)
 - [Mixin Effect](mixin.md)
 
 ### <a name="this"></a>How it works
