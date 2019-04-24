@@ -35,13 +35,12 @@ namespace AspectInjector.Core
         protected override Rule GenericInfoRule => GeneralRules.Info;
         protected override Rule GenericErrorRule => GeneralRules.CompilationMustSecceedIfNoOtherErrors;
 
-        protected override bool PatchAssembly(AssemblyDefinition assembly, bool optimize)
+        protected override bool PatchAssembly(AssemblyDefinition assembly, bool optimize, bool verbose)
         {
             var aspects = _aspectExtractor.ReadAll(assembly);
-            _log.Log(GeneralRules.Info, $"Found {aspects.Count} aspects");
-
             var injections = _injectionCollector.ReadAll(assembly).ToList();
-            _log.Log(GeneralRules.Info, $"Found {injections.Count} injections");
+
+            _log.Log(GeneralRules.Info, $"Found {aspects.Count} aspects, {injections.Count} injections");
 
             if (_log.IsErrorThrown)
                 return false;
@@ -51,7 +50,7 @@ namespace AspectInjector.Core
 
             if (hasAspects)
             {
-                _log.Log(GeneralRules.Info, "Processing aspects...");
+                if(verbose) _log.Log(GeneralRules.Info, "Processing aspects...");
                 foreach (var aspect in aspects)
                     _aspectWeaver.WeaveGlobalAssests(aspect);
             }
@@ -68,11 +67,11 @@ namespace AspectInjector.Core
 
             if (hasInjections)
             {
-                _log.Log(GeneralRules.Info, "Processing injections...");
+                if (verbose) _log.Log(GeneralRules.Info, "Processing injections...");
 
                 foreach (var injector in _effectWeavers.OrderByDescending(i => i.Priority))
                 {
-                    _log.Log(GeneralRules.Info, $"Executing {injector.GetType().Name}...");
+                    if (verbose) _log.Log(GeneralRules.Info, $"Executing {injector.GetType().Name}...");
 
                     foreach (var prioritizedInjections in injections.GroupBy(i => i.Priority).OrderByDescending(a => a.Key).ToList())
                         foreach (var injection in prioritizedInjections.OrderByDescending(i => i.Effect.Priority))
@@ -91,12 +90,12 @@ namespace AspectInjector.Core
             {
                 if (optimize)
                 {
-                    _log.Log(GeneralRules.Info, "Optimizing...");
+                    if (verbose) _log.Log(GeneralRules.Info, "Optimizing...");
                     foreach (var mb in modifiedBodies)
                         mb.OptimizeMacros();
                 }
 
-                _log.Log(GeneralRules.Info, "Processing is done.");
+                if (verbose) _log.Log(GeneralRules.Info, "Processing is done.");
                 return true;
             }
 

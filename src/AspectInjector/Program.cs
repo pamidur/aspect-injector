@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
+using System.Text;
 
 namespace AspectInjector
 {
@@ -12,8 +15,9 @@ namespace AspectInjector
                 return ShowHelp();
 
             var optimize = false;
+            var verbose = false;
             string target = null;
-            ArraySegment<string> references = null;
+            List<string> references = new List<string>();
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -28,10 +32,19 @@ namespace AspectInjector
                     case "-o":
                         optimize = true;
                         continue;
+                    case "-v":
+                        verbose = true;
+                        continue;
+                    case "-rf":
+                        var reflist = args[++i];
+                        if (File.Exists(reflist))
+                            references.AddRange(File.ReadAllLines(reflist, Encoding.UTF8));
+                        else return ShowHelp();
+                        continue;
                     default:
                         target = arg;
-                        references = new ArraySegment<string>(args, i + 1, args.Length - i - 1);
-                        return new Compiler().Execute(target, references, optimize);
+                        references.AddRange(new ArraySegment<string>(args, i + 1, args.Length - i - 1));
+                        return new Compiler().Execute(target, references, optimize, verbose);
                 }
             }
 
@@ -44,10 +57,12 @@ namespace AspectInjector
             Console.WriteLine($"version: {assembly.GetCustomAttribute<AssemblyProductAttribute>().Product} {assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}");
             Console.WriteLine($"visit: https://github.com/pamidur/aspect-injector");
             Console.WriteLine();
-            Console.WriteLine($"usage: dotnet {assembly.ManifestModule.Name} [-d] [-o] <path_to_assembly> (<path_to_reference>)");
+            Console.WriteLine($"usage: dotnet {assembly.ManifestModule.Name} [-d] [-o] [-v] [-rf <references_file>] <path_to_assembly> (<path_to_reference>)");
             Console.WriteLine($"options:");
             Console.WriteLine($"   -d\tAttach debugger.");
             Console.WriteLine($"   -o\tOptimize modified code.");
+            Console.WriteLine($"   -v\tVerbose log.");
+            Console.WriteLine($"   -rf\tPath to file with list of references. New line separated.");
             Console.WriteLine();
 
             return -1;

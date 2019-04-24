@@ -16,8 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="build/*.*" Pack="true" PackagePath="build" />
-    <None Include="buildTransitive/*.*" Pack="true" PackagePath="buildTransitive" />
+    <None Include="build/*.*" Pack="true" PackagePath="build/$(TargetFramework)" />
+    <None Include="build/*.*" Pack="true" PackagePath="buildTransitive/$(TargetFramework)" />
     <None Include="tools/*.*" Pack="true" PackagePath="tools" />
   </ItemGroup>
 
@@ -37,10 +37,10 @@
     
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(PublishMain)*.dll">
-        <PackagePath>build</PackagePath>
+        <PackagePath>build/_bin</PackagePath>
       </TfmSpecificPackageFile>
       <TfmSpecificPackageFile Include="$(PublishMain)*.runtimeconfig.json ">
-        <PackagePath>build</PackagePath>
+        <PackagePath>build/_bin</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
 
