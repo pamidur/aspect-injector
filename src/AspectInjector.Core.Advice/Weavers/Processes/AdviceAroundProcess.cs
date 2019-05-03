@@ -1,5 +1,4 @@
 ﻿using AspectInjector.Core.Advice.Effects;
-using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using FluentIL;
@@ -15,8 +14,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AdviceAroundProcess : AdviceWeaveProcessBase<AroundAdviceEffect>
     {
-        private static readonly MethodReference _funcCtor = WellKnownTypes.Func_ObjectArray_Object.Resolve().Methods.First(m => m.IsConstructor && !m.IsStatic).MakeHostInstanceGeneric(WellKnownTypes.Func_ObjectArray_Object);
-       
         private readonly string _wrapperNamePrefix;
         private readonly string _unWrapperName;
         private readonly string _movedOriginalName;
@@ -44,7 +41,18 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         protected override Cut LoadTargetArgument(Cut pc, AdviceArgument parameter)
         {
             var targetMethod = _wrapper.MakeCallReference(GetOrCreateUnwrapper().MakeHostInstanceGeneric(_target.DeclaringType));
-            return pc.ThisOrNull().Call(_funcCtor, args => args.Delegate(targetMethod));
+            return pc.ThisOrNull().Call(CreateFuncCtorRef(pc), args => args.Delegate(targetMethod));
+        }
+        
+        private static MethodReference CreateFuncCtorRef(Cut cut)
+        {
+            var mr = new MethodReference(".ctor", cut.Import(StandardTypes.Void), cut.Import(WellKnownTypes.Func_ObjectArray_Object))
+            {
+                HasThis = true
+            };
+            mr.Parameters.Add(new ParameterDefinition(cut.Import(StandardTypes.Object)));
+            mr.Parameters.Add(new ParameterDefinition(cut.Import(StandardTypes.IntPtr)));
+            return mr;
         }
 
         protected override Cut LoadArgumentsArgument(Cut pc, AdviceArgument parameter)
