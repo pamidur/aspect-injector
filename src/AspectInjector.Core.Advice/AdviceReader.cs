@@ -88,7 +88,7 @@ namespace AspectInjector.Core.Advice
                         if (!param.ParameterType.Match(StandardTypes.Object))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
                         break;
-                    case Source.Method:
+                    case Source.Metadata:
                         if (!param.ParameterType.Match(WellKnownTypes.MethodBase))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.MethodBase);
                         break;
@@ -108,7 +108,7 @@ namespace AspectInjector.Core.Advice
                         if (!param.ParameterType.Match(StandardTypes.Type))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
                         break;
-                    case Source.Injections:
+                    case Source.Triggers:
                         if (!param.ParameterType.Match(WellKnownTypes.AttributeArray))
                             _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.AttributeArray);
                         break;

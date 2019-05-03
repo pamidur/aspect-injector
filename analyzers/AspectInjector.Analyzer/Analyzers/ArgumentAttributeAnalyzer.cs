@@ -60,7 +60,7 @@ namespace AspectInjector.Analyzer.Analyzers
                         if (param.Type.SpecialType != SpecialType.System_Object)
                             context.ReportDiagnostic(Diagnostic.Create(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), location, param.Name, EffectRules.Literals.Object));
                         break;
-                    case Source.Method:
+                    case Source.Metadata:
                         if (param.Type.ToDisplayString() != WellKnown.MethodBase)
                             context.ReportDiagnostic(Diagnostic.Create(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), location, param.Name, EffectRules.Literals.MethodBase));
                         break;
@@ -84,7 +84,7 @@ namespace AspectInjector.Analyzer.Analyzers
                         if (param.Type.ToDisplayString() != WellKnown.Type)
                             context.ReportDiagnostic(Diagnostic.Create(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), location, param.Name, EffectRules.Literals.Type));
                         break;
-                    case Source.Injections:
+                    case Source.Triggers:
                         if (param.Type.ToDisplayString() != "System.Attribute[]")
                             context.ReportDiagnostic(Diagnostic.Create(EffectRules.ArgumentMustHaveValidType.AsDescriptor(), location, param.Name, EffectRules.Literals.AttributeArray));
                         break;

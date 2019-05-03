@@ -10,8 +10,8 @@ namespace AspectInjector.Rules
             public static readonly string IsStatic = "is static";
             public static readonly string IsGeneric = "is generic";
             public static readonly string IsNotPublic = "is not public";
-            public static readonly string MustBeObjectForAround = "must return 'object' for 'Around' advice";
-            public static readonly string MustBeVoidForInline = "must be 'void' for 'After' or 'Before' advice";
+            public static readonly string MustBeObjectForAround = $"must return 'object' for '{nameof(Kind.Around)}' advice";
+            public static readonly string MustBeVoidForInline = $"must be 'void' for '{nameof(Kind.After)}' or '{nameof(Kind.Before)}' advice";
 
 
             public static readonly string ObjectArray = "object[]";
