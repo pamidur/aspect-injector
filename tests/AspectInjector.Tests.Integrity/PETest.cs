@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Tests.Assets;
+using AspectInjector.Tests.Runtime;
 using ILVerify;
 using System;
 using System.IO;
@@ -53,7 +54,7 @@ namespace AspectInjector.Tests.General
         [Fact]
         public void IL_Runtime_Is_CorrectGeneral()
         {
-            var assembly = Path.GetFileName(typeof(PETest).Assembly.Location);
+            var assembly = Path.GetFileName(typeof(TestRunner).Assembly.Location);
             var result = _verifier.Verify(_resolver.Resolve(assembly)).ToArray();
             Assert.Empty(result);
         }

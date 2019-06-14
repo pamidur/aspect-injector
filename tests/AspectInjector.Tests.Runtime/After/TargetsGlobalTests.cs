@@ -4,110 +4,112 @@ using System.Collections.Generic;
 
 namespace AspectInjector.Tests.Runtime.After
 {
-    public class TargetsGlobalTests : TestRunner
+    public class Global_Tests : TestRunner
     {
+        protected virtual string Token => GlobalAspect.AfterExecuted;
+
         [Fact]
-        public void AdviceAfter_Global_Consrtuctor()
+        public void AdviceAfter_Constructor()
         {
             ExecConstructor();
             CheckSequence(new List<string> {
                 Events.TestConstructorExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Static_Consrtuctor()
+        public void AdviceAfter_Static_Constructor()
         {
             ExecStaticConstructor();
             CheckSequence(new List<string> {
                 Events.TestStaticConstructorExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Setter()
+        public void AdviceAfter_Setter()
         {
             ExecSetter();
             CheckSequence(new List<string> {
                 Events.TestPropertySetterExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Static_Setter()
+        public void AdviceAfter_Static_Setter()
         {
             ExecStaticSetter();
             CheckSequence(new List<string> {
                 Events.TestStaticPropertySetterExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Getter()
+        public void AdviceAfter_Getter()
         {
             ExecGetter();
             CheckSequence(new List<string> {
                 Events.TestPropertyGetterExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Static_Getter()
+        public void AdviceAfter_Static_Getter()
         {
             ExecStaticGetter();
             CheckSequence(new List<string> {
                 Events.TestStaticPropertyGetterExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Add()
+        public void AdviceAfter_Add()
         {
             ExecAdd();
             CheckSequence(new List<string> {
                 Events.TestEventAddExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Static_Add()
+        public void AdviceAfter_Static_Add()
         {
             ExecStaticAdd();
             CheckSequence(new List<string> {
                 Events.TestStaticEventAddExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Remove()
+        public void AdviceAfter_Remove()
         {
             ExecRemove();
             CheckSequence(new List<string> {
                 Events.TestEventRemoveExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Static_Remove()
+        public void AdviceAfter_Static_Remove()
         {
             ExecStaticRemove();
             CheckSequence(new List<string> {
                 Events.TestStaticEventRemoveExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Methods()
+        public void AdviceAfter_Methods()
         {
             ExecMethod();
             ExecIteratorMethod();
@@ -117,24 +119,24 @@ namespace AspectInjector.Tests.Runtime.After
 
             CheckSequence(new List<string> {
                 Events.FactExit,
-                GlobalAspect.AfterExecuted,
+                Token,
 
                 Events.TestIteratorMethodExit,
-                GlobalAspect.AfterExecuted,
+                Token,
 
                 Events.TestAsyncMethodExit,
-                GlobalAspect.AfterExecuted,
+                Token,
 
                 Events.TestAsyncMethodExit,
-                GlobalAspect.AfterExecuted,
+                Token,
 
                 Events.TestAsyncMethodExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
 
         [Fact]
-        public void AdviceAfter_Global_Static_Methods()
+        public void AdviceAfter_Static_Methods()
         {
             ExecStaticMethod();
             ExecStaticIteratorMethod();
@@ -144,19 +146,19 @@ namespace AspectInjector.Tests.Runtime.After
 
             CheckSequence(new List<string> {
                 Events.TestStaticMethodExit,
-                GlobalAspect.AfterExecuted,
+                Token,
 
                 Events.TestStaticIteratorMethodExit,
-                GlobalAspect.AfterExecuted,
+                Token,
 
                 Events.TestStaticAsyncMethodExit,
-                GlobalAspect.AfterExecuted,
+                Token,
 
                 Events.TestStaticAsyncMethodExit,
-                GlobalAspect.AfterExecuted,
+                Token,
 
                 Events.TestStaticAsyncMethodExit,
-                GlobalAspect.AfterExecuted
+                Token
             });
         }
     }

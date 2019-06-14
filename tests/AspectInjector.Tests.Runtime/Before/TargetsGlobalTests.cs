@@ -3,112 +3,113 @@ using Xunit;
 using System.Collections.Generic;
 
 namespace AspectInjector.Tests.Runtime.Before
-{
-    
-    public class TargetsGlobalTests : TestRunner
+{    
+    public class Global_Tests : TestRunner
     {
+        protected virtual string Token => GlobalAspect.BeforeExecuted;
+
         [Fact]
-        public void AdviceBefore_Global_Consrtuctor()
+        public void AdviceBefore_Consrtuctor()
         {
             ExecConstructor();
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestConstructorEnter
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Static_Consrtuctor()
+        public void AdviceBefore_Static_Consrtuctor()
         {
             ExecStaticConstructor();
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestStaticConstructorEnter
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Setter()
+        public void AdviceBefore_Setter()
         {
             ExecSetter();
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestPropertySetterEnter
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Static_Setter()
+        public void AdviceBefore_Static_Setter()
         {
             ExecStaticSetter();
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestStaticPropertySetterEnter
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Getter()
+        public void AdviceBefore_Getter()
         {
             ExecGetter();
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestPropertyGetterEnter
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Static_Getter()
+        public void AdviceBefore_Static_Getter()
         {
             ExecStaticGetter();
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestStaticPropertyGetterEnter
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Add()
+        public void AdviceBefore_Add()
         {
             ExecAdd();
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestEventAddEnter
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Static_Add()
+        public void AdviceBefore_Static_Add()
         {
             ExecStaticAdd();
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestStaticEventAddEnter
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Remove()
+        public void AdviceBefore_Remove()
         {
             ExecRemove();
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestEventRemoveEnter
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Static_Remove()
+        public void AdviceBefore_Static_Remove()
         {
             ExecStaticRemove();
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestStaticEventRemoveEnter
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Methods()
+        public void AdviceBefore_Methods()
         {
             ExecMethod();
             ExecIteratorMethod();
@@ -117,25 +118,25 @@ namespace AspectInjector.Tests.Runtime.Before
             ExecAsyncTypedTaskMethod();
 
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.FactEnter,
 
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestIteratorMethodEnter,
 
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestAsyncMethodEnter,
 
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestAsyncMethodEnter,
 
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestAsyncMethodEnter,
             });
         }
 
         [Fact]
-        public void AdviceBefore_Global_Static_Methods()
+        public void AdviceBefore_Static_Methods()
         {
             ExecStaticMethod();
             ExecStaticIteratorMethod();
@@ -144,19 +145,19 @@ namespace AspectInjector.Tests.Runtime.Before
             ExecStaticAsyncTypedTaskMethod();
 
             CheckSequence(new List<string> {
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestStaticMethodEnter,
 
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestStaticIteratorMethodEnter,
 
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestStaticAsyncMethodEnter,
 
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestStaticAsyncMethodEnter,
 
-                GlobalAspect.BeforeExecuted,
+                Token,
                 Events.TestStaticAsyncMethodEnter,
             });
         }

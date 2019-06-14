@@ -22,10 +22,7 @@ namespace AspectInjector.Core.Advice.Effects
         public abstract Kind Kind { get; }
 
         public override bool IsApplicableFor(IMemberDefinition target)
-        {
-            if (target.DeclaringType != null && target.DeclaringType.CustomAttributes.Any(ca => ca.AttributeType.Match(WellKnownTypes.CompilerGeneratedAttribute)))
-                return false;
-
+        {     
             if ((Target & Target.Method) != 0 && target is MethodDefinition method && !method.IsConstructor)
                 return IsApplicableForModifier(method);
 

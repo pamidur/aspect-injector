@@ -1,10 +1,16 @@
-﻿using Mono.Cecil;
+﻿using FluentIL.Extensions;
+using Mono.Cecil;
 using System.Linq;
 
 namespace AspectInjector.Core.Extensions
 {
     public static class CustomAttributeExtensions
     {
+        public static bool IsCompilerGenerated(this ICustomAttributeProvider t)
+        {
+            return t.CustomAttributes.Any(ca => ca.AttributeType.Match(WellKnownTypes.CompilerGeneratedAttribute));
+        }
+
         public static TR GetPropertyValue<TR>(this CustomAttribute ca, string name)
         {
             var prop = ca.Properties.Where(p => p.Name == name).ToList();

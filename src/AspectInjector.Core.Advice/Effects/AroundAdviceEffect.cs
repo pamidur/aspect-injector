@@ -15,14 +15,6 @@ namespace AspectInjector.Core.Advice.Effects
     {
         public override Kind Kind => Kind.Around;
 
-        public override bool IsApplicableFor(IMemberDefinition target)
-        {
-            if (target is MethodDefinition method && method.IsConstructor)
-                return false;
-
-            return base.IsApplicableFor(target);
-        }
-
         public override bool Validate(AspectDefinition aspect, ILogger log)
         {
             var result = base.Validate(aspect, log);

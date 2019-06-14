@@ -53,7 +53,7 @@ namespace AspectInjector.Core.Services
         //    aspects = aspects.Concat(type.Properties.SelectMany(ExtractInjections));
         //    //aspects = aspects.Concat(type.Fields.SelectMany(ExtractInjections));
         //    aspects = aspects.Concat(type.Methods.SelectMany(ExtractInjections));
-            
+
         //    return aspects.ToArray();
         //}
 
@@ -112,7 +112,7 @@ namespace AspectInjector.Core.Services
                     .SelectMany(m => FindApplicableMembers(m, aspect, priority, trigger)));
                 result = result.Concat(type.Events.SelectMany(m => FindApplicableMembers(m, aspect, priority, trigger)));
                 result = result.Concat(type.Properties.SelectMany(m => FindApplicableMembers(m, aspect, priority, trigger)));
-                result = result.Concat(type.NestedTypes.SelectMany(nt => FindApplicableMembers(nt, aspect, priority, trigger)));
+                result = result.Concat(type.NestedTypes.Where(nt => !nt.IsCompilerGenerated()).SelectMany(nt => FindApplicableMembers(nt, aspect, priority, trigger)));
             }
 
             return result;

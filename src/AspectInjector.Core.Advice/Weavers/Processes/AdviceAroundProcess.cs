@@ -43,7 +43,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var targetMethod = _wrapper.MakeCallReference(GetOrCreateUnwrapper().MakeHostInstanceGeneric(_target.DeclaringType));
             return pc.ThisOrNull().Call(CreateFuncCtorRef(pc), args => args.Delegate(targetMethod));
         }
-        
+
         private static MethodReference CreateFuncCtorRef(Cut cut)
         {
             var mr = new MethodReference(".ctor", cut.Import(StandardTypes.Void), cut.Import(WellKnownTypes.Func_ObjectArray_Object))
@@ -167,7 +167,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             MoveBody(_target, original);
 
-            _target.Body.Instead(
+            _target.Body.Append(
                 e =>
                 {
                     //var args = null;
@@ -205,35 +205,48 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private void MoveBody(MethodDefinition from, MethodDefinition to)
         {
-            foreach (var inst in from.Body.Instructions)
-                to.Body.Instructions.Add(inst);
+            var frb = from.Body.Instructions;
+            var trb = to.Body.Instructions;
+
+            var codeStart = from.Body.GetCodeStart();
+            var init = frb.IndexOf(codeStart);
+
+            foreach (var inst in frb.Skip(init).ToList())
+            {
+                trb.Add(inst);
+                frb.Remove(inst);
+            }
 
             if (from.DebugInformation.HasSequencePoints)
             {
+                var tsp = to.DebugInformation.SequencePoints;
+
                 to.DebugInformation.Scope = from.DebugInformation.Scope;
                 foreach (var sp in from.DebugInformation.SequencePoints)
-                    to.DebugInformation.SequencePoints.Add(sp);
+                    tsp.Add(sp);
+
+                from.DebugInformation.SequencePoints.Clear();
             }
 
+            var to_vars = to.Body.Variables;
             foreach (var var in from.Body.Variables)
-                to.Body.Variables.Add(new VariableDefinition(to.Module.ImportReference(var.VariableType)));
+                to_vars.Add(new VariableDefinition(to.Module.ImportReference(var.VariableType)));
+            from.Body.Variables.Clear();
 
             if (to.Body.HasVariables)
                 to.Body.InitLocals = true;
 
-            foreach (var handler in from.Body.ExceptionHandlers)
-                to.Body.ExceptionHandlers.Add(handler);
 
-            //erase old body
-            from.DebugInformation.SequencePoints.Clear();
-            from.Body.Instructions.Clear();
-            from.Body = new MethodBody(from);
+            var to_handlers = to.Body.ExceptionHandlers;
+            foreach (var handler in from.Body.ExceptionHandlers)
+                to_handlers.Add(handler);
+            from.Body.ExceptionHandlers.Clear();
         }
 
         private MethodDefinition DuplicateMethodDefinition(MethodDefinition origin)
         {
             var method = new MethodDefinition(origin.Name,
-               origin.Attributes,
+               origin.Attributes & ~MethodAttributes.RTSpecialName,
                origin.ReturnType);
 
             origin.DeclaringType.Methods.Add(method);

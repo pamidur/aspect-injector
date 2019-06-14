@@ -8,7 +8,6 @@ using FluentIL;
 using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -53,9 +52,9 @@ namespace AspectInjector.Core.Advice
                     if (advice.Target > Target.Any)
                         _log.Log(GeneralRules.UnknownCompilationOption, method, GeneralRules.Literals.UnknownAdviceTarget(advice.Target.ToString()));
 
-                    if ((advice.Target & Target.AnyScope) == 0) advice.Target = advice.Target ^ Target.AnyScope;
-                    if ((advice.Target & Target.AnyMember) == 0) advice.Target = advice.Target ^ Target.AnyMember;
-                    if ((advice.Target & Target.AnyAccess) == 0) advice.Target = advice.Target ^ Target.AnyAccess;
+                    if ((advice.Target & Target.AnyScope) == 0) advice.Target ^= Target.AnyScope;
+                    if ((advice.Target & Target.AnyMember) == 0) advice.Target ^= Target.AnyMember;
+                    if ((advice.Target & Target.AnyAccess) == 0) advice.Target ^= Target.AnyAccess;
 
                     advice.Arguments = ExtractArguments(method);
 

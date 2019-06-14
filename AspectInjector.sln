@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_solution", "_solution", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
 	ProjectSection(SolutionItems) = preProject
@@ -48,7 +48,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Rules", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentIL", "external\FluentIL\src\FluentIL\FluentIL.csproj", "{E8F7FB9B-4FF0-4195-B064-D41A96E41918}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentIL.Common", "external\FluentIL\src\FluentIL.Common\FluentIL.Common.csproj", "{7BD22418-F4A9-422B-9FDE-A20708BA0648}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentIL.Common", "external\FluentIL\src\FluentIL.Common\FluentIL.Common.csproj", "{7BD22418-F4A9-422B-9FDE-A20708BA0648}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Tests.Integrity", "tests\AspectInjector.Tests.Integrity\AspectInjector.Tests.Integrity.csproj", "{230C6FAF-11A1-4318-A482-69C7252652B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,6 +113,10 @@ Global
 		{7BD22418-F4A9-422B-9FDE-A20708BA0648}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BD22418-F4A9-422B-9FDE-A20708BA0648}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BD22418-F4A9-422B-9FDE-A20708BA0648}.Release|Any CPU.Build.0 = Release|Any CPU
+		{230C6FAF-11A1-4318-A482-69C7252652B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{230C6FAF-11A1-4318-A482-69C7252652B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{230C6FAF-11A1-4318-A482-69C7252652B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{230C6FAF-11A1-4318-A482-69C7252652B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,6 +136,7 @@ Global
 		{20ED44A4-9D35-41F2-A317-C1EB9923379E} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
 		{E8F7FB9B-4FF0-4195-B064-D41A96E41918} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
 		{7BD22418-F4A9-422B-9FDE-A20708BA0648} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
+		{230C6FAF-11A1-4318-A482-69C7252652B1} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B153C707-A96B-404C-B0E6-2225AE14B304}
