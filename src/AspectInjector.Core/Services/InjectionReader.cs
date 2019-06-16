@@ -1,12 +1,15 @@
-﻿using AspectInjector.Core.Contracts;
+﻿using AspectInjector.Broker;
+using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
 using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace AspectInjector.Core.Services
 {
@@ -45,18 +48,6 @@ namespace AspectInjector.Core.Services
             return aspects.ToList();
         }
 
-        //private IReadOnlyCollection<InjectionDefinition> ReadAll(TypeDefinition type)
-        //{
-        //    var aspects = ExtractInjections(type);
-
-        //    aspects = aspects.Concat(type.Events.SelectMany(ExtractInjections));
-        //    aspects = aspects.Concat(type.Properties.SelectMany(ExtractInjections));
-        //    //aspects = aspects.Concat(type.Fields.SelectMany(ExtractInjections));
-        //    aspects = aspects.Concat(type.Methods.SelectMany(ExtractInjections));
-
-        //    return aspects.ToArray();
-        //}
-
         protected virtual IEnumerable<InjectionDefinition> ExtractInjections(ICustomAttributeProvider target)
         {
             var injections = Enumerable.Empty<InjectionDefinition>();
@@ -77,6 +68,25 @@ namespace AspectInjector.Core.Services
             foreach (var injectionAttr in injectionAttrs)
             {
                 var aspectRef = injectionAttr.GetConstructorValue<TypeReference>(0);
+                var propagation = injectionAttr.GetPropertyValue<PropagateTo>(nameof(Injection.Propagation));
+                if (propagation == 0) propagation = PropagateTo.Members | PropagateTo.Types;
+
+                if (propagation > PropagateTo.Everything)
+                    _log.Log(GeneralRules.UnknownCompilationOption, trigger.AttributeType.Resolve(), GeneralRules.Literals.UnknownPropagationStrategy(propagation.ToString()));
+
+                var propagationFilter = injectionAttr.GetPropertyValue<string>(nameof(Injection.PropagationFilter));
+                Regex propagationRegex = null;
+                if (propagationFilter != null)
+                    try
+                    {
+                        propagationRegex = new Regex(propagationFilter, RegexOptions.CultureInvariant);
+                    }
+                    catch (Exception e)
+                    {
+                        if (propagation > PropagateTo.Everything)
+                            _log.Log(GeneralRules.UnknownCompilationOption, trigger.AttributeType.Resolve(), GeneralRules.Literals.InvalidPropagationFilter(propagationFilter));
+                    }
+
                 var aspect = _aspectReader.Read(aspectRef.Resolve());
 
                 if (aspect == null)
@@ -85,48 +95,56 @@ namespace AspectInjector.Core.Services
                     continue;
                 }
 
-                var priority = injectionAttr.GetPropertyValue<ushort>(nameof(Broker.Injection.Priority));
+                var priority = injectionAttr.GetPropertyValue<ushort>(nameof(Injection.Priority));
 
-                injections = injections.Concat(FindApplicableMembers(target, aspect, priority, trigger));
+                injections = injections.Concat(FindApplicableMembers(target, (aspect, priority, propagation, propagationRegex), trigger));
             }
 
             return injections;
         }
 
-        private IEnumerable<InjectionDefinition> FindApplicableMembers(ICustomAttributeProvider target, AspectDefinition aspect, ushort priority, CustomAttribute trigger)
+        private IEnumerable<InjectionDefinition> FindApplicableMembers(ICustomAttributeProvider target, (AspectDefinition aspect, ushort priority, PropagateTo propagation, Regex filter) injection, CustomAttribute trigger)
         {
             var result = Enumerable.Empty<InjectionDefinition>();
 
+            Func<ICustomAttributeProvider, bool> additionalFilter = (provider) => !provider.IsCompilerGenerated();
+            if ((injection.propagation & PropagateTo.IncludeCompilerGenerated) != 0)
+                additionalFilter = (provider) => true;
+
+
             if (target is AssemblyDefinition assm)
-                result = result.Concat(assm.Modules.SelectMany(nt => FindApplicableMembers(nt, aspect, priority, trigger)));
+                result = result.Concat(assm.Modules.SelectMany(nt => FindApplicableMembers(nt, injection, trigger)));
 
-            if (target is ModuleDefinition module)
-                result = result.Concat(module.Types.SelectMany(nt => FindApplicableMembers(nt, aspect, priority, trigger)));
+            if (target is ModuleDefinition module && (injection.propagation & PropagateTo.Types) != 0)
+                result = result.Concat(module.Types.SelectMany(nt => FindApplicableMembers(nt, injection, trigger)));
 
-            if (target is IMemberDefinition member)
-                result = result.Concat(CreateInjections(member, aspect, priority, trigger));
+            if (target is IMemberDefinition member && (injection.filter == null || injection.filter.IsMatch(member.Name)))
+                result = result.Concat(CreateInjections(member, injection, trigger));
 
             if (target is TypeDefinition type)
             {
-                result = result.Concat(type.Methods.Where(m => m.IsNormalMethod() || m.IsConstructor)
-                    .SelectMany(m => FindApplicableMembers(m, aspect, priority, trigger)));
-                result = result.Concat(type.Events.SelectMany(m => FindApplicableMembers(m, aspect, priority, trigger)));
-                result = result.Concat(type.Properties.SelectMany(m => FindApplicableMembers(m, aspect, priority, trigger)));
-                result = result.Concat(type.NestedTypes.Where(nt => !nt.IsCompilerGenerated()).SelectMany(nt => FindApplicableMembers(nt, aspect, priority, trigger)));
+                if ((injection.propagation & PropagateTo.Methods) != 0)
+                    result = result.Concat(type.Methods.Where(m => additionalFilter(m) && (m.IsNormalMethod() || m.IsConstructor)).SelectMany(m => FindApplicableMembers(m, injection, trigger)));
+                if ((injection.propagation & PropagateTo.Events) != 0)
+                    result = result.Concat(type.Events.Where(e => additionalFilter(e)).SelectMany(m => FindApplicableMembers(m, injection, trigger)));
+                if ((injection.propagation & PropagateTo.Properties) != 0)
+                    result = result.Concat(type.Properties.Where(p=>additionalFilter(p)).SelectMany(m => FindApplicableMembers(m, injection, trigger)));
+                if ((injection.propagation & PropagateTo.Types) != 0)
+                    result = result.Concat(type.NestedTypes.Where(nt => additionalFilter(nt)).SelectMany(nt => FindApplicableMembers(nt, injection, trigger)));
             }
 
             return result;
         }
 
-        private IEnumerable<InjectionDefinition> CreateInjections(IMemberDefinition target, AspectDefinition aspect, ushort priority, CustomAttribute trigger)
+        private IEnumerable<InjectionDefinition> CreateInjections(IMemberDefinition target, (AspectDefinition aspect, ushort priority, PropagateTo propagation, Regex filter) injection, CustomAttribute trigger)
         {
             if (IsAspectMember(target)) return Enumerable.Empty<InjectionDefinition>();
 
-            return aspect.Effects.Where(e => e.IsApplicableFor(target)).Select(e => new InjectionDefinition()
+            return injection.aspect.Effects.Where(e => e.IsApplicableFor(target)).Select(e => new InjectionDefinition()
             {
                 Target = target,
-                Source = aspect,
-                Priority = priority,
+                Source = injection.aspect,
+                Priority = injection.priority,
                 Effect = e,
                 Triggers = new List<CustomAttribute> { trigger }
             });
@@ -149,46 +167,5 @@ namespace AspectInjector.Core.Services
             a1.Triggers = a1.Triggers.Concat(a2.Triggers).Distinct().ToList();
             return a1;
         }
-
-        //private static bool CheckFilter(MethodDefinition targetMethod,
-        //    string targetName,
-        //    ChildrenFilter aspectDefinition)
-        //{
-        //    var result = true;
-
-        //    var nameFilter = aspectDefinition.NameFilter;
-        //    var accessModifierFilter = aspectDefinition.AccessModifierFilter;
-
-        //    if (!string.IsNullOrEmpty(nameFilter))
-        //    {
-        //        result = Regex.IsMatch(targetName, nameFilter);
-        //    }
-
-        //    if (result && accessModifierFilter != AccessModifier.Any)
-        //    {
-        //        if (targetMethod.IsPrivate)
-        //        {
-        //            result = (accessModifierFilter & AccessModifier.Private) != 0;
-        //        }
-        //        else if (targetMethod.IsFamily)
-        //        {
-        //            result = (accessModifierFilter & AccessModifier.Protected) != 0;
-        //        }
-        //        else if (targetMethod.IsAssembly)
-        //        {
-        //            result = (accessModifierFilter & AccessModifier.Internal) != 0;
-        //        }
-        //        else if (targetMethod.IsFamilyOrAssembly)
-        //        {
-        //            result = (accessModifierFilter & AccessModifier.ProtectedInternal) != 0;
-        //        }
-        //        else if (targetMethod.IsPublic)
-        //        {
-        //            result = (accessModifierFilter & AccessModifier.Public) != 0;
-        //        }
-        //    }
-
-        //    return result;
-        //}
     }
 }

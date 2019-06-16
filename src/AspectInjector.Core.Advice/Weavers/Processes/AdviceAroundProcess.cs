@@ -207,26 +207,26 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         {
             var frb = from.Body.Instructions;
             var trb = to.Body.Instructions;
+            var fdbg = from.DebugInformation;
+            var fsp = from.DebugInformation.SequencePoints;
+            var tsp = to.DebugInformation.SequencePoints;
 
-            var codeStart = from.Body.GetCodeStart();
-            var init = frb.IndexOf(codeStart);
+            var codeStart = from.Body.GetUserCodeStart();
+            var init = codeStart == null ? 0 : frb.IndexOf(codeStart);
 
             foreach (var inst in frb.Skip(init).ToList())
             {
-                trb.Add(inst);
+                var sp = fdbg.GetSequencePoint(inst);
+                if (sp != null) fsp.Remove(sp);
+
                 frb.Remove(inst);
+                trb.Add(inst);
+
+                if (sp != null)
+                    tsp.Add(new SequencePoint(inst, sp.Document) { EndColumn = sp.EndColumn, EndLine = sp.EndLine, StartColumn = sp.StartColumn, StartLine = sp.StartLine });
             }
 
-            if (from.DebugInformation.HasSequencePoints)
-            {
-                var tsp = to.DebugInformation.SequencePoints;
-
-                to.DebugInformation.Scope = from.DebugInformation.Scope;
-                foreach (var sp in from.DebugInformation.SequencePoints)
-                    tsp.Add(sp);
-
-                from.DebugInformation.SequencePoints.Clear();
-            }
+            to.DebugInformation.Scope = from.DebugInformation.Scope;
 
             var to_vars = to.Body.Variables;
             foreach (var var in from.Body.Variables)
@@ -235,7 +235,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             if (to.Body.HasVariables)
                 to.Body.InitLocals = true;
-
 
             var to_handlers = to.Body.ExceptionHandlers;
             foreach (var handler in from.Body.ExceptionHandlers)
