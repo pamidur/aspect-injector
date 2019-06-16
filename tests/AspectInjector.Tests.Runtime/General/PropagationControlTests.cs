@@ -18,6 +18,7 @@ namespace AspectInjector.Tests.Runtime.General
         {
             _testTarget.Method();
             _testTarget.Event += (s, e) => { };
+            _testTarget.Ev2ent += (s, e) => { };
             _testTarget.Property = "";
         }
 
@@ -27,11 +28,12 @@ namespace AspectInjector.Tests.Runtime.General
         public class TestClass
         {
             public event EventHandler Event;
+            public event EventHandler Ev2ent;
             public string Property { get; set; }
             public void Method() { }
         }
 
-        [Injection(typeof(SuccessAspect), Propagation = PropagateTo.Events)]
+        [Injection(typeof(SuccessAspect), Propagation = PropagateTo.Events, PropagationFilter = "Event")]
         public class EventTrigger : Attribute { }
 
         [Injection(typeof(SuccessAspect), Propagation = PropagateTo.Properties)]
