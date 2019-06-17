@@ -1,12 +1,15 @@
 ## Aspect Injector Docs
-- [ <- to contents...](readme.md)
+
+- [<- to contents...](readme.md)
 
 ### <a name="this"></a>Advice Effect Arguments
+
 Advice method can accept various arguments that represent information about target and triggers and can be used in complex scenarios.
 
 #### Name
 
-**Name** argument carries a name of a target. If the target in a method then the name will be the name of the method. If injections is applied to a whole property or an event then the name will be the name of the property or the event.
+**Name** argument carries a name of a target. If the target is a method, then the name will be the name of the method. If injection is applied to a whole property or an event then the name will be the name of the property or the event.
+
 ```c#
 class LogAspect {
     [Advice(Kind.Before, Targets = Target.Method)]
@@ -18,7 +21,9 @@ class LogAspect {
 ```
 
 #### Type
-**Type** argument carries a type that contains target method.
+
+**Type** argument carries a type that contains the target method.
+
 ```c#
 class CountCreationAspect {
     private int _count = 0;
@@ -31,7 +36,9 @@ class CountCreationAspect {
 ```
 
 #### Instance
-**Type** argument has a reference to instance that owns target method. Note that the reference can be ```null``` in case target method is static.
+
+**Type** argument has a reference to the instance that owns target method. Note that the reference can be ```null``` when the target method is static.
+
 ```c#
 class FreezableAspect {
     [Advice(Kind.Before, Targets = Target.Public | Target.Setter)]
@@ -44,5 +51,5 @@ class FreezableAspect {
 ```
 
 #### Metadata (former Method)
-**Metadata** argument refers to reflection metadata of a target method.
 
+**Metadata** argument refers to reflection metadata of a target method.

@@ -1,4 +1,5 @@
 ## Aspect Injector Docs
+
 - [How it works](#this) _(on this page)_
 - [Terminology](terminology.md)
 - [Defining Aspects](aspect.md)
@@ -7,9 +8,11 @@
 - [Advice Effect Arguments](advicearguments.md)
 - [Mixin Effect](mixin.md)
 
-### <a name="this"></a>How it works
-AspectInjector is compile-time AOP framework which means that all required work is done in compile time.
-For example before compilation your code looks like:
+### How it works
+
+AspectInjector is a compile-time AOP framework which means that all required work is done at compile time.
+For example, before compilation your code looks like:
+
 ```c#
 [Aspect(Scope.Global)]
 [Injection(typeof(Log))]
@@ -31,7 +34,9 @@ class TestClass
     }
 }
 ```
+
 Then when you hit F5, we pick up from there and change your assembly a bit, so it actually works like this:
+
 ```c#
 [Aspect(Scope.Global)]
 [Injection(typeof(Log))]
@@ -61,4 +66,5 @@ internal class TestClass
     }
 }
 ```
-Thus there is no performance hit often experienced with runtime AOP frameworks
+
+Thus, there is no performance hit as often experienced with other runtime AOP frameworks.
