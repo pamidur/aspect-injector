@@ -27,9 +27,16 @@ Check out [samples](samples) and [docs](docs)
 - .NetCore runtime 2.1.6+
 
 ### Known Issues / Limitations
-- If you use Visual Studio earlier than 2019 you'll need to reference AspectInjector in every project when you want your injections to work. Since VS2019 it is fixed. On your build environments it is enough to use at least **.NetCoreSDK 2.1.602** and ```dotnet build``` command.
 - Unsafe methods are not supported and are silently ignored.
 - ~~You cannot inject code around constructors. Such attempts are silently ignored.~~ You can since **2.2.1**!
+- Until Nuget v5 you need to refrecence AspectInjector into every project in your solution.
+Thus, 
+``` 
+    if VisualStudio >= 2019 && CoreSDK >= 2.1.602
+        no worries about references
+    else 
+        reference AspectInjector directly to projects where aspects are defined or used
+```
 
 ### Trivia
 
