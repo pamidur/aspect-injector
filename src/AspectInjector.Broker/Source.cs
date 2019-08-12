@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reflection;
 
 namespace AspectInjector.Broker
@@ -25,6 +26,7 @@ namespace AspectInjector.Broker
         /// Should be of type <see cref="MethodBase" />.
         /// </summary>
         [Obsolete("Use Source.Metadata instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         Method = 3,
 
         /// <summary>
@@ -69,7 +71,8 @@ namespace AspectInjector.Broker
         /// Set of injections that trigger this advice./>.
         /// Should be of type <see cref="Attribute" />[].
         /// </summary>
-        [Obsolete("Use Source.Triggers instead")]        
+        [Obsolete("Use Source.Triggers instead")]   
+        [EditorBrowsable(EditorBrowsableState.Never)]
         Injections = 9,
 
         /// <summary>
