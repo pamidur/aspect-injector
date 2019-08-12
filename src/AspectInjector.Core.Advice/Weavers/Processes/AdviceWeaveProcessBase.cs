@@ -40,9 +40,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 switch (arg.Source)
                 {
                     case Source.Arguments: cut = LoadArgumentsArgument(cut, arg); break;
-                    case Source.Injections: cut = LoadInjectionsArgument(cut, arg); break;
+                    case Source.Triggers: cut = LoadInjectionsArgument(cut, arg); break;
                     case Source.Instance: cut = LoadInstanceArgument(cut, arg); break;
-                    case Source.Method: cut = LoadMethodArgument(cut, arg); break;
+                    case Source.Metadata: cut = LoadMethodArgument(cut, arg); break;
                     case Source.Name: cut = LoadNameArgument(cut, arg); break;
                     case Source.ReturnType: cut = LoadReturnTypeArgument(cut, arg); break;
                     case Source.ReturnValue: cut = LoadReturnValueArgument(cut, arg); break;

@@ -20,7 +20,7 @@ namespace AspectInjector.Broker
         /// <summary>
         /// Specifies what target members this method is injected to. <see cref="Target.Any" /> by default.
         /// </summary>
-        public Target Targets { get; set; }
+        public Target Targets { get; set; } = Target.Any;
 
         /// <summary>
         /// Kind of advice

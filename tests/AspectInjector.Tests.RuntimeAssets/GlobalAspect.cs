@@ -25,9 +25,9 @@ namespace AspectInjector.Tests.Assets
         [Advice(Kind.After)]
         public void After(
             [Argument(Source.Arguments)] object[] args,
-            //[Argument(Source.Attributes)] Attribute[] attrs,
+            [Argument(Source.Triggers)] Attribute[] attrs,
             [Argument(Source.Instance)] object _this,
-            [Argument(Source.Method)] MethodBase method,
+            [Argument(Source.Metadata)] MethodBase method,
             [Argument(Source.Name)] string name,
             [Argument(Source.ReturnType)] Type retType,
             [Argument(Source.ReturnValue)] object retVal,
@@ -36,7 +36,7 @@ namespace AspectInjector.Tests.Assets
             )
         {
             base.LogArguments(args, AfterExecuted);
-            //base.LogAttributes(args, AfterExecuted);
+            base.LogAttributes(attrs, AfterExecuted);
             base.LogInstance(_this, AfterExecuted);
             base.LogMethod(method, AfterExecuted);
             base.LogName(name, AfterExecuted);
@@ -51,9 +51,9 @@ namespace AspectInjector.Tests.Assets
         [Advice(Kind.Before)]
         public void Before(
             [Argument(Source.Arguments)] object[] args,
-            //[Argument(Source.Attributes)] Attribute[] attrs,
+            [Argument(Source.Triggers)] Attribute[] attrs,
             [Argument(Source.Instance)] object _this,
-            [Argument(Source.Method)] MethodBase method,
+            [Argument(Source.Metadata)] MethodBase method,
             [Argument(Source.Name)] string name,
             [Argument(Source.ReturnType)] Type retType,
             [Argument(Source.ReturnValue)] object retVal,
@@ -62,7 +62,7 @@ namespace AspectInjector.Tests.Assets
             )
         {
             base.LogArguments(args, BeforeExecuted);
-            //base.LogAttributes(args, BeforeExecuted);
+            base.LogAttributes(attrs, BeforeExecuted);
             base.LogInstance(_this, BeforeExecuted);
             base.LogMethod(method, BeforeExecuted);
             base.LogName(name, BeforeExecuted);
@@ -77,9 +77,9 @@ namespace AspectInjector.Tests.Assets
         [Advice(Kind.Around)]
         public object Around(
             [Argument(Source.Arguments)] object[] args,
-            //[Argument(Source.Attributes)] Attribute[] attrs,
+            [Argument(Source.Triggers)] Attribute[] attrs,
             [Argument(Source.Instance)] object _this,
-            [Argument(Source.Method)] MethodBase method,
+            [Argument(Source.Metadata)] MethodBase method,
             [Argument(Source.Name)] string name,
             [Argument(Source.ReturnType)] Type retType,
             [Argument(Source.ReturnValue)] object retVal,
@@ -88,7 +88,7 @@ namespace AspectInjector.Tests.Assets
             )
         {
             base.LogArguments(args, AroundEnter);
-            base.LogAttributes(args, AroundEnter);
+            base.LogAttributes(attrs, AroundEnter);
             base.LogInstance(_this, AroundEnter);
             base.LogMethod(method, AroundEnter);
             base.LogName(name, AroundEnter);

@@ -12,27 +12,31 @@ namespace AspectInjector.Core.Extensions
 {
     public static class FluentExtensions
     {
-        public static void OnAspectsInitialized(this MethodBody body, PointCut action)
+        public static Instruction GetUserCodeStart(this MethodBody body)
         {
             var method = body.Method;
-            if (!method.HasBody) return;
+            if (!method.HasBody) return null;
 
             if (!method.IsConstructor || method.IsStatic)
-            {
-                body.AfterEntry(action);
-                return;
-            }
+                return body.GetCodeStart();
 
             MethodReference initializer = method.DeclaringType.Methods.FirstOrDefault(m => m.Name == Constants.InstanceAspectsMethodName);
 
             if (initializer == null)
-            {
-                body.AfterEntry(action);
-                return;
-            }
+                return body.GetCodeStart();
 
             initializer = initializer.MakeHostInstanceGeneric(method.DeclaringType);
-            body.OnCall(initializer, action);
+
+            var instruction = body.Instructions.FirstOrDefault(i => i.OpCode == OpCodes.Call && i.Operand is MethodReference mref && mref.DeclaringType.Match(initializer.DeclaringType) && mref.Resolve() == initializer.Resolve());
+            return instruction.Next;
+        }
+
+        public static void OnAspectsInitialized(this MethodBody body, PointCut action)
+        {
+            var userCodesStart = body.GetUserCodeStart();
+            if (userCodesStart == null) return;
+
+            body.BeforeInstruction(userCodesStart, action);
         }
 
         public static Cut LoadAspect(this Cut cut, AspectDefinition aspect)

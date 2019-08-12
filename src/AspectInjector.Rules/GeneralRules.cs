@@ -12,6 +12,8 @@ namespace AspectInjector.Rules
         {
             public static readonly Func<string, string> UnknownAdviceKind = k => $"Unknown advice kind '{k}'";
             public static readonly Func<string, string> UnknownAdviceTarget = t => $"Unknown advice target '{t}'";
+            public static readonly Func<string, string> UnknownPropagationStrategy = t => $"Unknown propagation strategy '{t}'";
+            public static readonly Func<string, string> InvalidPropagationFilter = t => $"Invalid propagation filter '{t}'";
             public static readonly Func<string, string> UnknownArgumentSource = s => $"Unknown argument source '{s}'";
             public static readonly Func<string, string> UnknownAspectScope = s => $"Unknown aspect scope '{s}'";
         }

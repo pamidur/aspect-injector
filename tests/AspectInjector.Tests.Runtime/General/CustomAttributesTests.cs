@@ -97,7 +97,7 @@ namespace AspectInjector.Tests.General
         public class TestAspect
         {
             [Advice(Kind.Before)]
-            public void Before2([Argument(Source.Injections)] Attribute[] data)
+            public void Before2([Argument(Source.Triggers)] Attribute[] data)
             {
                 var a = data.OfType<TestInjection2>().FirstOrDefault();
                 if (a == null) return;
@@ -110,7 +110,7 @@ namespace AspectInjector.Tests.General
             }
 
             [Advice(Kind.Before)]
-            public void Before([Argument(Source.Injections)] Attribute[] data)
+            public void Before([Argument(Source.Triggers)] Attribute[] data)
             {
                 var a = data.OfType<TestInjection>().FirstOrDefault();
                 if (a == null) return;
@@ -186,7 +186,7 @@ namespace AspectInjector.Tests.General
     public class CustomAttributesTests_Aspect
     {
         [Advice(Kind.After)]
-        public void AfterMethod([Argument(Source.Injections)] Attribute[] data)
+        public void AfterMethod([Argument(Source.Triggers)] Attribute[] data)
         {
             var a = (data[0] as CustomAttributesTestsAttribute);
 
@@ -208,7 +208,7 @@ namespace AspectInjector.Tests.General
     public class CustomAttributesTests_MultipleAspect
     {
         [Advice(Kind.After)]
-        public void AfterMethod([Argument(Source.Injections)] Attribute[] data)
+        public void AfterMethod([Argument(Source.Triggers)] Attribute[] data)
         {
             Checker.Passed = data.Length == 2
                 && data[0] is CustomAttributesTests_Multiple1Attribute

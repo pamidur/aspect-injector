@@ -23,7 +23,7 @@ namespace AspectInjector.Tests.Assets
                 }
         }
 
-        internal void LogAttributes(object[] args, string prefix)
+        internal void LogAttributes(Attribute[] args, string prefix)
         {
             return;
         }

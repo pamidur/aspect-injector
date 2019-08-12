@@ -40,7 +40,7 @@ namespace AspectInjector.Tests.Runtime.Advices
         internal class AccessTestAspect : Attribute
         {
             [Advice(Kind.Around, Targets = Target.Internal)]
-            public object TestAccess([Argument(Source.Method)] MethodBase method)
+            public object TestAccess([Argument(Source.Metadata)] MethodBase method)
             {
                 Assert.True(method.IsAssembly);
                 Assert.False(method.IsPublic);

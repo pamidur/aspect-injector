@@ -3,6 +3,7 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
+using FluentIL;
 using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
@@ -21,7 +22,7 @@ namespace AspectInjector.Core.Advice.Effects
         public abstract Kind Kind { get; }
 
         public override bool IsApplicableFor(IMemberDefinition target)
-        {
+        {     
             if ((Target & Target.Method) != 0 && target is MethodDefinition method && !method.IsConstructor)
                 return IsApplicableForModifier(method);
 

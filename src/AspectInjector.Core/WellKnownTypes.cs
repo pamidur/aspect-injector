@@ -4,6 +4,7 @@ using FluentIL.Extensions;
 using Mono.Cecil;
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace AspectInjector.Core
 {
@@ -16,6 +17,7 @@ namespace AspectInjector.Core
         public static readonly string Argument = typeof(Argument).FullName;
 
         public static readonly TypeReference DebuggerHiddenAttribute = StandardTypes.GetType(typeof(DebuggerHiddenAttribute));
+        public static readonly TypeReference CompilerGeneratedAttribute = StandardTypes.GetType(typeof(CompilerGeneratedAttribute));
         public static readonly TypeReference AttributeArray = new ArrayType(StandardTypes.Attribute);
         public static readonly TypeReference MethodBase = StandardTypes.GetType(typeof(System.Reflection.MethodBase));
 

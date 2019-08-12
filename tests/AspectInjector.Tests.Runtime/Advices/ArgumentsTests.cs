@@ -200,7 +200,7 @@ namespace AspectInjector.Tests.Advices
         internal class ArgumentsTests_StaticMethodAspect : Attribute
         {
             [Advice(Kind.Before, Targets = Target.Method | Target.Constructor)]
-            public void BeforeMethod([Argument(Source.Method)] MethodBase method)
+            public void BeforeMethod([Argument(Source.Metadata)] MethodBase method)
             {
                 Checker.Passed = method != null;
             }
@@ -248,7 +248,7 @@ namespace AspectInjector.Tests.Advices
         internal class ArgumentsTests_MethodAspect:Attribute
         {
             [Advice(Kind.Before, Targets = Target.Method | Target.Constructor)]
-            public void BeforeMethod([Argument(Source.Method)] MethodBase method)
+            public void BeforeMethod([Argument(Source.Metadata)] MethodBase method)
             {
                 Checker.Passed = method != null;
             }
@@ -309,7 +309,7 @@ namespace AspectInjector.Tests.Advices
         internal class ArgumentsTests_AroundMethodAspect : Attribute
         {
             [Advice(Kind.Around, Targets = Target.Method)]
-            public object BeforeMethod([Argument(Source.Method)] MethodBase method)
+            public object BeforeMethod([Argument(Source.Metadata)] MethodBase method)
             {
                 Checker.Passed = method.Name == "Fact";
                 return null;
