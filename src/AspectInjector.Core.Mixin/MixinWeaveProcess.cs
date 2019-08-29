@@ -105,7 +105,7 @@ namespace AspectInjector.Core.Mixin
             var method = _target.Module.ImportReference(originalMethod);
 
             if (@interface.IsGenericInstance)
-                method = _target.Module.ImportReference(originalMethod.MakeHostInstanceGeneric(@interface));
+                method = _target.Module.ImportReference(originalMethod.MakeGenericReference(@interface));
 
             GetOrCreateMethodProxy(method);
         }
@@ -123,7 +123,7 @@ namespace AspectInjector.Core.Mixin
                 if (originalEvent.AddMethod != null)
                 {
                     MethodReference method = _target.Module.ImportReference(originalEvent.AddMethod);
-                    if (@interface.IsGenericInstance) method = _target.Module.ImportReference(originalEvent.AddMethod.MakeHostInstanceGeneric(@interface));
+                    if (@interface.IsGenericInstance) method = _target.Module.ImportReference(originalEvent.AddMethod.MakeGenericReference(@interface));
 
                     ed.AddMethod = GetOrCreateMethodProxy(method);
                 }
@@ -131,7 +131,7 @@ namespace AspectInjector.Core.Mixin
                 if (originalEvent.RemoveMethod != null)
                 {
                     MethodReference method = _target.Module.ImportReference(originalEvent.RemoveMethod);
-                    if (@interface.IsGenericInstance) method = _target.Module.ImportReference(originalEvent.RemoveMethod.MakeHostInstanceGeneric(@interface));
+                    if (@interface.IsGenericInstance) method = _target.Module.ImportReference(originalEvent.RemoveMethod.MakeGenericReference(@interface));
 
                     ed.RemoveMethod = GetOrCreateMethodProxy(method);
                 }
@@ -152,7 +152,7 @@ namespace AspectInjector.Core.Mixin
             {
                 getMethod = originalProperty.GetMethod;
                 if (@interface.IsGenericInstance)
-                    getMethod = originalProperty.GetMethod.MakeHostInstanceGeneric(@interface);
+                    getMethod = originalProperty.GetMethod.MakeGenericReference(@interface);
 
                 propertyType = getMethod.ResolveIfGeneric(getMethod.ReturnType);
             }
@@ -161,7 +161,7 @@ namespace AspectInjector.Core.Mixin
             {
                 setMethod = originalProperty.SetMethod;
                 if (@interface.IsGenericInstance)
-                    setMethod = originalProperty.SetMethod.MakeHostInstanceGeneric(@interface);
+                    setMethod = originalProperty.SetMethod.MakeGenericReference(@interface);
 
                 propertyType = propertyType ?? setMethod.ResolveIfGeneric(setMethod.Parameters[0].ParameterType);
             }

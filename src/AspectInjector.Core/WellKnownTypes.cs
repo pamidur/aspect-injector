@@ -1,7 +1,7 @@
 ﻿using AspectInjector.Broker;
 using FluentIL;
-using FluentIL.Extensions;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -23,6 +23,6 @@ namespace AspectInjector.Core
 
         public static readonly TypeReference Func_ObjectArray_Object =
             StandardTypes.GetType(typeof(Func<,>))
-            .MakeGenericInstanceReference(StandardTypes.ObjectArray, StandardTypes.Object);
+            .MakeGenericInstanceType(StandardTypes.ObjectArray, StandardTypes.Object);
     }
 }

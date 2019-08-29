@@ -14,48 +14,54 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
     internal abstract class AfterStateMachineWeaveProcessBase : AdviceWeaveProcessBase<AfterAdviceEffect>
     {
         protected readonly TypeDefinition _stateMachine;
-        private readonly Func<FieldDefinition> _originalThis;
+        private readonly Func<FieldReference> _originalThis;
         protected readonly TypeReference _stateMachineRef;
 
         public AfterStateMachineWeaveProcessBase(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
         {
             _stateMachineRef = GetStateMachine();
             _stateMachine = _stateMachineRef.Resolve();
-            _originalThis = _target.IsStatic ? (Func<FieldDefinition>) null : () => GetThisField();
+            _originalThis = _target.IsStatic ? (Func<FieldReference>) null : () => GetThisField();
         }
 
         protected abstract TypeReference GetStateMachine();
 
-        private FieldDefinition GetThisField()
+        private FieldReference GetThisField()
         {
-            var thisfield = _stateMachine.Fields.FirstOrDefault(f => f.Name == Constants.MovedThis);
+            var thisfieldRef = _stateMachine.Fields
+                .FirstOrDefault(f => f.Name == Constants.MovedThis)?.MakeReference(_stateMachine);
 
-            if (thisfield == null)
+            if (thisfieldRef == null)
             {
-                thisfield = new FieldDefinition(Constants.MovedThis, FieldAttributes.Public, _stateMachine.MakeCallReference(_stateMachine.DeclaringType));
+                var thisfield = new FieldDefinition(Constants.MovedThis, FieldAttributes.Public, _stateMachine.MakeCallReference(_stateMachine.DeclaringType));
                 _stateMachine.Fields.Add(thisfield);
+
+                thisfieldRef = thisfield.MakeReference(_stateMachine);
 
                 InsertStateMachineCall(
                     e => e
-                    .Store(thisfield, v => v.This())
+                    .Store(thisfield.MakeReference(_stateMachineRef), v => v.This())
                     );
             }
 
-            return thisfield;
+            return thisfieldRef;
         }
 
-        private FieldDefinition GetArgsField()
+        private FieldReference GetArgsField()
         {
-            var argsfield = _stateMachine.Fields.FirstOrDefault(f => f.Name == Constants.MovedArgs);
+            var argsfieldRef = _stateMachine.Fields
+                .FirstOrDefault(f => f.Name == Constants.MovedArgs)?.MakeReference(_stateMachine);
 
-            if (argsfield == null)
+            if (argsfieldRef == null)
             {
-                argsfield = new FieldDefinition(Constants.MovedArgs, FieldAttributes.Public, _stateMachine.Module.ImportReference(StandardTypes.ObjectArray));
+                var argsfield = new FieldDefinition(Constants.MovedArgs, FieldAttributes.Public, _stateMachine.Module.ImportReference(StandardTypes.ObjectArray));
                 _stateMachine.Fields.Add(argsfield);
+
+                argsfieldRef = argsfield.MakeReference(_stateMachine);
 
                 InsertStateMachineCall(
                     e => e
-                    .Store(argsfield, v =>
+                    .Store(argsfield.MakeReference(_stateMachineRef), v =>
                     {
                         var elements = _target.Parameters.Select<ParameterDefinition, PointCut>(p => il =>
                                il.Load(p).Cast(p.ParameterType, StandardTypes.Object)
@@ -65,7 +71,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     }));
             }
 
-            return argsfield;
+            return argsfieldRef;
         }
 
         protected abstract void InsertStateMachineCall(PointCut code);

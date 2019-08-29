@@ -1,5 +1,4 @@
 ﻿using AspectInjector.Core.Advice.Effects;
-using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using FluentIL;
@@ -7,7 +6,7 @@ using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using System.Diagnostics;
+using Mono.Cecil.Rocks;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -25,8 +24,19 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override TypeReference GetStateMachine()
         {
-            return _target.CustomAttributes.First(ca => ca.AttributeType.Match(_iteratorStateMachineAttribute))
+            var smRef = _target.CustomAttributes.First(ca => ca.AttributeType.Match(_iteratorStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);
+
+            if (smRef.HasGenericParameters)
+            {
+                var smDef = smRef.Resolve();
+                smRef = ((MethodReference)_target.Body.Instructions
+                    .First(i => i.OpCode == OpCodes.Newobj && i.Operand is MemberReference mr && mr.DeclaringType.Resolve() == smDef).Operand).DeclaringType;
+            }
+
+            //smRef = smRef.MakeGenericInstanceType(_target.DeclaringType.GenericParameters.Concat(_target.GenericParameters).ToArray());
+
+            return smRef;
         }
 
         protected override MethodDefinition FindOrCreateAfterStateMachineMethod()
@@ -47,7 +57,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                         i.Next != null && i.Next.OpCode == OpCodes.Ret &&
                         (i.OpCode == OpCodes.Ldc_I4_0 || ((i.OpCode == OpCodes.Ldc_I4 || i.OpCode == OpCodes.Ldc_I4_S) && (int)i.Operand == 0)),
                     il =>
-                        il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine)));
+                        il.ThisOrStatic().Call(afterMethod.MakeGenericReference(_stateMachine)));
             }
 
             return afterMethod;
@@ -69,7 +79,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var stateMachineCtors = _stateMachine.Methods.Where(m => m.IsConstructor).ToArray();
 
             foreach (var ctor in stateMachineCtors)
-                _target.Body.OnCall(ctor.MakeHostInstanceGeneric(_stateMachineRef), cut => cut.Dup().Here(code));
+                _target.Body.OnCall(ctor.MakeGenericReference(_stateMachineRef), cut => cut.Dup().Here(code));
         }
     }
 }

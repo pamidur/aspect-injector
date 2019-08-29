@@ -40,7 +40,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override Cut LoadTargetArgument(Cut pc, AdviceArgument parameter)
         {
-            var targetMethod = _wrapper.MakeCallReference(GetOrCreateUnwrapper().MakeHostInstanceGeneric(_target.DeclaringType));
+            var targetMethod = _wrapper.MakeCallReference(GetOrCreateUnwrapper().MakeGenericReference(_target.DeclaringType));
             return pc.ThisOrNull().Call(CreateFuncCtorRef(pc), args => args.Delegate(targetMethod));
         }
 
@@ -82,7 +82,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var instructions = prev.Body.Instructions.Where(i => i.Operand is MethodReference && ((MethodReference)i.Operand).Resolve() == unwrapper).ToList();
 
             foreach (var inst in instructions)
-                inst.Operand = prev.MakeCallReference(next.MakeHostInstanceGeneric(_target.DeclaringType));
+                inst.Operand = prev.MakeCallReference(next.MakeGenericReference(_target.DeclaringType));
         }
 
         private MethodDefinition GetOrCreateUnwrapper()
@@ -108,7 +108,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 {
                     var refList = new List<Tuple<int, VariableDefinition>>();
 
-                    var targetMethod = original.MakeHostInstanceGeneric(_target.DeclaringType);
+                    var targetMethod = original.MakeGenericReference(_target.DeclaringType);
 
                     il = il.ThisOrStatic().Call(targetMethod, c =>
                     {
@@ -178,7 +178,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     //args = new object[] { param1, param2 ...};
                     e = e.Store(argsVar, args => base.LoadArgumentsArgument(args, null));
 
-                    var targetMethod = unwrapper.MakeHostInstanceGeneric(_target.DeclaringType);
+                    var targetMethod = unwrapper.MakeGenericReference(_target.DeclaringType);
 
                     // Unwrapper(args);
                     e = e.ThisOrStatic().Call(targetMethod, args => args.Load(argsVar));

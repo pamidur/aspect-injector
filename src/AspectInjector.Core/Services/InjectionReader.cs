@@ -32,6 +32,7 @@ namespace AspectInjector.Core.Services
             {
                 aspects = aspects.Concat(ExtractInjections(module));
 
+                //todo:: sort types by base class 
                 foreach (var type in module.GetTypes())
                 {
                     aspects = aspects.Concat(ExtractInjections(type));

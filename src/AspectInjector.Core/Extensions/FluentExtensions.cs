@@ -5,7 +5,6 @@ using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
-using System.Diagnostics;
 using System.Linq;
 
 namespace AspectInjector.Core.Extensions
@@ -20,14 +19,14 @@ namespace AspectInjector.Core.Extensions
             if (!method.IsConstructor || method.IsStatic)
                 return body.GetCodeStart();
 
-            MethodReference initializer = method.DeclaringType.Methods.FirstOrDefault(m => m.Name == Constants.InstanceAspectsMethodName);
+            var initializer = method.DeclaringType.Methods.FirstOrDefault(m => m.Name == Constants.InstanceAspectsMethodName);
 
             if (initializer == null)
                 return body.GetCodeStart();
 
-            initializer = initializer.MakeHostInstanceGeneric(method.DeclaringType);
+            var initializerRef = initializer.MakeGenericReference(method.DeclaringType);
 
-            var instruction = body.Instructions.FirstOrDefault(i => i.OpCode == OpCodes.Call && i.Operand is MethodReference mref && mref.DeclaringType.Match(initializer.DeclaringType) && mref.Resolve() == initializer.Resolve());
+            var instruction = body.Instructions.FirstOrDefault(i => i.OpCode == OpCodes.Call && i.Operand is MethodReference mref && mref.DeclaringType.Match(initializerRef.DeclaringType) && mref.Resolve() == initializer);
             return instruction.Next;
         }
 
@@ -75,16 +74,18 @@ namespace AspectInjector.Core.Extensions
 
             var fieldName = $"{Constants.AspectInstanceFieldPrefix}{aspect.Host.FullName}";
 
-            var field = FindField(type, fieldName);
-            if (field == null)
+            var fieldRef = FindField(type, fieldName)?.MakeReference(type);
+            if (fieldRef == null)
             {
-                field = new FieldDefinition(fieldName, FieldAttributes.Family, cut.Import(aspect.Host));
+                var field = new FieldDefinition(fieldName, FieldAttributes.Family, cut.Import(aspect.Host));
                 type.Fields.Add(field);
 
-                InjectInitialization(GetInstanсeAspectsInitializer(type, cut), field, c => c.CreateAspectInstance(aspect));
+                fieldRef = field.MakeReference(type);
+
+                InjectInitialization(GetInstanсeAspectsInitializer(type, cut), fieldRef, c => c.CreateAspectInstance(aspect));
             }
 
-            return field;
+            return fieldRef;
         }
 
         private static MethodDefinition GetInstanсeAspectsInitializer(TypeDefinition type, Cut cut)
@@ -104,7 +105,7 @@ namespace AspectInjector.Core.Extensions
                 var ctors = type.Methods.Where(c => c.IsConstructor && !c.IsStatic).ToList();
 
                 foreach (var ctor in ctors)
-                    ctor.Body.AfterEntry(i => i.This().Call(instanceAspectsInitializer.MakeHostInstanceGeneric(cut.Method.DeclaringType)));
+                    ctor.Body.AfterEntry(i => i.This().Call(instanceAspectsInitializer.MakeGenericReference(type)));
             }
 
             return instanceAspectsInitializer;
@@ -118,12 +119,12 @@ namespace AspectInjector.Core.Extensions
             if (singleton == null)
                 throw new Exception("Missed aspect global singleton.");
 
-            return singleton;
+            return singleton.MakeReference(aspect.Host);
         }
 
 
         private static void InjectInitialization(MethodDefinition initMethod,
-            FieldDefinition field,
+            FieldReference field,
             PointCut factory
             )
         {
@@ -142,7 +143,7 @@ namespace AspectInjector.Core.Extensions
             if (type == null)
                 return null;
 
-            var field = type.Fields.FirstOrDefault(f => f.Name == name);
+            var field = type.Fields.FirstOrDefault(f => f.Name == name && (f.Attributes & FieldAttributes.Family) != 0);
             return field ?? FindField(type.BaseType?.Resolve(), name);
         }
     }

@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>netcoreapp2.1;net461</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
-    <ProjectReference Include="..\..\src\AspectInjector\AspectInjector.csproj" />
   </ItemGroup>
 
   <Import Project="..\..\nuget\build\AspectInjector.targets" />

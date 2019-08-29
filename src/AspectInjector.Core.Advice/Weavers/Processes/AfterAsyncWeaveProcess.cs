@@ -1,5 +1,4 @@
 ﻿using AspectInjector.Core.Advice.Effects;
-using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using FluentIL;
@@ -7,8 +6,6 @@ using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -31,8 +28,17 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override TypeReference GetStateMachine()
         {
-            return _target.CustomAttributes.First(ca => ca.AttributeType.Match(_asyncStateMachineAttribute))
+            var smRef = _target.CustomAttributes.First(ca => ca.AttributeType.Match(_asyncStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);
+
+            if (smRef.HasGenericParameters)
+            {
+                var smDef = smRef.Resolve();
+                smRef = ((MethodReference)_target.Body.Instructions
+                    .First(i => i.OpCode == OpCodes.Newobj && i.Operand is MemberReference mr && mr.DeclaringType.Resolve() == smDef).Operand).DeclaringType;
+            }
+
+            return smRef;
         }
 
         protected override MethodDefinition FindOrCreateAfterStateMachineMethod()
@@ -60,10 +66,10 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     moveNext.Body.InitLocals = true;
                 }
 
-                MethodReference setResultCall = _builder.Resolve().Methods.First(m => m.Name == "SetResult");
-                if (_asyncResult != null) setResultCall = setResultCall.MakeHostInstanceGeneric(_builder);
+                var setResultCall = _builder.Resolve().Methods.First(m => m.Name == "SetResult");
+                var setResultCallRef = _asyncResult == null ? setResultCall : setResultCall.MakeGenericReference(_builder);
 
-                moveNext.Body.OnCall(setResultCall, il =>
+                moveNext.Body.OnCall(setResultCallRef, il =>
                 {
                     il = il.Prev();
 
@@ -75,7 +81,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                         loadArg = new PointCut(args => args.Load(resvar).Cast(resvar.VariableType, StandardTypes.Object));
                     }
 
-                    il = il.ThisOrStatic().Call(afterMethod.MakeHostInstanceGeneric(_stateMachine), loadArg);
+                    il = il.ThisOrStatic().Call(afterMethod.MakeGenericReference(_stateMachine), loadArg);
 
                     if (_asyncResult != null)
                         il = il.Load(resvar);
@@ -99,7 +105,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void InsertStateMachineCall(PointCut code)
         {
-            var method = _builder.Resolve().Methods.First(m => m.Name == "Start").MakeHostInstanceGeneric(_builder);
+            var method = _builder.Resolve().Methods.First(m => m.Name == "Start").MakeGenericReference(_builder);
 
             var v = _target.Body.Variables.First(vr => vr.VariableType.Resolve().Match(_stateMachine));
             var loadVar = v.VariableType.IsValueType ? (PointCut)(c => c.LoadRef(v)) : c => c.Load(v);
