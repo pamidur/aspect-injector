@@ -24,13 +24,13 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override TypeReference GetStateMachine()
         {
-            var smRef = _target.CustomAttributes.First(ca => ca.AttributeType.Match(_iteratorStateMachineAttribute))
+            var smRef = _method.CustomAttributes.First(ca => ca.AttributeType.Match(_iteratorStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);
 
             if (smRef.HasGenericParameters)
             {
                 var smDef = smRef.Resolve();
-                smRef = ((MethodReference)_target.Body.Instructions
+                smRef = ((MethodReference)_method.Body.Instructions
                     .First(i => i.OpCode == OpCodes.Newobj && i.Operand is MemberReference mr && mr.DeclaringType.Resolve() == smDef).Operand).DeclaringType;
             }
 
@@ -57,7 +57,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                         i.Next != null && i.Next.OpCode == OpCodes.Ret &&
                         (i.OpCode == OpCodes.Ldc_I4_0 || ((i.OpCode == OpCodes.Ldc_I4 || i.OpCode == OpCodes.Ldc_I4_S) && (int)i.Operand == 0)),
                     il =>
-                        il.ThisOrStatic().Call(afterMethod.MakeGenericReference(_stateMachine)));
+                        il.ThisOrStatic().Call(afterMethod.MakeReference(_stateMachine.MakeSelfReference())));
             }
 
             return afterMethod;
@@ -79,7 +79,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var stateMachineCtors = _stateMachine.Methods.Where(m => m.IsConstructor).ToArray();
 
             foreach (var ctor in stateMachineCtors)
-                _target.Body.OnCall(ctor.MakeGenericReference(_stateMachineRef), cut => cut.Dup().Here(code));
+                _method.Body.OnCall(ctor.MakeReference(_stateMachineRef), cut => cut.Dup().Here(code));
         }
     }
 }

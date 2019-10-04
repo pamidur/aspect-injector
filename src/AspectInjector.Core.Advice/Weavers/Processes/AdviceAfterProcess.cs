@@ -22,19 +22,19 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         public AdviceAfterProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)
         {
-            if (!_target.ReturnType.Match(StandardTypes.Void) && _effect.Arguments.Any(a => a.Source == Source.ReturnValue))
+            if (!_method.ReturnType.Match(StandardTypes.Void) && _effect.Arguments.Any(a => a.Source == Source.ReturnValue))
                 _retvar = GetOrCreateRetVar();
         }
 
         private VariableDefinition GetOrCreateRetVar()
         {
-            if (!_returnVariablesCache.TryGetValue(_target.Body, out var ret))
+            if (!_returnVariablesCache.TryGetValue(_method.Body, out var ret))
             {
-                ret = new VariableDefinition(_target.ReturnType);
-                _target.Body.Variables.Add(ret);
-                _target.Body.InitLocals = true;
+                ret = new VariableDefinition(_method.ReturnType);
+                _method.Body.Variables.Add(ret);
+                _method.Body.InitLocals = true;
 
-                _returnVariablesCache.Add(_target.Body, ret);
+                _returnVariablesCache.Add(_method.Body, ret);
             }
 
             return ret;
@@ -42,7 +42,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public override void Execute()
         {
-            _target.Body.BeforeExit(
+            _method.Body.BeforeExit(
                 cut =>
                 {
                     if (_retvar != null)

@@ -6,6 +6,7 @@ using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,12 +19,14 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         private readonly string _unWrapperName;
         private readonly string _movedOriginalName;
         private MethodDefinition _wrapper;
+        private MethodDefinition _entry;
 
         public AdviceAroundProcess(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
         {
-            _wrapperNamePrefix = $"{GetAroundMethodPrefix(_target)}w_";
-            _unWrapperName = $"{GetAroundMethodPrefix(_target)}u";
-            _movedOriginalName = $"{GetAroundMethodPrefix(_target)}o";
+            _entry = target;
+            _wrapperNamePrefix = $"{GetAroundMethodPrefix(_method)}w_";
+            _unWrapperName = $"{GetAroundMethodPrefix(_method)}u";
+            _movedOriginalName = $"{GetAroundMethodPrefix(_method)}o";
         }
 
         public override void Execute()
@@ -40,7 +43,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override Cut LoadTargetArgument(Cut pc, AdviceArgument parameter)
         {
-            var targetMethod = _wrapper.MakeCallReference(GetOrCreateUnwrapper().MakeGenericReference(_target.DeclaringType));
+            var targetMethod = CreateRef(GetOrCreateUnwrapper(), pc.Method);
             return pc.ThisOrNull().Call(CreateFuncCtorRef(pc), args => args.Delegate(targetMethod));
         }
 
@@ -62,7 +65,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public MethodDefinition GetNextWrapper()
         {
-            var prevWrapper = _target.DeclaringType.Methods.Where(m => m.Name.StartsWith(_wrapperNamePrefix))
+            var prevWrapper = _type.Methods.Where(m => m.Name.StartsWith(_wrapperNamePrefix))
                 .Select(m => new { m, i = ushort.Parse(m.Name.Substring(_wrapperNamePrefix.Length)) }).OrderByDescending(g => g.i).FirstOrDefault();
 
             var newWrapper = DuplicateMethodDefinition(GetOrCreateUnwrapper());
@@ -70,7 +73,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             newWrapper.Name = $"{_wrapperNamePrefix}{(prevWrapper == null ? 0 : prevWrapper.i + 1)}";
             newWrapper.Mark(WellKnownTypes.DebuggerHiddenAttribute);
 
-            RedirectPreviousWrapper(prevWrapper == null ? _target : prevWrapper.m, newWrapper);
+            RedirectPreviousWrapper(prevWrapper == null ? _method : prevWrapper.m, newWrapper);
 
             return newWrapper;
         }
@@ -81,22 +84,24 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             var instructions = prev.Body.Instructions.Where(i => i.Operand is MethodReference && ((MethodReference)i.Operand).Resolve() == unwrapper).ToList();
 
+            var nextRef = CreateRef(next, prev);
+       
             foreach (var inst in instructions)
-                inst.Operand = prev.MakeCallReference(next.MakeGenericReference(_target.DeclaringType));
+                inst.Operand = nextRef;
         }
 
         private MethodDefinition GetOrCreateUnwrapper()
         {
-            var unwrapper = _target.DeclaringType.Methods.FirstOrDefault(m => m.Name == _unWrapperName);
+            var unwrapper = _type.Methods.FirstOrDefault(m => m.Name == _unWrapperName);
             if (unwrapper != null)
                 return unwrapper;
 
-            unwrapper = DuplicateMethodDefinition(_target);
+            unwrapper = DuplicateMethodDefinition(_method);
             unwrapper.Name = _unWrapperName;
-            unwrapper.ReturnType = _target.Module.ImportReference(StandardTypes.Object);
+            unwrapper.ReturnType = _module.ImportReference(StandardTypes.Object);
             unwrapper.IsPrivate = true;
             unwrapper.Parameters.Clear();
-            var argsParam = new ParameterDefinition(_target.Module.ImportReference(StandardTypes.ObjectArray));
+            var argsParam = new ParameterDefinition(_module.ImportReference(StandardTypes.ObjectArray));
             unwrapper.Parameters.Add(argsParam);
             unwrapper.Body.InitLocals = true;
             unwrapper.Mark(WellKnownTypes.DebuggerHiddenAttribute);
@@ -108,9 +113,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 {
                     var refList = new List<Tuple<int, VariableDefinition>>();
 
-                    var targetMethod = original.MakeGenericReference(_target.DeclaringType);
-
-                    il = il.ThisOrStatic().Call(targetMethod, c =>
+                    var originalRef = CreateRef(original, unwrapper);
+                  
+                    il = il.ThisOrStatic().Call(originalRef, c =>
                     {
                         for (int i = 0; i < original.Parameters.Count; i++)
                         {
@@ -149,7 +154,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     if (original.ReturnType.Match(StandardTypes.Void))
                         il = il.Value(null);
                     else
-                        il = il.Cast(targetMethod.ReturnType, unwrapper.ReturnType);
+                        il = il.Cast(originalRef.ReturnType, unwrapper.ReturnType);
 
                     return il.Return();
                 });
@@ -159,34 +164,38 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private MethodDefinition WrapEntryPoint(MethodDefinition unwrapper)
         {
-            var original = DuplicateMethodDefinition(_target);
+            var original = DuplicateMethodDefinition(_method);
+
+
             original.Name = _movedOriginalName;
             original.IsPrivate = true;
 
-            var returnType = _target.ResolveIfGeneric(_target.ReturnType);
+            //var returnType = _method.ResolveIfGeneric(_method.ReturnType);
 
-            MoveBody(_target, original);
+            var returnType = _method.ReturnType;
 
-            _target.Body.Append(
+            MoveBody(_method, original);
+
+            _method.Body.Append(
                 e =>
                 {
                     //var args = null;
-                    var argsVar = new VariableDefinition(_target.Module.ImportReference(StandardTypes.ObjectArray));
-                    _target.Body.Variables.Add(argsVar);
-                    _target.Body.InitLocals = true;
+                    var argsVar = new VariableDefinition(_module.ImportReference(StandardTypes.ObjectArray));
+                    _method.Body.Variables.Add(argsVar);
+                    _method.Body.InitLocals = true;
 
                     //args = new object[] { param1, param2 ...};
                     e = e.Store(argsVar, args => base.LoadArgumentsArgument(args, null));
 
-                    var targetMethod = unwrapper.MakeGenericReference(_target.DeclaringType);
+                    var unwrapperRef = CreateRef(unwrapper, _method);
 
                     // Unwrapper(args);
-                    e = e.ThisOrStatic().Call(targetMethod, args => args.Load(argsVar));
+                    e = e.ThisOrStatic().Call(unwrapperRef, args => args.Load(argsVar));
 
                     // proxy ref and out params
-                    for (int i = 0; i < _target.Parameters.Count; i++)
+                    for (int i = 0; i < _method.Parameters.Count; i++)
                     {
-                        var p = _target.Parameters[i];
+                        var p = _method.Parameters[i];
                         if (p.ParameterType.IsByReference)
                             e = e.Store(p, val => val.Load(argsVar).GetByIndex(StandardTypes.Object, i).Cast(StandardTypes.Object, p.ParameterType));
                     }
@@ -195,12 +204,25 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     if (returnType.Match(StandardTypes.Void))
                         e = e.Pop();
                     else
-                        e = e.Cast(targetMethod.ReturnType, returnType);
+                        e = e.Cast(unwrapperRef.ReturnType, returnType);
 
                     return e.Return();
                 });
 
             return original;
+        }
+
+        private MethodReference CreateRef(MethodDefinition definition, MethodDefinition callSite)
+        {
+            TypeReference type = _type;
+            if (type.HasGenericParameters)
+                type = type.MakeGenericInstanceType(type.GenericParameters.ToArray());
+
+            MethodReference reference = definition.MakeReference(type);
+            if (callSite.HasGenericParameters)
+                reference = reference.MakeGenericInstanceMethod(callSite.GenericParameters.ToArray());
+
+            return reference;
         }
 
         private void MoveBody(MethodDefinition from, MethodDefinition to)
@@ -253,8 +275,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             foreach (var gparam in origin.GenericParameters)
                 method.GenericParameters.Add(gparam.Clone(method));
 
-            if (origin.ReturnType.IsGenericParameter && ((GenericParameter)origin.ReturnType).Owner == origin)
-                method.ReturnType = method.GenericParameters[origin.GenericParameters.IndexOf((GenericParameter)origin.ReturnType)];
+            if (origin.ReturnType is GenericParameter gp && gp.Owner == origin)
+                method.ReturnType = _module.ImportReference(method.GenericParameters[gp.Position]);
 
             if (origin.IsSpecialName)
                 method.IsSpecialName = true;
@@ -262,10 +284,10 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             foreach (var parameter in origin.Parameters)
             {
                 var paramType = parameter.ParameterType;
-                if (paramType.IsGenericParameter && ((GenericParameter)paramType).Owner == origin)
-                    paramType = method.GenericParameters[origin.GenericParameters.IndexOf((GenericParameter)paramType)];
+                if (paramType is GenericParameter gpp && gpp.Owner == origin)
+                    paramType = method.GenericParameters[gpp.Position];
 
-                method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, paramType));
+                method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _module.ImportReference(paramType)));
             }
 
             return method;

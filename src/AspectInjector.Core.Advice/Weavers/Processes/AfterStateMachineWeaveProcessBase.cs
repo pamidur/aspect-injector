@@ -1,11 +1,11 @@
 ﻿using AspectInjector.Core.Advice.Effects;
-using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using FluentIL;
 using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 using System;
 using System.Linq;
 
@@ -21,49 +21,49 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         {
             _stateMachineRef = GetStateMachine();
             _stateMachine = _stateMachineRef.Resolve();
-            _originalThis = _target.IsStatic ? (Func<FieldReference>) null : () => GetThisField();
+            _originalThis = _method.IsStatic ? (Func<FieldReference>)null : () => GetThisField();
         }
 
         protected abstract TypeReference GetStateMachine();
 
         private FieldReference GetThisField()
         {
-            var thisfieldRef = _stateMachine.Fields
-                .FirstOrDefault(f => f.Name == Constants.MovedThis)?.MakeReference(_stateMachine);
+            var thisfield = _stateMachine.Fields
+                .FirstOrDefault(f => f.Name == Constants.MovedThis);       
 
-            if (thisfieldRef == null)
+            if (thisfield == null)
             {
-                var thisfield = new FieldDefinition(Constants.MovedThis, FieldAttributes.Public, _stateMachine.MakeCallReference(_stateMachine.DeclaringType));
+                TypeReference _origTypeRef = _type;
+                if (_origTypeRef.HasGenericParameters)
+                    _origTypeRef = _origTypeRef.MakeGenericInstanceType(_stateMachine.GenericParameters.Take(_type.GenericParameters.Count).ToArray());
+
+                thisfield = new FieldDefinition(Constants.MovedThis, FieldAttributes.Public, _origTypeRef);
                 _stateMachine.Fields.Add(thisfield);
-
-                thisfieldRef = thisfield.MakeReference(_stateMachine);
-
+                
                 InsertStateMachineCall(
                     e => e
                     .Store(thisfield.MakeReference(_stateMachineRef), v => v.This())
                     );
             }
 
-            return thisfieldRef;
+            return thisfield.MakeReference(_stateMachine.MakeSelfReference());
         }
 
         private FieldReference GetArgsField()
         {
-            var argsfieldRef = _stateMachine.Fields
-                .FirstOrDefault(f => f.Name == Constants.MovedArgs)?.MakeReference(_stateMachine);
+            var argsfield = _stateMachine.Fields
+                .FirstOrDefault(f => f.Name == Constants.MovedArgs);
 
-            if (argsfieldRef == null)
+            if (argsfield == null)
             {
-                var argsfield = new FieldDefinition(Constants.MovedArgs, FieldAttributes.Public, _stateMachine.Module.ImportReference(StandardTypes.ObjectArray));
+                argsfield = new FieldDefinition(Constants.MovedArgs, FieldAttributes.Public, _stateMachine.Module.ImportReference(StandardTypes.ObjectArray));
                 _stateMachine.Fields.Add(argsfield);
-
-                argsfieldRef = argsfield.MakeReference(_stateMachine);
-
+                
                 InsertStateMachineCall(
                     e => e
                     .Store(argsfield.MakeReference(_stateMachineRef), v =>
                     {
-                        var elements = _target.Parameters.Select<ParameterDefinition, PointCut>(p => il =>
+                        var elements = _method.Parameters.Select<ParameterDefinition, PointCut>(p => il =>
                                il.Load(p).Cast(p.ParameterType, StandardTypes.Object)
                            ).ToArray();
 
@@ -71,7 +71,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     }));
             }
 
-            return argsfieldRef;
+            return argsfield.MakeReference(_stateMachine.MakeSelfReference());
         }
 
         protected abstract void InsertStateMachineCall(PointCut code);
@@ -80,7 +80,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         {
             FindOrCreateAfterStateMachineMethod().Body.BeforeExit(
                 e => e
-                .LoadAspect(_aspect, _target, LoadOriginalThis)
+                .LoadAspect(_aspect, _method, LoadOriginalThis)
                 .Call(_effect.Method, LoadAdviceArgs)
             );
         }

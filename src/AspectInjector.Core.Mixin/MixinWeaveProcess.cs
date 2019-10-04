@@ -1,11 +1,11 @@
-﻿using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Extensions;
+﻿using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
 using FluentIL;
 using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,23 +66,39 @@ namespace AspectInjector.Core.Mixin
             {
                 proxy = new MethodDefinition(methodName,
                     MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
-                     _target.Module.ImportReference(ifaceMethod.ReturnType));
+                     ifaceMethod.ReturnType);
 
                 _target.Methods.Add(proxy);
 
-                foreach (var gp in ifaceMethod.GenericParameters)
+                var ifaceMethodDef = ifaceMethod.Resolve();
+
+                foreach (var gp in ifaceMethodDef.GenericParameters)
                     proxy.GenericParameters.Add(gp.Clone(proxy));
 
+                TypeReference mayBeGeneric(TypeReference tr) => tr is GenericParameter gpr && gpr.Type == GenericParameterType.Method ? proxy.GenericParameters[gpr.Position] : tr;
+
                 proxy.Mark(WellKnownTypes.DebuggerHiddenAttribute);
-                proxy.ReturnType = _target.Module.ImportReference(ifaceMethod.ResolveIfGeneric(ifaceMethod.ReturnType));
+                //proxy.ReturnType = _target.Module.ImportReference(mayBeGeneric(ifaceMethod.ReturnType));
 
                 if (ifaceMethod.Resolve().IsSpecialName)
                     proxy.IsSpecialName = true;
 
                 foreach (var parameter in ifaceMethod.Parameters)
-                    proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _target.Module.ImportReference(ifaceMethod.ResolveIfGeneric(parameter.ParameterType))));
+                    proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType));
 
                 proxy.Overrides.Add(ifaceMethod);
+
+                if (proxy.HasGenericParameters)
+                {
+                    //var ifaceRef = ifaceMethod.Resolve().DeclaringType.MakeReference();
+
+                    var gref = new GenericInstanceMethod(ifaceMethod);
+                    foreach (var gpar in proxy.GenericParameters)
+                        gref.GenericArguments.Add(gpar);
+
+                    ifaceMethod = gref;
+
+                }
 
                 proxy.Body.Instead(
                     e => e
@@ -102,10 +118,10 @@ namespace AspectInjector.Core.Mixin
 
         protected void CreateMethodProxy(MethodDefinition originalMethod, TypeReference @interface)
         {
-            var method = _target.Module.ImportReference(originalMethod);
+            var method = _target.Module.ImportReference(originalMethod.MakeReference(@interface));
 
-            if (@interface.IsGenericInstance)
-                method = _target.Module.ImportReference(originalMethod.MakeGenericReference(@interface));
+            //if (@interface.IsGenericInstance)
+            //    method = _target.Module.ImportReference(originalMethod.MakeGenericReference(@interface));
 
             GetOrCreateMethodProxy(method);
         }
@@ -122,16 +138,16 @@ namespace AspectInjector.Core.Mixin
 
                 if (originalEvent.AddMethod != null)
                 {
-                    MethodReference method = _target.Module.ImportReference(originalEvent.AddMethod);
-                    if (@interface.IsGenericInstance) method = _target.Module.ImportReference(originalEvent.AddMethod.MakeGenericReference(@interface));
+                    var method = _target.Module.ImportReference(originalEvent.AddMethod);
+                    method = _target.Module.ImportReference(originalEvent.AddMethod.MakeReference(@interface));
 
                     ed.AddMethod = GetOrCreateMethodProxy(method);
                 }
 
                 if (originalEvent.RemoveMethod != null)
                 {
-                    MethodReference method = _target.Module.ImportReference(originalEvent.RemoveMethod);
-                    if (@interface.IsGenericInstance) method = _target.Module.ImportReference(originalEvent.RemoveMethod.MakeGenericReference(@interface));
+                    var method = _target.Module.ImportReference(originalEvent.RemoveMethod);
+                    method = _target.Module.ImportReference(originalEvent.RemoveMethod.MakeReference(@interface));
 
                     ed.RemoveMethod = GetOrCreateMethodProxy(method);
                 }
@@ -151,8 +167,8 @@ namespace AspectInjector.Core.Mixin
             if (originalProperty.GetMethod != null)
             {
                 getMethod = originalProperty.GetMethod;
-                if (@interface.IsGenericInstance)
-                    getMethod = originalProperty.GetMethod.MakeGenericReference(@interface);
+
+                getMethod = originalProperty.GetMethod.MakeReference(@interface);
 
                 propertyType = getMethod.ResolveIfGeneric(getMethod.ReturnType);
             }
@@ -160,8 +176,8 @@ namespace AspectInjector.Core.Mixin
             if (originalProperty.SetMethod != null)
             {
                 setMethod = originalProperty.SetMethod;
-                if (@interface.IsGenericInstance)
-                    setMethod = originalProperty.SetMethod.MakeGenericReference(@interface);
+
+                setMethod = originalProperty.SetMethod.MakeReference(@interface);
 
                 propertyType = propertyType ?? setMethod.ResolveIfGeneric(setMethod.Parameters[0].ParameterType);
             }
@@ -192,9 +208,24 @@ namespace AspectInjector.Core.Mixin
             if (!definition.IsInterface)
                 throw new NotSupportedException(typeReference.Name + " should be an interface");
 
-            var nestedIfaces = definition.Interfaces.Select(i => typeReference.IsGenericInstance ? typeReference.ParametrizeGenericInstance((GenericInstanceType)i.InterfaceType) : i.InterfaceType).ToArray();
+            var nestedIfaces = definition.Interfaces.Select(i => i.InterfaceType.IsGenericInstance ? ParametrizeSubInterface((GenericInstanceType)i.InterfaceType, typeReference) : i.InterfaceType).ToArray();
 
             return new[] { typeReference }.Concat(nestedIfaces);
+        }
+
+        private TypeReference ParametrizeSubInterface(GenericInstanceType interfaceType, TypeReference typeReference)
+        {
+            TypeReference LookupType(TypeReference tr)
+            {
+                if (tr is GenericParameter gp)
+                    return ((GenericInstanceType)typeReference).GenericArguments[gp.Position];
+
+                return tr;
+            }
+
+            var gparams = interfaceType.GenericArguments.Select(LookupType).ToArray();
+
+            return interfaceType.Resolve().MakeGenericInstanceType(gparams);
         }
     }
 }

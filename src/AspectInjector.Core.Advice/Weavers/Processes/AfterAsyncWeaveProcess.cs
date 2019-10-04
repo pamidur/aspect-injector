@@ -28,13 +28,13 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override TypeReference GetStateMachine()
         {
-            var smRef = _target.CustomAttributes.First(ca => ca.AttributeType.Match(_asyncStateMachineAttribute))
+            var smRef = _method.CustomAttributes.First(ca => ca.AttributeType.Match(_asyncStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);
 
             if (smRef.HasGenericParameters)
             {
                 var smDef = smRef.Resolve();
-                smRef = ((MethodReference)_target.Body.Instructions
+                smRef = ((MethodReference)_method.Body.Instructions
                     .First(i => i.OpCode == OpCodes.Newobj && i.Operand is MemberReference mr && mr.DeclaringType.Resolve() == smDef).Operand).DeclaringType;
             }
 
@@ -67,7 +67,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 }
 
                 var setResultCall = _builder.Resolve().Methods.First(m => m.Name == "SetResult");
-                var setResultCallRef = _asyncResult == null ? setResultCall : setResultCall.MakeGenericReference(_builder);
+                var setResultCallRef = _asyncResult == null ? setResultCall : setResultCall.MakeReference(_builder);
 
                 moveNext.Body.OnCall(setResultCallRef, il =>
                 {
@@ -81,7 +81,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                         loadArg = new PointCut(args => args.Load(resvar).Cast(resvar.VariableType, StandardTypes.Object));
                     }
 
-                    il = il.ThisOrStatic().Call(afterMethod.MakeGenericReference(_stateMachine), loadArg);
+                    il = il.ThisOrStatic().Call(afterMethod.MakeReference(_stateMachine.MakeSelfReference()), loadArg);
 
                     if (_asyncResult != null)
                         il = il.Load(resvar);
@@ -105,12 +105,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void InsertStateMachineCall(PointCut code)
         {
-            var method = _builder.Resolve().Methods.First(m => m.Name == "Start").MakeGenericReference(_builder);
+            var method = _builder.Resolve().Methods.First(m => m.Name == "Start").MakeReference(_builder);
 
-            var v = _target.Body.Variables.First(vr => vr.VariableType.Resolve().Match(_stateMachine));
+            var v = _method.Body.Variables.First(vr => vr.VariableType.Resolve().Match(_stateMachine));
             var loadVar = v.VariableType.IsValueType ? (PointCut)(c => c.LoadRef(v)) : c => c.Load(v);
 
-            _target.Body.OnCall(method, cut => cut.Prev().Prev().Prev().Here(loadVar).Here(code));
+            _method.Body.OnCall(method, cut => cut.Prev().Prev().Prev().Here(loadVar).Here(code));
         }
     }
 }

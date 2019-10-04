@@ -74,18 +74,18 @@ namespace AspectInjector.Core.Extensions
 
             var fieldName = $"{Constants.AspectInstanceFieldPrefix}{aspect.Host.FullName}";
 
-            var fieldRef = FindField(type, fieldName)?.MakeReference(type);
-            if (fieldRef == null)
+            var field = FindField(type, fieldName);
+            if (field == null)
             {
-                var field = new FieldDefinition(fieldName, FieldAttributes.Family, cut.Import(aspect.Host));
+                field = new FieldDefinition(fieldName, FieldAttributes.Family, cut.Import(aspect.Host));
                 type.Fields.Add(field);
 
-                fieldRef = field.MakeReference(type);
+                var fieldRef = field.MakeReference(type.MakeSelfReference());
 
                 InjectInitialization(GetInstanсeAspectsInitializer(type, cut), fieldRef, c => c.CreateAspectInstance(aspect));
             }
 
-            return fieldRef;
+            return field.MakeReference(type.MakeSelfReference());
         }
 
         private static MethodDefinition GetInstanсeAspectsInitializer(TypeDefinition type, Cut cut)
