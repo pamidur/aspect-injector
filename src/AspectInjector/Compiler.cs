@@ -34,7 +34,8 @@ namespace AspectInjector
         }
         private Container GetAppContainer()
         {
-            var app = "AspectInjector|" + typeof(Compiler).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            var version = typeof(Compiler).Assembly.GetName().Version.ToString(3);
+            var app = $"AspectInjector|{version}";
 
             var container = new Container();
 
