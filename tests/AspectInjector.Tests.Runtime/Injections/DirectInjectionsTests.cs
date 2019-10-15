@@ -7,7 +7,7 @@ namespace AspectInjector.Tests.Runtime.Injections
     public class DirectInjectionsTests
     {
         [Fact]
-        public void Can_Inject_Into_Getter_Directly()
+        public void CanInjectIntoGetterDirectly()
         {
             Checker.Passed = false;
             var t = new TestTarget();
