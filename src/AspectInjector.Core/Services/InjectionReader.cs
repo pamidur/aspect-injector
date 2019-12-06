@@ -26,38 +26,43 @@ namespace AspectInjector.Core.Services
 
         public IReadOnlyCollection<InjectionDefinition> ReadAll(AssemblyDefinition assembly)
         {
-            var aspects = ExtractInjections(assembly);
+            var injections = ExtractInjections(assembly);
 
             foreach (var module in assembly.Modules)
             {
-                aspects = aspects.Concat(ExtractInjections(module));
+                injections = injections.Concat(ExtractInjections(module));
 
                 //todo:: sort types by base class 
                 foreach (var type in module.GetTypes())
                 {
-                    aspects = aspects.Concat(ExtractInjections(type));
+                    injections = injections.Concat(ExtractInjections(type));
 
-                    aspects = aspects.Concat(type.Events.SelectMany(ExtractInjections));
-                    aspects = aspects.Concat(type.Properties.SelectMany(ExtractInjections));
-                    //aspects = aspects.Concat(type.Fields.SelectMany(ExtractInjections));
-                    aspects = aspects.Concat(type.Methods.SelectMany(ExtractInjections));
+                    injections = injections.Concat(type.Events.SelectMany(ExtractInjections));
+                    injections = injections.Concat(type.Properties.SelectMany(ExtractInjections));
+                    //definitions = definitions.Concat(type.Fields.SelectMany(ExtractInjections));
+                    injections = injections.Concat(type.Methods.SelectMany(ExtractInjections));
                 }
             }
 
-            aspects = aspects.GroupBy(a => a).Select(g => g.Aggregate(MergeInjections)).ToList();
+            injections = injections.GroupBy(a => a).Select(g => g.Aggregate(MergeInjections)).ToArray();
 
-            return aspects.ToList();
+            //Remove trigger classes from injection
+            var triggerTypes = new HashSet<TypeDefinition>(assembly.Modules.SelectMany(m => m.GetTypes())
+                .Where(t => t.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.Injection)));
+
+            return injections.Where(d => !IsTriggerMember(d.Target, triggerTypes)).ToArray();
         }
 
-        protected virtual IEnumerable<InjectionDefinition> ExtractInjections(ICustomAttributeProvider target)
+        protected virtual IEnumerable <InjectionDefinition> ExtractInjections(ICustomAttributeProvider target)
         {
             var injections = Enumerable.Empty<InjectionDefinition>();
 
             foreach (var trigger in target.CustomAttributes
-                .Select(a => new { attribute = a, injections = a.AttributeType.Resolve().CustomAttributes.Where(t => t.AttributeType.FullName == WellKnownTypes.Injection).ToArray() })
-                .Where(e => e.injections.Length != 0).ToArray())
-                injections = injections.Concat(ParseInjectionAttribute(target, trigger.attribute, trigger.injections));
-
+                .Select(a => new { Attribute = a, Injections = a.AttributeType.Resolve().CustomAttributes.Where(t => t.AttributeType.FullName == WellKnownTypes.Injection).ToArray() })
+                .Where(e => e.Injections.Length != 0).ToArray())
+            {
+                injections = injections.Concat(ParseInjectionAttribute(target, trigger.Attribute, trigger.Injections));
+            }
 
             return injections;
         }
@@ -160,6 +165,17 @@ namespace AspectInjector.Core.Services
                 return true;
 
             return IsAspectMember(member.DeclaringType);
+        }
+
+        private bool IsTriggerMember(IMemberDefinition member, HashSet<TypeDefinition> triggerTypes)
+        {
+            if (member == null)
+                return false;
+
+            if (member is TypeDefinition type && triggerTypes.Contains(type))
+                return true;
+
+            return IsTriggerMember(member.DeclaringType, triggerTypes);
         }
 
         private InjectionDefinition MergeInjections(InjectionDefinition a1, InjectionDefinition a2)

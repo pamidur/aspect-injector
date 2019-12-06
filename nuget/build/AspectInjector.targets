@@ -9,21 +9,25 @@
     </_InjectAspectsDependsOn>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup>    
     <_ASI_Loaded>true</_ASI_Loaded>
     <_ASI_Location Condition="'$(_ASI_Location)' == ''">$(MSBuildThisFileDirectory)../../build/_bin/</_ASI_Location>
     <_ASI_Options Condition="'$(Optimize)' == 'true'">$(_ASI_Options) -o</_ASI_Options>
   </PropertyGroup>
 
   <PropertyGroup>
+    <AspectInjectorEnabled Condition="'$(AspectInjectorEnabled)' == ''">true</AspectInjectorEnabled>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <_ASI_RefsFileExt>._asi_refs</_ASI_RefsFileExt>
   </PropertyGroup>
 
-  <Target Name="InjectAspects" AfterTargets="CoreCompile" DependsOnTargets="$(_InjectAspectsDependsOn)"/>
+  <Target Name="InjectAspects" AfterTargets="CoreCompile" Condition="'$(AspectInjectorEnabled)' == 'true'" DependsOnTargets="$(_InjectAspectsDependsOn)"/>
 
   <Target Name="_ASI_InjectAspectsCore" Condition="'$(_InjectionNeeded)' == 'true'">
     <PropertyGroup>
-      <ProcessCmd>dotnet &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_ASI_Options) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot;</ProcessCmd>
+      <ProcessCmd>dotnet &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_ASI_Options) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;@(IntermediateAssembly->'%(FullPath)')&quot;</ProcessCmd>
     </PropertyGroup>
     <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="_AspectExitCode" />

@@ -9,6 +9,7 @@ using DryIoc;
 using FluentIL.Logging;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace AspectInjector
 {
@@ -20,7 +21,7 @@ namespace AspectInjector
             var log = container.Resolve<ILogger>();
 
             try
-            {  
+            {
                 var processor = container.Resolve<Processor>();
                 processor.Process(filename, references, optimize, verbose);
             }
@@ -33,6 +34,9 @@ namespace AspectInjector
         }
         private Container GetAppContainer()
         {
+            var version = typeof(Compiler).Assembly.GetName().Version.ToString(3);
+            var app = $"AspectInjector|{version}";
+
             var container = new Container();
 
             //register main services
@@ -41,7 +45,7 @@ namespace AspectInjector
             container.Register<IAspectReader, AspectReader>(Reuse.Singleton);
             container.Register<IAspectWeaver, AspectWeaver>(Reuse.Singleton);
             container.Register<IInjectionReader, InjectionReader>(Reuse.Singleton);
-            container.RegisterDelegate<ILogger>(c => new ConsoleLogger("AspectInjector"), Reuse.Singleton);
+            container.RegisterDelegate<ILogger>(c => new ConsoleLogger(app), Reuse.Singleton);
 
             //register effects
 
