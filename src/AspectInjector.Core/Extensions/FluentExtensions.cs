@@ -24,7 +24,7 @@ namespace AspectInjector.Core.Extensions
             if (initializer == null)
                 return body.GetCodeStart();
 
-            var initializerRef = initializer.MakeGenericReference(method.DeclaringType);
+            var initializerRef = initializer.MakeReference(method.DeclaringType.MakeSelfReference());
 
             var instruction = body.Instructions.FirstOrDefault(i => i.OpCode == OpCodes.Call && i.Operand is MethodReference mref && mref.DeclaringType.Match(initializerRef.DeclaringType) && mref.Resolve() == initializer);
             return instruction.Next;
@@ -105,7 +105,7 @@ namespace AspectInjector.Core.Extensions
                 var ctors = type.Methods.Where(c => c.IsConstructor && !c.IsStatic).ToList();
 
                 foreach (var ctor in ctors)
-                    ctor.Body.AfterEntry(i => i.This().Call(instanceAspectsInitializer.MakeGenericReference(type)));
+                    ctor.Body.AfterEntry(i => i.This().Call(instanceAspectsInitializer.MakeReference(type.MakeSelfReference())));
             }
 
             return instanceAspectsInitializer;
