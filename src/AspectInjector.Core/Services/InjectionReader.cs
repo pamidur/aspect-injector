@@ -50,7 +50,8 @@ namespace AspectInjector.Core.Services
             var triggerTypes = new HashSet<TypeDefinition>(assembly.Modules.SelectMany(m => m.GetTypes())
                 .Where(t => t.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.Injection)));
 
-            return injections.Where(d => !IsTriggerMember(d.Target, triggerTypes)).ToArray();
+            return OrderByInheritance(injections.Where(d => !IsTriggerMember(d.Target, triggerTypes)))
+                .ToArray();
         }
 
         protected virtual IEnumerable <InjectionDefinition> ExtractInjections(ICustomAttributeProvider target)
@@ -183,6 +184,32 @@ namespace AspectInjector.Core.Services
             a1.Priority = Enumerable.Max(new[] { a1.Priority, a2.Priority });
             a1.Triggers = a1.Triggers.Concat(a2.Triggers).Distinct().ToList();
             return a1;
+        }
+
+        private IEnumerable<InjectionDefinition> OrderByInheritance(IEnumerable<InjectionDefinition> injections)
+        {
+            //Target can be either a type or a method
+            var types = new HashSet<TypeDefinition>(injections.Select(i => i.Target is TypeDefinition td ? td : i.Target.DeclaringType));
+            while(types.Any())
+            {
+                var currentType = types.First();
+                var baseType = currentType.BaseType?.Resolve();
+
+                //While base type exists in the list of all affected types, set base class as current
+                //This way we will process base classes first
+                while (baseType != null && types.Contains(baseType))
+                {
+                    currentType = baseType;
+                    baseType = currentType.BaseType.Resolve();
+                }
+
+                types.Remove(currentType);
+
+                foreach (var currentInjection in injections.Where(i => i.Target == currentType || i.Target.DeclaringType == currentType))
+                {
+                    yield return currentInjection;
+                }
+            }
         }
     }
 }
