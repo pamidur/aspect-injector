@@ -9,10 +9,10 @@
     </_InjectAspectsDependsOn>
   </PropertyGroup>
 
-  <PropertyGroup>    
+  <PropertyGroup>
     <_ASI_Loaded>true</_ASI_Loaded>
     <_ASI_Location Condition="'$(_ASI_Location)' == ''">$(MSBuildThisFileDirectory)../../build/_bin/</_ASI_Location>
-    <_ASI_Options Condition="'$(Optimize)' == 'true'">$(_ASI_Options) -o</_ASI_Options>
+    <_ASI_Debug Condition="'$(_ASI_Debug)' == ''">false</_ASI_Debug>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -27,11 +27,19 @@
 
   <Target Name="_ASI_InjectAspectsCore" Condition="'$(_InjectionNeeded)' == 'true'">
     <PropertyGroup>
-      <ProcessCmd>dotnet &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_ASI_Options) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;@(IntermediateAssembly->'%(FullPath)')&quot;</ProcessCmd>
+      <_CmdParams Condition=" '$(Optimize)' == 'true' "> -o</_CmdParams>
+      <_CmdParams Condition=" '$(_ASI_Debug)' == 'true' ">$(CmdParams) -d</_CmdParams>
     </PropertyGroup>
-    <Exec Command="$(ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true">
+    <PropertyGroup>
+      <_ProcessCmd>dotnet &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_CmdParams) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;@(IntermediateAssembly->'%(FullPath)')&quot;</_ProcessCmd>
+    </PropertyGroup>
+
+    <Message Condition=" '$(_ASI_Debug)' == 'true' " Importance="high" Text="$(_ProcessCmd)"/>
+
+    <Exec Command="$(_ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="_AspectExitCode" />
     </Exec>
+
     <Error Text="Aspect Injector processing has failed. See other errors." Condition="'$(_AspectExitCode)' != '0'" Code="AI_FAIL"  File="AspectInjector"/>
   </Target>
 

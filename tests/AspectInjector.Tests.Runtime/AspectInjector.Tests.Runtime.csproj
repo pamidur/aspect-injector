@@ -4,7 +4,7 @@
     <TargetFrameworks>net461</TargetFrameworks>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
@@ -13,12 +13,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Tests.RuntimeAssets\AspectInjector.Tests.RuntimeAssets.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <None Update="xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -29,7 +29,7 @@
 
   <PropertyGroup>
     <_ASI_Location>$(SolutionDir)src\AspectInjector\bin\$(Configuration)\netcoreapp2.1\</_ASI_Location>
-    <_ASI_Options Condition=" '$(Configuration)' == 'Debug' ">$(_ASI_Options) -d</_ASI_Options>
+    <_ASI_Debug Condition=" '$(Configuration)' == 'Debug' ">true</_ASI_Debug>
     <LangVersion>7.1</LangVersion>
-  </PropertyGroup> 
+  </PropertyGroup>
 </Project>

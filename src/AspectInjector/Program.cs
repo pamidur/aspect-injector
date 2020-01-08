@@ -27,6 +27,7 @@ namespace AspectInjector
                     case "-h":
                         return ShowHelp();
                     case "-d":
+                        Console.WriteLine("DEBUG MODE!!!");
                         Debugger.Launch();
                         continue;
                     case "-o":

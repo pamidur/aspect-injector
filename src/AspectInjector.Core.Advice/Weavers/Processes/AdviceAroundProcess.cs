@@ -19,11 +19,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         private readonly string _unWrapperName;
         private readonly string _movedOriginalName;
         private MethodDefinition _wrapper;
-        private MethodDefinition _entry;
 
         public AdviceAroundProcess(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
         {
-            _entry = target;
             _wrapperNamePrefix = $"{GetAroundMethodPrefix(_method)}w_";
             _unWrapperName = $"{GetAroundMethodPrefix(_method)}u";
             _movedOriginalName = $"{GetAroundMethodPrefix(_method)}o";
@@ -68,7 +66,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var prevWrapper = _type.Methods.Where(m => m.Name.StartsWith(_wrapperNamePrefix))
                 .Select(m => new { m, i = ushort.Parse(m.Name.Substring(_wrapperNamePrefix.Length)) }).OrderByDescending(g => g.i).FirstOrDefault();
 
-            var newWrapper = DuplicateMethodDefinition(GetOrCreateUnwrapper());
+            var newWrapper = CloneDefinition(GetOrCreateUnwrapper());
+
             newWrapper.IsPrivate = true;
             newWrapper.Name = $"{_wrapperNamePrefix}{(prevWrapper == null ? 0 : prevWrapper.i + 1)}";
             newWrapper.Mark(WellKnownTypes.DebuggerHiddenAttribute);
@@ -85,7 +84,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var instructions = prev.Body.Instructions.Where(i => i.Operand is MethodReference && ((MethodReference)i.Operand).Resolve() == unwrapper).ToList();
 
             var nextRef = CreateRef(next, prev);
-       
+
             foreach (var inst in instructions)
                 inst.Operand = nextRef;
         }
@@ -96,7 +95,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             if (unwrapper != null)
                 return unwrapper;
 
-            unwrapper = DuplicateMethodDefinition(_method);
+            unwrapper = CloneDefinition(_method);
+
             unwrapper.Name = _unWrapperName;
             unwrapper.ReturnType = _module.ImportReference(StandardTypes.Object);
             unwrapper.IsPrivate = true;
@@ -114,7 +114,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     var refList = new List<Tuple<int, VariableDefinition>>();
 
                     var originalRef = CreateRef(original, unwrapper);
-                  
+
                     il = il.ThisOrStatic().Call(originalRef, c =>
                     {
                         for (int i = 0; i < original.Parameters.Count; i++)
@@ -164,14 +164,11 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private MethodDefinition WrapEntryPoint(MethodDefinition unwrapper)
         {
-            var original = DuplicateMethodDefinition(_method);
-
+            var original = CloneDefinition(_method);
 
             original.Name = _movedOriginalName;
             original.IsPrivate = true;
-
-            //var returnType = _method.ResolveIfGeneric(_method.ReturnType);
-
+            
             var returnType = _method.ReturnType;
 
             MoveBody(_method, original);
@@ -264,19 +261,17 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             from.Body.ExceptionHandlers.Clear();
         }
 
-        private MethodDefinition DuplicateMethodDefinition(MethodDefinition origin)
+        private MethodDefinition CloneDefinition(MethodDefinition origin)
         {
-            var method = new MethodDefinition(origin.Name,
-               origin.Attributes & ~MethodAttributes.RTSpecialName,
-               origin.ReturnType);
+            var method = new MethodDefinition(origin.Name, origin.Attributes & ~MethodAttributes.RTSpecialName, origin.ReturnType);
 
-            origin.DeclaringType.Methods.Add(method);
+            _type.Methods.Add(method);
 
             foreach (var gparam in origin.GenericParameters)
                 method.GenericParameters.Add(gparam.Clone(method));
 
             if (origin.ReturnType is GenericParameter gp && gp.Owner == origin)
-                method.ReturnType = _module.ImportReference(method.GenericParameters[gp.Position]);
+                method.ReturnType = _type.Module.ImportReference(method.GenericParameters[gp.Position]);
 
             if (origin.IsSpecialName)
                 method.IsSpecialName = true;
@@ -284,8 +279,13 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             foreach (var parameter in origin.Parameters)
             {
                 var paramType = parameter.ParameterType;
-                if (paramType is GenericParameter gpp && gpp.Owner == origin)
-                    paramType = method.GenericParameters[gpp.Position];
+                if (paramType is GenericParameter gpp)
+                {
+                    if (gpp.Owner == origin)
+                        paramType = method.GenericParameters[gpp.Position];
+                    else if (gpp.Owner != _type)
+                        throw new Exception();
+                }
 
                 method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _module.ImportReference(paramType)));
             }

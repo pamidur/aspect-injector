@@ -40,7 +40,7 @@ namespace AspectInjector.Core.Mixin
             foreach (var iface in ifaceTree)
                 if (_target.Interfaces.All(i => !i.InterfaceType.Match(iface)))
                 {
-                    var ifaceRef = _target.Module.ImportReference(iface);
+                    var ifaceRef = _target.Module.ImportReference(iface.Clone(_target));
 
                     _target.Interfaces.Add(new InterfaceImplementation(ifaceRef));
 
@@ -57,149 +57,48 @@ namespace AspectInjector.Core.Mixin
                 }
         }
 
-        protected MethodDefinition GetOrCreateMethodProxy(MethodReference ifaceMethod)
+        protected MethodDefinition CreateMethodProxy(MethodDefinition originalMethod, TypeReference @interface)
         {
-            var methodName = $"{ifaceMethod.DeclaringType.FullName}.{ifaceMethod.Name}";
-
-            var proxy = _target.Methods.FirstOrDefault(m => m.IsExplicitImplementationOf(ifaceMethod));
-            if (proxy == null)
-            {
-                proxy = new MethodDefinition(methodName,
-                    MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
-                     ifaceMethod.ReturnType);
-
-                _target.Methods.Add(proxy);
-
-                var ifaceMethodDef = ifaceMethod.Resolve();
-
-                foreach (var gp in ifaceMethodDef.GenericParameters)
-                    proxy.GenericParameters.Add(gp.Clone(proxy));
-
-                TypeReference mayBeGeneric(TypeReference tr) => tr is GenericParameter gpr && gpr.Type == GenericParameterType.Method ? proxy.GenericParameters[gpr.Position] : tr;
-
-                proxy.Mark(WellKnownTypes.DebuggerHiddenAttribute);
-                //proxy.ReturnType = _target.Module.ImportReference(mayBeGeneric(ifaceMethod.ReturnType));
-
-                if (ifaceMethod.Resolve().IsSpecialName)
-                    proxy.IsSpecialName = true;
-
-                foreach (var parameter in ifaceMethod.Parameters)
-                    proxy.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, parameter.ParameterType));
-
-                proxy.Overrides.Add(ifaceMethod);
-
-                if (proxy.HasGenericParameters)
-                {
-                    //var ifaceRef = ifaceMethod.Resolve().DeclaringType.MakeReference();
-
-                    var gref = new GenericInstanceMethod(ifaceMethod);
-                    foreach (var gpar in proxy.GenericParameters)
-                        gref.GenericArguments.Add(gpar);
-
-                    ifaceMethod = gref;
-
-                }
-
-                proxy.Body.Instead(
-                    e => e
-                    .LoadAspect(_aspect)
-                    .Call(ifaceMethod, args =>
-                    {
-                        foreach (var pp in proxy.Parameters)
-                            args = args.Load(pp);
-                        return args;
-                    })
-                    .Return()
-                    );
-            }
-
-            return proxy;
-        }
-
-        protected void CreateMethodProxy(MethodDefinition originalMethod, TypeReference @interface)
-        {
-            var method = _target.Module.ImportReference(originalMethod.MakeReference(@interface));
+            var method = _target.Module.ImportReference(originalMethod).MakeReference(@interface);
 
             //if (@interface.IsGenericInstance)
             //    method = _target.Module.ImportReference(originalMethod.MakeGenericReference(@interface));
 
-            GetOrCreateMethodProxy(method);
+            return GetOrCreateMethodProxy(method);
         }
 
         protected void CreateEventProxy(EventDefinition originalEvent, TypeReference @interface)
         {
             var eventName = $"{@interface.FullName}.{originalEvent.Name}";
-            var eventType = @interface.ResolveIfGeneric(_target.Module.ImportReference(originalEvent.AddMethod ?? originalEvent.RemoveMethod).Parameters[0].ParameterType);
 
-            var ed = _target.Events.FirstOrDefault(e => e.Name == eventName && e.EventType.Match(eventType));
-            if (ed == null)
+            var proxyAdd = originalEvent.AddMethod == null ? null : CreateMethodProxy(originalEvent.AddMethod, @interface);
+            var proxyRemove = originalEvent.RemoveMethod == null ? null : CreateMethodProxy(originalEvent.RemoveMethod, @interface);
+
+            var eventType = (proxyAdd ?? proxyRemove).Parameters[0].ParameterType;
+            var ed = new EventDefinition(eventName, EventAttributes.None, eventType)
             {
-                ed = new EventDefinition(eventName, EventAttributes.None, _target.Module.ImportReference(eventType));
+                RemoveMethod = proxyRemove,
+                AddMethod = proxyAdd
+            };
 
-                if (originalEvent.AddMethod != null)
-                {
-                    var method = _target.Module.ImportReference(originalEvent.AddMethod);
-                    method = _target.Module.ImportReference(originalEvent.AddMethod.MakeReference(@interface));
-
-                    ed.AddMethod = GetOrCreateMethodProxy(method);
-                }
-
-                if (originalEvent.RemoveMethod != null)
-                {
-                    var method = _target.Module.ImportReference(originalEvent.RemoveMethod);
-                    method = _target.Module.ImportReference(originalEvent.RemoveMethod.MakeReference(@interface));
-
-                    ed.RemoveMethod = GetOrCreateMethodProxy(method);
-                }
-
-                _target.Events.Add(ed);
-            }
+            _target.Events.Add(ed);
         }
 
         protected void CreatePropertyProxy(PropertyDefinition originalProperty, TypeReference @interface)
         {
             var propertyName = $"{@interface.FullName}.{originalProperty.Name}";
 
-            TypeReference propertyType = null;
-            MethodReference getMethod = null;
-            MethodReference setMethod = null;
+            var proxyGet = originalProperty.GetMethod == null ? null : CreateMethodProxy(originalProperty.GetMethod, @interface);
+            var proxySet = originalProperty.SetMethod == null ? null : CreateMethodProxy(originalProperty.SetMethod, @interface);
 
-            if (originalProperty.GetMethod != null)
+            var propertyType = proxyGet?.ReturnType ?? proxySet.Parameters[0].ParameterType;
+            var pd = new PropertyDefinition(propertyName, PropertyAttributes.None, propertyType)
             {
-                getMethod = originalProperty.GetMethod;
+                GetMethod = proxyGet,
+                SetMethod = proxySet
+            };
 
-                getMethod = originalProperty.GetMethod.MakeReference(@interface);
-
-                propertyType = getMethod.ResolveIfGeneric(getMethod.ReturnType);
-            }
-
-            if (originalProperty.SetMethod != null)
-            {
-                setMethod = originalProperty.SetMethod;
-
-                setMethod = originalProperty.SetMethod.MakeReference(@interface);
-
-                propertyType = propertyType ?? setMethod.ResolveIfGeneric(setMethod.Parameters[0].ParameterType);
-            }
-
-            propertyType = _target.Module.ImportReference(propertyType);
-            if (getMethod != null) getMethod = _target.Module.ImportReference(getMethod);
-            if (setMethod != null) setMethod = _target.Module.ImportReference(setMethod);
-
-            var pd = _target.Properties.FirstOrDefault(p => p.Name == propertyName && p.PropertyType.Match(propertyType));
-            if (pd == null)
-            {
-                pd = new PropertyDefinition(propertyName, PropertyAttributes.None, propertyType);
-
-                if (getMethod != null)
-                    pd.GetMethod = GetOrCreateMethodProxy(getMethod);
-
-
-                if (setMethod != null)
-                    pd.SetMethod = GetOrCreateMethodProxy(setMethod);
-
-                _target.Properties.Add(pd);
-            }
+            _target.Properties.Add(pd);
         }
 
         private IEnumerable<TypeReference> GetInterfacesTree(TypeReference typeReference)
@@ -226,6 +125,115 @@ namespace AspectInjector.Core.Mixin
             var gparams = interfaceType.GenericArguments.Select(LookupType).ToArray();
 
             return interfaceType.Resolve().MakeGenericInstanceType(gparams);
+        }
+
+        protected MethodDefinition GetOrCreateMethodProxy(MethodReference ifaceMethod)
+        {
+            var proxy = _target.Methods.FirstOrDefault(m => m.IsExplicitImplementationOf(ifaceMethod));
+            if (proxy == null)
+            {
+                proxy = Implement(ifaceMethod, _target);
+                proxy.Mark(WellKnownTypes.DebuggerHiddenAttribute);
+
+
+                if (proxy.HasGenericParameters)
+                    ifaceMethod = ifaceMethod.MakeGenericInstanceMethod(proxy.GenericParameters.ToArray());
+
+                proxy.Body.Instead(
+                    e => e
+                    .LoadAspect(_aspect)
+                    .Call(ifaceMethod, args =>
+                    {
+                        foreach (var pp in proxy.Parameters)
+                            args = args.Load(pp);
+                        return args;
+                    })
+                    .Return()
+                    );
+            }
+
+            return proxy;
+        }
+
+        private static MethodDefinition Implement(MethodReference origin, TypeDefinition target)
+        {
+            var methodName = $"{origin.DeclaringType.FullName}.{origin.Name}";
+            var originDef = origin.Resolve();
+            var method = new MethodDefinition(methodName, MethodAttributes.Private | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual, origin.ReturnType);
+
+            target.Methods.Add(method);
+
+
+
+            foreach (var gparam in origin.GenericParameters)
+                method.GenericParameters.Add(gparam.Clone(method));
+
+            method.ReturnType = ResolveType(origin.ReturnType, origin, method.GenericParameters.ToArray());
+
+            if (originDef.IsSpecialName)
+                method.IsSpecialName = true;
+
+            foreach (var parameter in origin.Parameters)
+            {
+                var resolvedType = ResolveType(parameter.ParameterType, origin, method.GenericParameters.ToArray());
+                method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, target.Module.ImportReference(resolvedType)));
+            }
+
+            //foreach (var parameter in origin.Parameters)
+            //{
+            //    var resolvedType = ResolveType(parameter.ParameterType, origin, method.GenericParameters.ToArray());
+            //    parameter.ParameterType = resolvedType;
+            //    //method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, target.Module.ImportReference(resolvedType)));
+            //}
+
+            //origin.ReturnType = ResolveType(origin.ReturnType, origin, method.GenericParameters.ToArray());
+
+            method.Overrides.Add(origin);
+
+            return method;
+        }
+
+        private static TypeReference ResolveType(TypeReference tr, MethodReference reference, IList<GenericParameter> genericParameters)
+        {
+            var newtr = tr;
+            if (!newtr.ContainsGenericParameter)
+                return reference.Module.ImportReference(newtr);
+
+            var definition = reference.Resolve();
+
+            if (newtr is GenericParameter gpp)
+            {
+                // pick Type from method implementation
+                if (gpp.Owner == definition)
+                    newtr = genericParameters[gpp.Position];
+                //pick Type from interface implementation
+                else if (gpp.Owner == definition.DeclaringType)
+                    newtr = ((IGenericInstance)reference.DeclaringType).GenericArguments[gpp.Position];
+            }
+            else if (tr is ByReferenceType brt)
+                newtr = new ByReferenceType(ResolveType(brt.ElementType, reference, genericParameters));
+            else if (tr is GenericInstanceType git)
+            {
+                var newgit = new GenericInstanceType(ResolveType(git.ElementType, reference, genericParameters));
+
+                foreach (var ga in git.GenericArguments)
+                    newgit.GenericArguments.Add(ResolveType(ga, reference, genericParameters));
+
+                newtr = newgit;
+            }
+            else
+                newtr = new TypeReference(tr.Namespace, tr.Name, reference.Module, tr.Scope, tr.IsValueType)
+                {
+                    DeclaringType = tr.DeclaringType
+                };
+
+            foreach (var subgp in tr.GenericParameters)
+            {
+                newtr.GenericParameters.Add(genericParameters[subgp.Position]);
+            }
+
+
+            return reference.Module.ImportReference(newtr);
         }
     }
 }
