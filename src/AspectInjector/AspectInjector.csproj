@@ -5,9 +5,6 @@
     <Description>Entrypoint for Aspect Injector.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DryIoc.dll" Version="3.0.2" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" />
     <ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj" />

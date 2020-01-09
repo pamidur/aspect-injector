@@ -5,11 +5,9 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Mixin;
 using AspectInjector.Core.Services;
 using AspectInjector.Rules;
-using DryIoc;
 using FluentIL.Logging;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace AspectInjector
 {
@@ -17,12 +15,13 @@ namespace AspectInjector
     {
         public int Execute(string filename, IReadOnlyList<string> references, bool optimize, bool verbose)
         {
-            var container = GetAppContainer();
-            var log = container.Resolve<ILogger>();
+            var version = typeof(Compiler).Assembly.GetName().Version.ToString(3);
+            var app = $"AspectInjector|{version}";
+            var log = new ConsoleLogger(app);
 
             try
             {
-                var processor = container.Resolve<Processor>();
+                var processor = CreateApp(log);
                 processor.Process(filename, references, optimize, verbose);
             }
             catch (Exception e)
@@ -32,34 +31,20 @@ namespace AspectInjector
 
             return log.IsErrorThrown ? 1 : 0;
         }
-        private Container GetAppContainer()
+        private Processor CreateApp(ILogger logger)
         {
-            var version = typeof(Compiler).Assembly.GetName().Version.ToString(3);
-            var app = $"AspectInjector|{version}";
+            var aspectReader = new AspectReader(new IEffectReader[] {
+                new MixinReader(),
+                new AdviceReader(logger)
+            }, logger);
+            var processor = new Processor(aspectReader, new InjectionReader(aspectReader, logger), new AspectWeaver(logger), new IEffectWeaver[] {
+                new MixinWeaver(logger),
+                new AdviceInlineWeaver(logger),
+                new AdviceAroundWeaver(logger),
+                new AdviceStateMachineWeaver(logger)
+            }, logger);
 
-            var container = new Container();
-
-            //register main services
-
-            container.Register<Processor>(Reuse.Singleton);
-            container.Register<IAspectReader, AspectReader>(Reuse.Singleton);
-            container.Register<IAspectWeaver, AspectWeaver>(Reuse.Singleton);
-            container.Register<IInjectionReader, InjectionReader>(Reuse.Singleton);
-            container.RegisterDelegate<ILogger>(c => new ConsoleLogger(app), Reuse.Singleton);
-
-            //register effects
-
-            container.Register<IEffectReader, MixinReader>();
-            container.Register<IEffectReader, AdviceReader>();
-
-            container.Register<IEffectWeaver, MixinWeaver>();
-            container.Register<IEffectWeaver, AdviceInlineWeaver>();
-            container.Register<IEffectWeaver, AdviceAroundWeaver>();
-            container.Register<IEffectWeaver, AdviceStateMachineWeaver>();
-
-            //done registration
-
-            return container;
+            return processor;
         }
     }
 }
