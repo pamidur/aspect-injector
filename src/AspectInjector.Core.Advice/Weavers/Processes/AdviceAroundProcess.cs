@@ -284,7 +284,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     if (gpp.Owner == origin)
                         paramType = method.GenericParameters[gpp.Position];
                     else if (gpp.Owner != _type)
-                        throw new Exception();
+                        throw new Exception("Cannot clone definition of external method.");
                 }
 
                 method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _module.ImportReference(paramType)));

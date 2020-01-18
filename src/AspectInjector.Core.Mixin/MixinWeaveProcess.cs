@@ -194,14 +194,14 @@ namespace AspectInjector.Core.Mixin
 
             if (newtr is GenericParameter gpp)
             {
-                // pick Type from method implementation
+                //pick Type from method implementation
                 if (gpp.Owner is MethodReference dmr && dmr.Resolve() == definition)
                     newtr = genericParameters[gpp.Position];
                 //pick Type from interface implementation
                 else if (gpp.Owner is TypeReference dtr && dtr.Resolve() == definition.DeclaringType)
                     newtr = ResolveType(((IGenericInstance)reference.DeclaringType).GenericArguments[gpp.Position], reference, genericParameters);
                 else
-                    throw new Exception();
+                    throw new Exception("Cannot resolve generic argument for interface implementation.");
             }
             else if (tr is ByReferenceType brt)
                 newtr = new ByReferenceType(ResolveType(brt.ElementType, reference, genericParameters));

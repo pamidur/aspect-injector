@@ -31,10 +31,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Tests.RuntimeAssets", "tests\AspectInjector.Tests.RuntimeAssets\AspectInjector.Tests.RuntimeAssets.csproj", "{A4BDB41D-096A-42E7-953E-99F7680141B0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {FC862191-9081-4A58-96FF-B57F17AC40A9}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector", "src\AspectInjector\AspectInjector.csproj", "{FC862191-9081-4A58-96FF-B57F17AC40A9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Tests.Runtime", "tests\AspectInjector.Tests.Runtime\AspectInjector.Tests.Runtime.csproj", "{6431E891-8E90-4510-AC8F-581536757EA0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {FC862191-9081-4A58-96FF-B57F17AC40A9}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "analyzers", "analyzers", "{F062AF31-5518-40FA-A790-E4B4887126C1}"
 EndProject
@@ -52,7 +58,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentIL.Common", "external
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Tests.Integrity", "tests\AspectInjector.Tests.Integrity\AspectInjector.Tests.Integrity.csproj", "{230C6FAF-11A1-4318-A482-69C7252652B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.GenericTests", "tests\AspectInjector.GenericTests\AspectInjector.GenericTests.csproj", "{BF019B75-CECE-46E7-9E3D-620B2CAB6A96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.GenericTests", "tests\AspectInjector.GenericTests\AspectInjector.GenericTests.csproj", "{BF019B75-CECE-46E7-9E3D-620B2CAB6A96}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {FC862191-9081-4A58-96FF-B57F17AC40A9}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
