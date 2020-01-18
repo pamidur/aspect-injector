@@ -6,6 +6,7 @@
 [![NuGet](https://img.shields.io/nuget/v/AspectInjector.svg)](https://www.nuget.org/packages/AspectInjector)
 [![NuGet Pre Release](https://img.shields.io/nuget/vpre/AspectInjector.svg)](https://www.nuget.org/packages/AspectInjector)
 [![Build Status](https://travis-ci.org/pamidur/aspect-injector.svg?branch=master)](https://travis-ci.org/pamidur/aspect-injector)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d9c91dfb194e4c669b0a98031c59b26e)](https://www.codacy.com/manual/agulyj/aspect-injector?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=pamidur/aspect-injector&amp;utm_campaign=Badge_Grade)
 
 ### Download
 ```bash
