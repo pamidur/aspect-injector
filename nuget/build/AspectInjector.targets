@@ -27,11 +27,12 @@
 
   <Target Name="_ASI_InjectAspectsCore" Condition="'$(_InjectionNeeded)' == 'true'">
     <PropertyGroup>
-      <_CmdParams Condition=" '$(Optimize)' == 'true' "> -o</_CmdParams>
+      <_CmdParams Condition=" '$(Optimize)' == 'true' ">$(CmdParams) -o</_CmdParams>
       <_CmdParams Condition=" '$(_ASI_Debug)' == 'true' ">$(CmdParams) -d</_CmdParams>
+      <_CmdParams Condition=" '$(_ASI_Verbose)' == 'true' ">$(CmdParams) -v</_CmdParams>
     </PropertyGroup>
     <PropertyGroup>
-      <_ProcessCmd>dotnet &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_CmdParams) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;@(IntermediateAssembly->'%(FullPath)')&quot;</_ProcessCmd>
+      <_ProcessCmd>dotnet --roll-forward-on-no-candidate-fx 2 &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_CmdParams) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;@(IntermediateAssembly->'%(FullPath)')&quot;</_ProcessCmd>
     </PropertyGroup>
 
     <Message Condition=" '$(_ASI_Debug)' == 'true' " Importance="high" Text="$(_ProcessCmd)"/>
