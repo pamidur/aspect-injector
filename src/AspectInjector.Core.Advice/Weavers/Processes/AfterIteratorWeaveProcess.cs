@@ -34,8 +34,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     .First(i => i.OpCode == OpCodes.Newobj && i.Operand is MemberReference mr && mr.DeclaringType.Resolve() == smDef).Operand).DeclaringType;
             }
 
-            //smRef = smRef.MakeGenericInstanceType(_target.DeclaringType.GenericParameters.Concat(_target.GenericParameters).ToArray());
-
             return smRef;
         }
 

@@ -9,6 +9,7 @@ namespace AspectInjector
 {
     internal class Program
     {
+        private static bool _headerPrinted = false;
         private static int Main(string[] args)
         {
             if (args.Length == 0)
@@ -27,6 +28,7 @@ namespace AspectInjector
                     case "-h":
                         return ShowHelp();
                     case "-d":
+                        Console.WriteLine("DEBUG MODE!!!");
                         Debugger.Launch();
                         continue;
                     case "-o":
@@ -34,6 +36,7 @@ namespace AspectInjector
                         continue;
                     case "-v":
                         verbose = true;
+                        ShowVerboseHeader();
                         continue;
                     case "-rf":
                         var reflist = args[++i];
@@ -51,11 +54,22 @@ namespace AspectInjector
             return ShowHelp();
         }
 
+        private static void ShowVerboseHeader()
+        {
+            if (!_headerPrinted)
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                Console.WriteLine($"version: {assembly.GetCustomAttribute<AssemblyProductAttribute>().Product} {assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}");
+                Console.WriteLine($"runtime: {System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}");
+                Console.WriteLine($"visit: https://github.com/pamidur/aspect-injector");
+                _headerPrinted = true;
+            }
+        }
+
         private static int ShowHelp()
         {
+            ShowVerboseHeader();
             var assembly = Assembly.GetExecutingAssembly();
-            Console.WriteLine($"version: {assembly.GetCustomAttribute<AssemblyProductAttribute>().Product} {assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}");
-            Console.WriteLine($"visit: https://github.com/pamidur/aspect-injector");
             Console.WriteLine();
             Console.WriteLine($"usage: dotnet {assembly.ManifestModule.Name} [-d] [-o] [-v] [-rf <references_file>] <path_to_assembly> (<path_to_reference>)");
             Console.WriteLine($"options:");

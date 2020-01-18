@@ -34,8 +34,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             if (smRef.HasGenericParameters)
             {
                 var smDef = smRef.Resolve();
-                smRef = ((MethodReference)_method.Body.Instructions
-                    .First(i => i.OpCode == OpCodes.Newobj && i.Operand is MemberReference mr && mr.DeclaringType.Resolve() == smDef).Operand).DeclaringType;
+                smRef = _method.Body.Variables.First(v => v.VariableType.Resolve() == smRef).VariableType;
+                //smRef = ((MethodReference)_method.Body.Instructions
+                //    .First(i => i.OpCode == OpCodes.Newobj && i.Operand is MemberReference mr && mr.DeclaringType.Resolve() == smDef).Operand).DeclaringType;
             }
 
             return smRef;
