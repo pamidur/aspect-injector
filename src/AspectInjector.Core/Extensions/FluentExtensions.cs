@@ -4,6 +4,7 @@ using FluentIL;
 using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using System;
 using System.Linq;
 
@@ -74,18 +75,18 @@ namespace AspectInjector.Core.Extensions
 
             var fieldName = $"{Constants.AspectInstanceFieldPrefix}{aspect.Host.FullName}";
 
-            var field = FindField(type, fieldName);
+            var field = FindField(type.MakeSelfReference(), fieldName);
             if (field == null)
             {
-                field = new FieldDefinition(fieldName, FieldAttributes.Family, cut.Import(aspect.Host));
-                type.Fields.Add(field);
+                var fieldDef = new FieldDefinition(fieldName, FieldAttributes.Family, cut.Import(aspect.Host));
+                type.Fields.Add(fieldDef);
 
-                var fieldRef = field.MakeReference(type.MakeSelfReference());
+                field = fieldDef.MakeReference(type.MakeSelfReference());
 
-                InjectInitialization(GetInstanсeAspectsInitializer(type, cut), fieldRef, c => c.CreateAspectInstance(aspect));
+                InjectInitialization(GetInstanсeAspectsInitializer(type, cut), field, c => c.CreateAspectInstance(aspect));
             }
 
-            return field.MakeReference(type.MakeSelfReference());
+            return field;
         }
 
         private static MethodDefinition GetInstanсeAspectsInitializer(TypeDefinition type, Cut cut)
@@ -138,13 +139,36 @@ namespace AspectInjector.Core.Extensions
             );
         }
 
-        private static FieldDefinition FindField(TypeDefinition type, string name)
+        private static FieldReference FindField(TypeReference type, string name)
         {
             if (type == null)
                 return null;
 
-            var field = type.Fields.FirstOrDefault(f => f.Name == name && (f.Attributes & FieldAttributes.Family) != 0);
-            return field ?? FindField(type.BaseType?.Resolve(), name);
+            var field = type.Resolve().Fields.FirstOrDefault(f => f.Name == name && (f.Attributes & FieldAttributes.Family) != 0);
+
+            if (field == null)
+            {
+                var basetype = type.Resolve().BaseType;
+                if (basetype is GenericInstanceType git)
+                {
+                    var gtype = type as GenericInstanceType;
+                    var gparams = git.GenericArguments.Select(ga =>
+                    {
+                        if (ga is GenericParameter gp && gtype != null)
+                            return type.Module.ImportReference(gtype.GenericArguments[gp.Position]);
+                        else
+                            return type.Module.ImportReference(ga);
+
+                    }).ToArray();
+
+                    basetype = type.Module.ImportReference(basetype.Resolve()).MakeGenericInstanceType(gparams);
+                }
+
+                return FindField(basetype, name);
+            }
+            else
+                return field.MakeReference(type);
+
         }
     }
 }
