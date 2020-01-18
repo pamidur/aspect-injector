@@ -40,31 +40,33 @@ namespace AspectInjector.Core.Mixin
             foreach (var iface in ifaceTree)
                 if (_target.Interfaces.All(i => !i.InterfaceType.Match(iface)))
                 {
-                    var ifaceRef = _target.Module.ImportReference(iface.Clone(_target));
-
-                    _target.Interfaces.Add(new InterfaceImplementation(ifaceRef));
+                    _target.Interfaces.Add(new InterfaceImplementation(iface));
 
                     var ifaceDefinition = iface.Resolve();
 
                     foreach (var method in ifaceDefinition.Methods.Where(m => m.IsNormalMethod() || m.IsConstructor))
-                        CreateMethodProxy(method, ifaceRef);
+                        CreateMethodProxy(method, iface);
 
                     foreach (var @event in ifaceDefinition.Events)
-                        CreateEventProxy(@event, ifaceRef);
+                        CreateEventProxy(@event, iface);
 
                     foreach (var property in ifaceDefinition.Properties)
-                        CreatePropertyProxy(property, ifaceRef);
+                        CreatePropertyProxy(property, iface);
                 }
         }
 
         protected MethodDefinition CreateMethodProxy(MethodDefinition originalMethod, TypeReference @interface)
         {
-            var method = _target.Module.ImportReference(originalMethod).MakeReference(@interface);
+            var method = _target.Module.ImportReference(originalMethod);
 
-            //if (@interface.IsGenericInstance)
-            //    method = _target.Module.ImportReference(originalMethod.MakeGenericReference(@interface));
+            if (originalMethod.DeclaringType.HasGenericParameters)
+                method = method.MakeReference(@interface);
 
-            return GetOrCreateMethodProxy(method);
+            var proxy = GetOrCreateMethodProxy(method);
+
+            proxy.Overrides.Add(method);
+
+            return proxy;
         }
 
         protected void CreateEventProxy(EventDefinition originalEvent, TypeReference @interface)
@@ -107,9 +109,9 @@ namespace AspectInjector.Core.Mixin
             if (!definition.IsInterface)
                 throw new NotSupportedException(typeReference.Name + " should be an interface");
 
-            var nestedIfaces = definition.Interfaces.Select(i => i.InterfaceType.IsGenericInstance ? ParametrizeSubInterface((GenericInstanceType)i.InterfaceType, typeReference) : i.InterfaceType).ToArray();
+            var nestedIfaces = definition.Interfaces.Select(i => i.InterfaceType.IsGenericInstance ? ParametrizeSubInterface((GenericInstanceType)i.InterfaceType, typeReference) : _target.Module.ImportReference(i.InterfaceType)).ToArray();
 
-            return new[] { typeReference }.Concat(nestedIfaces);
+            return new[] { _target.Module.ImportReference(typeReference) }.Concat(nestedIfaces);
         }
 
         private TypeReference ParametrizeSubInterface(GenericInstanceType interfaceType, TypeReference typeReference)
@@ -117,14 +119,14 @@ namespace AspectInjector.Core.Mixin
             TypeReference LookupType(TypeReference tr)
             {
                 if (tr is GenericParameter gp)
-                    return ((GenericInstanceType)typeReference).GenericArguments[gp.Position];
+                    return _target.Module.ImportReference(((GenericInstanceType)typeReference).GenericArguments[gp.Position]);
 
                 return tr;
             }
 
             var gparams = interfaceType.GenericArguments.Select(LookupType).ToArray();
 
-            return interfaceType.Resolve().MakeGenericInstanceType(gparams);
+            return _target.Module.ImportReference(interfaceType.Resolve()).MakeGenericInstanceType(gparams);
         }
 
         protected MethodDefinition GetOrCreateMethodProxy(MethodReference ifaceMethod)
@@ -179,17 +181,6 @@ namespace AspectInjector.Core.Mixin
                 method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, target.Module.ImportReference(resolvedType)));
             }
 
-            //foreach (var parameter in origin.Parameters)
-            //{
-            //    var resolvedType = ResolveType(parameter.ParameterType, origin, method.GenericParameters.ToArray());
-            //    parameter.ParameterType = resolvedType;
-            //    //method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, target.Module.ImportReference(resolvedType)));
-            //}
-
-            //origin.ReturnType = ResolveType(origin.ReturnType, origin, method.GenericParameters.ToArray());
-
-            method.Overrides.Add(origin);
-
             return method;
         }
 
@@ -204,11 +195,13 @@ namespace AspectInjector.Core.Mixin
             if (newtr is GenericParameter gpp)
             {
                 // pick Type from method implementation
-                if (gpp.Owner == definition)
+                if (gpp.Owner is MethodReference dmr && dmr.Resolve() == definition)
                     newtr = genericParameters[gpp.Position];
                 //pick Type from interface implementation
-                else if (gpp.Owner == definition.DeclaringType)
-                    newtr = ((IGenericInstance)reference.DeclaringType).GenericArguments[gpp.Position];
+                else if (gpp.Owner is TypeReference dtr && dtr.Resolve() == definition.DeclaringType)
+                    newtr = ResolveType(((IGenericInstance)reference.DeclaringType).GenericArguments[gpp.Position], reference, genericParameters);
+                else
+                    throw new Exception();
             }
             else if (tr is ByReferenceType brt)
                 newtr = new ByReferenceType(ResolveType(brt.ElementType, reference, genericParameters));

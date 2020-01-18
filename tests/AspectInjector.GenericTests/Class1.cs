@@ -33,7 +33,7 @@ namespace AspectInjector.GenericTests
 
         }
 
-        public Tuple<int, int, int, TMethod> Do<TMethod>(Tuple<int, int, int, TMethod> data)
+        Tuple<int, int, int, TMethod> Wrapper2<int>.IInterface<int, int>.Do<TMethod>(Tuple<int, int, int, TMethod> data)
         {
             throw new NotImplementedException();
         }
