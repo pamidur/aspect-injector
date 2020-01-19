@@ -14,10 +14,11 @@ jobs:
       with:
         dotnet-version: 2.2.108
     - name: Build
-      run: dotnet build ./samples -c Release
+      working-directory: samples
+      run: dotnet build -c Release
     - name: Test
       working-directory: samples
-      run: dotnet test ./samples -c Release --no-build
+      run: dotnet test -c Release --no-build
       
   pack:
       runs-on: ubuntu-latest
@@ -29,8 +30,9 @@ jobs:
         with:
           dotnet-version: 2.2.108
       - name: Pack
+        working-directory: samples
         run: dotnet pack -o ./artifacts -c Release
       - uses: actions/upload-artifact@v1
         with:
           name: artifacts
-          path: ./artifacts
+          path: ./samples/artifacts
