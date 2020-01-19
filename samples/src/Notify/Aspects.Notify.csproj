@@ -7,6 +7,7 @@
 Powered by AspectInjector.</Description>
     <PackageProjectUrl>https://github.com/pamidur/aspect-injector/tree/master/samples/src/Notify</PackageProjectUrl>
     <PackageIcon>package.png</PackageIcon>
+    <PackageIconUrl>https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png</PackageIconUrl>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AspectInjector" Version="2.2.8" PrivateAssets="None" />
