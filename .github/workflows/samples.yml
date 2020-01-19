@@ -31,7 +31,7 @@ jobs:
           dotnet-version: 2.2.108
       - name: Pack
         working-directory: samples
-        run: dotnet pack -o ./artifacts -c Release
+        run: dotnet pack AspectInjector.SampleApps.sln -o `pwd`/artifacts -c Release
       - uses: actions/upload-artifact@v1
         with:
           name: artifacts
