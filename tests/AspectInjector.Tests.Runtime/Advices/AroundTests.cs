@@ -189,7 +189,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(AroundTests_Simple))]
-        internal class AroundTests_Simple : Attribute
+        public class AroundTests_Simple : Attribute
         {
             [Advice(Kind.Around, Targets = Target.Method)]
             public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
@@ -201,7 +201,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(AroundTests_Aspect1))]
-        internal class AroundTests_Aspect1 : Attribute
+        public class AroundTests_Aspect1 : Attribute
         {
             [Advice(Kind.Around, Targets = Target.Method)]
             public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
@@ -213,7 +213,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(AroundTests_Aspect2))]
-        internal class AroundTests_Aspect2 : Attribute
+        public class AroundTests_Aspect2 : Attribute
         {
             [Advice(Kind.Around, Targets = Target.Method)]
             public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
@@ -235,7 +235,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(AroundTests_ArgumentsModificationAspect))]
-        internal class AroundTests_ArgumentsModificationAspect : Attribute
+        public class AroundTests_ArgumentsModificationAspect : Attribute
         {
             [Advice(Kind.Around, Targets = Target.Method)]
             public object AroundMethod(

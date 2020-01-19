@@ -23,7 +23,7 @@ namespace AspectInjector.Tests.Runtime.Injections
 
         [Aspect(Scope.Global)]
         [Injection(typeof(TestAspect))]
-        private class TestAspect : Attribute
+        public class TestAspect : Attribute
         {
             private int _count = 0;
 

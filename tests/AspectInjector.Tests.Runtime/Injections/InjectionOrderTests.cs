@@ -18,7 +18,7 @@ namespace AspectInjector.Tests.Runtime.Injections
 
         [Aspect(Scope.PerInstance)]
         [Injection(typeof(TestAspect))]
-        private class TestAspect : Attribute
+        public class TestAspect : Attribute
         {
             public int Count { get; private set; }
 

@@ -132,7 +132,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_InstanceAspect))]
-        internal class ArgumentsTests_InstanceAspect : Attribute
+        public class ArgumentsTests_InstanceAspect : Attribute
         {
             [Advice(Kind.Before, Targets = Target.Method)]
             public void BeforeMethod([Argument(Source.Instance)] object instance)
@@ -151,7 +151,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_StaticInstanceAspect))]
-        internal class ArgumentsTests_StaticInstanceAspect:Attribute
+        public class ArgumentsTests_StaticInstanceAspect:Attribute
         {
             [Advice(Kind.Before, Targets = Target.Method)]
             public void BeforeMethod([Argument(Source.Instance)] object instance)
@@ -170,7 +170,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_ReturnTypeAspect))]
-        internal class ArgumentsTests_ReturnTypeAspect: Attribute
+        public class ArgumentsTests_ReturnTypeAspect: Attribute
         {
             [Advice(Kind.Before, Targets = Target.Method)]
             public void BeforeMethod([Argument(Source.Type)] System.Type type)
@@ -197,7 +197,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_StaticMethodAspect))]
-        internal class ArgumentsTests_StaticMethodAspect : Attribute
+        public class ArgumentsTests_StaticMethodAspect : Attribute
         {
             [Advice(Kind.Before, Targets = Target.Method | Target.Constructor)]
             public void BeforeMethod([Argument(Source.Metadata)] MethodBase method)
@@ -245,7 +245,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_MethodAspect))]
-        internal class ArgumentsTests_MethodAspect:Attribute
+        public class ArgumentsTests_MethodAspect:Attribute
         {
             [Advice(Kind.Before, Targets = Target.Method | Target.Constructor)]
             public void BeforeMethod([Argument(Source.Metadata)] MethodBase method)
@@ -266,7 +266,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_ArgumentsAspect))]
-        internal class ArgumentsTests_ArgumentsAspect:Attribute
+        public class ArgumentsTests_ArgumentsAspect:Attribute
         {
             [Advice(Kind.Before, Targets = Target.Method)]
             public void BeforeMethod([Argument(Source.Arguments)] object[] args)
@@ -287,7 +287,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_StaticArgumentsAspect))]
-        internal class ArgumentsTests_StaticArgumentsAspect :Attribute
+        public class ArgumentsTests_StaticArgumentsAspect :Attribute
         {
             [Advice(Kind.Before, Targets = Target.Method)]
             public void BeforeMethod([Argument(Source.Arguments)] object[] args)
@@ -306,7 +306,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_AroundMethodAspect))]
-        internal class ArgumentsTests_AroundMethodAspect : Attribute
+        public class ArgumentsTests_AroundMethodAspect : Attribute
         {
             [Advice(Kind.Around, Targets = Target.Method)]
             public object BeforeMethod([Argument(Source.Metadata)] MethodBase method)
@@ -327,7 +327,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(ArgumentsTests_AroundRetValAspect))]
-        internal class ArgumentsTests_AroundRetValAspect:Attribute
+        public class ArgumentsTests_AroundRetValAspect:Attribute
         {
             [Advice(Kind.After, Targets = Target.Method)]
             public void AfterMethod([Argument(Source.ReturnValue)] object ret)
@@ -344,7 +344,7 @@ namespace AspectInjector.Tests.Advices
 
         [Injection(typeof(ArgumentsTests_PropertyTarget_Aspect))]
         [Aspect(Scope.Global)]
-        class ArgumentsTests_PropertyTarget_Aspect : Attribute
+        public class ArgumentsTests_PropertyTarget_Aspect : Attribute
         {
             [Advice(Kind.Before)]
             public void TestName([Argument(Source.Name)] string name)

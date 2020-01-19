@@ -37,7 +37,7 @@ namespace AspectInjector.Tests.Runtime.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(AccessTestAspect))]
-        internal class AccessTestAspect : Attribute
+        public class AccessTestAspect : Attribute
         {
             [Advice(Kind.Around, Targets = Target.Internal)]
             public object TestAccess([Argument(Source.Metadata)] MethodBase method)

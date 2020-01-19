@@ -8,6 +8,7 @@ namespace AspectInjector.Rules
         {
             public static readonly string HasGenericParams = "has generic parameters";
             public static readonly string IsAbstract = "is abstract";
+            public static readonly string IsNotPublic = "is not public";
             public static readonly string IsStatic = "is static";
         }
 
@@ -20,9 +21,9 @@ namespace AspectInjector.Rules
 
         public static readonly Rule AspectMustHaveValidSignature =
             GeneralRules.Make("AI_A001",
-               "Aspect must not be generic, abstract or static",
+               "Aspect must not be generic, abstract or static. And it should be public.",
                "Aspect '{0}' {1}",
-               "Aspect must have valid signature. Aspect must be non-generic, non-abstract and non-static class.");
+               "Aspect must have valid signature. Aspect must be non-generic, non-abstract and non-static public class.");
 
         public static readonly Rule AspectFactoryMustContainFactoryMethod =
             GeneralRules.Make("AI_A002",

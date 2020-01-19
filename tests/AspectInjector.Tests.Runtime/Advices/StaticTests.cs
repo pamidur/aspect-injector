@@ -45,7 +45,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(StaticTests_AroundAspect1))]
-        internal class StaticTests_AroundAspect1 : Attribute
+        public class StaticTests_AroundAspect1 : Attribute
         {
             [Advice(Kind.Around, Targets = Target.Method)]
             public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
@@ -57,7 +57,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(StaticTests_AroundAspect2))]
-        internal class StaticTests_AroundAspect2 : Attribute
+        public class StaticTests_AroundAspect2 : Attribute
         {
             [Advice(Kind.Around, Targets = Target.Method)]
             public object AroundMethod([Argument(Source.Target)] Func<object[], object> target,
@@ -81,7 +81,7 @@ namespace AspectInjector.Tests.Advices
 
         [Aspect(Scope.Global)]
         [Injection(typeof(StaticTests_BeforeAspect))]
-        internal class StaticTests_BeforeAspect : Attribute
+        public class StaticTests_BeforeAspect : Attribute
         {
             //Property
             [Advice(Kind.Before, Targets = Target.Method)]

@@ -14,7 +14,7 @@ namespace AspectInjector.Tests.Runtime.Issues
 
         [Aspect(Scope.PerInstance)]
         [Injection(typeof(TestAspect))]
-        private class TestAspect : Attribute
+        public class TestAspect : Attribute
         {
             [Advice(Kind.Before)]
             public void Before()

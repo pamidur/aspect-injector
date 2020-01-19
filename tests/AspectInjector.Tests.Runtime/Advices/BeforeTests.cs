@@ -99,7 +99,7 @@ namespace AspectInjector.Tests.Advices
     //aspects
     [Aspect(Scope.Global)]
     [Injection(typeof(BeforeTests_Aspect))]
-    internal class BeforeTests_Aspect : Attribute
+    public class BeforeTests_Aspect : Attribute
     {
         //Property
         [Advice(Kind.Before, Targets = Target.Setter)]
@@ -122,7 +122,7 @@ namespace AspectInjector.Tests.Advices
 
     [Aspect( Scope.Global)]
     [Injection(typeof(BeforeTests_BeforeConstructorAspect))]
-    internal class BeforeTests_BeforeConstructorAspect : Attribute
+    public class BeforeTests_BeforeConstructorAspect : Attribute
     {
         [Advice(Kind.Before, Targets = Target.Constructor)]
         public void BeforeConstructor([Argument(Source.Instance)] object instance)
@@ -135,7 +135,7 @@ namespace AspectInjector.Tests.Advices
     [Mixin(typeof(IDisposable))]
     [Aspect(Scope.Global)]
     [Injection(typeof(BeforeTests_BeforeConstructorWithInterfaceAspect))]
-    internal class BeforeTests_BeforeConstructorWithInterfaceAspect : Attribute, IDisposable
+    public class BeforeTests_BeforeConstructorWithInterfaceAspect : Attribute, IDisposable
     {
         [Advice(Kind.Before, Targets = Target.Constructor)]
         public void BeforeConstructor() { Checker.Passed = true; }

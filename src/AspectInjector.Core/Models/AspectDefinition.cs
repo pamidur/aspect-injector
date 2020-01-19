@@ -47,7 +47,7 @@ namespace AspectInjector.Core.Models
         {
             var result = true;
 
-            if(Scope!= Scope.Global && Scope!= Scope.PerInstance)
+            if (Scope != Scope.Global && Scope != Scope.PerInstance)
                 log.Log(GeneralRules.UnknownCompilationOption, Host, GeneralRules.Literals.UnknownAspectScope(Scope.ToString()));
 
             if (!Effects.Any())
@@ -56,6 +56,12 @@ namespace AspectInjector.Core.Models
             if (Host.HasGenericParameters)
             {
                 log.Log(AspectRules.AspectMustHaveValidSignature, Host, Host.Name, AspectRules.Literals.HasGenericParams);
+                result = false;
+            }
+
+            if (!Host.IsPublic && !Host.IsNestedPublic)
+            {
+                log.Log(AspectRules.AspectMustHaveValidSignature, Host, Host.Name, AspectRules.Literals.IsNotPublic);
                 result = false;
             }
 

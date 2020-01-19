@@ -39,7 +39,7 @@ namespace AspectInjector.Tests.Runtime.Injections
         }
 
         [Aspect(Scope.Global)]
-        private class TestAspect
+        public class TestAspect
         {
             [Advice(Kind.Before, Targets = Target.Method)]
             public void Before()

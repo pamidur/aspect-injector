@@ -121,7 +121,7 @@ namespace AspectInjector.Tests.Interfaces
         [Mixin(typeof(IGeneralTests))]
         [Mixin(typeof(INotifyPropertyChanged))]
         [Aspect(Scope.Global)]
-        internal class GeneralTests_Aspect : IGeneralTests, INotifyPropertyChanged
+        public class GeneralTests_Aspect : IGeneralTests, INotifyPropertyChanged
         {
             public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
 

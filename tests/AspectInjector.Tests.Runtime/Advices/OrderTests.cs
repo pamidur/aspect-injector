@@ -31,7 +31,7 @@ namespace AspectInjector.Tests.Runtime.Advices
         class Trigger : Attribute { }
 
         [Aspect(Scope.Global)]
-        internal class OrderTests_Aspect1
+        public class OrderTests_Aspect1
         {
             [Advice(Kind.Before)]
             public void BeforeMethod()
@@ -41,7 +41,7 @@ namespace AspectInjector.Tests.Runtime.Advices
         }
 
         [Aspect(Scope.Global)]
-        internal class OrderTests_Aspect2
+        public class OrderTests_Aspect2
         {
             [Advice(Kind.Before)]
             public void BeforeMethod()
@@ -51,7 +51,7 @@ namespace AspectInjector.Tests.Runtime.Advices
         }
 
         [Aspect(Scope.Global)]
-        internal class OrderTests_Aspect3
+        public class OrderTests_Aspect3
         {
             [Advice(Kind.Before)]
             public void BeforeMethod()
