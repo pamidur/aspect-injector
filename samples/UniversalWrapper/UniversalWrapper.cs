@@ -7,7 +7,7 @@ namespace UniversalWrapper
 {
     [Aspect(Scope.Global)]
     [Injection(typeof(UniversalWrapper))]
-    class UniversalWrapper : Attribute
+    public class UniversalWrapper : Attribute
     {
         private static readonly MethodInfo _asyncHandler = typeof(UniversalWrapper).GetMethod(nameof(UniversalWrapper.WrapAsync), BindingFlags.NonPublic | BindingFlags.Static);
         private static readonly MethodInfo _syncHandler = typeof(UniversalWrapper).GetMethod(nameof(UniversalWrapper.WrapSync), BindingFlags.NonPublic | BindingFlags.Static);

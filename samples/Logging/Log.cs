@@ -6,7 +6,7 @@ namespace AspectInjector.Samples.Logging.Aspects
 {
     [Aspect(Scope.Global)]
     [Injection(typeof(Log))]
-    internal class Log : Attribute
+    public class Log : Attribute
     {
         [Advice(Kind.Around, Targets = Target.Method)]
         public object HandleMethod(

@@ -2,8 +2,9 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AspectInjector" Version="2.0.0-rc3" />
+    <PackageReference Include="AspectInjector" Version="2.2.8" />
   </ItemGroup>
 </Project>
