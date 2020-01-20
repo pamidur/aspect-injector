@@ -3,9 +3,12 @@
 **Aspect Injector** is an attribute-based framework for creating and injecting aspects into your .net assemblies.
 
 ### Project Status
-[![NuGet](https://img.shields.io/nuget/v/AspectInjector.svg)](https://www.nuget.org/packages/AspectInjector)
-[![NuGet Pre Release](https://img.shields.io/nuget/vpre/AspectInjector.svg)](https://www.nuget.org/packages/AspectInjector)
+[![Nuget](https://img.shields.io/nuget/v/AspectInjector?label=stable&logo=nuget)](https://www.nuget.org/packages/AspectInjector)
+[![Nuget Pre](https://img.shields.io/nuget/vpre/AspectInjector?label=latest&logo=nuget)](https://www.nuget.org/packages/AspectInjector)
+
 [![Build Status](https://travis-ci.org/pamidur/aspect-injector.svg?branch=master)](https://travis-ci.org/pamidur/aspect-injector)
+[![Samples Status](https://img.shields.io/github/workflow/status/pamidur/aspect-injector/Samples?label=samples%20build)](https://github.com/pamidur/aspect-injector/commits/master)
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d9c91dfb194e4c669b0a98031c59b26e)](https://www.codacy.com/manual/agulyj/aspect-injector?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=pamidur/aspect-injector&amp;utm_campaign=Badge_Grade)
 
 ### Download
