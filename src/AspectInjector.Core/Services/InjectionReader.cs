@@ -69,7 +69,7 @@ namespace AspectInjector.Core.Services
             return injections;
         }
 
-        protected IReadOnlyList<CustomAttribute> FindInjections(TypeDefinition type)
+        protected static IReadOnlyList<CustomAttribute> FindInjections(TypeDefinition type)
         {
             var injections = new List<CustomAttribute>();
 
