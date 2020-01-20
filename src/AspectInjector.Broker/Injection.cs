@@ -35,5 +35,10 @@ namespace AspectInjector.Broker
         /// Specifies subsequent members filter by name. The aspect will be applied to selected members as well. <code>null</code> means - all members.
         /// </summary>
         public string PropagationFilter { get; set; } = null;
+
+        /// <summary>
+        /// Gets or sets a System.Boolean value that determines whether the indicated injection is inherited by derived attribute classes.
+        /// </summary>
+        public bool Inherited { get; set; } = false;
     }
 }
