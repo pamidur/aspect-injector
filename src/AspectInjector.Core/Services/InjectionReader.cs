@@ -3,6 +3,7 @@ using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
+using FluentIL;
 using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
@@ -54,13 +55,13 @@ namespace AspectInjector.Core.Services
                 .ToArray();
         }
 
-        protected virtual IEnumerable <InjectionDefinition> ExtractInjections(ICustomAttributeProvider target)
+        protected virtual IEnumerable<InjectionDefinition> ExtractInjections(ICustomAttributeProvider target)
         {
             var injections = Enumerable.Empty<InjectionDefinition>();
 
             foreach (var trigger in target.CustomAttributes
-                .Select(a => new { Attribute = a, Injections = a.AttributeType.Resolve().CustomAttributes.Where(t => t.AttributeType.FullName == WellKnownTypes.Injection).ToArray() })
-                .Where(e => e.Injections.Length != 0).ToArray())
+                .Select(a => new { Attribute = a, Injections = FindInjections(a.AttributeType.Resolve()) })
+                .Where(e => e.Injections.Count != 0).ToArray())
             {
                 injections = injections.Concat(ParseInjectionAttribute(target, trigger.Attribute, trigger.Injections));
             }
@@ -68,7 +69,19 @@ namespace AspectInjector.Core.Services
             return injections;
         }
 
-        private IEnumerable<InjectionDefinition> ParseInjectionAttribute(ICustomAttributeProvider target, CustomAttribute trigger, CustomAttribute[] injectionAttrs)
+        protected static IReadOnlyList<CustomAttribute> FindInjections(TypeDefinition type)
+        {
+            var injections = new List<CustomAttribute>();
+
+            injections.AddRange(type.CustomAttributes.Where(t => t.AttributeType.FullName == WellKnownTypes.Injection));
+
+            if (type.BaseType != null && !type.BaseType.Match(StandardTypes.Attribute))
+                injections.AddRange(FindInjections(type.BaseType.Resolve()).Where(a => a.GetPropertyValue<bool>(nameof(Injection.Inherited))).ToArray());
+
+            return injections;
+        }
+
+        private IEnumerable<InjectionDefinition> ParseInjectionAttribute(ICustomAttributeProvider target, CustomAttribute trigger, IReadOnlyList<CustomAttribute> injectionAttrs)
         {
             var injections = Enumerable.Empty<InjectionDefinition>();
 
@@ -135,7 +148,7 @@ namespace AspectInjector.Core.Services
                 if ((injection.propagation & PropagateTo.Events) != 0)
                     result = result.Concat(type.Events.Where(e => additionalFilter(e)).SelectMany(m => FindApplicableMembers(m, injection, trigger)));
                 if ((injection.propagation & PropagateTo.Properties) != 0)
-                    result = result.Concat(type.Properties.Where(p=>additionalFilter(p)).SelectMany(m => FindApplicableMembers(m, injection, trigger)));
+                    result = result.Concat(type.Properties.Where(p => additionalFilter(p)).SelectMany(m => FindApplicableMembers(m, injection, trigger)));
                 if ((injection.propagation & PropagateTo.Types) != 0)
                     result = result.Concat(type.NestedTypes.Where(nt => additionalFilter(nt)).SelectMany(nt => FindApplicableMembers(nt, injection, trigger)));
             }
@@ -190,7 +203,7 @@ namespace AspectInjector.Core.Services
         {
             //Target can be either a type or a method
             var types = new HashSet<TypeDefinition>(injections.Select(i => i.Target is TypeDefinition td ? td : i.Target.DeclaringType));
-            while(types.Any())
+            while (types.Any())
             {
                 var currentType = types.First();
                 var baseType = currentType.BaseType?.Resolve();

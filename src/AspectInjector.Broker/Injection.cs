@@ -20,7 +20,7 @@ namespace AspectInjector.Broker
         /// <summary>
         /// Specifies priority for this cut. The higher priority the earlier execution.
         /// </summary>
-        public ushort Priority { get; set; } = 0;
+        public ushort Priority { get; set; }
         /// <summary>
         /// Aspect type that is being injected.
         /// </summary>
@@ -34,6 +34,11 @@ namespace AspectInjector.Broker
         /// <summary>
         /// Specifies subsequent members filter by name. The aspect will be applied to selected members as well. <code>null</code> means - all members.
         /// </summary>
-        public string PropagationFilter { get; set; } = null;
+        public string PropagationFilter { get; set; }
+
+        /// <summary>
+        /// Gets or sets a System.Boolean value that determines whether the indicated injection is inherited by derived attribute classes.
+        /// </summary>
+        public bool Inherited { get; set; }
     }
 }
