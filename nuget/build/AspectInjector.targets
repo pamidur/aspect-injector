@@ -13,6 +13,7 @@
     <_ASI_Loaded>true</_ASI_Loaded>
     <_ASI_Location Condition="'$(_ASI_Location)' == ''">$(MSBuildThisFileDirectory)../../build/_bin/</_ASI_Location>
     <_ASI_Debug Condition="'$(_ASI_Debug)' == ''">false</_ASI_Debug>
+    <_ASI_DelayedInjection Condition="'$(_ASI_DelayedInjection)' == ''">false</_ASI_DelayedInjection>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -27,9 +28,9 @@
 
   <Target Name="_ASI_InjectAspectsCore" Condition="'$(_InjectionNeeded)' == 'true'">
     <PropertyGroup>
-      <_CmdParams Condition=" '$(Optimize)' == 'true' ">$(CmdParams) -o</_CmdParams>
-      <_CmdParams Condition=" '$(_ASI_Debug)' == 'true' ">$(CmdParams) -d</_CmdParams>
-      <_CmdParams Condition=" '$(_ASI_Verbose)' == 'true' ">$(CmdParams) -v</_CmdParams>
+      <_CmdParams Condition=" '$(Optimize)' == 'true' ">$(_CmdParams) -o</_CmdParams>
+      <_CmdParams Condition=" '$(_ASI_Debug)' == 'true' ">$(_CmdParams) -d</_CmdParams>
+      <_CmdParams Condition=" '$(_ASI_Verbose)' == 'true' ">$(_CmdParams) -v</_CmdParams>
     </PropertyGroup>
     <PropertyGroup>
       <_ProcessCmd>dotnet --roll-forward-on-no-candidate-fx 2 &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_CmdParams) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;@(IntermediateAssembly->'%(FullPath)')&quot;</_ProcessCmd>
@@ -37,11 +38,11 @@
 
     <Message Condition=" '$(_ASI_Debug)' == 'true' " Importance="high" Text="$(_ProcessCmd)"/>
 
-    <Exec Command="$(_ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true">
+    <Exec Command="$(_ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true" Condition="'$(_ASI_DelayedInjection)' == 'false'">
       <Output TaskParameter="ExitCode" PropertyName="_AspectExitCode" />
     </Exec>
 
-    <Error Text="Aspect Injector processing has failed. See other errors." Condition="'$(_AspectExitCode)' != '0'" Code="AI_FAIL"  File="AspectInjector"/>
+    <Error Text="Aspect Injector processing has failed. See other errors." Condition="'$(_AspectExitCode)' != '0' AND '$(_ASI_DelayedInjection)' == 'false'" Code="AI_FAIL"  File="AspectInjector"/>
   </Target>
 
   <Target Name="_ASI_ResignAssembly" Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true' AND '$(_InjectionNeeded)' == 'true' " DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows">
