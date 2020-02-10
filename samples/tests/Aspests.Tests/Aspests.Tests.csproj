@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -21,5 +21,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Freezable\Aspects.Freezable.csproj" />
     <ProjectReference Include="..\..\src\Notify\Aspects.Notify.csproj" />
+    <ProjectReference Include="..\..\src\Cache\Aspects.Cache.csproj" />
   </ItemGroup>
 </Project>
