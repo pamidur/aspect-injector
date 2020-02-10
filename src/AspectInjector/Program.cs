@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 
 namespace AspectInjector
 {
@@ -28,8 +29,7 @@ namespace AspectInjector
                     case "-h":
                         return ShowHelp();
                     case "-d":
-                        Console.WriteLine("DEBUG MODE!!!");
-                        Debugger.Launch();
+                        AttachDebugger();
                         continue;
                     case "-o":
                         optimize = true;
@@ -52,6 +52,32 @@ namespace AspectInjector
             }
 
             return ShowHelp();
+        }
+
+        private static void AttachDebugger()
+        {
+            Console.WriteLine("DEBUG MODE!!! Waiting 20 sec for debugger to attach!");
+            Console.WriteLine($"Process id is '{Process.GetCurrentProcess().Id}'");
+            Debugger.Launch();
+            var c = 0;
+            while (!Debugger.IsAttached && c < 20)
+            {
+                Thread.Sleep(1000);
+                Console.Write(".");
+                c++;
+            }
+
+            Console.WriteLine();
+
+            if (Debugger.IsAttached)
+            {
+                Console.WriteLine("Debugger attached.");
+                Debugger.Break();
+            }
+            else
+            {
+                Console.WriteLine("Debugger is not attached.");
+            }
         }
 
         private static void ShowVerboseHeader()

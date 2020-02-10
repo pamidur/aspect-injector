@@ -16,6 +16,11 @@ namespace AspectInjector
         public int Execute(string filename, IReadOnlyList<string> references, bool optimize, bool verbose)
         {
             var version = typeof(Compiler).Assembly.GetName().Version.ToString(3);
+
+            #if DEBUG
+            version = "DEV";
+            #endif
+
             var app = $"AspectInjector|{version}";
             var log = new ConsoleLogger(app);
 
@@ -30,7 +35,8 @@ namespace AspectInjector
             }
 
             return log.IsErrorThrown ? 1 : 0;
-        }
+        }
+
         private Processor CreateApp(ILogger logger)
         {
             var aspectReader = new AspectReader(new IEffectReader[] {
