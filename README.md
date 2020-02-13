@@ -32,6 +32,7 @@ Check out [samples](samples) and [docs](docs)
 - .NetCore runtime 2.1.6+
 
 ### Known Issues / Limitations
+- For analyzers to work in VSCode, don't forget to enable ```"omnisharp.enableRoslynAnalyzers": true``` 
 - Unsafe methods are not supported and are silently ignored.
 - ~~You cannot inject code around constructors. Such attempts are silently ignored.~~ You can since **2.2.1**!
 - Until Nuget v5 you need to refrecence AspectInjector into every project in your solution.
