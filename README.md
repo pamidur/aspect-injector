@@ -43,23 +43,70 @@ Thus,
         reference AspectInjector directly to projects where aspects are defined or used
 ```
 
-### Trivia
+### Simple advice
 
-#### Create aspect:
+#### Create an aspect with simple advice:
 ```C#
 [Aspect(Scope.Global)]
 [Injection(typeof(LogCall))]
-class LogCall : Attribute
+public class LogCall : Attribute
 {
-    [Advice(Kind.Before)]
+    [Advice(Kind.Before)] // you can have also After (async-aware), and Around(Wrap/Instead) kinds
     public void LogEnter([Argument(Source.Name)] string name)
     {
-        Console.WriteLine($"Calling {name}");   //you can debug it	
+        Console.WriteLine($"Calling '{name}' method...");   //you can debug it	
     }
 }
 ```
 #### Use it:
 ```C#
 [LogCall]
-public void Calculate() { }
+public void Calculate() 
+{ 
+    Console.WriteLine("Calculated");
+}
+
+Calculate();
+```
+#### Result:
+```bash
+$ dotnet run
+Calling 'Calculate' method...
+Calculated
+```
+
+### Simple mixin
+
+#### Create an aspect with mixin:
+```C#
+public interface IInitializable
+{
+    void Init();
+}
+
+[Aspect(Scope.PerInstance)]
+[Injection(typeof(Initializable))]
+[Mixin(typeof(IInitializable))]
+public class Initializable : IInitializable, Attribute
+{
+    public void Init()
+    {
+        Console.WriteLine("Initialized!");
+    }
+}
+```
+#### Use it:
+```C#
+[Initializable]
+public class Target
+{ 
+}
+
+var target = new Target() as IInitializable;
+target.Init();
+```
+#### Result:
+```bash
+$ dotnet run
+Initialized!
 ```
