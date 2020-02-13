@@ -19,7 +19,7 @@
 
 ### Features
 - Compile-time injection
-- Works with Blazor, should work with any AOT
+- Works with Blazor and AOT
 - Injecting Before, After and Around targets
 - Injecting into Methods, Properties, Events
 - Injecting Interface implementaions
