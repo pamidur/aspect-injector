@@ -45,8 +45,8 @@ Thus,
         reference AspectInjector directly to projects where aspects are defined or used
 ```
 
-### Simple advice
 
+### Simple advice
 #### Create an aspect with simple advice:
 ```C#
 [Aspect(Scope.Global)]
@@ -77,8 +77,8 @@ Calling 'Calculate' method...
 Calculated
 ```
 
-### Simple mixin
 
+### Simple mixin
 #### Create an aspect with mixin:
 ```C#
 public interface IInitializable
