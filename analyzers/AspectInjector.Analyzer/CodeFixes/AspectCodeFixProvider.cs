@@ -28,7 +28,8 @@ namespace AspectInjector.Analyzer.CodeFixes
             if (diagnostic.Id == AspectRules.AspectMustHaveValidSignature.Id)
                 context.RegisterCodeFix(CodeAction.Create(
                     title: $"Fix Aspect signature",
-                    createChangedDocument: c => RemoveModifier(context.Document, diagnostic.Location.SourceSpan.Start, c), diagnostic.Id),
+                    createChangedDocument: c => RemoveModifier(context.Document, diagnostic.Location.SourceSpan.Start, c),
+                    equivalenceKey: diagnostic.Id),
                 diagnostic);
 
             return Task.CompletedTask;

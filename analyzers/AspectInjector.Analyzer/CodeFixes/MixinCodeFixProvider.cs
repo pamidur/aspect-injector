@@ -27,7 +27,8 @@ namespace AspectInjector.Analyzer.CodeFixes
             if (diagnostic.Id == EffectRules.MixinSupportsOnlyAspectInterfaces.Id)
                 context.RegisterCodeFix(CodeAction.Create(
                     title: $"Add interface '{diagnostic.Properties[WellKnown.MixinTypeProperty]}' to Aspect",
-                    createChangedDocument: c => ImplementInterface(context.Document, diagnostic, c), diagnostic.Id),
+                    createChangedDocument: c => ImplementInterface(context.Document, diagnostic, c),
+                    equivalenceKey: diagnostic.Id),
                 diagnostic);
 
             return Task.CompletedTask;
