@@ -56,11 +56,11 @@ namespace AspectInjector
 
         private static void AttachDebugger()
         {
-            Console.WriteLine("DEBUG MODE!!! Waiting 20 sec for debugger to attach!");
+            Console.WriteLine("DEBUG MODE!!! Waiting 10 sec for debugger to attach!");
             Console.WriteLine($"Process id is '{Process.GetCurrentProcess().Id}'");
             Debugger.Launch();
             var c = 0;
-            while (!Debugger.IsAttached && c < 20)
+            while (!Debugger.IsAttached && c < 10)
             {
                 Thread.Sleep(1000);
                 Console.Write(".");

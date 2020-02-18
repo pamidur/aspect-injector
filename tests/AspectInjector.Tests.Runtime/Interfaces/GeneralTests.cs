@@ -32,7 +32,7 @@ namespace AspectInjector.Tests.Interfaces
             int out2;
 
             Checker.Passed = false;
-            var result = ((IGeneralTests)new GeneralTests_Target(1)).Fact("ok", 1, ref ref1, out out1, ref ref2, out out2);
+            var result = ((IGeneralTests)new GeneralTests_Target(1)).Fact("ok", 1, ref ref1, out out1, ref ref2, out out2, StringSplitOptions.None);
             Assert.Equal("ok", result);
             Assert.True(Checker.Passed);
         }
@@ -46,7 +46,7 @@ namespace AspectInjector.Tests.Interfaces
             int out2;
 
             Checker.Passed = false;
-            var result = _testClass.Fact("ok", 1, ref ref1, out out1, ref ref2, out out2);
+            var result = _testClass.Fact("ok", 1, ref ref1, out out1, ref ref2, out out2, StringSplitOptions.RemoveEmptyEntries);
             Assert.Equal("ok", result);
             Assert.True(Checker.Passed);
         }
@@ -106,7 +106,7 @@ namespace AspectInjector.Tests.Interfaces
 
         internal interface IGeneralTests
         {
-            string Fact(string data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue);
+            string Fact(string data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, StringSplitOptions stringSplit);
 
             event EventHandler<EventArgs> TestEvent;
 
@@ -125,7 +125,7 @@ namespace AspectInjector.Tests.Interfaces
         {
             public event PropertyChangedEventHandler PropertyChanged = (s, e) => { };
 
-            string IGeneralTests.Fact(string data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue)
+            string IGeneralTests.Fact(string data, int value, ref object testRef, out object testOut, ref int testRefValue, out int testOutValue, StringSplitOptions stringSplit)
             {
                 Checker.Passed = true;
                 testOut = new object();
