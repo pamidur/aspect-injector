@@ -17,7 +17,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         private readonly Func<FieldReference> _originalThis;
         protected readonly TypeReference _stateMachineRef;
 
-        public AfterStateMachineWeaveProcessBase(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
+        protected AfterStateMachineWeaveProcessBase(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
         {
             _stateMachineRef = GetStateMachine();
             _stateMachine = _stateMachineRef.Resolve();

@@ -33,14 +33,12 @@ namespace AspectInjector.Core.Services
             {
                 injections = injections.Concat(ExtractInjections(module));
 
-                //todo:: sort types by base class 
                 foreach (var type in module.GetTypes())
                 {
                     injections = injections.Concat(ExtractInjections(type));
 
                     injections = injections.Concat(type.Events.SelectMany(ExtractInjections));
                     injections = injections.Concat(type.Properties.SelectMany(ExtractInjections));
-                    //definitions = definitions.Concat(type.Fields.SelectMany(ExtractInjections));
                     injections = injections.Concat(type.Methods.SelectMany(ExtractInjections));
                 }
             }
@@ -88,36 +86,42 @@ namespace AspectInjector.Core.Services
             foreach (var injectionAttr in injectionAttrs)
             {
                 var aspectRef = injectionAttr.GetConstructorValue<TypeReference>(0);
-                var propagation = injectionAttr.GetPropertyValue<PropagateTo>(nameof(Injection.Propagation));
-                if (propagation == 0) propagation = PropagateTo.Members | PropagateTo.Types;
-
-                if (propagation > PropagateTo.Everything)
-                    _log.Log(GeneralRules.UnknownCompilationOption, trigger.AttributeType.Resolve(), GeneralRules.Literals.UnknownPropagationStrategy(propagation.ToString()));
-
-                var propagationFilter = injectionAttr.GetPropertyValue<string>(nameof(Injection.PropagationFilter));
-                Regex propagationRegex = null;
-                if (propagationFilter != null)
-                    try
-                    {
-                        propagationRegex = new Regex(propagationFilter, RegexOptions.CultureInvariant);
-                    }
-                    catch (Exception e)
-                    {
-                        if (propagation > PropagateTo.Everything)
-                            _log.Log(GeneralRules.UnknownCompilationOption, trigger.AttributeType.Resolve(), GeneralRules.Literals.InvalidPropagationFilter(propagationFilter));
-                    }
-
                 var aspect = _aspectReader.Read(aspectRef.Resolve());
-
                 if (aspect == null)
                 {
                     _log.Log(InjectionRules.InjectionMustReferToAspect, target, aspectRef.Name);
                     continue;
                 }
 
+#pragma warning disable S1854 // Unused assignments should be removed
                 var priority = injectionAttr.GetPropertyValue<ushort>(nameof(Injection.Priority));
+#pragma warning restore S1854 // Unused assignments should be removed
 
-                injections = injections.Concat(FindApplicableMembers(target, (aspect, priority, propagation, propagationRegex), trigger));
+                var propagation = injectionAttr.GetPropertyValue<PropagateTo>(nameof(Injection.Propagation));
+                if (propagation == 0) propagation = PropagateTo.Members | PropagateTo.Types;
+                if (propagation > PropagateTo.Everything)
+                    _log.Log(GeneralRules.UnknownCompilationOption, trigger.AttributeType.Resolve(), GeneralRules.Literals.UnknownPropagationStrategy(propagation.ToString()));
+
+
+                var propagationFilter = injectionAttr.GetPropertyValue<string>(nameof(Injection.PropagationFilter));
+                Regex propagationRegex = null;
+                if (propagationFilter != null)
+                {
+                    try
+                    {
+#pragma warning disable S1854 // Unused assignments should be removed
+                        propagationRegex = new Regex(propagationFilter, RegexOptions.CultureInvariant);
+#pragma warning restore S1854 // Unused assignments should be removed
+                    }
+                    catch (Exception)
+                    {
+                        _log.Log(GeneralRules.UnknownCompilationOption, trigger.AttributeType.Resolve(), GeneralRules.Literals.InvalidPropagationFilter(propagationFilter));
+                    }
+                }
+
+                var injectionInfo = (aspect, priority, propagation, propagationRegex);
+
+                injections = injections.Concat(FindApplicableMembers(target, injectionInfo, trigger));
             }
 
             return injections;

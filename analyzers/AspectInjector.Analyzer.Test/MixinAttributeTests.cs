@@ -1,7 +1,6 @@
 using AspectInjector.Analyzer.Analyzers;
 using AspectInjector.Analyzer.CodeFixes;
 using AspectInjector.Rules;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TestHelper;

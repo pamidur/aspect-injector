@@ -32,7 +32,7 @@ namespace AspectInjector.Tests.Runtime.Issues
         private class Target
         {
 
-            private object m_variable = null;
+            private object _variable = null;
 
             [TestAspect]
             public object Variable
@@ -40,17 +40,17 @@ namespace AspectInjector.Tests.Runtime.Issues
                 get
                 {
 
-                    try { return m_variable; }
-                    catch (Exception e) { throw; }
+                    try { return _variable; }
+                    catch (Exception) { throw; }
                 }
                 set
                 {
-                    var oldValue = m_variable;
+                    var oldValue = _variable;
                     var newValue = value;
 
                     try
                     {
-                        m_variable = value;
+                        _variable = value;
 
                         if (oldValue != default && oldValue != newValue)
                         {
@@ -59,7 +59,7 @@ namespace AspectInjector.Tests.Runtime.Issues
                     }
                     catch (Exception)
                     {
-                        m_variable = oldValue;
+                        _variable = oldValue;
 
                         throw;
                     }

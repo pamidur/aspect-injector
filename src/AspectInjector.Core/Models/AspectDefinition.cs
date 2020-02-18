@@ -1,6 +1,4 @@
 ﻿using AspectInjector.Broker;
-using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Extensions;
 using AspectInjector.Rules;
 using FluentIL;
 using FluentIL.Extensions;

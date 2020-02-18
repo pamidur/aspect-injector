@@ -176,17 +176,17 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             _method.Body.Append(
                 e =>
                 {
-                    //var args = null;
+                    ////var args = null;
                     var argsVar = new VariableDefinition(_module.ImportReference(StandardTypes.ObjectArray));
                     _method.Body.Variables.Add(argsVar);
                     _method.Body.InitLocals = true;
 
-                    //args = new object[] { param1, param2 ...};
+                    ////args = new object[] { param1, param2 ...};
                     e = e.Store(argsVar, args => base.LoadArgumentsArgument(args, null));
 
                     var unwrapperRef = CreateRef(unwrapper, _method);
 
-                    // Unwrapper(args);
+                    //// Unwrapper(args);
                     e = e.ThisOrStatic().Call(unwrapperRef, args => args.Load(argsVar));
 
                     // proxy ref and out params
@@ -284,7 +284,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     if (gpp.Owner == origin)
                         paramType = method.GenericParameters[gpp.Position];
                     else if (gpp.Owner != _type)
-                        throw new Exception("Cannot clone definition of external method.");
+                        throw new InvalidOperationException("Cannot clone definition of external method.");
                 }
 
                 method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, _module.ImportReference(paramType)));

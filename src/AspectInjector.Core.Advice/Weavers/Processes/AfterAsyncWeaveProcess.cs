@@ -15,14 +15,13 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
     {
         private static readonly TypeReference _asyncStateMachineAttribute = StandardTypes.GetType(typeof(AsyncStateMachineAttribute));
 
-        private readonly FieldDefinition _builderField;
         private readonly TypeReference _builder;
         private readonly TypeReference _asyncResult;
 
         public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
         {
-            _builderField = _stateMachine.Fields.First(f => f.Name == "<>t__builder");
-            _builder = _builderField.FieldType;
+            var builderField = _stateMachine.Fields.First(f => f.Name == "<>t__builder");
+            _builder = builderField.FieldType;
             _asyncResult = (_builder as IGenericInstance)?.GenericArguments.FirstOrDefault();
         }
 
@@ -31,13 +30,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var smRef = _method.CustomAttributes.First(ca => ca.AttributeType.Match(_asyncStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);
 
-            if (smRef.HasGenericParameters)
-            {
-                var smDef = smRef.Resolve();
-                smRef = _method.Body.Variables.First(v => v.VariableType.Resolve() == smRef).VariableType;
-                //smRef = ((MethodReference)_method.Body.Instructions
-                //    .First(i => i.OpCode == OpCodes.Newobj && i.Operand is MemberReference mr && mr.DeclaringType.Resolve() == smDef).Operand).DeclaringType;
-            }
+            if (smRef.HasGenericParameters)            
+                smRef = _method.Body.Variables.First(v => v.VariableType.Resolve() == smRef).VariableType;            
 
             return smRef;
         }

@@ -2,12 +2,12 @@
 using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Advice.Weavers.Processes;
 using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
 using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
+using System;
 
 namespace AspectInjector.Core.Advice.Weavers
 {
@@ -42,40 +42,34 @@ namespace AspectInjector.Core.Advice.Weavers
         {
             var effect = (AdviceEffectBase)injection.Effect;
 
-            if (injection.Target is EventDefinition)
+            if (injection.Target is EventDefinition eventDefinition)
             {
-                var target = (EventDefinition)injection.Target;
+                if (eventDefinition.AddMethod != null && effect.Target.HasFlag(Target.EventAdd))
+                    WeaveMethod(eventDefinition.AddMethod, injection);
 
-                if (target.AddMethod != null && effect.Target.HasFlag(Target.EventAdd))
-                    WeaveMethod(target.AddMethod, injection);
-
-                if (target.RemoveMethod != null && effect.Target.HasFlag(Target.EventRemove))
-                    WeaveMethod(target.RemoveMethod, injection);
+                if (eventDefinition.RemoveMethod != null && effect.Target.HasFlag(Target.EventRemove))
+                    WeaveMethod(eventDefinition.RemoveMethod, injection);
                 return;
             }
 
-            if (injection.Target is PropertyDefinition)
+            if (injection.Target is PropertyDefinition propertyDefinition)
             {
-                var target = (PropertyDefinition)injection.Target;
+                if (propertyDefinition.SetMethod != null && effect.Target.HasFlag(Target.Setter))
+                    WeaveMethod(propertyDefinition.SetMethod, injection);
 
-                if (target.SetMethod != null && effect.Target.HasFlag(Target.Setter))
-                    WeaveMethod(target.SetMethod, injection);
-
-                if (target.GetMethod != null && effect.Target.HasFlag(Target.Getter))
-                    WeaveMethod(target.GetMethod, injection);
+                if (propertyDefinition.GetMethod != null && effect.Target.HasFlag(Target.Getter))
+                    WeaveMethod(propertyDefinition.GetMethod, injection);
 
                 return;
             }
 
-            if (injection.Target is MethodDefinition)
+            if (injection.Target is MethodDefinition methodDefinition)
             {
-                var target = (MethodDefinition)injection.Target;
+                if (methodDefinition.IsConstructor && effect.Target.HasFlag(Target.Constructor))
+                    WeaveMethod(methodDefinition, injection);
 
-                if (target.IsConstructor && effect.Target.HasFlag(Target.Constructor))
-                    WeaveMethod(target, injection);
-
-                if (!target.IsConstructor && effect.Target.HasFlag(Target.Method))
-                    WeaveMethod(target, injection);
+                if (!methodDefinition.IsConstructor && effect.Target.HasFlag(Target.Method))
+                    WeaveMethod(methodDefinition, injection);
 
                 return;
             }
@@ -85,19 +79,22 @@ namespace AspectInjector.Core.Advice.Weavers
 
         protected virtual void WeaveMethod(MethodDefinition method, InjectionDefinition injection)
         {
-            if (injection.Effect is AfterAdviceEffect)
+            switch(injection.Effect)
             {
-                var process = new AdviceAfterProcess(_log, method, injection);
-                process.Execute();
-            }
-            else if (injection.Effect is BeforeAdviceEffect)
-            {
-                var process = new AdviceBeforeProcess(_log, method, injection);
-                process.Execute();
-            }
-            else
-            {
-                throw new System.Exception("Unknown advice type.");
+                case AfterAdviceEffect _:
+                    {
+                        var process = new AdviceAfterProcess(_log, method, injection);
+                        process.Execute();
+                        break;
+                    }
+                case BeforeAdviceEffect _:
+                    {
+                        var process = new AdviceBeforeProcess(_log, method, injection);
+                        process.Execute();
+                        break;
+                    }
+                case null: throw new ArgumentNullException(nameof(injection), "Effect is null.");
+                default: throw new NotSupportedException($"Unknown effect type. {injection.Effect.GetType().Name}");
             }
         }
     }

@@ -84,7 +84,7 @@ namespace AspectInjector.Analyzer.Analyzers
 
             var hasAdvices = symbol.GetMembers()
                 .Where(m => m.DeclaredAccessibility == Accessibility.Public && m.Kind == SymbolKind.Method)
-                .Where(m => m.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AdviceType)).Any();
+                .Any(m => m.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.AdviceType));
 
             var hasMixins = symbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == WellKnown.MixinType);
 

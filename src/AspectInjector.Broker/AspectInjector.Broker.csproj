@@ -6,4 +6,7 @@
     <Description>Broker for Aspect Injector operations.</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <NoWarn>1701,1702,S3376</NoWarn>
+  </PropertyGroup>
 </Project>

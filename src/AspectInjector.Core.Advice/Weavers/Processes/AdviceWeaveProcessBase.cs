@@ -22,7 +22,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         protected readonly ILogger _log;
         protected readonly AspectDefinition _aspect;
 
-        public AdviceWeaveProcessBase(ILogger log, MethodDefinition target, InjectionDefinition injection)
+        protected AdviceWeaveProcessBase(ILogger log, MethodDefinition target, InjectionDefinition injection)
         {
             _log = log;
             _method = target;

@@ -6,7 +6,6 @@ using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
 using System.Linq;
 using System.Runtime.CompilerServices;
 

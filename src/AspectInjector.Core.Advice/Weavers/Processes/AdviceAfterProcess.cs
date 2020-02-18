@@ -1,6 +1,5 @@
 ﻿using AspectInjector.Broker;
 using AspectInjector.Core.Advice.Effects;
-using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using FluentIL;
@@ -17,7 +16,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
     {
         private static readonly Dictionary<MethodBody, VariableDefinition> _returnVariablesCache = new Dictionary<MethodBody, VariableDefinition>();
 
-        private VariableDefinition _retvar;
+        private readonly VariableDefinition _retvar;
 
         public AdviceAfterProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)

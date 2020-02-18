@@ -83,13 +83,13 @@ namespace AspectInjector.Core.Extensions
 
                 field = fieldDef.MakeReference(type.MakeSelfReference());
 
-                InjectInitialization(GetInstanсeAspectsInitializer(type, cut), field, c => c.CreateAspectInstance(aspect));
+                InjectInitialization(GetInstanсeAspectsInitializer(type), field, c => c.CreateAspectInstance(aspect));
             }
 
             return field;
         }
 
-        private static MethodDefinition GetInstanсeAspectsInitializer(TypeDefinition type, Cut cut)
+        private static MethodDefinition GetInstanсeAspectsInitializer(TypeDefinition type)
         {
             var instanceAspectsInitializer = type.Methods.FirstOrDefault(m => m.Name == Constants.InstanceAspectsMethodName);
 
@@ -118,7 +118,7 @@ namespace AspectInjector.Core.Extensions
             var singleton = aspect.Host.Fields.FirstOrDefault(f => f.Name == Constants.AspectGlobalField);
 
             if (singleton == null)
-                throw new Exception("Missed aspect global singleton.");
+                throw new InvalidOperationException("Aspect doesn't have global singleton injected.");
 
             return singleton.MakeReference(aspect.Host);
         }

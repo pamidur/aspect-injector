@@ -1,6 +1,5 @@
 ﻿using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Advice.Weavers.Processes;
-using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
 using FluentIL.Logging;
 using Mono.Cecil;
@@ -31,7 +30,7 @@ namespace AspectInjector.Core.Advice.Weavers
             }
             else
             {
-                throw new Exception("Unknown advice type.");
+                throw new NotSupportedException($"Unknown effect type. {injection.Effect?.GetType().Name}");
             }
         }
     }

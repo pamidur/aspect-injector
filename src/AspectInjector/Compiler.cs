@@ -15,11 +15,13 @@ namespace AspectInjector
     {
         public int Execute(string filename, IReadOnlyList<string> references, bool optimize, bool verbose)
         {
+#pragma warning disable S1854 // Unused assignments should be removed
             var version = typeof(Compiler).Assembly.GetName().Version.ToString(3);
+#pragma warning restore S1854 // Unused assignments should be removed
 
-            #if DEBUG
+#if DEBUG
             version = "DEV";
-            #endif
+#endif
 
             var app = $"AspectInjector|{version}";
             var log = new ConsoleLogger(app);

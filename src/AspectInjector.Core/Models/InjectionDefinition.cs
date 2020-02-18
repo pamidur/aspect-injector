@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace AspectInjector.Core.Models
 {
-    public class InjectionDefinition : IEquatable<InjectionDefinition>
+    public sealed class InjectionDefinition : IEquatable<InjectionDefinition>
     {
         public IMemberDefinition Target { get; internal set; }
 
@@ -14,7 +14,12 @@ namespace AspectInjector.Core.Models
 
         public Effect Effect { get; internal set; }
 
-        public List<CustomAttribute> Triggers { get; internal set; } = new List<CustomAttribute>();        
+        public List<CustomAttribute> Triggers { get; internal set; } = new List<CustomAttribute>();
+
+        public override bool Equals(object obj)
+        {
+            return obj is InjectionDefinition id && Equals(id);
+        }
 
         public bool Equals(InjectionDefinition other)
         {

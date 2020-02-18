@@ -93,7 +93,7 @@ namespace AspectInjector.Core.Mixin
             var proxyGet = originalProperty.GetMethod == null ? null : CreateMethodProxy(originalProperty.GetMethod, @interface);
             var proxySet = originalProperty.SetMethod == null ? null : CreateMethodProxy(originalProperty.SetMethod, @interface);
 
-            var propertyType = proxyGet?.ReturnType ?? proxySet.Parameters[0].ParameterType;
+            var propertyType = proxyGet?.ReturnType ?? proxySet?.Parameters[0].ParameterType;
             var pd = new PropertyDefinition(propertyName, PropertyAttributes.None, propertyType)
             {
                 GetMethod = proxyGet,
@@ -116,15 +116,10 @@ namespace AspectInjector.Core.Mixin
 
         private TypeReference ParametrizeSubInterface(GenericInstanceType interfaceType, TypeReference typeReference)
         {
-            TypeReference LookupType(TypeReference tr)
-            {
-                if (tr is GenericParameter gp)
-                    return _target.Module.ImportReference(((GenericInstanceType)typeReference).GenericArguments[gp.Position]);
-
-                return tr;
-            }
-
-            var gparams = interfaceType.GenericArguments.Select(LookupType).ToArray();
+            var gparams = interfaceType.GenericArguments
+                .Select(tr => 
+                tr is GenericParameter gp ? _target.Module.ImportReference(((GenericInstanceType)typeReference).GenericArguments[gp.Position]) : tr)
+                .ToArray();
 
             return _target.Module.ImportReference(interfaceType.Resolve()).MakeGenericInstanceType(gparams);
         }
@@ -201,7 +196,7 @@ namespace AspectInjector.Core.Mixin
                 else if (gpp.Owner is TypeReference dtr && dtr.Resolve() == definition.DeclaringType)
                     newtr = ResolveType(((IGenericInstance)reference.DeclaringType).GenericArguments[gpp.Position], reference, genericParameters);
                 else
-                    throw new Exception("Cannot resolve generic argument for interface implementation.");
+                    throw new NotSupportedException("Not supported generic parameter owner for interface implementation.");
             }
             else if (tr is ByReferenceType brt)
                 newtr = new ByReferenceType(ResolveType(brt.ElementType, reference, genericParameters));

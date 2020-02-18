@@ -1,5 +1,4 @@
 ﻿using AspectInjector.Broker;
-using AspectInjector.Core.Contracts;
 using AspectInjector.Core.Models;
 using FluentIL.Logging;
 using System.Linq;

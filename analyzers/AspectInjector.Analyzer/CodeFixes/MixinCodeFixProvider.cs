@@ -1,4 +1,3 @@
-using AspectInjector.Analyzer.Analyzers;
 using AspectInjector.Rules;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -28,7 +27,7 @@ namespace AspectInjector.Analyzer.CodeFixes
             if (diagnostic.Id == EffectRules.MixinSupportsOnlyAspectInterfaces.Id)
                 context.RegisterCodeFix(CodeAction.Create(
                     title: $"Add interface '{diagnostic.Properties[WellKnown.MixinTypeProperty]}' to Aspect",
-                    createChangedDocument: c => ImplementInterface(context.Document, diagnostic, c)),
+                    createChangedDocument: c => ImplementInterface(context.Document, diagnostic, c), diagnostic.Id),
                 diagnostic);
 
             return Task.CompletedTask;
@@ -49,6 +48,11 @@ namespace AspectInjector.Analyzer.CodeFixes
             var newroot = root.ReplaceNode(typeDecl, newclass);
 
             return document.WithSyntaxRoot(newroot);
+        }
+
+        public override FixAllProvider GetFixAllProvider()
+        {
+            return WellKnownFixAllProviders.BatchFixer;
         }
     }
 }

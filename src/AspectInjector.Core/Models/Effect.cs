@@ -1,8 +1,6 @@
-﻿using AspectInjector.Core.Contracts;
-using FluentIL.Logging;
+﻿using FluentIL.Logging;
 using Mono.Cecil;
 using System;
-using System.Linq;
 
 namespace AspectInjector.Core.Models
 {
@@ -10,22 +8,16 @@ namespace AspectInjector.Core.Models
     {
         public uint Priority { get; protected set; }
 
-        public bool Equals(Effect other)
-        {
-            if (other == null)
-                return false;
+        public abstract bool Equals(Effect other);             
 
-            return IsEqualTo(other);
+        public override bool Equals(object obj)
+        {
+            return obj is Effect ef && Equals(ef);
         }
 
         public override int GetHashCode()
         {
             return GetType().GetHashCode();
-        }
-
-        protected virtual bool IsEqualTo(Effect other)
-        {
-            return this == other;
         }
 
         public abstract bool IsApplicableFor(IMemberDefinition target);

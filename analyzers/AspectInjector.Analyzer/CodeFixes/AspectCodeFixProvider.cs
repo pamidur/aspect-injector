@@ -28,7 +28,7 @@ namespace AspectInjector.Analyzer.CodeFixes
             if (diagnostic.Id == AspectRules.AspectMustHaveValidSignature.Id)
                 context.RegisterCodeFix(CodeAction.Create(
                     title: $"Fix Aspect signature",
-                    createChangedDocument: c => RemoveModifier(context.Document, diagnostic.Location.SourceSpan.Start, c)),
+                    createChangedDocument: c => RemoveModifier(context.Document, diagnostic.Location.SourceSpan.Start, c), diagnostic.Id),
                 diagnostic);
 
             return Task.CompletedTask;
@@ -40,19 +40,24 @@ namespace AspectInjector.Analyzer.CodeFixes
             var type = root.FindToken(from).Parent.AncestorsAndSelf().OfType<TypeDeclarationSyntax>().First();
 
             var newtype = type;
+            
+            var statictoken = newtype.Modifiers.IndexOf(SyntaxKind.StaticKeyword);
+            if (statictoken != -1)
+                newtype = newtype.RemoveTokenKeepTrivia(newtype.Modifiers[statictoken]);
 
-            var statictoken = newtype.Modifiers.FirstOrDefault(m => m.Kind() == SyntaxKind.StaticKeyword);
-            if (statictoken != null)
-                newtype = newtype.RemoveTokenKeepTrivia(statictoken);
-
-            var abstracttoken = newtype.Modifiers.FirstOrDefault(m => m.Kind() == SyntaxKind.AbstractKeyword);
-            if (abstracttoken != null)
-                newtype = newtype.RemoveTokenKeepTrivia(abstracttoken);
+            var abstracttoken = newtype.Modifiers.IndexOf(SyntaxKind.AbstractKeyword);
+            if (abstracttoken != -1)
+                newtype = newtype.RemoveTokenKeepTrivia(newtype.Modifiers[abstracttoken]);
 
             if (newtype.TypeParameterList != null && !newtype.TypeParameterList.Span.IsEmpty)
                 newtype = newtype.RemoveNode(newtype.TypeParameterList, SyntaxRemoveOptions.KeepExteriorTrivia);
 
             return document.WithSyntaxRoot(root.ReplaceNode(type, newtype));
+        }
+
+        public override FixAllProvider GetFixAllProvider()
+        {
+            return WellKnownFixAllProviders.BatchFixer;
         }
     }
 }

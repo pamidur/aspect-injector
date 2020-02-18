@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace AspectInjector
 {
-    internal class Program
+    internal static class Program
     {
         private static bool _headerPrinted = false;
         private static int Main(string[] args)
@@ -18,7 +18,6 @@ namespace AspectInjector
 
             var optimize = false;
             var verbose = false;
-            string target = null;
             List<string> references = new List<string>();
 
             for (int i = 0; i < args.Length; i++)
@@ -45,9 +44,8 @@ namespace AspectInjector
                         else return ShowHelp();
                         continue;
                     default:
-                        target = arg;
                         references.AddRange(new ArraySegment<string>(args, i + 1, args.Length - i - 1));
-                        return new Compiler().Execute(target, references, optimize, verbose);
+                        return new Compiler().Execute(arg, references, optimize, verbose);
                 }
             }
 

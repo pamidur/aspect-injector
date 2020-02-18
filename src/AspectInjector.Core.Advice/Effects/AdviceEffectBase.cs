@@ -1,9 +1,6 @@
 ﻿using AspectInjector.Broker;
-using AspectInjector.Core.Contracts;
-using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using AspectInjector.Rules;
-using FluentIL;
 using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
@@ -22,7 +19,7 @@ namespace AspectInjector.Core.Advice.Effects
         public abstract Kind Kind { get; }
 
         public override bool IsApplicableFor(IMemberDefinition target)
-        {     
+        {
             if ((Target & Target.Method) != 0 && target is MethodDefinition method && !method.IsConstructor)
                 return IsApplicableForModifier(method);
 
@@ -50,31 +47,27 @@ namespace AspectInjector.Core.Advice.Effects
             if (!target.HasBody || target.IsUnsafe())
                 return false;
 
-            if (
-                ((Target & Target.Instance) != 0 && !target.IsStatic)
-                || ((Target & Target.Static) != 0 && target.IsStatic)
+            return (
+                    ((Target & Target.Instance) != 0 && !target.IsStatic)
+                    || ((Target & Target.Static) != 0 && target.IsStatic)
                 )
-            {
-                if (
+                &&
+                (
                     ((Target & Target.Private) != 0 && target.IsPrivate)
                     || ((Target & Target.Public) != 0 && target.IsPublic)
                     || ((Target & Target.Protected) != 0 && target.IsFamily)
                     || ((Target & Target.ProtectedInternal) != 0 && target.IsFamilyOrAssembly)
                     || ((Target & Target.ProtectedPrivate) != 0 && target.IsFamilyAndAssembly)
                     || ((Target & Target.Internal) != 0 && target.IsAssembly)
-                    )
-                    return true;
-            }
-
-            return false;
+                );
         }
 
-        protected override bool IsEqualTo(Effect effect)
+        public override bool Equals(Effect other)
         {
-            if (!(effect is AdviceEffectBase other))
+            if (!(other is AdviceEffectBase effect))
                 return false;
 
-            return other.Target == Target && other.Kind == Kind && other.Method == Method;
+            return effect.Target == Target && effect.Kind == Kind && effect.Method == Method;
         }
 
         public override bool Validate(AspectDefinition aspect, ILogger log)

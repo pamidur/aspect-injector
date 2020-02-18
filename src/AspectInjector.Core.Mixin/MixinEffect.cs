@@ -15,12 +15,12 @@ namespace AspectInjector.Core.Mixin
             return target is TypeDefinition || target is PropertyDefinition || target is EventDefinition || target is MethodDefinition;
         }
 
-        protected override bool IsEqualTo(Effect effect)
+        public override bool Equals(Effect other)
         {
-            if (!(effect is MixinEffect other))
+            if (!(other is MixinEffect effect))
                 return false;
 
-            return other.InterfaceType.Match(InterfaceType);
+            return effect.InterfaceType.Match(InterfaceType);
         }
 
         public override bool Validate(AspectDefinition aspect, ILogger log)
