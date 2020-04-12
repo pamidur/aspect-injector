@@ -3,13 +3,13 @@
 **Aspect Injector** is an attribute-based framework for creating and injecting aspects into your .net assemblies.
 
 ### Project Status
-[![Nuget](https://img.shields.io/nuget/v/AspectInjector?label=stable&logo=nuget)](https://www.nuget.org/packages/AspectInjector)
-[![Nuget Pre](https://img.shields.io/nuget/vpre/AspectInjector?label=latest&logo=nuget)](https://www.nuget.org/packages/AspectInjector)
-![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/pamidur/aspect-injector)
-![GitHub last commit](https://img.shields.io/github/last-commit/pamidur/aspect-injector)
+[![Nuget](https://img.shields.io/nuget/v/AspectInjector?label=stable&logo=nuget&style=flat-square)](https://www.nuget.org/packages/AspectInjector)
+[![Nuget Pre](https://img.shields.io/nuget/vpre/AspectInjector?label=latest&logo=nuget&style=flat-square)](https://www.nuget.org/packages/AspectInjector)
+![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/pamidur/aspect-injector?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/pamidur/aspect-injector?style=flat-square)
 
-[![Build Status](https://travis-ci.org/pamidur/aspect-injector.svg?branch=master)](https://travis-ci.org/pamidur/aspect-injector)
-[![Samples Status](https://img.shields.io/github/workflow/status/pamidur/aspect-injector/Samples?label=samples%20build)](https://github.com/pamidur/aspect-injector/commits/master)
+[![Build Status](https://img.shields.io/travis/pamidur/aspect-injector?style=flat-square&branch=master)](https://travis-ci.org/pamidur/aspect-injector)
+[![Samples Status](https://img.shields.io/github/workflow/status/pamidur/aspect-injector/Samples?label=samples%20build&style=flat-square)](https://github.com/pamidur/aspect-injector/commits/master)
 
 ### Download
 ```bash
