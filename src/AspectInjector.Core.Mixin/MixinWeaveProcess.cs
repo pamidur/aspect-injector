@@ -26,7 +26,7 @@ namespace AspectInjector.Core.Mixin
                 case MethodDefinition md: _target = md.DeclaringType; break;
                 case PropertyDefinition pd: _target = pd.DeclaringType; break;
                 case EventDefinition ed: _target = ed.DeclaringType; break;
-                default: log.Log(GeneralRules.UnexpectedCompilerBehaviour, _target, $"Unexpected mixin target '{target.ToString()}'"); break;
+                default: log.Log(GeneralRules.UnexpectedCompilerBehaviour, _target, $"Unexpected mixin target '{target}'"); break;
             }
 
             _aspect = aspect;

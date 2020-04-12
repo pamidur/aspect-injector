@@ -13,23 +13,26 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal abstract class AfterStateMachineWeaveProcessBase : AdviceWeaveProcessBase<AfterAdviceEffect>
     {
-        protected readonly TypeDefinition _stateMachine;
+        protected TypeDefinition _stateMachine;
+        protected TypeReference _stateMachineRef;
+
         private readonly Func<FieldReference> _originalThis;
-        protected readonly TypeReference _stateMachineRef;
 
         protected AfterStateMachineWeaveProcessBase(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
         {
-            _stateMachineRef = GetStateMachine();
-            _stateMachine = _stateMachineRef.Resolve();
             _originalThis = _method.IsStatic ? (Func<FieldReference>)null : () => GetThisField();
         }
 
-        protected abstract TypeReference GetStateMachine();
+        protected void SetStateMachine(TypeReference stateMachineRef)
+        {
+            _stateMachineRef = stateMachineRef;
+            _stateMachine = _stateMachineRef.Resolve();
+        }
 
         private FieldReference GetThisField()
         {
             var thisfield = _stateMachine.Fields
-                .FirstOrDefault(f => f.Name == Constants.MovedThis);       
+                .FirstOrDefault(f => f.Name == Constants.MovedThis);
 
             if (thisfield == null)
             {
@@ -39,7 +42,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 thisfield = new FieldDefinition(Constants.MovedThis, FieldAttributes.Public, _origTypeRef);
                 _stateMachine.Fields.Add(thisfield);
-                
+
                 InsertStateMachineCall(
                     e => e
                     .Store(thisfield.MakeReference(_stateMachineRef), v => v.This())
@@ -58,7 +61,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             {
                 argsfield = new FieldDefinition(Constants.MovedArgs, FieldAttributes.Public, _stateMachine.Module.ImportReference(StandardTypes.ObjectArray));
                 _stateMachine.Fields.Add(argsfield);
-                
+
                 InsertStateMachineCall(
                     e => e
                     .Store(argsfield.MakeReference(_stateMachineRef), v =>
@@ -78,6 +81,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public override void Execute()
         {
+            if (_stateMachineRef == null)
+                throw new InvalidOperationException("State machine is not set");
+
             FindOrCreateAfterStateMachineMethod().Body.BeforeExit(
                 e => e
                 .LoadAspect(_aspect, _method, LoadOriginalThis)

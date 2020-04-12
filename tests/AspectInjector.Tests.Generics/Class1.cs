@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 namespace AspectInjector.GenericTests
 {
     [Aspect(Scope.Global)]
-    [Injection(typeof(TestAspect))]
+    [Injection(typeof(GenericsTestAspect))]
     [Mixin(typeof(Wrapper2<int>.IInterface<int, int>))]
     [Mixin(typeof(INotifyPropertyChanged))]
-    public class TestAspect : Attribute, Wrapper2<int>.IInterface<int, int>, INotifyPropertyChanged
+    public class GenericsTestAspect : Attribute, Wrapper2<int>.IInterface<int, int>, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -39,7 +39,7 @@ namespace AspectInjector.GenericTests
         }
     }
 
-    [TestAspect]
+    [GenericsTestAspect]
     class TestClass
     {
 
@@ -66,32 +66,32 @@ namespace AspectInjector.GenericTests
                 throw new NotImplementedException();
             }
 
-            [TestAspect]
+            [GenericsTestAspect]
             private async Task<Func<TMethod, TType, TWrapper>> Do<TMethod>(TMethod tmethod, TType type, Func<TMethod, TType> func)
             {
                 await Task.Delay(0);
                 return default;
             }
 
-            [TestAspect]
+            [GenericsTestAspect]
             private TType Do1<TMethod>(TMethod tmethod, TType type, Func<TMethod, TType> func, Tuple<TWrapper, TType, TMethod> t)
             {
                 return default;
             }
 
-            [TestAspect]
+            [GenericsTestAspect]
             private TMethod Do2<TMethod>(TMethod tmethod, TType type, Func<TMethod, TType> func)
             {
                 return default;
             }
 
-            [TestAspect]
+            [GenericsTestAspect]
             private TWrapper Do3<TMethod>(TWrapper wrapper, TMethod tmethod, TType type, Func<TMethod, TType> func)
             {
                 return default;
             }
 
-            [TestAspect]
+            [GenericsTestAspect]
             private TWrapper Do4<TMethod>(TWrapper wrapper, TMethod tmethod, TType type, Func<TMethod, TType> func)
             {
                 return default;

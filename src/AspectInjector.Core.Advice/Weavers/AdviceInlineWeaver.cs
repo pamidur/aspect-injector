@@ -74,7 +74,7 @@ namespace AspectInjector.Core.Advice.Weavers
                 return;
             }
 
-            _log.Log(GeneralRules.UnexpectedCompilerBehaviour, effect.Method, $"Unexpected injection target '{injection.Target.ToString()}'");
+            _log.Log(GeneralRules.UnexpectedCompilerBehaviour, effect.Method, $"Unexpected injection target '{injection.Target}'");
         }
 
         protected virtual void WeaveMethod(MethodDefinition method, InjectionDefinition injection)

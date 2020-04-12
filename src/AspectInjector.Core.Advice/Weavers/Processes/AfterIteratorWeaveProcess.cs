@@ -18,10 +18,10 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         public AfterIteratorWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)
         {
-
+            SetStateMachine(GetStateMachine());
         }
 
-        protected override TypeReference GetStateMachine()
+        private TypeReference GetStateMachine()
         {
             var smRef = _method.CustomAttributes.First(ca => ca.AttributeType.Match(_iteratorStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);

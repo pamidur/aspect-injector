@@ -6,14 +6,19 @@
     <Description>This library provides attributes-based compile-time AOP framework.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/pamidur/aspect-injector</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pamidur/aspect-injector</RepositoryUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png</PackageIconUrl>
-    <RepositoryUrl>https://github.com/pamidur/aspect-injector</RepositoryUrl>       
+    <PackageIcon>package.png</PackageIcon>
     <RepositoryType>git</RepositoryType>    
     <PackageTags>AOP aspect aspects injector injection wp8 wp8.1 win8 win8.1 win10 dotnet core notify notifypropertychanged INPC</PackageTags>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <IncludeBuildOutput>False</IncludeBuildOutput>
     <Version>0.0.0</Version>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="build/*.*" Pack="true" PackagePath="build/$(TargetFramework)" />
@@ -33,7 +38,7 @@
     </PropertyGroup>
 
     <Exec Command="dotnet publish ../src/AspectInjector/ -o $(PublishMain) -c $(Configuration) --no-build" />
-    <Exec Command="dotnet publish ../analyzers/AspectInjector.Analyzer/ -o $(PublishAnalyzer) -c $(Configuration) --no-build" />
+    <Exec Command="dotnet publish ../src/AspectInjector.Analyzer/ -o $(PublishAnalyzer) -c $(Configuration) --no-build" />
     
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(PublishMain)*.dll">

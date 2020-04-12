@@ -6,7 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_solution", "_solution", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
-		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		package.png = package.png
 		README.md = README.md
@@ -15,6 +14,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Core", "src\AspectInjector.Core\AspectInjector.Core.csproj", "{ACCC10D0-D079-4B9C-8269-71796A0EF822}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2DAB661A-26B2-440A-BC54-59F2C8404F12}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Core.Mixin", "src\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj", "{3FBD73F5-6098-45A8-A236-6CC2F093B804}"
 EndProject
@@ -24,9 +26,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Broker", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Package", "nuget\AspectInjector.Package.csproj", "{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{8B8EB611-8720-4A8B-8F52-43327FE510E9}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Tests.RuntimeAssets", "tests\AspectInjector.Tests.RuntimeAssets\AspectInjector.Tests.RuntimeAssets.csproj", "{A4BDB41D-096A-42E7-953E-99F7680141B0}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -40,13 +43,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Tests.Runtim
 		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {FC862191-9081-4A58-96FF-B57F17AC40A9}
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "analyzers", "analyzers", "{F062AF31-5518-40FA-A790-E4B4887126C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Analyzer", "src\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj", "{8A2E5556-55A4-4A1C-BE82-7603BEFA1A19}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Analyzer", "analyzers\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj", "{8A2E5556-55A4-4A1C-BE82-7603BEFA1A19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Analyzer.Tests", "tests\AspectInjector.Analyzer.Tests\AspectInjector.Analyzer.Tests.csproj", "{ACEE719B-B932-4B41-84AE-0F0CA0CE37E0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Analyzer.Test", "analyzers\AspectInjector.Analyzer.Test\AspectInjector.Analyzer.Test.csproj", "{ACEE719B-B932-4B41-84AE-0F0CA0CE37E0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Analyzer.Vsix", "analyzers\AspectInjector.Analyzer.Vsix\AspectInjector.Analyzer.Vsix.csproj", "{06F6709E-56E5-41ED-9BC1-55A8F648DD72}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Analyzer.Vsix", "src\AspectInjector.Analyzer.Vsix\AspectInjector.Analyzer.Vsix.csproj", "{06F6709E-56E5-41ED-9BC1-55A8F648DD72}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Rules", "src\AspectInjector.Rules\AspectInjector.Rules.csproj", "{20ED44A4-9D35-41F2-A317-C1EB9923379E}"
 EndProject
@@ -56,7 +57,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentIL.Common", "external
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Tests.Integrity", "tests\AspectInjector.Tests.Integrity\AspectInjector.Tests.Integrity.csproj", "{230C6FAF-11A1-4318-A482-69C7252652B1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.GenericTests", "tests\AspectInjector.GenericTests\AspectInjector.GenericTests.csproj", "{BF019B75-CECE-46E7-9E3D-620B2CAB6A96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Tests.Generics", "tests\AspectInjector.Tests.Generics\AspectInjector.Tests.Generics.csproj", "{BF019B75-CECE-46E7-9E3D-620B2CAB6A96}"
 	ProjectSection(ProjectDependencies) = postProject
 		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {FC862191-9081-4A58-96FF-B57F17AC40A9}
 	EndProjectSection
@@ -139,13 +140,12 @@ Global
 		{3FBD73F5-6098-45A8-A236-6CC2F093B804} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
 		{1A96AA51-2CBC-4901-91D1-53208AD5E6B6} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
 		{0926FE28-73BA-4F73-9188-B196FBBC9410} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
-		{29DB956E-AC8F-4A2C-BBEF-71DDE91602FC} = {8B8EB611-8720-4A8B-8F52-43327FE510E9}
 		{A4BDB41D-096A-42E7-953E-99F7680141B0} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
 		{FC862191-9081-4A58-96FF-B57F17AC40A9} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
 		{6431E891-8E90-4510-AC8F-581536757EA0} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
-		{8A2E5556-55A4-4A1C-BE82-7603BEFA1A19} = {F062AF31-5518-40FA-A790-E4B4887126C1}
-		{ACEE719B-B932-4B41-84AE-0F0CA0CE37E0} = {F062AF31-5518-40FA-A790-E4B4887126C1}
-		{06F6709E-56E5-41ED-9BC1-55A8F648DD72} = {F062AF31-5518-40FA-A790-E4B4887126C1}
+		{8A2E5556-55A4-4A1C-BE82-7603BEFA1A19} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
+		{ACEE719B-B932-4B41-84AE-0F0CA0CE37E0} = {2DAB661A-26B2-440A-BC54-59F2C8404F12}
+		{06F6709E-56E5-41ED-9BC1-55A8F648DD72} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
 		{20ED44A4-9D35-41F2-A317-C1EB9923379E} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
 		{E8F7FB9B-4FF0-4195-B064-D41A96E41918} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}
 		{7BD22418-F4A9-422B-9FDE-A20708BA0648} = {8F9E5ECE-A6EB-4DC7-B3E2-20319BF21607}

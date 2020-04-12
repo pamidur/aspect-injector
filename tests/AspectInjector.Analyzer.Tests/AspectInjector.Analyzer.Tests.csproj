@@ -20,7 +20,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj" />
+    <ProjectReference Include="..\..\src\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj" />
   </ItemGroup>
 
 

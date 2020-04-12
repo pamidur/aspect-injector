@@ -1,4 +1,5 @@
-﻿using AspectInjector.Tests.Assets;
+﻿using AspectInjector.GenericTests;
+using AspectInjector.Tests.Assets;
 using AspectInjector.Tests.Runtime;
 using ILVerify;
 using System;
@@ -63,6 +64,14 @@ namespace AspectInjector.Tests.General
         public void IL_RuntimeAssets_Is_CorrectGeneral()
         {
             var assembly = Path.GetFileName(typeof(TestLog).Assembly.Location);
+            var result = _verifier.Verify(_resolver.Resolve(assembly)).ToArray();
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void IL_Generics_Is_CorrectGeneral()
+        {
+            var assembly = Path.GetFileName(typeof(GenericsTestAspect).Assembly.Location);
             var result = _verifier.Verify(_resolver.Resolve(assembly)).ToArray();
             Assert.Empty(result);
         }

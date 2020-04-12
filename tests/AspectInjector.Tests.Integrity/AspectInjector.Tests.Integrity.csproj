@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
+    <ProjectReference Include="..\AspectInjector.Tests.Generics\AspectInjector.Tests.Generics.csproj" />
     <ProjectReference Include="..\AspectInjector.Tests.Runtime\AspectInjector.Tests.Runtime.csproj" />
     <ProjectReference Include="..\AspectInjector.Tests.RuntimeAssets\AspectInjector.Tests.RuntimeAssets.csproj" />
   </ItemGroup>

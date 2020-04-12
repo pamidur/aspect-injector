@@ -2,14 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
-
+  
   <Import Project="..\..\nuget\build\AspectInjector.targets" />
 
   <PropertyGroup>
-    <_ASI_Location>$(SolutionDir)src\AspectInjector\bin\$(Configuration)\netcoreapp2.1\</_ASI_Location>
-    <_ASI_Debug Condition=" '$(Configuration)' == 'Debug' ">true</_ASI_Debug>
-    <LangVersion>7.1</LangVersion>
+    <_ASI_Location>$(MSBuildThisFileDirectory)..\..\src\AspectInjector\bin\$(Configuration)\netcoreapp2.1\</_ASI_Location>
   </PropertyGroup>
 
   <ItemGroup>

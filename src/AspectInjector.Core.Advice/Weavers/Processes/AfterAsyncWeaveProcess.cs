@@ -18,14 +18,17 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         private readonly TypeReference _builder;
         private readonly TypeReference _asyncResult;
 
-        public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection) : base(log, target, injection)
+        public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection) 
+            : base(log, target, injection)
         {
+            SetStateMachine(GetStateMachine());
+
             var builderField = _stateMachine.Fields.First(f => f.Name == "<>t__builder");
             _builder = builderField.FieldType;
             _asyncResult = (_builder as IGenericInstance)?.GenericArguments.FirstOrDefault();
         }
 
-        protected override TypeReference GetStateMachine()
+        private TypeReference GetStateMachine()
         {
             var smRef = _method.CustomAttributes.First(ca => ca.AttributeType.Match(_asyncStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);

@@ -149,18 +149,18 @@ namespace AspectInjector.Core.Extensions
             if (field == null)
             {
                 var basetype = type.Resolve().BaseType;
-                if (basetype is GenericInstanceType git)
-                {
-                    var gtype = type as GenericInstanceType;
-                    var gparams = git.GenericArguments.Select(ga =>
+                if (basetype is GenericInstanceType bgit)
+                {   //here we're constructing basetype generic reference 
+
+                    Func<TypeReference, TypeReference> resolveGenericArg = ga => type.Module.ImportReference(ga);
+
+                    if (type is GenericInstanceType git)
                     {
-                        if (ga is GenericParameter gp && gtype != null)
-                            return type.Module.ImportReference(gtype.GenericArguments[gp.Position]);
-                        else
-                            return type.Module.ImportReference(ga);
+                        var origResolveGenericArg = resolveGenericArg;
+                        resolveGenericArg = ga => origResolveGenericArg(ga is GenericParameter gp ? git.GenericArguments[gp.Position] : ga);
+                    }
 
-                    }).ToArray();
-
+                    var gparams = bgit.GenericArguments.Select(resolveGenericArg).ToArray();
                     basetype = type.Module.ImportReference(basetype.Resolve()).MakeGenericInstanceType(gparams);
                 }
 

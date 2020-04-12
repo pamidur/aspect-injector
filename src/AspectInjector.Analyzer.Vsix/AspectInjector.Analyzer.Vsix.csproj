@@ -64,12 +64,12 @@
       <Name>FluentIL.Common</Name>
       <AdditionalProperties>TargetFramework=netstandard1.3</AdditionalProperties>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj">
+    <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj">
       <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
       <Name>AspectInjector.Broker</Name>
       <AdditionalProperties>TargetFramework=netstandard1.3</AdditionalProperties>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\AspectInjector.Rules\AspectInjector.Rules.csproj">
+    <ProjectReference Include="..\AspectInjector.Rules\AspectInjector.Rules.csproj">
       <Project>{20ed44a4-9d35-41f2-a317-c1eb9923379e}</Project>
       <Name>AspectInjector.Rules</Name>
       <AdditionalProperties>TargetFramework=netstandard1.3</AdditionalProperties>
