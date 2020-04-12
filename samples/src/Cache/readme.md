@@ -1,6 +1,8 @@
 ﻿This package provides simple cache attribute implementation. 
 Put ```[MemoryCache]``` attribure on your methods to easily cache them. 
 
+[![Nuget](https://img.shields.io/nuget/v/Aspects.Cache?style=flat-square)](https://www.nuget.org/packages/Aspects.Cache/)
+
 It also works with **void** and **async** methods!
 
 ```c#
