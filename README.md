@@ -20,14 +20,14 @@
 - Compile-time injection - works with Blazor and AOT
 - Injecting **Before**, **After** and **Around** (wrap) **Methods**, **Properties** and **Events**
 - Injecting **Interface implementaions**
-- Supports any project that can reference **netstandard2.0** libraries
+- Supports any project that can reference **netstandard2.0** libraries, see [here](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
 - Debugging support
 - Roslyn analyzers for your convenience (only c# currently)
 
 Check out [samples](samples) and [docs](docs)
 
 ### Requirements
-- .NetCore runtime 2.1.6+ installed
+- .NetCore runtime 2.1.6+ installed on your machine (your projects can by anything that targets netstandard2.0)
 
 ### Known Issues / Limitations
 - For analyzers to work in VSCode, don't forget to enable ```"omnisharp.enableRoslynAnalyzers": true``` 
