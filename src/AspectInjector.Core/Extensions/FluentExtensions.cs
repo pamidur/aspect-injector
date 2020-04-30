@@ -39,6 +39,14 @@ namespace AspectInjector.Core.Extensions
             body.BeforeInstruction(userCodesStart, action);
         }
 
+        public static bool IsFactoryMethod(this MethodDefinition m)
+        {
+            return m.IsStatic && m.IsPublic
+                && m.Name == Constants.AspectFactoryMethodName
+                && m.ReturnType.Match(StandardTypes.Object)
+                && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.Match(StandardTypes.Type);
+        }
+
         public static Cut LoadAspect(this Cut cut, AspectDefinition aspect)
         {
             return LoadAspect(cut, aspect, cut.Method, c => c.ThisOrStatic());

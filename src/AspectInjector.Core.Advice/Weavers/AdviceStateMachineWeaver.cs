@@ -9,7 +9,7 @@ namespace AspectInjector.Core.Advice.Weavers
 {
     public class AdviceStateMachineWeaver : AdviceInlineWeaver
     {
-        public override byte Priority => 30;
+        public override byte Priority => 40;
 
         public AdviceStateMachineWeaver(ILogger logger) : base(logger)
         {

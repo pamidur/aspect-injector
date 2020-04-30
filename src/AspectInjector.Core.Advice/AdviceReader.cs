@@ -76,58 +76,63 @@ namespace AspectInjector.Core.Advice
                     _log.Log(EffectRules.AdviceArgumentMustBeBound, method, param.Name);
 
                 var source = argAttr.GetConstructorValue<Source>(0);
-                
-                switch (source)
-                {
-                    case Source.Arguments:
-                        if (!param.ParameterType.Match(StandardTypes.ObjectArray))
-                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.ObjectArray);
-                        break;
-                    case Source.Instance:
-                        if (!param.ParameterType.Match(StandardTypes.Object))
-                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
-                        break;
-                    case Source.Metadata:
-                        if (!param.ParameterType.Match(WellKnownTypes.MethodBase))
-                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.MethodBase);
-                        break;
-                    case Source.Name:
-                        if (!param.ParameterType.Match(StandardTypes.String))
-                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.String);
-                        break;
-                    case Source.ReturnType:
-                        if (!param.ParameterType.Match(StandardTypes.Type))
-                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
-                        break;
-                    case Source.ReturnValue:
-                        if (!param.ParameterType.Match(StandardTypes.Object))
-                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
-                        break;
-                    case Source.Type:
-                        if (!param.ParameterType.Match(StandardTypes.Type))
-                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
-                        break;
-                    case Source.Triggers:
-                        if (!param.ParameterType.Match(WellKnownTypes.AttributeArray))
-                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.AttributeArray);
-                        break;
-                    case Source.Target:
-                        if (!param.ParameterType.Match(WellKnownTypes.Func_ObjectArray_Object))
-                            _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.TargetFunc);
-                        break;
-                    default:
-                        _log.Log(GeneralRules.UnknownCompilationOption, method, GeneralRules.Literals.UnknownArgumentSource(source.ToString()));
-                        break;
-                }
+
+                ValidateArgument(method, param, source);
 
                 args.Add(new AdviceArgument
                 {
-                    Source = argAttr.GetConstructorValue<Source>(0),
+                    Source = source,
                     Parameter = param
                 });
             }
 
             return args;
+        }
+
+        private void ValidateArgument(MethodDefinition method, ParameterDefinition param, Source source)
+        {
+            switch (source)
+            {
+                case Source.Arguments:
+                    if (!param.ParameterType.Match(StandardTypes.ObjectArray))
+                        _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.ObjectArray);
+                    break;
+                case Source.Instance:
+                    if (!param.ParameterType.Match(StandardTypes.Object))
+                        _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
+                    break;
+                case Source.Metadata:
+                    if (!param.ParameterType.Match(WellKnownTypes.MethodBase))
+                        _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.MethodBase);
+                    break;
+                case Source.Name:
+                    if (!param.ParameterType.Match(StandardTypes.String))
+                        _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.String);
+                    break;
+                case Source.ReturnType:
+                    if (!param.ParameterType.Match(StandardTypes.Type))
+                        _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
+                    break;
+                case Source.ReturnValue:
+                    if (!param.ParameterType.Match(StandardTypes.Object))
+                        _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
+                    break;
+                case Source.Type:
+                    if (!param.ParameterType.Match(StandardTypes.Type))
+                        _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
+                    break;
+                case Source.Triggers:
+                    if (!param.ParameterType.Match(WellKnownTypes.AttributeArray))
+                        _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.AttributeArray);
+                    break;
+                case Source.Target:
+                    if (!param.ParameterType.Match(WellKnownTypes.Func_ObjectArray_Object))
+                        _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.TargetFunc);
+                    break;
+                default:
+                    _log.Log(GeneralRules.UnknownCompilationOption, method, GeneralRules.Literals.UnknownArgumentSource(source.ToString()));
+                    break;
+            }
         }
 
         internal static AdviceEffectBase CreateEffect(Kind adviceType)

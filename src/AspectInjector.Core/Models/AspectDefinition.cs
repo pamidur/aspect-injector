@@ -1,7 +1,6 @@
 ﻿using AspectInjector.Broker;
+using AspectInjector.Core.Extensions;
 using AspectInjector.Rules;
-using FluentIL;
-using FluentIL.Extensions;
 using FluentIL.Logging;
 using Mono.Cecil;
 using System.Collections.Generic;
@@ -25,17 +24,9 @@ namespace AspectInjector.Core.Models
         {
             if (_factoryMethod == null)
             {
-                if (Factory != null)
-                {
-                    _factoryMethod = Factory.Resolve().Methods.FirstOrDefault(m =>
-                    m.IsStatic && m.IsPublic
-                    && m.Name == Constants.AspectFactoryMethodName
-                    && m.ReturnType.Match(StandardTypes.Object)
-                    && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.Match(StandardTypes.Type)
-                    );
-                }
-                else
-                    _factoryMethod = Host.Methods.FirstOrDefault(m => m.IsConstructor && !m.IsStatic && m.IsPublic && !m.HasParameters);
+                _factoryMethod = Factory != null
+                    ? Factory.Resolve().Methods.FirstOrDefault(m => m.IsFactoryMethod())
+                    : Host.Methods.FirstOrDefault(m => m.IsConstructor && !m.IsStatic && m.IsPublic && !m.HasParameters);
             }
 
             return _factoryMethod;

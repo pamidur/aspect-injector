@@ -13,7 +13,7 @@ namespace AspectInjector.Core.Advice.Weavers
 {
     public class AdviceInlineWeaver : IEffectWeaver
     {
-        public virtual byte Priority => 90;
+        public virtual byte Priority => 20;
 
         protected readonly ILogger _log;
 

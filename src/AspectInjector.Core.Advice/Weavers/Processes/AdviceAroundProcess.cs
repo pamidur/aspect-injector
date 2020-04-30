@@ -108,58 +108,59 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             var original = WrapEntryPoint(unwrapper);
 
-            unwrapper.Body.Instead(
-                il =>
-                {
-                    var refList = new List<Tuple<int, VariableDefinition>>();
-
-                    var originalRef = CreateRef(original, unwrapper);
-
-                    il = il.ThisOrStatic().Call(originalRef, c =>
-                    {
-                        for (int i = 0; i < original.Parameters.Count; i++)
-                        {
-                            var p = original.Parameters[i];
-
-                            if (p.ParameterType.IsByReference)
-                            {
-                                var elementType = ((ByReferenceType)p.ParameterType).ElementType;
-
-                                var tempVar = new VariableDefinition(elementType);
-                                refList.Add(new Tuple<int, VariableDefinition>(i, tempVar));
-                                unwrapper.Body.Variables.Add(tempVar);
-
-                                c = c
-                                .Store(tempVar, v => v
-                                    .Load(argsParam)
-                                    .GetByIndex(StandardTypes.Object, i)
-                                    .Cast(StandardTypes.Object, elementType))
-                                .LoadRef(tempVar);
-                            }
-                            else
-                            {
-                                c = c
-                                .Load(argsParam)
-                                .GetByIndex(StandardTypes.Object, i)
-                                .Cast(StandardTypes.Object, p.ParameterType);
-                            }
-                        }
-
-                        return c;
-                    });
-
-                    foreach (var refPar in refList)
-                        il = il.Load(argsParam).SetByIndex(StandardTypes.Object, refPar.Item1, val => val.Load(refPar.Item2).Cast(refPar.Item2.VariableType, StandardTypes.Object));
-
-                    if (original.ReturnType.Match(StandardTypes.Void))
-                        il = il.Value(null);
-                    else
-                        il = il.Cast(originalRef.ReturnType, unwrapper.ReturnType);
-
-                    return il.Return();
-                });
+            unwrapper.Body.Instead(il => WriteUnwrapperBody(il, argsParam, original));    
 
             return unwrapper;
+        }
+
+        private Cut WriteUnwrapperBody(Cut il, ParameterDefinition argsParam, MethodDefinition original)
+        {
+            var refList = new List<Tuple<int, VariableDefinition>>();
+
+            var originalRef = CreateRef(original, il.Method);
+
+            il = il.ThisOrStatic().Call(originalRef, c =>
+            {
+                for (int i = 0; i < original.Parameters.Count; i++)
+                {
+                    var p = original.Parameters[i];
+
+                    if (p.ParameterType.IsByReference)
+                    {
+                        var elementType = ((ByReferenceType)p.ParameterType).ElementType;
+
+                        var tempVar = new VariableDefinition(elementType);
+                        refList.Add(new Tuple<int, VariableDefinition>(i, tempVar));
+                        c.Method.Body.Variables.Add(tempVar);
+
+                        c = c
+                        .Store(tempVar, v => v
+                            .Load(argsParam)
+                            .GetByIndex(StandardTypes.Object, i)
+                            .Cast(StandardTypes.Object, elementType))
+                        .LoadRef(tempVar);
+                    }
+                    else
+                    {
+                        c = c
+                        .Load(argsParam)
+                        .GetByIndex(StandardTypes.Object, i)
+                        .Cast(StandardTypes.Object, p.ParameterType);
+                    }
+                }
+
+                return c;
+            });
+
+            foreach (var refPar in refList)
+                il = il.Load(argsParam).SetByIndex(StandardTypes.Object, refPar.Item1, val => val.Load(refPar.Item2).Cast(refPar.Item2.VariableType, StandardTypes.Object));
+
+            if (original.ReturnType.Match(StandardTypes.Void))
+                il = il.Value(null);
+            else
+                il = il.Cast(originalRef.ReturnType, il.Method.ReturnType);
+
+            return il.Return();
         }
 
         private MethodDefinition WrapEntryPoint(MethodDefinition unwrapper)
