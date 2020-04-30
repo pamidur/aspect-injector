@@ -18,7 +18,7 @@
 
 ### Features
 - Compile-time injection - works with Blazor and AOT
-- Injecting **Before**, **After** and **Around** (wrap) **Methods**, **Properties** and **Events**
+- Injecting **Before**, **After** and **Around** (wrap) **Methods**, **Constructors**, **Properties** and **Events**
 - Injecting **Interface implementaions**
 - Supports any project that can reference **netstandard2.0** libraries, see [here](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
 - Debugging support
@@ -27,13 +27,12 @@
 Check out [samples](samples) and [docs](docs)
 
 ### Requirements
-- .NetCore runtime 2.1.6+ installed on your machine (your projects can be anything that can reference netstandard2.0)
+- .NetCore runtime 2.1.6+ installed on your machine _(your projects can be anything that can reference netstandard2.0)_
 
 ### Known Issues / Limitations
 - For analyzers to work in VSCode, don't forget to enable ```"omnisharp.enableRoslynAnalyzers": true``` 
 - Unsafe methods are not supported and are silently ignored.
-- ~~You cannot inject code around constructors. Such attempts are silently ignored.~~ You can since **2.2.1**!
-- Until Nuget v5 you need to refrecence AspectInjector into every project in your solution.
+- Until Nuget v5 (with transient build feature) you need to refrecence AspectInjector into every project in your solution.
 Thus, 
 ``` 
     if VisualStudio >= 2019 && CoreSDK >= 2.1.602
