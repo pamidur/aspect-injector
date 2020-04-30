@@ -27,7 +27,7 @@
 Check out [samples](samples) and [docs](docs)
 
 ### Requirements
-- .NetCore runtime 2.1.6+ installed on your machine (your projects can be anything that targets netstandard2.0)
+- .NetCore runtime 2.1.6+ installed on your machine (your projects can be anything that can reference netstandard2.0)
 
 ### Known Issues / Limitations
 - For analyzers to work in VSCode, don't forget to enable ```"omnisharp.enableRoslynAnalyzers": true``` 
