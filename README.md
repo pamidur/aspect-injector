@@ -28,9 +28,9 @@ Check out [samples](samples) and [docs](docs)
 
 ### Requirements
 - .NetCore runtime 2.1.6+ installed on your machine _(your projects can be anything that can reference netstandard2.0)_
+- (_optional_) For analyzers to work in VSCode, don't forget to enable ```"omnisharp.enableRoslynAnalyzers": true``` 
 
 ### Known Issues / Limitations
-- (_optional_) For analyzers to work in VSCode, don't forget to enable ```"omnisharp.enableRoslynAnalyzers": true``` 
 - Unsafe methods are not supported and are silently ignored.
 - Until Nuget v5 (with transient build feature) you need to refrecence AspectInjector into every project in your solution.
 Thus, 
