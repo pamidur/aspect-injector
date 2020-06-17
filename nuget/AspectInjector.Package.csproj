@@ -3,22 +3,30 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>AspectInjector</PackageId>
     <Title>Aspect Injector - AOP Framework</Title>
-    <Description>This library provides attributes-based compile-time AOP framework.</Description>
+    <Description>
+      This library provides attributes-based compile-time AOP framework.
+      
+      Create your aspect by marking class with [Aspect], its methods with [Advice] and create trigger attribute with [Injection].
+      That's it! Cross-cutting concerns made easy! Just apply your attribute where you need and everything automicaly works!
+      No xml configs! No wierd reflection hacks! No runtime emit!
+      Works with AOT and Blazor!
+
+      See release notes for this version here:
+      https://github.com/pamidur/aspect-injector/releases/tag/$(Version)
+    </Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/pamidur/aspect-injector</PackageProjectUrl>
     <RepositoryUrl>https://github.com/pamidur/aspect-injector</RepositoryUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png</PackageIconUrl>
     <PackageIcon>package.png</PackageIcon>
-    <RepositoryType>git</RepositoryType>    
-    <PackageTags>AOP aspect aspects injector injection wp8 wp8.1 win8 win8.1 win10 dotnet core notify notifypropertychanged INPC</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>aop aspect aspects injector injection inpc dotnet core notify notifypropertychanged aot blazor attribute</PackageTags>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <IncludeBuildOutput>False</IncludeBuildOutput>
-    <PackageReleaseNotes>
-      See here => https://github.com/pamidur/aspect-injector/releases/tag/$(Version)
-    </PackageReleaseNotes>
+    <PackageReleaseNotes>See here => https://github.com/pamidur/aspect-injector/releases/tag/$(Version)</PackageReleaseNotes>
     <Version>0.0.0</Version>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="\" />
   </ItemGroup>
@@ -42,7 +50,7 @@
 
     <Exec Command="dotnet publish ../src/AspectInjector/ -o $(PublishMain) -c $(Configuration) --no-build" />
     <Exec Command="dotnet publish ../src/AspectInjector.Analyzer/ -o $(PublishAnalyzer) -c $(Configuration) --no-build" />
-    
+
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(PublishMain)*.dll">
         <PackagePath>build/_bin</PackagePath>
@@ -65,6 +73,6 @@
       <TfmSpecificPackageFile Include="$(PublishAnalyzer)FluentIL*.dll">
         <PackagePath>analyzers/dotnet/cs</PackagePath>
       </TfmSpecificPackageFile>
-    </ItemGroup>    
+    </ItemGroup>
   </Target>
 </Project>
