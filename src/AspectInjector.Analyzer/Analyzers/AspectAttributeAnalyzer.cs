@@ -78,7 +78,7 @@ namespace AspectInjector.Analyzer.Analyzers
                     || method.Parameters.Length != 1
                     || method.Parameters[0].Type.ToDisplayString() != WellKnown.Type)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectFactoryMustContainFactoryMethod.AsDescriptor(), location, symbol.Name));
+                    context.ReportDiagnostic(Diagnostic.Create(AspectRules.AspectFactoryMustContainFactoryMethod.AsDescriptor(), location, named.Name));
                 }
             }
 
