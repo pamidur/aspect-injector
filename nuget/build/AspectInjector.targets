@@ -1,6 +1,14 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+    <AspectInjectorEnabled Condition="'$(AspectInjectorEnabled)' == ''">true</AspectInjectorEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Update="AspectInjector" PrivateAssets="None" />
+  </ItemGroup>
+
+  <PropertyGroup>
     <_InjectAspectsDependsOn>
       _ASI_CheckAssemblyChanged;
       _ASI_InjectAspectsCore;
@@ -10,17 +18,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <_ASI_Loaded>true</_ASI_Loaded>
     <_ASI_Location Condition="'$(_ASI_Location)' == ''">$(MSBuildThisFileDirectory)../../build/_bin/</_ASI_Location>
     <_ASI_Debug Condition="'$(_ASI_Debug)' == ''">false</_ASI_Debug>
     <_ASI_DelayedInjection Condition="'$(_ASI_DelayedInjection)' == ''">false</_ASI_DelayedInjection>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <AspectInjectorEnabled Condition="'$(AspectInjectorEnabled)' == ''">true</AspectInjectorEnabled>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <_ASI_RefsFileExt>._asi_refs</_ASI_RefsFileExt>
   </PropertyGroup>
 
