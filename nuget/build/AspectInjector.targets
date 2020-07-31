@@ -76,7 +76,7 @@
     </PropertyGroup>
     <WriteLinesToFile Condition="'$(_InjectionNeeded)' == 'true'"
         File="%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)"
-        Lines="@(ReferencePath)"
+        Lines="@(ReferencePath->'%(FullPath)')"
         Overwrite="true"
         Encoding="Unicode"/>
     <Message Text="Assembly requires injection." Condition="'$(_InjectionNeeded)' == 'true'"/>
