@@ -29,6 +29,7 @@ jobs:
       env: 
         app_version: ${{ steps.tagger.outputs.tag }}
         app_release: true
+      run: echo "Release version ${{ steps.tagger.outputs.tag }}"
     - name: Build
       run: dotnet build -c Release -p:Version=${{ app_version }} -p:InformationalVersion="${{ app_version }}:${{ GITHUB_SHA }}"
     - name: Test
