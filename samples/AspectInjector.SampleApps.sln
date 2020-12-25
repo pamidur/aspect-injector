@@ -17,9 +17,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_solution", "_solution", "{
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 		readme.md = readme.md
+		..\.github\workflows\samples.yml = ..\.github\workflows\samples.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aspects.Cache", "src\Cache\Aspects.Cache.csproj", "{A63A2062-F490-497A-ADA4-98581FC7A809}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aspects.Cache", "src\Cache\Aspects.Cache.csproj", "{A63A2062-F490-497A-ADA4-98581FC7A809}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

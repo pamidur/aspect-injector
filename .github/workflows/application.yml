@@ -1,0 +1,51 @@
+name: Application
+on:
+  push:
+    branches: 
+        - master
+    tags: 
+        - '**'
+  pull_request:  
+
+env:
+  dotnetsdk: 2.1.811
+  app_version: 0.0.0-dev
+  app_release: false
+
+jobs:  
+  build:
+    runs-on: ubuntu-latest    
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ dotnetsdk }}
+    - name: Query Tag
+      id: tagger
+      uses: jimschubert/query-tag-action@v2
+      continue-on-error: true
+    - name: Versioning
+      if: ${{ steps.tagger.outcome == 'success' }}      
+      env: 
+        app_version: ${{ steps.tagger.outputs.tag }}
+        app_release: true
+    - name: Build
+      run: dotnet build -c Release -p:Version=${{ app_version }} -p:InformationalVersion="${{ app_version }}:${{ GITHUB_SHA }}"
+    - name: Test
+      run: dotnet test -c Release --no-build
+      
+  pack:
+      runs-on: ubuntu-latest
+      needs: build
+      steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ dotnetsdk }}
+      - name: Pack
+        working-directory: nuget
+        run: dotnet pack -c Release -o `pwd`/artifacts 
+      - uses: actions/upload-artifact@v1
+        with:
+          name: artifacts
+          path: ./nuget/artifacts
