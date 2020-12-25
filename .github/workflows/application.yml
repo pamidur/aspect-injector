@@ -19,7 +19,7 @@ jobs:
     - uses: actions/checkout@v1
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: ${{ dotnetsdk }}
+        dotnet-version: ${{ env.dotnetsdk }}
     - name: Query Tag
       id: tagger
       uses: jimschubert/query-tag-action@v2
@@ -31,7 +31,7 @@ jobs:
         app_release: true
       run: echo "Release version ${{ steps.tagger.outputs.tag }}"
     - name: Build
-      run: dotnet build -c Release -p:Version=${{ app_version }} -p:InformationalVersion="${{ app_version }}:${{ GITHUB_SHA }}"
+      run: dotnet build -c Release -p:Version=$app_version -p:InformationalVersion="$app_version:$GITHUB_SHA"
     - name: Test
       run: dotnet test -c Release --no-build
       
@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{ dotnetsdk }}
+          dotnet-version: ${{ env.dotnetsdk }}
       - name: Pack
         working-directory: nuget
         run: dotnet pack -c Release -o `pwd`/artifacts 
