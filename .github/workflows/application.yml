@@ -9,7 +9,6 @@ on:
 
 env:
   dotnetsdk: 2.1.811
-  app_version: 0.0.0-dev
   app_release: false
 
 jobs:  
@@ -22,16 +21,12 @@ jobs:
     - uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.dotnetsdk }}
-    - name: Query Tag
-      id: tagger
-      uses: jimschubert/query-tag-action@v2
-      continue-on-error: true
+    - name: Get version
+      run:  echo "app_version=`git describe --tags`" >> $GITHUB_ENV
+    - name: Get release status
+      run:  echo "app_release=`(git describe --tags --exact-match>/dev/null 2>&1 && echo true) || echo false`" >> $GITHUB_ENV
     - name: Versioning
-      if: ${{ steps.tagger.outcome == 'success' }}      
-      env: 
-        app_version: ${{ steps.tagger.outputs.tag }}
-        app_release: true
-      run: echo "Release version ${{ steps.tagger.outputs.tag }}"
+      run: echo "Release status=$app_release, version=$app_version"
     - name: Build
       run: dotnet build -c Release -p:Version=$app_version -p:InformationalVersion="$app_version:$GITHUB_SHA"
     - name: Test
