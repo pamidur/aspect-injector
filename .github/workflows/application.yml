@@ -26,15 +26,15 @@ jobs:
       run:  echo "app_version=`git describe --tags`" >> $GITHUB_ENV
     - name: Get release status
       run:  echo "app_release=`(git describe --tags --exact-match>/dev/null 2>&1 && echo true) || echo false`" >> $GITHUB_ENV
-    - name: Versioning
-      run: echo "Release status=$app_release, version=$app_version"
+    - name: Status
+      run: echo "Release=$app_release, version=$app_version"
     - name: Build
       run: dotnet build -c Release -p:Version=$app_version -p:InformationalVersion="$app_version:$GITHUB_SHA"
     - name: Test
       run: dotnet test -c Release --no-build
     - name: Pack
       working-directory: nuget
-      run: dotnet pack -c Release -o `pwd`/artifacts
+      run: dotnet pack -c Release -o `pwd`/artifacts -p:Version=$app_version
     - uses: actions/upload-artifact@v1
       with:
         name: artifacts
