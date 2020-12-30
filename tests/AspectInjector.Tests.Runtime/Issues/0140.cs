@@ -16,6 +16,23 @@ namespace AspectInjector.Tests.Runtime.Issues
             }
         }
 
+        [Aspect(Scope.PerInstance)]
+        [Injection(typeof(TestAspect))]
+        public class TestAspect2 : Attribute
+        {
+            [Advice(Kind.Before)]
+            public void Before()
+            {
+
+            }
+        }
+
+        [TestAspect]
+        [TestAspect2]
+        internal class ArgumentsTests_GenericClassConstructorChainTargetImpl : ArgumentsTests_GenericClassConstructorChainTarget<string>
+        {
+        }
+
         [TestAspect]
         internal abstract class ArgumentsTests_GenericClassConstructorChainTarget<T> where T : class
         {
