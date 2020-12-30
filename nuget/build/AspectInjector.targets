@@ -24,7 +24,7 @@
     <_ASI_RefsFileExt>._asi_refs</_ASI_RefsFileExt>
   </PropertyGroup>
 
-  <Target Name="InjectAspects" AfterTargets="CoreCompile" Condition="'$(AspectInjectorEnabled)' == 'true'" DependsOnTargets="$(_InjectAspectsDependsOn)"/>
+  <Target Name="InjectAspects" AfterTargets="CoreCompile" BeforeTargets="_TimeStampAfterCompile;AfterCompile" Condition="'$(AspectInjectorEnabled)' == 'true'" DependsOnTargets="$(_InjectAspectsDependsOn)"/>
 
   <Target Name="_ASI_InjectAspectsCore" Condition="'$(_InjectionNeeded)' == 'true'">
     <PropertyGroup>
