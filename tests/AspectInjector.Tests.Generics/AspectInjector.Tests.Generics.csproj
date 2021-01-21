@@ -7,13 +7,15 @@
   
   <Import Project="..\..\nuget\build\AspectInjector.targets" />
 
-  <PropertyGroup>
-    <_ASI_Location>$(MSBuildThisFileDirectory)..\..\src\AspectInjector\bin\$(Configuration)\netcoreapp2.1\</_ASI_Location>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Tests.RuntimeAssets\AspectInjector.Tests.RuntimeAssets.csproj" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <_ASI_Location>$(MSBuildThisFileDirectory)..\..\src\AspectInjector\bin\$(Configuration)\netcoreapp2.1\</_ASI_Location>
+    <_ASI_Debug Condition=" '$(Configuration)' == 'Debug' ">true</_ASI_Debug>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
 
 </Project>

@@ -22,7 +22,7 @@ namespace AspectInjector
 #if DEBUG
             version = "DEV";
 #endif
-
+            
             var app = $"AspectInjector|{version}";
             var log = new ConsoleLogger(app);
 
@@ -33,7 +33,7 @@ namespace AspectInjector
             }
             catch (Exception e)
             {
-                log.Log(GeneralRules.CompilationMustSecceedIfNoOtherErrors, $"Processing failure: {e.ToString()}");
+                log.Log(GeneralRules.CompilationMustSecceedIfNoOtherErrors, $"Processing failure: {e}");
             }
 
             return log.IsErrorThrown ? 1 : 0;

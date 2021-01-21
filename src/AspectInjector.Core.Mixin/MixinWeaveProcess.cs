@@ -117,7 +117,7 @@ namespace AspectInjector.Core.Mixin
         private TypeReference ParametrizeSubInterface(GenericInstanceType interfaceType, TypeReference typeReference)
         {
             var gparams = interfaceType.GenericArguments
-                .Select(tr => 
+                .Select(tr =>
                 tr is GenericParameter gp ? _target.Module.ImportReference(((GenericInstanceType)typeReference).GenericArguments[gp.Position]) : tr)
                 .ToArray();
 
@@ -160,26 +160,45 @@ namespace AspectInjector.Core.Mixin
 
             target.Methods.Add(method);
 
+            foreach (var gparam in origin.Resolve().GenericParameters)
+            {
+                var gp = new GenericParameter(gparam.Name, method);
+                foreach (var contraint in gparam.Constraints)                
+                    gp.Constraints.Add(contraint);
 
+                method.GenericParameters.Add(gp);
+            }
 
-            foreach (var gparam in origin.GenericParameters)
-                method.GenericParameters.Add(gparam.Clone(method));
+            var implGenericParams = method.GenericParameters.ToArray();
 
-            method.ReturnType = ResolveType(origin.ReturnType, origin, method.GenericParameters.ToArray());
+            foreach (var gparam in method.GenericParameters)
+                ParametrizeGenericParamater(gparam, origin, implGenericParams);
+
+            method.ReturnType = ResolveType(origin.ReturnType, origin, implGenericParams);
 
             if (originDef.IsSpecialName)
                 method.IsSpecialName = true;
 
             foreach (var parameter in origin.Parameters)
             {
-                var resolvedType = ResolveType(parameter.ParameterType, origin, method.GenericParameters.ToArray());
+                var resolvedType = ResolveType(parameter.ParameterType, origin, implGenericParams);
                 method.Parameters.Add(new ParameterDefinition(parameter.Name, parameter.Attributes, target.Module.ImportReference(resolvedType)));
             }
 
             return method;
         }
 
-        private static TypeReference ResolveType(TypeReference tr, MethodReference reference, IList<GenericParameter> genericParameters)
+        private static void ParametrizeGenericParamater(GenericParameter gp, MethodReference argumentsOwner, IReadOnlyList<GenericParameter> genericParameters)
+        {
+            var contraints = gp.Constraints.ToArray();
+            gp.Constraints.Clear();
+            foreach (var constraint in contraints)
+            {
+                gp.Constraints.Add(new GenericParameterConstraint(ResolveType(constraint.ConstraintType, argumentsOwner, genericParameters)));
+            }
+        }
+
+        private static TypeReference ResolveType(TypeReference tr, MethodReference reference, IReadOnlyList<GenericParameter> genericParameters)
         {
             var newtr = tr;
             if (!newtr.ContainsGenericParameter)

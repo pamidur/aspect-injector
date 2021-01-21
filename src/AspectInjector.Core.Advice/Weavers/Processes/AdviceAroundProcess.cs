@@ -108,7 +108,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             var original = WrapEntryPoint(unwrapper);
 
-            unwrapper.Body.Instead(il => WriteUnwrapperBody(il, argsParam, original));    
+            unwrapper.Body.Instead(il => WriteUnwrapperBody(il, argsParam, original));
 
             return unwrapper;
         }
@@ -169,7 +169,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             original.Name = _movedOriginalName;
             original.IsPrivate = true;
-            
+
             var returnType = _method.ReturnType;
 
             MoveBody(_method, original);
@@ -226,7 +226,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         private void MoveBody(MethodDefinition from, MethodDefinition to)
         {
             var frb = from.Body.Instructions;
-            var trb = to.Body.Instructions;
+            var tbProc = to.Body.GetILProcessor();
+            var fbProc = from.Body.GetILProcessor();
             var fdbg = from.DebugInformation;
             var fsp = from.DebugInformation.SequencePoints;
             var tsp = to.DebugInformation.SequencePoints;
@@ -237,16 +238,18 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             foreach (var inst in frb.Skip(init).ToList())
             {
                 var sp = fdbg.GetSequencePoint(inst);
-                if (sp != null) fsp.Remove(sp);
 
-                frb.Remove(inst);
-                trb.Add(inst);
+                // Cecil doens't allow to remove last instruction
+                if (frb.Count == 1)                
+                    fbProc.Clear();                
+                else
+                    frb.Remove(inst);
 
+                tbProc.Append(inst);
                 if (sp != null)
                     tsp.Add(new SequencePoint(inst, sp.Document) { EndColumn = sp.EndColumn, EndLine = sp.EndLine, StartColumn = sp.StartColumn, StartLine = sp.StartLine });
-            }
 
-            to.DebugInformation.Scope = from.DebugInformation.Scope;
+            }
 
             var to_vars = to.Body.Variables;
             foreach (var var in from.Body.Variables)
