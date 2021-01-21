@@ -46,4 +46,4 @@ jobs:
       env:
         NUGETKEY: ${{ secrets.NUGET_KEY }}
       working-directory: nuget/artifacts
-      run: dotnet nuget push ./AspectInjector.$VERSION.nupkg -s $nuget_url -k $NUGETKEY     
+      run: dotnet nuget push ./AspectInjector.$app_version.nupkg -s $nuget_url -k $NUGETKEY     
