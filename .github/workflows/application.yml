@@ -11,6 +11,7 @@ env:
   dotnetsdk: 2.1.811
   app_release: false
   app_conf: Release
+  nuget_url: https://api.nuget.org/v3/index.json
 
 jobs:  
   build:
@@ -39,4 +40,10 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         name: artifacts
-        path: ./nuget/artifacts   
+        path: ./nuget/artifacts
+    - name: Publish
+      if: env.app_release == 'true'
+      env:
+        NUGETKEY: ${{ secrets.NUGET_KEY }}
+      working-directory: nuget/artifacts
+      run: dotnet nuget push ./AspectInjector.$VERSION.nupkg -s $nuget_url -k $NUGETKEY     
