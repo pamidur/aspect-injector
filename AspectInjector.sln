@@ -5,10 +5,11 @@ VisualStudioVersion = 16.0.29519.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_solution", "_solution", "{AEB111CE-8C1F-49F8-8282-6BBA13C05C2E}"
 	ProjectSection(SolutionItems) = preProject
-		.travis.yml = .travis.yml
+		.github\workflows\application.yml = .github\workflows\application.yml
 		LICENSE = LICENSE
 		package.png = package.png
 		README.md = README.md
+		.github\workflows\samples.yml = .github\workflows\samples.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Core", "src\AspectInjector.Core\AspectInjector.Core.csproj", "{ACCC10D0-D079-4B9C-8269-71796A0EF822}"
