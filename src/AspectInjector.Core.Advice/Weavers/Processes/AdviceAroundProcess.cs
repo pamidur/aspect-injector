@@ -271,8 +271,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             _type.Methods.Add(method);
 
-            foreach (var gparam in origin.GenericParameters)
-                method.GenericParameters.Add(gparam.Clone(method));
+            origin.GenericParameters.CloneTo(method);
 
             if (origin.ReturnType is GenericParameter gp && gp.Owner == origin)
                 method.ReturnType = _type.Module.ImportReference(method.GenericParameters[gp.Position]);

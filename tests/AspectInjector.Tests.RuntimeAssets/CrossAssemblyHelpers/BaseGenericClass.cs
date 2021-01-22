@@ -12,8 +12,8 @@ namespace AspectInjector.Tests.RuntimeAssets.CrossAssemblyHelpers
             {
                 public interface NestedGenericInterface<H>
                 {
-                    H GetH<G>(G g, I i, U u, T t)
-                        where G : NestedGenericInterface<T>
+                    H GetH<G,J>(G g, I i, U u, T t)
+                        where G : NestedGenericInterface<J>
                         ;
 
                 }
