@@ -19,7 +19,7 @@
 ### Features
 - Compile-time injection - works with Blazor and AOT
 - Injecting **Before**, **After** and **Around** (wrap) **Methods**, **Constructors**, **Properties** and **Events**
-- Injecting **Interface implementaions**
+- Injecting **Interface implementations**
 - Supports any project that can reference **netstandard2.0** libraries, see [here](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
 - Debugging support
 - Roslyn analyzers for your convenience (only c# currently)
