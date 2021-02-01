@@ -5,7 +5,7 @@ namespace AspectInjector.Broker
     /// <summary>
     /// Marks attribute as an injection trigger.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
     public class Injection : Attribute
     {
         /// <summary>

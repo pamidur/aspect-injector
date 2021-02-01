@@ -12,8 +12,8 @@ namespace AspectInjector.Rules
 
         public static readonly Rule InjectionMustBeAttribute =
             GeneralRules.Make("AI_I001",
-                "Injection trigger must be an Attribute class",
-                "'{0}' is not an Attribute",
-                "Injection Attribute can only mark an attribute class.");
+                "Injection trigger must be an Attribute class or Interface",
+                "'{0}' is not an Attribute or interface",
+                "Injection Attribute can only mark an attribute class or interface.");
     }
 }

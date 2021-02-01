@@ -37,6 +37,8 @@ namespace AspectInjector.Core.Services
                 {
                     injections = injections.Concat(ExtractInjections(type));
 
+                    injections = injections.Concat(type.Interfaces.SelectMany(ii => ExtractInterfaceInjections(type, ii)));
+
                     injections = injections.Concat(type.Events.SelectMany(ExtractInjections));
                     injections = injections.Concat(type.Properties.SelectMany(ExtractInjections));
                     injections = injections.Concat(type.Methods.SelectMany(ExtractInjections));
@@ -61,11 +63,23 @@ namespace AspectInjector.Core.Services
                 .Select(a => new { Attribute = a, Injections = FindInjections(a.AttributeType.Resolve()) })
                 .Where(e => e.Injections.Count != 0).ToArray())
             {
-                injections = injections.Concat(ParseInjectionAttribute(target, trigger.Attribute, trigger.Injections));
+                var parsedList = ParseInjectionAttributes(trigger.Injections, trigger.Attribute.AttributeType.Resolve());
+                injections = injections.Concat(parsedList.SelectMany(parsed => FindApplicableMembers(target, parsed, trigger.Attribute)));
             }
 
             return injections;
         }
+
+        protected virtual IEnumerable<InjectionDefinition> ExtractInterfaceInjections(ICustomAttributeProvider target, InterfaceImplementation implementation)
+        {
+            var interfaceDef = implementation.InterfaceType.Resolve();
+
+            var injectionAttributes = FindInjections(interfaceDef);
+            var parsedList = ParseInjectionAttributes(injectionAttributes, interfaceDef);
+
+            return parsedList.SelectMany(parsed => FindApplicableMembers(target, parsed, null)); //todo: figure if we need fake metadata attribute here
+        }
+
 
         protected static IReadOnlyList<CustomAttribute> FindInjections(TypeDefinition type)
         {
@@ -79,9 +93,9 @@ namespace AspectInjector.Core.Services
             return injections;
         }
 
-        private IEnumerable<InjectionDefinition> ParseInjectionAttribute(ICustomAttributeProvider target, CustomAttribute trigger, IReadOnlyList<CustomAttribute> injectionAttrs)
+        private IEnumerable<InjectionInfo> ParseInjectionAttributes(IReadOnlyList<CustomAttribute> injectionAttrs, IMemberDefinition debugRef)
         {
-            var injections = Enumerable.Empty<InjectionDefinition>();
+            var parsedInfos = new List<InjectionInfo>();
 
             foreach (var injectionAttr in injectionAttrs)
             {
@@ -89,18 +103,16 @@ namespace AspectInjector.Core.Services
                 var aspect = _aspectReader.Read(aspectRef.Resolve());
                 if (aspect == null)
                 {
-                    _log.Log(InjectionRules.InjectionMustReferToAspect, target, aspectRef.Name);
+                    _log.Log(InjectionRules.InjectionMustReferToAspect, debugRef, aspectRef.Name);
                     continue;
                 }
 
-#pragma warning disable S1854 // Unused assignments should be removed
                 var priority = injectionAttr.GetPropertyValue<ushort>(nameof(Injection.Priority));
-#pragma warning restore S1854 // Unused assignments should be removed
 
                 var propagation = injectionAttr.GetPropertyValue<PropagateTo>(nameof(Injection.Propagation));
                 if (propagation == 0) propagation = PropagateTo.Members | PropagateTo.Types;
                 if (propagation > PropagateTo.Everything)
-                    _log.Log(GeneralRules.UnknownCompilationOption, trigger.AttributeType.Resolve(), GeneralRules.Literals.UnknownPropagationStrategy(propagation.ToString()));
+                    _log.Log(GeneralRules.UnknownCompilationOption, debugRef, GeneralRules.Literals.UnknownPropagationStrategy(propagation.ToString()));
 
 
                 var propagationFilter = injectionAttr.GetPropertyValue<string>(nameof(Injection.PropagationFilter));
@@ -109,25 +121,21 @@ namespace AspectInjector.Core.Services
                 {
                     try
                     {
-#pragma warning disable S1854 // Unused assignments should be removed
                         propagationRegex = new Regex(propagationFilter, RegexOptions.CultureInvariant);
-#pragma warning restore S1854 // Unused assignments should be removed
                     }
                     catch (Exception)
                     {
-                        _log.Log(GeneralRules.UnknownCompilationOption, trigger.AttributeType.Resolve(), GeneralRules.Literals.InvalidPropagationFilter(propagationFilter));
+                        _log.Log(GeneralRules.UnknownCompilationOption, debugRef, GeneralRules.Literals.InvalidPropagationFilter(propagationFilter));
                     }
                 }
 
-                var injectionInfo = (aspect, priority, propagation, propagationRegex);
-
-                injections = injections.Concat(FindApplicableMembers(target, injectionInfo, trigger));
+                parsedInfos.Add(new InjectionInfo(aspect, priority, propagation, propagationRegex));
             }
 
-            return injections;
+            return parsedInfos;
         }
 
-        private IEnumerable<InjectionDefinition> FindApplicableMembers(ICustomAttributeProvider target, (AspectDefinition aspect, ushort priority, PropagateTo propagation, Regex filter) injection, CustomAttribute trigger)
+        private IEnumerable<InjectionDefinition> FindApplicableMembers(ICustomAttributeProvider target, InjectionInfo injection, CustomAttribute trigger)
         {
             var result = Enumerable.Empty<InjectionDefinition>();
 
@@ -160,7 +168,7 @@ namespace AspectInjector.Core.Services
             return result;
         }
 
-        private IEnumerable<InjectionDefinition> CreateInjections(IMemberDefinition target, (AspectDefinition aspect, ushort priority, PropagateTo propagation, Regex filter) injection, CustomAttribute trigger)
+        private IEnumerable<InjectionDefinition> CreateInjections(IMemberDefinition target, InjectionInfo injection, CustomAttribute trigger)
         {
             if (IsAspectMember(target)) return Enumerable.Empty<InjectionDefinition>();
 
@@ -170,7 +178,7 @@ namespace AspectInjector.Core.Services
                 Source = injection.aspect,
                 Priority = injection.priority,
                 Effect = e,
-                Triggers = new List<CustomAttribute> { trigger }
+                Triggers = trigger == null ? new List<CustomAttribute>() : new List<CustomAttribute> { trigger }
             });
         }
 
@@ -227,6 +235,22 @@ namespace AspectInjector.Core.Services
                     yield return currentInjection;
                 }
             }
+        }
+    }
+
+    internal readonly struct InjectionInfo
+    {
+        public readonly AspectDefinition aspect;
+        public readonly ushort priority;
+        public readonly PropagateTo propagation;
+        public readonly Regex filter;
+
+        public InjectionInfo(AspectDefinition aspect, ushort priority, PropagateTo propagation, Regex filter)
+        {
+            this.aspect = aspect;
+            this.priority = priority;
+            this.propagation = propagation;
+            this.filter = filter;
         }
     }
 }

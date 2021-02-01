@@ -35,8 +35,11 @@ namespace AspectInjector.Analyzer.Analyzers
 
             var attributeType = compilation.GetTypeByMetadataName(typeof(Attribute).FullName);
 
-            if (context.ContainingSymbol is ITypeSymbol type && !compilation.ClassifyConversion(type, attributeType).IsImplicit)
-                context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustBeAttribute.AsDescriptor(), location, context.ContainingSymbol.Name));
+            if (context.ContainingSymbol is ITypeSymbol type)
+            {
+                if (type.TypeKind != TypeKind.Interface && !compilation.ClassifyConversion(type, attributeType).IsImplicit)
+                    context.ReportDiagnostic(Diagnostic.Create(InjectionRules.InjectionMustBeAttribute.AsDescriptor(), location, context.ContainingSymbol.Name));
+            }
 
             if (attr.AttributeConstructor == null)
                 return;
