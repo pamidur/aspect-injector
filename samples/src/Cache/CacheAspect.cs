@@ -14,20 +14,25 @@ namespace Aspects.Cache
         public abstract ObjectCache Cache { get; }
 
         public abstract CacheItemPolicy Policy { get; }
+
+        public bool PerInstanceCache { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class MemoryCacheAttribute : CacheAttribute
     {
         private static readonly MemoryCache _cache = new MemoryCache("aspect_builtin_memory_cache");
+
         private readonly uint _seconds;
 
-        public MemoryCacheAttribute(uint seconds)
+        public MemoryCacheAttribute(uint seconds, bool perInstanceCache = false)
         {
             _seconds = seconds;
+            PerInstanceCache = perInstanceCache;
         }
 
         public override ObjectCache Cache => _cache;
+
         public override CacheItemPolicy Policy => new CacheItemPolicy() { AbsoluteExpiration = DateTimeOffset.UtcNow.AddSeconds(_seconds) };
     }
 
@@ -50,7 +55,8 @@ namespace Aspects.Cache
             var resultFound = false;
 
             var cacheTriggers = (triggers.OfType<CacheAttribute>()).ToList();
-            var key = GetKey(instance, target.Method, args);
+            var useInstance = cacheTriggers.Any(ct => ct.PerInstanceCache);
+            var key = useInstance ? GetKey(instance, target.Method, args) : GetKey(target.Method, args);
 
             foreach (var cache in cacheTriggers.Select(ct => ct.Cache).Distinct())
             {
@@ -79,7 +85,10 @@ namespace Aspects.Cache
             return result;
         }
 
-        protected string GetKey(object instance, MethodInfo method, IEnumerable<object> args) =>
+        protected string GetKey(MethodInfo method, IEnumerable<object> args) =>
             $"{method.DeclaringType.FullName.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
+
+        protected string GetKey(object instance, MethodInfo method, IEnumerable<object> args) =>
+            $"{instance.GetHashCode()}-{method.DeclaringType.FullName.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
     }
 }
