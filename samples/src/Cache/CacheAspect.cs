@@ -74,9 +74,7 @@ namespace Aspects.Cache
 
             if (!resultFound)
             {
-                result = target(args);
-                if (result == null)
-                    result = NullMarker;
+                result = target(args) ?? NullMarker;
 
                 foreach (var cache in cacheTriggers)
                     cache.Cache.Set(key, result, cache.Policy);
