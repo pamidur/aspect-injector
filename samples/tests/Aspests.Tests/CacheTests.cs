@@ -30,6 +30,12 @@ namespace Aspests.Tests
                 return a + b.GetHashCode() + DateTime.Now.Ticks;
             }
 
+            [MemoryCache(3, true)]
+            public long CalculatePerInstance(int a, string b)
+            {
+                return a + b.GetHashCode() + DateTime.Now.Ticks;
+            }
+
             [MemoryCache(3)]
             public long Calculate(int a, int b)
             {
@@ -85,6 +91,18 @@ namespace Aspests.Tests
             var result2 = target2.Calculate(20, "test");
 
             Assert.Equal(result1, result2);
+        }
+
+        [Fact]
+        public async Task Cache_Aspect_Distinct_Instances_PerInstance()
+        {
+            var target = new TestClass();
+            var target2 = new TestClass();
+            var result1 = target.CalculatePerInstance(20, "test");
+            await Task.Delay(10);
+            var result2 = target2.CalculatePerInstance(20, "test");
+
+            Assert.NotEqual(result1, result2);
         }
 
         [Fact]
