@@ -86,9 +86,9 @@ namespace Aspects.Cache
         }
 
         protected string GetKey(MethodInfo method, IEnumerable<object> args) =>
-            $"{method.DeclaringType.FullName.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
+            $"{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
 
         protected string GetKey(object instance, MethodInfo method, IEnumerable<object> args) =>
-            $"{instance.GetHashCode()}-{method.DeclaringType.FullName.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
+            $"{instance.GetHashCode()}-{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
     }
 }
