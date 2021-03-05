@@ -31,6 +31,12 @@ namespace Aspests.Tests
             }
 
             [MemoryCache(3)]
+            public long Calculate(int a, int b)
+            {
+                return a + b + DateTime.Now.Ticks;
+            }
+
+            [MemoryCache(3)]
             public Task<long> CalculateTask(int a, string b)
             {
                 return Task.FromResult(a + b.GetHashCode() + DateTime.Now.Ticks);
@@ -164,6 +170,17 @@ namespace Aspests.Tests
             a = 1;
             await target.DoTask(ref a);
             Assert.Equal(1, a);
+        }
+
+        [Fact]
+        public async Task Cache_Aspect_OppositeArguments()
+        {
+            var target = new TestClass();
+            var result1 = target.Calculate(20, 5);
+            await Task.Delay(10);
+            var result2 = target.Calculate(5, 20);
+
+            Assert.NotEqual(result1, result2);
         }
     }
 }
