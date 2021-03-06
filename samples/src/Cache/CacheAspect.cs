@@ -55,11 +55,13 @@ namespace Aspects.Cache
             var resultFound = false;
 
             var cacheTriggers = (triggers.OfType<CacheAttribute>()).ToList();
-            var useInstance = cacheTriggers.Any(ct => ct.PerInstanceCache);
-            var key = useInstance ? GetKey(instance, target.Method, args) : GetKey(target.Method, args);
+            var nonInstanceKey = GetKey(target.Method, args);
+            var instanceKey = instance == null ? nonInstanceKey : GetKey(instance, target.Method, args);
 
-            foreach (var cache in cacheTriggers.Select(ct => ct.Cache).Distinct())
+            foreach (var cacheTrigger in cacheTriggers)
             {
+                var key = cacheTrigger.PerInstanceCache ? instanceKey : nonInstanceKey;
+                var cache = cacheTrigger.Cache;
                 var ci = cache.GetCacheItem(key);
                 if (ci != null)
                 {
@@ -76,17 +78,21 @@ namespace Aspects.Cache
             {
                 result = target(args) ?? NullMarker;
 
-                foreach (var cache in cacheTriggers)
-                    cache.Cache.Set(key, result, cache.Policy);
+                foreach (var cacheTrigger in cacheTriggers)
+                {
+                    var key = cacheTrigger.PerInstanceCache ? instanceKey : nonInstanceKey;
+                    cacheTrigger.Cache.Set(key, result, cacheTrigger.Policy);
+                }
+                
             }
 
             return result;
         }
 
-        protected string GetKey(MethodInfo method, IEnumerable<object> args) =>
-            $"{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
-
-        protected string GetKey(object instance, MethodInfo method, IEnumerable<object> args) =>
-            $"{instance.GetHashCode()}-{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
+        protected string GetKey(MethodInfo method, IEnumerable<object> args) => 
+            $"{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}"; 
+ 
+        protected string GetKey(object instance, MethodInfo method, IEnumerable<object> args) => 
+            $"{instance.GetHashCode()}-{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}"; 
     }
 }
