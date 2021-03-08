@@ -8,15 +8,23 @@ namespace AspectInjector.Tests.Runtime.InheritedInjections
     [Aspect(Scope.Global)]
     public class TestAspect
     {
-        [Advice(Kind.Before)]
-        public void Before()
+        [Advice(Kind.Around)]
+        public object Around(
+            [Argument(Source.Target)] Func<object[], object> target,
+            [Argument(Source.Arguments)] object[] args,
+            [Argument(Source.Triggers)] Attribute[] attrs)
         {
+            var res = target(args);
             Checker.Passed = true;
+            return res;
         }
     }
 
     [Injection(typeof(TestAspect), Inherited = true)]
-    public abstract class BaseLocalAttribute : Attribute { }
+    public abstract class BaseLocalAttribute : Attribute {
+        public int Value { get; set; }
+        public int Value2;
+    }
 
     public class RealAttribute : BaseLocalAttribute { }
 
@@ -24,7 +32,7 @@ namespace AspectInjector.Tests.Runtime.InheritedInjections
 
     internal class TestClass
     {
-        [Real]
+        [Real(Value = 1, Value2 = 2)]
         [Remote]
         public void Do() { }
     }

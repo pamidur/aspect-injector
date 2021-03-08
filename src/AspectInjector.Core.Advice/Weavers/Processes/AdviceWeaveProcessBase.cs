@@ -103,30 +103,23 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 {
                     var catype = ca.AttributeType.Resolve();
 
-                    var attrvar = new VariableDefinition(il.Import(ca.AttributeType));
-                    _method.Body.Variables.Add(attrvar);
-                    _method.Body.InitLocals = true;
-
-                    il = il.Store(attrvar);
-
                     foreach (var namedArg in ca.Properties)
                     {
-                        var prop = catype.Properties.First(p => p.Name == namedArg.Name).SetMethod;
+                        var prop = catype.FindProperty(namedArg.Name).SetMethod;
 
                         il = il
-                        .Load(attrvar)
+                        .Dup()
                         .Call(prop, ilp => ilp.Value(namedArg.Argument));
                     }
 
                     foreach (var namedArg in ca.Fields)
                     {
-                        var field = catype.Fields.First(p => p.Name == namedArg.Name);
+                        var field = catype.FindField(namedArg.Name);
 
                         il = il
-                        .Load(attrvar)
+                        .Dup()
                         .Store(field, ilf => ilf.Value(namedArg.Argument));
                     }
-                    il = il.Load(attrvar);
                 }
 
                 return il;

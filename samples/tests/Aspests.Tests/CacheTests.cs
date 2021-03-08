@@ -11,50 +11,50 @@ namespace Aspests.Tests
     {
         class TestClass
         {
-            [MemoryCache(3)]
+            [MemoryCache(3, PerInstanceCache = false)]
             public void Do(ref int a)
             {
                 a++;
             }
 
-            [MemoryCache(3)]
+            [MemoryCache(3, PerInstanceCache = false)]
             public Task DoTask(ref int a)
             {
                 a++;
                 return Task.CompletedTask;
             }
 
-            [MemoryCache(3)]
+            [MemoryCache(3, PerInstanceCache = false)]
             public long Calculate(int a, string b)
             {
                 return a + b.GetHashCode() + DateTime.Now.Ticks;
             }
 
-            [MemoryCache(3, true)]
+            [MemoryCache(3, PerInstanceCache = true)]
             public long CalculatePerInstance(int a, string b)
             {
                 return a + b.GetHashCode() + DateTime.Now.Ticks;
             }
 
-            [MemoryCache(3)]
+            [MemoryCache(3, PerInstanceCache = false)]
             public long Calculate(int a, int b)
             {
                 return a + b + DateTime.Now.Ticks;
             }
 
-            [MemoryCache(3)]
+            [MemoryCache(3, PerInstanceCache = false)]
             public Task<long> CalculateTask(int a, string b)
             {
                 return Task.FromResult(a + b.GetHashCode() + DateTime.Now.Ticks);
             }
 
-            [MemoryCache(3)]
+            [MemoryCache(3, PerInstanceCache = false)]
             public async Task<long> CalculateTaskAsync(int a, string b)
             {
                 return await Task.FromResult(a + b.GetHashCode() + DateTime.Now.Ticks);
             }
 
-            [MemoryCache(3)]
+            [MemoryCache(3, PerInstanceCache = false)]
             public static long CalculateStatic(int a, string b)
             {
                 return a + b.GetHashCode() + DateTime.Now.Ticks;

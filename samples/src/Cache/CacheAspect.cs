@@ -15,7 +15,15 @@ namespace Aspects.Cache
 
         public abstract CacheItemPolicy Policy { get; }
 
+        /// <summary>
+        /// Data is cached PerInstance vs PerType. Default PerInstanceCache = true
+        /// </summary>
         public bool PerInstanceCache { get; set; }
+
+        /// <summary>
+        /// Cache with highest priority is checked first. 0 - Highest, 255 - Lowest. Default 127
+        /// </summary>
+        public byte Priority { get; set; } = 127;
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
@@ -23,17 +31,14 @@ namespace Aspects.Cache
     {
         private static readonly MemoryCache _cache = new MemoryCache("aspect_builtin_memory_cache");
 
-        private readonly uint _seconds;
-
-        public MemoryCacheAttribute(uint seconds, bool perInstanceCache = false)
+        public MemoryCacheAttribute(uint seconds)
         {
-            _seconds = seconds;
-            PerInstanceCache = perInstanceCache;
+            Policy = new CacheItemPolicy() { AbsoluteExpiration = DateTimeOffset.UtcNow.AddSeconds(seconds) };
         }
 
         public override ObjectCache Cache => _cache;
 
-        public override CacheItemPolicy Policy => new CacheItemPolicy() { AbsoluteExpiration = DateTimeOffset.UtcNow.AddSeconds(_seconds) };
+        public override CacheItemPolicy Policy { get; }
     }
 
 
@@ -54,11 +59,11 @@ namespace Aspects.Cache
             object result = null;
             var resultFound = false;
 
-            var cacheTriggers = (triggers.OfType<CacheAttribute>()).ToList();
+            var cacheTriggers = triggers.OfType<CacheAttribute>().ToList();
             var nonInstanceKey = GetKey(target.Method, args);
-            var instanceKey = instance == null ? nonInstanceKey : GetKey(instance, target.Method, args);
+            var instanceKey = instance == null ? nonInstanceKey : $"{instance.GetHashCode()}-{nonInstanceKey}";
 
-            foreach (var cacheTrigger in cacheTriggers)
+            foreach (var cacheTrigger in cacheTriggers.OrderBy(c => c.Priority))
             {
                 var key = cacheTrigger.PerInstanceCache ? instanceKey : nonInstanceKey;
                 var cache = cacheTrigger.Cache;
@@ -83,16 +88,13 @@ namespace Aspects.Cache
                     var key = cacheTrigger.PerInstanceCache ? instanceKey : nonInstanceKey;
                     cacheTrigger.Cache.Set(key, result, cacheTrigger.Policy);
                 }
-                
+
             }
 
             return result;
         }
 
-        protected string GetKey(MethodInfo method, IEnumerable<object> args) => 
-            $"{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}"; 
- 
-        protected string GetKey(object instance, MethodInfo method, IEnumerable<object> args) => 
-            $"{instance.GetHashCode()}-{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}"; 
+        private string GetKey(MethodInfo method, IEnumerable<object> args) =>
+            $"{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
     }
 }
