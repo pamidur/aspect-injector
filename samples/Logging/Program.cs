@@ -8,6 +8,7 @@ namespace AspectInjector.Samples.Logging
         {
             var service = new SampleService();
             service.GetCount();
+            service.ThrowGetCount();
         }
     }
 }

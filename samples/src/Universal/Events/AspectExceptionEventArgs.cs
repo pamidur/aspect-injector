@@ -6,12 +6,20 @@ namespace Aspects.Universal.Events
     {
         public Exception Exception { get; set; }
 
-        public static AspectExceptionEventArgs CreateFrom(AspectEventArgs args, Exception exception)
+        public static AspectExceptionEventArgs CreateFrom(AspectEventArgs aspectEventArgs, Exception exception)
         {
-            var aspectExceptionEventArgs = (AspectExceptionEventArgs) args.Copy();
-            aspectExceptionEventArgs.Exception = exception;
-
-            return aspectExceptionEventArgs;
+            return new AspectExceptionEventArgs
+            {
+                Args = aspectEventArgs.Args,
+                Exception = exception,
+                Instance = aspectEventArgs.Instance,
+                Method = aspectEventArgs.Method,
+                Name = aspectEventArgs.Name,
+                ReturnType = aspectEventArgs.ReturnType,
+                Target = aspectEventArgs.Target,
+                Triggers = aspectEventArgs.Triggers,
+                Type = aspectEventArgs.Type
+            };
         }
     }
 }

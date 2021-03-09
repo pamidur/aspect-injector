@@ -1,17 +1,22 @@
-﻿using AspectInjector.Broker;
-using AspectInjector.Samples.Logging.Aspects;
+﻿using System;
 using System.Threading;
+using Logging;
 
 namespace AspectInjector.Samples.Logging.Services
 {
-    [Log]
+    [AnyMethodHandleIt]
     public class SampleService
     {
         public int GetCount()
         {
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
 
             return 10;
+        }
+
+        public void ThrowGetCount()
+        {
+            throw new ArgumentNullException();
         }
     }
 }
