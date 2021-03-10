@@ -95,6 +95,7 @@ namespace Aspects.Universal.Aspects
                 }
                 catch
                 {
+                    // In case the overridden OnBefore throws an exception, ignore this exception so that the other OnBefore methods are still called from here.
                 }
             }
         }
@@ -109,6 +110,7 @@ namespace Aspects.Universal.Aspects
                 }
                 catch
                 {
+                    // In case the overridden OnBefore throws an exception, ignore this exception so that the other OnBefore methods are still called from here.
                 }
             }
         }
@@ -123,6 +125,7 @@ namespace Aspects.Universal.Aspects
                 }
                 catch
                 {
+                    // TODO : need to think about what we want to do here...
                 }
             }
         }
