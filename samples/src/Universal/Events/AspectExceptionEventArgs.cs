@@ -16,7 +16,6 @@ namespace Aspects.Universal.Events
                 Method = aspectEventArgs.Method,
                 Name = aspectEventArgs.Name,
                 ReturnType = aspectEventArgs.ReturnType,
-                Target = aspectEventArgs.Target,
                 Triggers = aspectEventArgs.Triggers,
                 Type = aspectEventArgs.Type
             };

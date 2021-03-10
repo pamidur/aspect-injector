@@ -28,7 +28,6 @@ namespace Aspects.Universal.Aspects
                 Instance = instance,
                 Type = type,
                 Method = method,
-                Target = target,
                 Name = name,
                 Args = args,
                 ReturnType = returnType,
@@ -39,20 +38,20 @@ namespace Aspects.Universal.Aspects
             {
                 var syncResultType = eventArgs.ReturnType.IsConstructedGenericType ? eventArgs.ReturnType.GenericTypeArguments[0] : _voidTaskResult;
 
-                return _asyncHandler.MakeGenericMethod(syncResultType).Invoke(this, new object[] { eventArgs.Copy() });
+                return _asyncHandler.MakeGenericMethod(syncResultType).Invoke(this, new object[] { target, eventArgs.Copy() });
             }
 
             var syncReturnType = eventArgs.ReturnType == typeof(void) ? typeof(object) : eventArgs.ReturnType;
-            return _syncHandler.MakeGenericMethod(syncReturnType).Invoke(this, new object[] { eventArgs.Copy() });
+            return _syncHandler.MakeGenericMethod(syncReturnType).Invoke(this, new object[] { target, eventArgs.Copy() });
         }
 
-        private T WrapSync<T>(AspectEventArgs eventArgs)
+        private T WrapSync<T>(Func<object[], object> target, AspectEventArgs eventArgs)
         {
             OnBefore(eventArgs);
 
             try
             {
-                var result = (T)eventArgs.Target(eventArgs.Args);
+                var result = (T)target(eventArgs.Args);
 
                 OnAfter(eventArgs);
 
@@ -66,13 +65,13 @@ namespace Aspects.Universal.Aspects
             }
         }
 
-        private async Task<T> WrapAsync<T>(AspectEventArgs eventArgs)
+        private async Task<T> WrapAsync<T>(Func<object[], object> target, AspectEventArgs eventArgs)
         {
             OnBefore(eventArgs);
 
             try
             {
-                var result = await (Task<T>)eventArgs.Target(eventArgs.Args);
+                var result = await (Task<T>)target(eventArgs.Args);
 
                 OnAfter(eventArgs);
 
