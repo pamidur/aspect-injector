@@ -40,20 +40,20 @@ namespace Aspects.Universal.Aspects
             {
                 var syncResultType = eventArgs.ReturnType.IsConstructedGenericType ? eventArgs.ReturnType.GenericTypeArguments[0] : _voidTaskResult;
 
-                return _asyncHandler.MakeGenericMethod(syncResultType).Invoke(this, new object[] { target, baseUniversalWrapperAttributes, eventArgs });
+                return _asyncHandler.MakeGenericMethod(syncResultType).Invoke(this, new object[] { target, args, baseUniversalWrapperAttributes, eventArgs });
             }
 
             var syncReturnType = eventArgs.ReturnType == typeof(void) ? typeof(object) : eventArgs.ReturnType;
-            return _syncHandler.MakeGenericMethod(syncReturnType).Invoke(this, new object[] { target, baseUniversalWrapperAttributes, eventArgs });
+            return _syncHandler.MakeGenericMethod(syncReturnType).Invoke(this, new object[] { target, args, baseUniversalWrapperAttributes, eventArgs });
         }
 
-        private T WrapSync<T>(Func<IReadOnlyList<object>, object> target, BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
+        private T WrapSync<T>(Func<object[], object> target, object[] args, BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
         {
             OnBefore(attributes, eventArgs);
 
             try
             {
-                var result = (T)target(eventArgs.Args);
+                var result = (T)target(args);
 
                 OnAfter(attributes, eventArgs);
 
@@ -67,13 +67,13 @@ namespace Aspects.Universal.Aspects
             }
         }
 
-        private async Task<T> WrapAsync<T>(Func<IReadOnlyList<object>, object> target, BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
+        private async Task<T> WrapAsync<T>(Func<object[], object> target, object[] args, BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
         {
             OnBefore(attributes, eventArgs);
 
             try
             {
-                var result = await (Task<T>)target(eventArgs.Args);
+                var result = await (Task<T>)target(args);
 
                 OnAfter(attributes, eventArgs);
 

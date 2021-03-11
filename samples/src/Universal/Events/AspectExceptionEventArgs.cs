@@ -4,6 +4,6 @@ namespace Aspects.Universal.Events
 {
     public class AspectExceptionEventArgs : AspectEventArgs
     {
-        public Exception Exception { get; set; }
+        public Exception Exception { get; internal set; }
     }
 }
