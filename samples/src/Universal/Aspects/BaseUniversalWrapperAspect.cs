@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -31,67 +32,68 @@ namespace Aspects.Universal.Aspects
                 Name = name,
                 Args = args,
                 ReturnType = returnType,
-                Triggers = triggers.OfType<BaseUniversalWrapperAttribute>().ToArray()
             };
+
+            var baseUniversalWrapperAttributes = triggers.OfType<BaseUniversalWrapperAttribute>().ToArray();
 
             if (typeof(Task).IsAssignableFrom(eventArgs.ReturnType))
             {
                 var syncResultType = eventArgs.ReturnType.IsConstructedGenericType ? eventArgs.ReturnType.GenericTypeArguments[0] : _voidTaskResult;
 
-                return _asyncHandler.MakeGenericMethod(syncResultType).Invoke(this, new object[] { target, eventArgs.Copy() });
+                return _asyncHandler.MakeGenericMethod(syncResultType).Invoke(this, new object[] { target, baseUniversalWrapperAttributes, eventArgs });
             }
 
             var syncReturnType = eventArgs.ReturnType == typeof(void) ? typeof(object) : eventArgs.ReturnType;
-            return _syncHandler.MakeGenericMethod(syncReturnType).Invoke(this, new object[] { target, eventArgs.Copy() });
+            return _syncHandler.MakeGenericMethod(syncReturnType).Invoke(this, new object[] { target, baseUniversalWrapperAttributes, eventArgs });
         }
 
-        private T WrapSync<T>(Func<object[], object> target, AspectEventArgs eventArgs)
+        private T WrapSync<T>(Func<IReadOnlyList<object>, object> target, BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
         {
-            OnBefore(eventArgs);
+            OnBefore(attributes, eventArgs);
 
             try
             {
                 var result = (T)target(eventArgs.Args);
 
-                OnAfter(eventArgs);
+                OnAfter(attributes, eventArgs);
 
                 return result;
             }
             catch (Exception exception)
             {
-                OnException(AspectExceptionEventArgs.CreateFrom(eventArgs, exception));
+                OnException(attributes, CreateAspectExceptionEventArgs(eventArgs, exception));
 
                 return default;
             }
         }
 
-        private async Task<T> WrapAsync<T>(Func<object[], object> target, AspectEventArgs eventArgs)
+        private async Task<T> WrapAsync<T>(Func<IReadOnlyList<object>, object> target, BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
         {
-            OnBefore(eventArgs);
+            OnBefore(attributes, eventArgs);
 
             try
             {
                 var result = await (Task<T>)target(eventArgs.Args);
 
-                OnAfter(eventArgs);
+                OnAfter(attributes, eventArgs);
 
                 return result;
             }
             catch (Exception exception)
             {
-                OnException(AspectExceptionEventArgs.CreateFrom(eventArgs, exception));
+                OnException(attributes, CreateAspectExceptionEventArgs(eventArgs, exception));
 
                 return default;
             }
         }
 
-        private void OnBefore(AspectEventArgs eventArgs)
+        private void OnBefore(BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
         {
-            foreach (var attr in eventArgs.Triggers)
+            foreach (var attribute in attributes)
             {
                 try
                 {
-                    attr.OnBefore(eventArgs);
+                    attribute.OnBefore(eventArgs);
                 }
                 catch
                 {
@@ -100,13 +102,13 @@ namespace Aspects.Universal.Aspects
             }
         }
 
-        private void OnAfter(AspectEventArgs eventArgs)
+        private void OnAfter(BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
         {
-            foreach (var attr in eventArgs.Triggers)
+            foreach (var attribute in attributes)
             {
                 try
                 {
-                    attr.OnAfter(eventArgs);
+                    attribute.OnAfter(eventArgs);
                 }
                 catch
                 {
@@ -115,19 +117,33 @@ namespace Aspects.Universal.Aspects
             }
         }
 
-        private void OnException(AspectExceptionEventArgs eventArgs)
+        private void OnException(BaseUniversalWrapperAttribute[] attributes, AspectExceptionEventArgs eventArgs)
         {
-            foreach (var attr in eventArgs.Triggers)
+            foreach (var attribute in attributes)
             {
                 try
                 {
-                    attr.OnException(eventArgs);
+                    attribute.OnException(eventArgs);
                 }
                 catch
                 {
                     // TODO : need to think about what we want to do here...
                 }
             }
+        }
+
+        private static AspectExceptionEventArgs CreateAspectExceptionEventArgs(AspectEventArgs aspectEventArgs, Exception exception)
+        {
+            return new AspectExceptionEventArgs
+            {
+                Args = aspectEventArgs.Args,
+                Exception = exception,
+                Instance = aspectEventArgs.Instance,
+                Method = aspectEventArgs.Method,
+                Name = aspectEventArgs.Name,
+                ReturnType = aspectEventArgs.ReturnType,
+                Type = aspectEventArgs.Type
+            };
         }
     }
 }
