@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -91,14 +90,7 @@ namespace Aspects.Universal.Aspects
         {
             foreach (var attribute in attributes)
             {
-                try
-                {
-                    attribute.OnBefore(eventArgs);
-                }
-                catch
-                {
-                    // In case the overridden OnBefore throws an exception, ignore this exception so that the other OnBefore methods are still called from here.
-                }
+                attribute.OnBefore(eventArgs);
             }
         }
 
@@ -106,14 +98,7 @@ namespace Aspects.Universal.Aspects
         {
             foreach (var attribute in attributes)
             {
-                try
-                {
-                    attribute.OnAfter(eventArgs);
-                }
-                catch
-                {
-                    // In case the overridden OnBefore throws an exception, ignore this exception so that the other OnBefore methods are still called from here.
-                }
+                attribute.OnAfter(eventArgs);
             }
         }
 
@@ -121,14 +106,7 @@ namespace Aspects.Universal.Aspects
         {
             foreach (var attribute in attributes)
             {
-                try
-                {
-                    attribute.OnException(eventArgs);
-                }
-                catch
-                {
-                    // TODO : need to think about what we want to do here...
-                }
+                attribute.OnException(eventArgs);
             }
         }
 
