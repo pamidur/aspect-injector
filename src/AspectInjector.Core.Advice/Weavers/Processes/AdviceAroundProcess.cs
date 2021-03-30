@@ -234,7 +234,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var fbProc = from.Body.GetILProcessor();
             var fdbg = from.DebugInformation;
             var fsp = from.DebugInformation.SequencePoints;
-            var tsp = to.DebugInformation.SequencePoints;            
+            var tsp = to.DebugInformation.SequencePoints;
 
             var codeStart = from.Body.GetUserCodeStart();
             var init = codeStart == null ? 0 : frb.IndexOf(codeStart);
@@ -244,8 +244,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 var sp = fdbg.GetSequencePoint(inst);
 
                 // Cecil doens't allow to remove last instruction
-                if (frb.Count == 1)                
-                    fbProc.Clear();                
+                if (frb.Count == 1)
+                    fbProc.Clear();
                 else
                     frb.Remove(inst);
 
@@ -256,15 +256,18 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     fsp.Remove(sp);
                 }
             }
-            
-            to.DebugInformation.Scope = new ScopeDebugInformation(to.Body.Instructions.First(), to.Body.Instructions.Last());
-            to.DebugInformation.Scope.Import = from.DebugInformation.Scope.Import;
 
-            foreach (var cdi in from.DebugInformation.CustomDebugInformations.ToArray())
-            {
-                from.DebugInformation.CustomDebugInformations.Remove(cdi);
-                to.DebugInformation.CustomDebugInformations.Add(cdi);
-            }                
+            to.DebugInformation.Scope = new ScopeDebugInformation(to.Body.Instructions.First(), to.Body.Instructions.Last());
+
+            if (from.DebugInformation.Scope != null)
+                to.DebugInformation.Scope.Import = from.DebugInformation.Scope.Import;
+
+            if (from.DebugInformation.HasCustomDebugInformations)
+                foreach (var cdi in from.DebugInformation.CustomDebugInformations.ToArray())
+                {
+                    from.DebugInformation.CustomDebugInformations.Remove(cdi);
+                    to.DebugInformation.CustomDebugInformations.Add(cdi);
+                }
 
             //from.DebugInformation.SequencePoints.Clear();
             //from.DebugInformation.Scope = null;
