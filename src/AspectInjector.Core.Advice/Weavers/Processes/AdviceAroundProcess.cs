@@ -71,6 +71,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             newWrapper.IsPrivate = true;
             newWrapper.Name = $"{_wrapperNamePrefix}{(prevWrapper == null ? 0 : prevWrapper.i + 1)}";
             newWrapper.Mark(WellKnownTypes.DebuggerHiddenAttribute);
+            newWrapper.Mark(WellKnownTypes.CompilerGeneratedAttribute);
 
             RedirectPreviousWrapper(prevWrapper == null ? _method : prevWrapper.m, newWrapper);
 
@@ -105,6 +106,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             unwrapper.Parameters.Add(argsParam);
             unwrapper.Body.InitLocals = true;
             unwrapper.Mark(WellKnownTypes.DebuggerHiddenAttribute);
+            unwrapper.Mark(WellKnownTypes.CompilerGeneratedAttribute);
 
             var original = WrapEntryPoint(unwrapper);
 
@@ -174,6 +176,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             MoveBody(_method, original);
 
+            _method.Mark(WellKnownTypes.DebuggerStepThroughAttribute);
+
             _method.Body.Append(
                 e =>
                 {
@@ -230,7 +234,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var fbProc = from.Body.GetILProcessor();
             var fdbg = from.DebugInformation;
             var fsp = from.DebugInformation.SequencePoints;
-            var tsp = to.DebugInformation.SequencePoints;
+            var tsp = to.DebugInformation.SequencePoints;            
 
             var codeStart = from.Body.GetUserCodeStart();
             var init = codeStart == null ? 0 : frb.IndexOf(codeStart);
@@ -247,9 +251,23 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
                 tbProc.Append(inst);
                 if (sp != null)
+                {
                     tsp.Add(new SequencePoint(inst, sp.Document) { EndColumn = sp.EndColumn, EndLine = sp.EndLine, StartColumn = sp.StartColumn, StartLine = sp.StartLine });
-
+                    fsp.Remove(sp);
+                }
             }
+            
+            to.DebugInformation.Scope = new ScopeDebugInformation(to.Body.Instructions.First(), to.Body.Instructions.Last());
+            to.DebugInformation.Scope.Import = from.DebugInformation.Scope.Import;
+
+            foreach (var cdi in from.DebugInformation.CustomDebugInformations.ToArray())
+            {
+                from.DebugInformation.CustomDebugInformations.Remove(cdi);
+                to.DebugInformation.CustomDebugInformations.Add(cdi);
+            }                
+
+            //from.DebugInformation.SequencePoints.Clear();
+            //from.DebugInformation.Scope = null;
 
             var to_vars = to.Body.Variables;
             foreach (var var in from.Body.Variables)

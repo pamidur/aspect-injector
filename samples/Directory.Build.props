@@ -7,7 +7,6 @@
     <Company>Aspect Injector Contributors</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>package.png</PackageIcon>
-    <PackageIconUrl>https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png</PackageIconUrl>
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="\" />
