@@ -13,7 +13,7 @@ namespace AspectInjector.Broker
         AttributeTargets.Property | 
         AttributeTargets.Event, 
         AllowMultiple = false)]
-    public class SkipInjection : Attribute
+    public sealed class SkipInjection : Attribute
     {
     }
 }
