@@ -1,4 +1,4 @@
-﻿This package provides Lazy proerty.
+﻿This package provides Lazy property.
 Put `LazyAttribute` attribure on your get only properties. 
 
 ```csharp
