@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Aspects.Lazy\Aspects.Lazy.csproj" />
+    <ProjectReference Include="..\..\src\Aspects.StringLengthCheck\Aspects.StringLengthCheck.csproj" />
     <ProjectReference Include="..\..\src\Freezable\Aspects.Freezable.csproj" />
     <ProjectReference Include="..\..\src\Notify\Aspects.Notify.csproj" />
     <ProjectReference Include="..\..\src\Cache\Aspects.Cache.csproj" />

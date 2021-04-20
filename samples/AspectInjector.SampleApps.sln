@@ -24,6 +24,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aspects.Cache", "src\Cache\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aspects.Lazy", "src\Aspects.Lazy\Aspects.Lazy.csproj", "{C73ADE53-80CA-4422-B648-F334890CA703}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aspects.StringLengthCheck", "src\Aspects.StringLengthCheck\Aspects.StringLengthCheck.csproj", "{4D3D2049-A476-436E-933D-B1B450E7903D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{C73ADE53-80CA-4422-B648-F334890CA703}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C73ADE53-80CA-4422-B648-F334890CA703}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C73ADE53-80CA-4422-B648-F334890CA703}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D3D2049-A476-436E-933D-B1B450E7903D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D3D2049-A476-436E-933D-B1B450E7903D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D3D2049-A476-436E-933D-B1B450E7903D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D3D2049-A476-436E-933D-B1B450E7903D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +66,7 @@ Global
 		{8C4F252C-009C-4E9E-9EEC-E835900542FF} = {90E6BBDF-64DB-4AA0-8686-2D539735915C}
 		{A63A2062-F490-497A-ADA4-98581FC7A809} = {1D633C57-DFFB-4BAC-93F6-432903A3DF5D}
 		{C73ADE53-80CA-4422-B648-F334890CA703} = {1D633C57-DFFB-4BAC-93F6-432903A3DF5D}
+		{4D3D2049-A476-436E-933D-B1B450E7903D} = {1D633C57-DFFB-4BAC-93F6-432903A3DF5D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE1CFDCB-A690-412A-84BA-72C9E1949E96}
