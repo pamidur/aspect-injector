@@ -143,7 +143,6 @@ namespace AspectInjector.Core.Services
             if ((injection.propagation & PropagateTo.IncludeCompilerGenerated) != 0)
                 additionalFilter = (provider) => true;
 
-
             if (target is AssemblyDefinition assm)
                 result = result.Concat(assm.Modules.SelectMany(nt => FindApplicableMembers(nt, injection, trigger)));
 
@@ -152,6 +151,11 @@ namespace AspectInjector.Core.Services
 
             if (target is IMemberDefinition member && (injection.filter == null || injection.filter.IsMatch(member.Name)) && !IsMemberSkipped(member))
                 result = result.Concat(CreateInjections(member, injection, trigger));
+
+            if (target is IMemberDefinition member1 && IsMemberSkipped(member1))
+            {
+                Console.WriteLine($"DEBUG SKIPPED: {member1.FullName}");
+            }
 
             if (target is TypeDefinition type && !IsTypeSkipped(type))
             {
