@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="\" />
+	  <None Include="$(MSBuildThisFileDirectory)../tests/**" Pack="true" PackagePath="tests" />
   </ItemGroup>
 
   <ItemGroup>
