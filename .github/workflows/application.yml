@@ -36,7 +36,7 @@ jobs:
       run: dotnet test -c $app_conf --no-build
     - name: Pack
       working-directory: nuget
-      run: dotnet pack -c $app_conf --no-build -o `pwd`/artifacts -p:Version=$app_version
+      run: dotnet pack -c $app_conf -o `pwd`/artifacts -p:Version=$app_version
     - uses: actions/upload-artifact@v1
       with:
         name: artifacts
