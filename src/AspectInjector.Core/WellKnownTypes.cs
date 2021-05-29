@@ -15,6 +15,7 @@ namespace AspectInjector.Core
         public static readonly string Mixin = typeof(Mixin).FullName;
         public static readonly string Advice = typeof(Advice).FullName;
         public static readonly string Argument = typeof(Argument).FullName;
+        public static readonly string SkipInjection = typeof(SkipInjection).FullName;
 
         public static readonly TypeReference DebuggerHiddenAttribute = StandardTypes.GetType(typeof(DebuggerHiddenAttribute));
         public static readonly TypeReference CompilerGeneratedAttribute = StandardTypes.GetType(typeof(CompilerGeneratedAttribute));

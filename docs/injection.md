@@ -93,3 +93,9 @@ class TestClass {
     public void DoSomething() {}
 }
 ```
+
+#### Injection suppression
+
+If there is a need to skip injection in some cases, there is an attribute ```SkipInjection```, which can annotate classes, constructors, methods, properties, and events. Once applied, it suppresses any injections to the target.
+
+Please note that inheritance is not taken into account - applying the attribute to a base class doesn't suppress injections to its descendants. 
