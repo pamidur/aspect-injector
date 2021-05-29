@@ -47,6 +47,11 @@ namespace AspectInjector.Tests.Runtime.Injections
             public static int Counter = 0;
 
             [SkipInjection]
+            static TestMethodTarget()
+            {
+            }
+
+            [SkipInjection]
             public TestMethodTarget()
             {
             }
