@@ -38,7 +38,11 @@ jobs:
     - name: Compile
       run: dotnet build -c $app_conf -p:Version=$app_version -p:InformationalVersion="$app_version:$GITHUB_SHA"
     - name: Test
-      run: dotnet test -c $app_conf --no-build
+      run: dotnet test -c $app_conf --no-build -f netcoreapp2.1
+    - name: Test
+      run: dotnet test -c $app_conf --no-build -f netcoreapp3.1
+    - name: Test
+      run: dotnet test -c $app_conf --no-build -f net5.0
     - name: Pack
       working-directory: nuget
       run: dotnet pack -c $app_conf --no-build -o `pwd`/artifacts -p:Version=$app_version
