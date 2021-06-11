@@ -43,41 +43,43 @@ namespace AspectInjector.Core.Extensions
         {
             return m.IsStatic && m.IsPublic
                 && m.Name == Constants.AspectFactoryMethodName
-                && m.ReturnType.Match(StandardTypes.Object)
-                && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.Match(StandardTypes.Type);
+                && m.ReturnType.Match(m.Module.TypeSystem.Object)
+                && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.Match(StandardType.Type);
         }
 
-        public static Cut LoadAspect(this Cut cut, AspectDefinition aspect)
+        public static Cut LoadAspect(this in Cut cut, AspectDefinition aspect)
         {
-            return LoadAspect(cut, aspect, cut.Method, c => c.ThisOrStatic());
+            return LoadAspect(cut, aspect, cut.Method, (in Cut c) => c.ThisOrStatic());
         }
 
-        public static Cut LoadAspect(this Cut cut, AspectDefinition aspect, MethodDefinition method, PointCut accessor)
+        public static Cut LoadAspect(this in Cut cut, AspectDefinition aspect, MethodDefinition method, PointCut accessor)
         {
             FieldReference aspectField;
+
+            var cur_cut = cut;
 
             if (method.IsStatic || aspect.Scope == Scope.Global)
                 aspectField = GetGlobalAspectField(aspect);
             else
             {
-                aspectField = GetInstanceAspectField(aspect, method.DeclaringType, cut);
-                cut = cut.Here(accessor);
+                aspectField = GetInstanceAspectField(aspect, method.DeclaringType, cur_cut);
+                cur_cut = cur_cut.Here(accessor);
             }
 
-            return cut.Load(aspectField);
+            return cur_cut.Load(aspectField);
         }
 
-        public static Cut CreateAspectInstance(this Cut cut, AspectDefinition aspect)
+        public static Cut CreateAspectInstance(this in Cut cut, AspectDefinition aspect)
         {
-            cut = cut.Call(aspect.GetFactoryMethod(), arg => aspect.Factory != null ? arg.TypeOf(aspect.Host) : arg);
+            var call = cut.Call(aspect.GetFactoryMethod(), (in Cut arg) => aspect.Factory != null ? arg.TypeOf(aspect.Host) : arg);
 
             if (aspect.Factory != null)
-                cut = cut.Cast(StandardTypes.Object, aspect.Host);
+                call = call.Cast(call.TypeSystem.Object, aspect.Host);
 
-            return cut;
+            return call;
         }
 
-        private static FieldReference GetInstanceAspectField(AspectDefinition aspect, TypeDefinition source, Cut cut)
+        private static FieldReference GetInstanceAspectField(AspectDefinition aspect, TypeDefinition source, in Cut cut)
         {
             var type = source;
 
@@ -91,7 +93,7 @@ namespace AspectInjector.Core.Extensions
 
                 field = fieldDef.MakeReference(type.MakeSelfReference());
 
-                InjectInitialization(GetInstanсeAspectsInitializer(type), field, c => c.CreateAspectInstance(aspect));
+                InjectInitialization(GetInstanсeAspectsInitializer(type), field, (in Cut c) => c.CreateAspectInstance(aspect));
             }
 
             return field;
@@ -104,17 +106,17 @@ namespace AspectInjector.Core.Extensions
             if (instanceAspectsInitializer == null)
             {
                 instanceAspectsInitializer = new MethodDefinition(Constants.InstanceAspectsMethodName,
-                    MethodAttributes.Private | MethodAttributes.HideBySig, type.Module.ImportReference(StandardTypes.Void));
+                    MethodAttributes.Private | MethodAttributes.HideBySig, type.Module.TypeSystem.Void);
 
                 type.Methods.Add(instanceAspectsInitializer);
 
-                instanceAspectsInitializer.Body.Instead(i => i.Return());
-                instanceAspectsInitializer.Mark(WellKnownTypes.DebuggerHiddenAttribute);
+                instanceAspectsInitializer.Body.Instead((in Cut i) => i.Return());
+                instanceAspectsInitializer.Mark(type.Module.ImportStandardType(WellKnownTypes.DebuggerHiddenAttribute));
 
                 var ctors = type.Methods.Where(c => c.IsConstructor && !c.IsStatic).ToList();
 
                 foreach (var ctor in ctors)
-                    ctor.Body.AfterEntry(i => i.This().Call(instanceAspectsInitializer.MakeReference(type.MakeSelfReference())));
+                    ctor.Body.AfterEntry((in Cut i) => i.This().Call(instanceAspectsInitializer.MakeReference(type.MakeSelfReference())));
             }
 
             return instanceAspectsInitializer;
@@ -138,11 +140,11 @@ namespace AspectInjector.Core.Extensions
             )
         {
             initMethod.Body.AfterEntry(
-                e => e
+                (in Cut e) => e
                 .IfEqual(
-                    l => l.This().Load(field),
-                    r => r.Null(),// (this.)aspect == null
-                    pos => pos.This().Store(field, factory)// (this.)aspect = new aspect()
+                    (in Cut l) => l.This().Load(field),
+                    (in Cut r) => r.Null(),// (this.)aspect == null
+                    (in Cut pos) => pos.This().Store(field, factory)// (this.)aspect = new aspect()
                 )
             );
         }

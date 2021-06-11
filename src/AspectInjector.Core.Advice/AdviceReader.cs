@@ -94,35 +94,35 @@ namespace AspectInjector.Core.Advice
             switch (source)
             {
                 case Source.Arguments:
-                    if (!param.ParameterType.Match(StandardTypes.ObjectArray))
+                    if (!param.ParameterType.Match(WellKnownTypes.Object_Array))
                         _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.ObjectArray);
                     break;
                 case Source.Instance:
-                    if (!param.ParameterType.Match(StandardTypes.Object))
+                    if (!param.ParameterType.Match(method.Module.TypeSystem.Object))
                         _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
                     break;
                 case Source.Metadata:
-                    if (!param.ParameterType.Match(WellKnownTypes.MethodBase))
+                    if (!param.ParameterType.Match(StandardType.MethodBase))
                         _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.MethodBase);
                     break;
                 case Source.Name:
-                    if (!param.ParameterType.Match(StandardTypes.String))
+                    if (!param.ParameterType.Match(method.Module.TypeSystem.String))
                         _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.String);
                     break;
                 case Source.ReturnType:
-                    if (!param.ParameterType.Match(StandardTypes.Type))
+                    if (!param.ParameterType.Match(StandardType.Type))
                         _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
                     break;
                 case Source.ReturnValue:
-                    if (!param.ParameterType.Match(StandardTypes.Object))
+                    if (!param.ParameterType.Match(method.Module.TypeSystem.Object))
                         _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Object);
                     break;
                 case Source.Type:
-                    if (!param.ParameterType.Match(StandardTypes.Type))
+                    if (!param.ParameterType.Match(StandardType.Type))
                         _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.Type);
                     break;
                 case Source.Triggers:
-                    if (!param.ParameterType.Match(WellKnownTypes.AttributeArray))
+                    if (!param.ParameterType.Match(WellKnownTypes.Attribute_Array))
                         _log.Log(EffectRules.ArgumentMustHaveValidType, method, param.Name, EffectRules.Literals.AttributeArray);
                     break;
                 case Source.Target:

@@ -37,14 +37,14 @@ namespace AspectInjector.Core.Services
                 {
                     cctor = new MethodDefinition(".cctor",
                         MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
-                            aspect.Host.Module.ImportReference(StandardTypes.Void));
+                            aspect.Host.Module.TypeSystem.Void);
 
                     aspect.Host.Methods.Add(cctor);
 
-                    cctor.Body.Instead(i => i.Return());
+                    cctor.Body.Instead((in Cut i) => i.Return());
                 }
 
-                cctor.Body.AfterEntry(i => i.Store(singletonField, val => val.CreateAspectInstance(aspect)));
+                cctor.Body.AfterEntry((in Cut i) => i.Store(singletonField, (in Cut val) => val.CreateAspectInstance(aspect)));
             }
 
             aspect.Host.IsBeforeFieldInit = false;

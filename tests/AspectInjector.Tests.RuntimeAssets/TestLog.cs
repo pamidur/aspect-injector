@@ -18,6 +18,7 @@ namespace AspectInjector.Tests.Assets
 
         public static void Reset()
         {
+            var t = typeof(TestLog);
             _log.Clear();
         }
     }

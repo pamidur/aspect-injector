@@ -87,7 +87,7 @@ namespace AspectInjector.Core.Services
 
             injections.AddRange(type.CustomAttributes.Where(t => t.AttributeType.FullName == WellKnownTypes.Injection));
 
-            if (type.BaseType != null && !type.BaseType.Match(StandardTypes.Attribute))
+            if (type.BaseType != null && !type.BaseType.Match(StandardType.Attribute))
                 injections.AddRange(FindInjections(type.BaseType.Resolve()).Where(a => a.GetPropertyValue<bool>(nameof(Injection.Inherited))).ToArray());
 
             return injections;

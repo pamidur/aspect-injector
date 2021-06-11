@@ -15,7 +15,7 @@ namespace AspectInjector.Core.Advice.Effects
         {
             var result = base.Validate(aspect, log);
 
-            if (!Method.ReturnType.Match(StandardTypes.Void))
+            if (!Method.ReturnType.Match(Method.Module.TypeSystem.Void))
             {
                 log.Log(EffectRules.AdviceMustHaveValidSingnature, Method, Method.Name, EffectRules.Literals.MustBeVoidForInline);
                 result = false;

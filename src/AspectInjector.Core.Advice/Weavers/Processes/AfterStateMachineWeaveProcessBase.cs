@@ -44,8 +44,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 _stateMachine.Fields.Add(thisfield);
 
                 InsertStateMachineCall(
-                    e => e
-                    .Store(thisfield.MakeReference(_stateMachineRef), v => v.This())
+                    (in Cut e) => e
+                    .Store(thisfield.MakeReference(_stateMachineRef), (in Cut v) => v.This())
                     );
             }
 
@@ -59,18 +59,18 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             if (argsfield == null)
             {
-                argsfield = new FieldDefinition(Constants.MovedArgs, FieldAttributes.Public, _stateMachine.Module.ImportReference(StandardTypes.ObjectArray));
+                argsfield = new FieldDefinition(Constants.MovedArgs, FieldAttributes.Public, _stateMachine.Module.ImportStandardType(WellKnownTypes.Object_Array));
                 _stateMachine.Fields.Add(argsfield);
 
                 InsertStateMachineCall(
-                    e => e
-                    .Store(argsfield.MakeReference(_stateMachineRef), v =>
+                    (in Cut e) => e
+                    .Store(argsfield.MakeReference(_stateMachineRef), (in Cut v) =>
                     {
-                        var elements = _method.Parameters.Select<ParameterDefinition, PointCut>(p => il =>
-                               il.Load(p).Cast(p.ParameterType, StandardTypes.Object)
+                        var elements = _method.Parameters.Select<ParameterDefinition, PointCut>(p => (in Cut il) =>
+                               il.Load(p).Cast(p.ParameterType, il.TypeSystem.Object)
                            ).ToArray();
 
-                        return v.CreateArray(StandardTypes.Object, elements);
+                        return v.CreateArray(v.TypeSystem.Object, elements);
                     }));
             }
 
@@ -85,18 +85,18 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 throw new InvalidOperationException("State machine is not set");
 
             FindOrCreateAfterStateMachineMethod().Body.BeforeExit(
-                e => e
+                (in Cut e) => e
                 .LoadAspect(_aspect, _method, LoadOriginalThis)
                 .Call(_effect.Method, LoadAdviceArgs)
             );
         }
 
-        protected Cut LoadOriginalThis(Cut pc)
+        protected Cut LoadOriginalThis(in Cut pc)
         {
             return _originalThis == null ? pc : pc.This().Load(_originalThis());
         }
 
-        protected override Cut LoadInstanceArgument(Cut pc, AdviceArgument parameter)
+        protected override Cut LoadInstanceArgument(in Cut pc, AdviceArgument parameter)
         {
             if (_originalThis != null)
                 return LoadOriginalThis(pc);
@@ -104,7 +104,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 return pc.Value(null);
         }
 
-        protected override Cut LoadArgumentsArgument(Cut pc, AdviceArgument parameter)
+        protected override Cut LoadArgumentsArgument(in Cut pc, AdviceArgument parameter)
         {
             return pc.This().Load(GetArgsField());
         }
