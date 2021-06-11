@@ -15,6 +15,7 @@ namespace AspectInjector.Core
         public static readonly string Mixin = typeof(Mixin).FullName;
         public static readonly string Advice = typeof(Advice).FullName;
         public static readonly string Argument = typeof(Argument).FullName;
+        public static readonly string SkipInjection = typeof(SkipInjection).FullName;
 
         public static readonly StandardType Attribute_Array = new StandardType("System", "Attribute", isArray: true);
         public static readonly StandardType Object_Array = new StandardType("System", "Object", isArray: true);

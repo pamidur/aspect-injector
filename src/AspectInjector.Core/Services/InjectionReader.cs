@@ -150,10 +150,10 @@ namespace AspectInjector.Core.Services
             if (target is ModuleDefinition module && (injection.propagation & PropagateTo.Types) != 0)
                 result = result.Concat(module.Types.SelectMany(nt => FindApplicableMembers(nt, injection, trigger)));
 
-            if (target is IMemberDefinition member && (injection.filter == null || injection.filter.IsMatch(member.Name)))
+            if (target is IMemberDefinition member && (injection.filter == null || injection.filter.IsMatch(member.Name)) && !IsMemberSkipped(member))
                 result = result.Concat(CreateInjections(member, injection, trigger));
 
-            if (target is TypeDefinition type)
+            if (target is TypeDefinition type && !IsTypeSkipped(type))
             {
                 if ((injection.propagation & PropagateTo.Methods) != 0)
                     result = result.Concat(type.Methods.Where(m => additionalFilter(m) && (m.IsNormalMethod() || m.IsConstructor)).SelectMany(m => FindApplicableMembers(m, injection, trigger)));
@@ -166,6 +166,16 @@ namespace AspectInjector.Core.Services
             }
 
             return result;
+        }
+
+        private bool IsMemberSkipped(IMemberDefinition member)
+        {
+            return member.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.SkipInjection);
+        }
+
+        private bool IsTypeSkipped(TypeDefinition type)
+        {
+            return type.CustomAttributes.Any(a => a.AttributeType.FullName == WellKnownTypes.SkipInjection);
         }
 
         private IEnumerable<InjectionDefinition> CreateInjections(IMemberDefinition target, InjectionInfo injection, CustomAttribute trigger)

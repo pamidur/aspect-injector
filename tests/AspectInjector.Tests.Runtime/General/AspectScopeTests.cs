@@ -31,7 +31,7 @@ namespace AspectInjector.Tests.General
 
     [Aspect(Scope.PerInstance)]
     [Injection(typeof(AspectScopeTests_PerInstanceAspect))]
-    public class AspectScopeTests_PerInstanceAspect:Attribute
+    public class AspectScopeTests_PerInstanceAspect: Attribute
     {
         public static int _counter;
 
