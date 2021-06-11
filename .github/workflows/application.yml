@@ -8,7 +8,6 @@ on:
   pull_request:  
 
 env:
-  dotnetsdk: 5.0.x
   app_release: false
   app_conf: Release
   nuget_url: https://api.nuget.org/v3/index.json
@@ -23,7 +22,13 @@ jobs:
         fetch-depth: 0
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: ${{ env.dotnetsdk }}
+        dotnet-version: 5.0.x
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.1.x
     - name: Get version
       run:  echo "app_version=`git describe --tags`" >> $GITHUB_ENV
     - name: Get release status
