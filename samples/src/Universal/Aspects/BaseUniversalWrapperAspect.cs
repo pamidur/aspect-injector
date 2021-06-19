@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using Aspects.Universal.Attributes;
@@ -9,8 +11,18 @@ namespace Aspects.Universal.Aspects
 {
     public abstract class BaseUniversalWrapperAspect
     {
-        private static readonly MethodInfo _asyncHandler = typeof(BaseUniversalWrapperAspect).GetMethod(nameof(WrapAsync), BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly MethodInfo _syncHandler = typeof(BaseUniversalWrapperAspect).GetMethod(nameof(WrapSync), BindingFlags.NonPublic | BindingFlags.Instance);
+        private delegate object Method(object[] args);
+        private delegate object Wrapper(Func<object[], object> target, object[] args);
+        private delegate object Handler(Func<object[], object> next, object[] args, AspectEventArgs eventArgs);
+
+        private static readonly Dictionary<MethodBase, Handler> _delegateCache = new Dictionary<MethodBase, Handler>();
+
+        private static readonly MethodInfo _asyncGenericHandler =
+            typeof(BaseUniversalWrapperAttribute).GetMethod(nameof(BaseUniversalWrapperAttribute.WrapAsync), BindingFlags.NonPublic | BindingFlags.Instance);
+
+        private static readonly MethodInfo _syncGenericHandler =
+            typeof(BaseUniversalWrapperAttribute).GetMethod(nameof(BaseUniversalWrapperAttribute.WrapSync), BindingFlags.NonPublic | BindingFlags.Instance);
+
         private static readonly Type _voidTaskResult = Type.GetType("System.Threading.Tasks.VoidTaskResult");
 
         protected object BaseHandle(
@@ -31,97 +43,68 @@ namespace Aspects.Universal.Aspects
                 Name = name,
                 Args = args,
                 ReturnType = returnType,
+                Triggers = triggers
             };
 
-            var baseUniversalWrapperAttributes = triggers.OfType<BaseUniversalWrapperAttribute>().ToArray();
+            var wrappers = triggers.OfType<BaseUniversalWrapperAttribute>().ToArray();
 
-            if (typeof(Task).IsAssignableFrom(eventArgs.ReturnType))
-            {
-                var syncResultType = eventArgs.ReturnType.IsConstructedGenericType ? eventArgs.ReturnType.GenericTypeArguments[0] : _voidTaskResult;
-
-                return _asyncHandler.MakeGenericMethod(syncResultType).Invoke(this, new object[] { target, args, baseUniversalWrapperAttributes, eventArgs });
-            }
-
-            var syncReturnType = eventArgs.ReturnType == typeof(void) ? typeof(object) : eventArgs.ReturnType;
-            return _syncHandler.MakeGenericMethod(syncReturnType).Invoke(this, new object[] { target, args, baseUniversalWrapperAttributes, eventArgs });
+            var handler = GetMethodHandler(method, returnType, wrappers);
+            return handler(target, args, eventArgs);
         }
 
-        private T WrapSync<T>(Func<object[], object> target, object[] args, BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
+        private Handler CreateMethodHandler(MethodBase method, Type returnType, IReadOnlyList<BaseUniversalWrapperAttribute> wrappers)
         {
-            OnBefore(attributes, eventArgs);
+            var targetParam = Expression.Parameter(typeof(Func<object[], object>), "orig");
+            var eventArgsParam = Expression.Parameter(typeof(AspectEventArgs), "event");
 
-            try
+            MethodInfo wrapperMethod;
+
+            if (typeof(Task).IsAssignableFrom(returnType))
             {
-                var result = (T)target(args);
+                var taskType = returnType.IsConstructedGenericType ? returnType.GenericTypeArguments[0] : Type.GetType("System.Threading.Tasks.VoidTaskResult");
+                returnType = typeof(Task<>).MakeGenericType(new[] { taskType });
 
-                OnAfter(attributes, eventArgs);
-
-                return result;
+                wrapperMethod = _asyncGenericHandler.MakeGenericMethod(new[] { taskType });
             }
-            catch (Exception exception)
+            else
             {
-                OnException(attributes, CreateAspectExceptionEventArgs(eventArgs, exception));
+                if (returnType == typeof(void))
+                    returnType = typeof(object);
 
-                return default;
+                wrapperMethod = _syncGenericHandler.MakeGenericMethod(new[] { returnType });
             }
+
+            var converArgs = Expression.Parameter(typeof(object[]), "args");
+            var next = Expression.Lambda(Expression.Convert(Expression.Invoke(targetParam, converArgs), returnType), converArgs);
+
+            foreach (var wrapper in wrappers)
+            {
+                var argsParam = Expression.Parameter(typeof(object[]), "args");
+                next = Expression.Lambda(Expression.Call(Expression.Constant(wrapper), wrapperMethod, next, argsParam, eventArgsParam), argsParam);
+            }
+
+            var orig_args = Expression.Parameter(typeof(object[]), "orig_args");
+            var handler = Expression.Lambda<Handler>(Expression.Convert(Expression.Invoke(next, orig_args), typeof(object)), targetParam, orig_args, eventArgsParam);
+
+            var handlerCompiled = handler.Compile();
+
+            return handlerCompiled;
         }
 
-        private async Task<T> WrapAsync<T>(Func<object[], object> target, object[] args, BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
+        private Handler GetMethodHandler(MethodBase method, Type returnType, IReadOnlyList<BaseUniversalWrapperAttribute> wrappers)
         {
-            OnBefore(attributes, eventArgs);
-
-            try
+            if (!_delegateCache.TryGetValue(method, out var handler))
             {
-                var result = await (Task<T>)target(args);
-
-                OnAfter(attributes, eventArgs);
-
-                return result;
+                lock (method)
+                {
+                    if (!_delegateCache.TryGetValue(method, out handler))
+                    {
+                        _delegateCache[method] = handler = CreateMethodHandler(method, returnType, wrappers);
+                    }
+                }
             }
-            catch (Exception exception)
-            {
-                OnException(attributes, CreateAspectExceptionEventArgs(eventArgs, exception));
 
-                return default;
-            }
-        }
-
-        private void OnBefore(BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
-        {
-            foreach (var attribute in attributes)
-            {
-                attribute.OnBefore(eventArgs);
-            }
-        }
-
-        private void OnAfter(BaseUniversalWrapperAttribute[] attributes, AspectEventArgs eventArgs)
-        {
-            foreach (var attribute in attributes)
-            {
-                attribute.OnAfter(eventArgs);
-            }
-        }
-
-        private void OnException(BaseUniversalWrapperAttribute[] attributes, AspectExceptionEventArgs eventArgs)
-        {
-            foreach (var attribute in attributes)
-            {
-                attribute.OnException(eventArgs);
-            }
-        }
-
-        private static AspectExceptionEventArgs CreateAspectExceptionEventArgs(AspectEventArgs aspectEventArgs, Exception exception)
-        {
-            return new AspectExceptionEventArgs
-            {
-                Args = aspectEventArgs.Args,
-                Exception = exception,
-                Instance = aspectEventArgs.Instance,
-                Method = aspectEventArgs.Method,
-                Name = aspectEventArgs.Name,
-                ReturnType = aspectEventArgs.ReturnType,
-                Type = aspectEventArgs.Type
-            };
+            return handler;
         }
     }
 }

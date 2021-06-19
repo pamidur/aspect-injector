@@ -6,7 +6,7 @@ namespace Aspects.Universal.Attributes
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true)]
     [Injection(typeof(PublicMethodWrapperAspect), Inherited = true)]
-    public abstract class PublicMethodAspectAttribute: BaseUniversalWrapperAttribute
+    public abstract class PublicMethodAspectAttribute: BaseMethodPointsAspectAttribute
     {
     }
 }

@@ -12,5 +12,6 @@ namespace Aspects.Universal.Events
         public string Name { get; internal set; }
         public IReadOnlyList<object> Args { get; internal set; }
         public Type ReturnType { get; internal set; }
+        public Attribute[] Triggers { get; internal set; }
     }
 }

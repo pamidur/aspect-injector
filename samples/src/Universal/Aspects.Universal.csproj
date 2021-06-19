@@ -2,8 +2,11 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<!--<LangVersion>9.0</LangVersion>
-		<Nullable>enable</Nullable>-->
+    <PackageTags>aspect proxy wrapper universal</PackageTags>
+    <Description>
+      This package provides simple universal method wrrapper aspect.
+    </Description>
+    <PackageProjectUrl>https://github.com/pamidur/aspect-injector/tree/master/samples/src/Notify</PackageProjectUrl>
 	</PropertyGroup>
 
 </Project>
