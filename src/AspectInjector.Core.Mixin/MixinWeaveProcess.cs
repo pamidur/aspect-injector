@@ -130,20 +130,20 @@ namespace AspectInjector.Core.Mixin
             if (proxy == null)
             {
                 proxy = Implement(ifaceMethod, _target);
-                proxy.Mark(WellKnownTypes.DebuggerHiddenAttribute);
-
+                proxy.Mark(_target.Module.ImportStandardType(WellKnownTypes.DebuggerHiddenAttribute));
 
                 if (proxy.HasGenericParameters)
                     ifaceMethod = ifaceMethod.MakeGenericInstanceMethod(proxy.GenericParameters.ToArray());
 
                 proxy.Body.Instead(
-                    e => e
+                    (in Cut e) => e
                     .LoadAspect(_aspect)
-                    .Call(ifaceMethod, args =>
+                    .Call(ifaceMethod, (in Cut args) =>
                     {
+                        var cur_arg = args;
                         foreach (var pp in proxy.Parameters)
-                            args = args.Load(pp);
-                        return args;
+                            cur_arg = cur_arg.Load(pp);
+                        return cur_arg;
                     })
                     .Return()
                     );

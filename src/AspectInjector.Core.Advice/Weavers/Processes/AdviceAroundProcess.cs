@@ -32,31 +32,31 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             _wrapper = GetNextWrapper();
 
             _wrapper.Body.Instead(
-                e => e
+                (in Cut e) => e
                 .LoadAspect(_aspect)
                 .Call(_effect.Method, LoadAdviceArgs)
                 .Return()
             );
         }
 
-        protected override Cut LoadTargetArgument(Cut pc, AdviceArgument parameter)
+        protected override Cut LoadTargetArgument(in Cut pc, AdviceArgument parameter)
         {
             var targetMethod = CreateRef(GetOrCreateUnwrapper(), pc.Method);
-            return pc.ThisOrNull().Call(CreateFuncCtorRef(pc), args => args.Delegate(targetMethod));
+            return pc.ThisOrNull().Call(CreateFuncCtorRef(pc), (in Cut args) => args.Delegate(targetMethod));
         }
 
-        private static MethodReference CreateFuncCtorRef(Cut cut)
+        private static MethodReference CreateFuncCtorRef(in Cut cut)
         {
-            var mr = new MethodReference(".ctor", cut.Import(StandardTypes.Void), cut.Import(WellKnownTypes.Func_ObjectArray_Object))
+            var mr = new MethodReference(".ctor", cut.TypeSystem.Void, cut.Import(WellKnownTypes.Func_ObjectArray_Object))
             {
                 HasThis = true
             };
-            mr.Parameters.Add(new ParameterDefinition(cut.Import(StandardTypes.Object)));
-            mr.Parameters.Add(new ParameterDefinition(cut.Import(StandardTypes.IntPtr)));
+            mr.Parameters.Add(new ParameterDefinition(cut.TypeSystem.Object));
+            mr.Parameters.Add(new ParameterDefinition(cut.TypeSystem.IntPtr));
             return mr;
         }
 
-        protected override Cut LoadArgumentsArgument(Cut pc, AdviceArgument parameter)
+        protected override Cut LoadArgumentsArgument(in Cut pc, AdviceArgument parameter)
         {
             return pc.Load(_wrapper.Parameters[0]);
         }
@@ -70,7 +70,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             newWrapper.IsPrivate = true;
             newWrapper.Name = $"{_wrapperNamePrefix}{(prevWrapper == null ? 0 : prevWrapper.i + 1)}";
-            newWrapper.Mark(WellKnownTypes.DebuggerHiddenAttribute);
+            newWrapper.Mark(_module.ImportStandardType(WellKnownTypes.DebuggerHiddenAttribute));
+            newWrapper.Mark(_module.ImportStandardType(WellKnownTypes.CompilerGeneratedAttribute));
 
             RedirectPreviousWrapper(prevWrapper == null ? _method : prevWrapper.m, newWrapper);
 
@@ -98,29 +99,33 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             unwrapper = CloneDefinition(_method);
 
             unwrapper.Name = _unWrapperName;
-            unwrapper.ReturnType = _module.ImportReference(StandardTypes.Object);
+            unwrapper.ReturnType = _module.TypeSystem.Object;
             unwrapper.IsPrivate = true;
             unwrapper.Parameters.Clear();
-            var argsParam = new ParameterDefinition(_module.ImportReference(StandardTypes.ObjectArray));
+            var argsParam = new ParameterDefinition(_module.ImportStandardType(WellKnownTypes.Object_Array));
             unwrapper.Parameters.Add(argsParam);
             unwrapper.Body.InitLocals = true;
-            unwrapper.Mark(WellKnownTypes.DebuggerHiddenAttribute);
+            unwrapper.Mark(_module.ImportStandardType(WellKnownTypes.DebuggerHiddenAttribute));
+            unwrapper.Mark(_module.ImportStandardType(WellKnownTypes.CompilerGeneratedAttribute));
 
             var original = WrapEntryPoint(unwrapper);
 
-            unwrapper.Body.Instead(il => WriteUnwrapperBody(il, argsParam, original));
+            unwrapper.Body.Instead((in Cut il) => WriteUnwrapperBody(il, argsParam, original));
 
             return unwrapper;
         }
 
-        private Cut WriteUnwrapperBody(Cut il, ParameterDefinition argsParam, MethodDefinition original)
+        private Cut WriteUnwrapperBody(in Cut cut, ParameterDefinition argsParam, MethodDefinition original)
         {
             var refList = new List<Tuple<int, VariableDefinition>>();
 
+            var il = cut;
+
             var originalRef = CreateRef(original, il.Method);
 
-            il = il.ThisOrStatic().Call(originalRef, c =>
+            il = il.ThisOrStatic().Call(originalRef, (in Cut call_cut) =>
             {
+                var c = call_cut;
                 for (int i = 0; i < original.Parameters.Count; i++)
                 {
                     var p = original.Parameters[i];
@@ -134,18 +139,18 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                         c.Method.Body.Variables.Add(tempVar);
 
                         c = c
-                        .Store(tempVar, v => v
+                        .Store(tempVar, (in Cut v) => v
                             .Load(argsParam)
-                            .GetByIndex(StandardTypes.Object, i)
-                            .Cast(StandardTypes.Object, elementType))
+                            .GetByIndex(v.TypeSystem.Object, i)
+                            .Cast(v.TypeSystem.Object, elementType))
                         .LoadRef(tempVar);
                     }
                     else
                     {
                         c = c
                         .Load(argsParam)
-                        .GetByIndex(StandardTypes.Object, i)
-                        .Cast(StandardTypes.Object, p.ParameterType);
+                        .GetByIndex(c.TypeSystem.Object, i)
+                        .Cast(c.TypeSystem.Object, p.ParameterType);
                     }
                 }
 
@@ -153,9 +158,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             });
 
             foreach (var refPar in refList)
-                il = il.Load(argsParam).SetByIndex(StandardTypes.Object, refPar.Item1, val => val.Load(refPar.Item2).Cast(refPar.Item2.VariableType, StandardTypes.Object));
+                il = il.Load(argsParam).SetByIndex(il.TypeSystem.Object, refPar.Item1, (in Cut val) => val.Load(refPar.Item2).Cast(refPar.Item2.VariableType, val.TypeSystem.Object));
 
-            if (original.ReturnType.Match(StandardTypes.Void))
+            if (original.ReturnType.Match(original.Module.TypeSystem.Void))
                 il = il.Value(null);
             else
                 il = il.Cast(originalRef.ReturnType, il.Method.ReturnType);
@@ -174,32 +179,35 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
             MoveBody(_method, original);
 
+            _method.Mark(_module.ImportStandardType(WellKnownTypes.DebuggerStepThroughAttribute));
+
             _method.Body.Append(
-                e =>
+                (in Cut cut) =>
                 {
+                    var e = cut;
                     ////var args = null;
-                    var argsVar = new VariableDefinition(_module.ImportReference(StandardTypes.ObjectArray));
+                    var argsVar = new VariableDefinition(_module.ImportStandardType(WellKnownTypes.Object_Array));
                     _method.Body.Variables.Add(argsVar);
                     _method.Body.InitLocals = true;
 
                     ////args = new object[] { param1, param2 ...};
-                    e = e.Store(argsVar, args => base.LoadArgumentsArgument(args, null));
+                    e = e.Store(argsVar, (in Cut args) => base.LoadArgumentsArgument(args, null));
 
                     var unwrapperRef = CreateRef(unwrapper, _method);
 
                     //// Unwrapper(args);
-                    e = e.ThisOrStatic().Call(unwrapperRef, args => args.Load(argsVar));
+                    e = e.ThisOrStatic().Call(unwrapperRef, (in Cut args) => args.Load(argsVar));
 
                     // proxy ref and out params
                     for (int i = 0; i < _method.Parameters.Count; i++)
                     {
                         var p = _method.Parameters[i];
                         if (p.ParameterType.IsByReference)
-                            e = e.Store(p, val => val.Load(argsVar).GetByIndex(StandardTypes.Object, i).Cast(StandardTypes.Object, p.ParameterType));
+                            e = e.Store(p, (in Cut val) => val.Load(argsVar).GetByIndex(val.TypeSystem.Object, i).Cast(val.TypeSystem.Object, p.ParameterType));
                     }
 
                     //drop if void, cast if not is object
-                    if (returnType.Match(StandardTypes.Void))
+                    if (returnType.Match(cut.TypeSystem.Void))
                         e = e.Pop();
                     else
                         e = e.Cast(unwrapperRef.ReturnType, returnType);
@@ -240,16 +248,33 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 var sp = fdbg.GetSequencePoint(inst);
 
                 // Cecil doens't allow to remove last instruction
-                if (frb.Count == 1)                
-                    fbProc.Clear();                
+                if (frb.Count == 1)
+                    fbProc.Clear();
                 else
                     frb.Remove(inst);
 
                 tbProc.Append(inst);
                 if (sp != null)
+                {
                     tsp.Add(new SequencePoint(inst, sp.Document) { EndColumn = sp.EndColumn, EndLine = sp.EndLine, StartColumn = sp.StartColumn, StartLine = sp.StartLine });
-
+                    fsp.Remove(sp);
+                }
             }
+
+            to.DebugInformation.Scope = new ScopeDebugInformation(to.Body.Instructions.First(), to.Body.Instructions.Last());
+
+            if (from.DebugInformation.Scope != null)
+                to.DebugInformation.Scope.Import = from.DebugInformation.Scope.Import;
+
+            if (from.DebugInformation.HasCustomDebugInformations)
+                foreach (var cdi in from.DebugInformation.CustomDebugInformations.ToArray())
+                {
+                    from.DebugInformation.CustomDebugInformations.Remove(cdi);
+                    to.DebugInformation.CustomDebugInformations.Add(cdi);
+                }
+
+            //from.DebugInformation.SequencePoints.Clear();
+            //from.DebugInformation.Scope = null;
 
             var to_vars = to.Body.Variables;
             foreach (var var in from.Body.Variables)

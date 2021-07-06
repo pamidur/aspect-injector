@@ -21,7 +21,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         public AdviceAfterProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)
         {
-            if (!_method.ReturnType.Match(StandardTypes.Void) && _effect.Arguments.Any(a => a.Source == Source.ReturnValue))
+            if (!_method.ReturnType.Match(_method.Module.TypeSystem.Void) && _effect.Arguments.Any(a => a.Source == Source.ReturnValue))
                 _retvar = GetOrCreateRetVar();
         }
 
@@ -42,8 +42,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         public override void Execute()
         {
             _method.Body.BeforeExit(
-                cut =>
+                (in Cut exit) =>
                 {
+                    var cut = exit;
                     if (_retvar != null)
                         cut = cut.Store(_retvar);
 
@@ -58,12 +59,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 });
         }
 
-        protected override Cut LoadReturnValueArgument(Cut pc, AdviceArgument parameter)
+        protected override Cut LoadReturnValueArgument(in Cut pc, AdviceArgument parameter)
         {
             if (_retvar == null)
                 return pc.Null();
             else
-                return pc.Load(_retvar).Cast(_retvar.VariableType, StandardTypes.Object);
+                return pc.Load(_retvar).Cast(_retvar.VariableType, pc.TypeSystem.Object);
         }
     }
 }

@@ -1,12 +1,11 @@
 <Project>
-  <PropertyGroup>    
+  <PropertyGroup> 
     <LangVersion>7.3</LangVersion>
     <Product>Aspect Injector</Product>
     <Authors>Aspect Injector Contributors</Authors>
     <Company>Aspect Injector Contributors</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>package.png</PackageIcon>
-    <PackageIconUrl>https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png</PackageIconUrl>
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="\" />

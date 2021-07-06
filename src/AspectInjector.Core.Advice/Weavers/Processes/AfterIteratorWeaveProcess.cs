@@ -7,14 +7,11 @@ using FluentIL.Logging;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AfterIteratorWeaveProcess : AfterStateMachineWeaveProcessBase
-    {
-        private static readonly TypeReference _iteratorStateMachineAttribute = StandardTypes.GetType(typeof(IteratorStateMachineAttribute));
-
+    {       
         public AfterIteratorWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)
         {
@@ -23,7 +20,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private TypeReference GetStateMachine()
         {
-            var smRef = _method.CustomAttributes.First(ca => ca.AttributeType.Match(_iteratorStateMachineAttribute))
+            var smRef = _method.CustomAttributes.First(ca => ca.AttributeType.Match(StandardType.IteratorStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);
 
             if (smRef.HasGenericParameters)
@@ -44,16 +41,16 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             {
                 var moveNext = _stateMachine.Methods.First(m => m.Name == "MoveNext");
 
-                afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _stateMachine.Module.ImportReference(StandardTypes.Void));
+                afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _stateMachine.Module.TypeSystem.Void);
                 _stateMachine.Methods.Add(afterMethod);
-                afterMethod.Mark(WellKnownTypes.DebuggerHiddenAttribute);
-                afterMethod.Body.Instead(pc => pc.Return());
+                afterMethod.Mark(_module.ImportStandardType(WellKnownTypes.DebuggerHiddenAttribute));
+                afterMethod.Body.Instead((in Cut pc) => pc.Return());
 
                 moveNext.Body.OnEveryOccasionOf(
                     i =>
                         i.Next != null && i.Next.OpCode == OpCodes.Ret &&
                         (i.OpCode == OpCodes.Ldc_I4_0 || ((i.OpCode == OpCodes.Ldc_I4 || i.OpCode == OpCodes.Ldc_I4_S) && (int)i.Operand == 0)),
-                    il =>
+                    (in Cut il) =>
                         il.ThisOrStatic().Call(afterMethod.MakeReference(_stateMachine.MakeSelfReference())));
             }
 
@@ -61,12 +58,12 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         }
 
 
-        protected override Cut LoadReturnValueArgument(Cut pc, AdviceArgument parameter)
+        protected override Cut LoadReturnValueArgument(in Cut pc, AdviceArgument parameter)
         {
             return pc.This();
         }
 
-        protected override Cut LoadReturnTypeArgument(Cut pc, AdviceArgument parameter)
+        protected override Cut LoadReturnTypeArgument(in Cut pc, AdviceArgument parameter)
         {
             return pc.TypeOf(_stateMachine.Interfaces.First(i => i.InterfaceType.Name.StartsWith("IEnumerable`1")).InterfaceType);
         }
@@ -76,7 +73,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var stateMachineCtors = _stateMachine.Methods.Where(m => m.IsConstructor).ToArray();
 
             foreach (var ctor in stateMachineCtors)
-                _method.Body.OnCall(ctor.MakeReference(_stateMachineRef), cut => cut.Dup().Here(code));
+                _method.Body.OnCall(ctor.MakeReference(_stateMachineRef), (in Cut cut) => cut.Dup().Here(code));
         }
     }
 }

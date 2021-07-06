@@ -9,7 +9,12 @@ namespace Aspects.Cache
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     [Injection(typeof(CacheAspect), Inherited = true)]
     public abstract class CacheAttribute : Attribute
-    {       
+    {   
+        /// <summary>
+        /// Cache with highest priority is checked first. 0 - Highest, 255 - Lowest. Default 127
+        /// </summary>
+        public byte Priority { get; set; } = 127;
+
         public virtual object Get(string key, Type type, object instance)
         {
             key = instance != null && IsPerInstance() ? FormatInstanceKey(key, instance) : key;
@@ -54,6 +59,9 @@ namespace Aspects.Cache
 
         public abstract MemoryCacheEntryOptions Policy { get; }
 
+        /// <summary>
+        /// Data is cached PerInstance vs PerType. Default PerInstanceCache = true
+        /// </summary>
         public bool PerInstanceCache { get; set; }
     }
 
@@ -88,6 +96,9 @@ namespace Aspects.Cache
         public abstract IDistributedCache Cache { get; }
         public abstract DistributedCacheEntryOptions Policy { get; }
 
+        /// <summary>
+        /// Data is cached PerInstance vs PerType. Default PerInstanceCache = true
+        /// </summary>
         public bool PerInstanceCache { get; set; }
     }
 }

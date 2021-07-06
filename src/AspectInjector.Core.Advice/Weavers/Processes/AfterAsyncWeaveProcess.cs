@@ -7,14 +7,11 @@ using FluentIL.Logging;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AfterAsyncWeaveProcess : AfterStateMachineWeaveProcessBase
-    {
-        private static readonly TypeReference _asyncStateMachineAttribute = StandardTypes.GetType(typeof(AsyncStateMachineAttribute));
-
+    {       
         private readonly TypeReference _builder;
         private readonly TypeReference _asyncResult;
 
@@ -30,7 +27,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         private TypeReference GetStateMachine()
         {
-            var smRef = _method.CustomAttributes.First(ca => ca.AttributeType.Match(_asyncStateMachineAttribute))
+            var smRef = _method.CustomAttributes.First(ca => ca.AttributeType.Match(StandardType.AsyncStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);
 
             if (smRef.HasGenericParameters)            
@@ -47,13 +44,13 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             {
                 var moveNext = _stateMachine.Methods.First(m => m.Name == "MoveNext");
 
-                afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _stateMachine.Module.ImportReference(StandardTypes.Void));
-                afterMethod.Parameters.Add(new ParameterDefinition(_stateMachine.Module.ImportReference(StandardTypes.Object)));
+                afterMethod = new MethodDefinition(Constants.AfterStateMachineMethodName, MethodAttributes.Private, _stateMachine.Module.TypeSystem.Void);
+                afterMethod.Parameters.Add(new ParameterDefinition(_stateMachine.Module.TypeSystem.Object));
 
                 _stateMachine.Methods.Add(afterMethod);
 
-                afterMethod.Mark(WellKnownTypes.DebuggerHiddenAttribute);
-                afterMethod.Body.Instead(pc => pc.Return());
+                afterMethod.Mark(_module.ImportStandardType(WellKnownTypes.DebuggerHiddenAttribute));
+                afterMethod.Body.Instead((in Cut pc) => pc.Return());
 
                 VariableDefinition resvar = null;
 
@@ -67,16 +64,16 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 var setResultCall = _builder.Resolve().Methods.First(m => m.Name == "SetResult");
                 var setResultCallRef = _asyncResult == null ? setResultCall : setResultCall.MakeReference(_builder);
 
-                moveNext.Body.OnCall(setResultCallRef, il =>
+                moveNext.Body.OnCall(setResultCallRef, (in Cut oncall_cut) =>
                 {
-                    il = il.Prev();
+                    var il = oncall_cut.Prev();
 
-                    var loadArg = new PointCut(args => args.Value(null));
+                    var loadArg = new PointCut((in Cut args) => args.Value(null));
 
                     if (_asyncResult != null)
                     {
                         il = il.Store(resvar);
-                        loadArg = new PointCut(args => args.Load(resvar).Cast(resvar.VariableType, StandardTypes.Object));
+                        loadArg = new PointCut((in Cut args) => args.Load(resvar).Cast(resvar.VariableType, args.TypeSystem.Object));
                     }
 
                     il = il.ThisOrStatic().Call(afterMethod.MakeReference(_stateMachine.MakeSelfReference()), loadArg);
@@ -91,14 +88,14 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             return afterMethod;
         }
 
-        protected override Cut LoadReturnValueArgument(Cut pc, AdviceArgument parameter)
+        protected override Cut LoadReturnValueArgument(in Cut pc, AdviceArgument parameter)
         {
             return pc.Load(pc.Method.Parameters[0]);
         }
 
-        protected override Cut LoadReturnTypeArgument(Cut pc, AdviceArgument parameter)
+        protected override Cut LoadReturnTypeArgument(in Cut pc, AdviceArgument parameter)
         {
-            return pc.TypeOf(_asyncResult ?? StandardTypes.Void);
+            return pc.TypeOf(_asyncResult ?? pc.TypeSystem.Void);
         }
 
         protected override void InsertStateMachineCall(PointCut code)
@@ -106,9 +103,9 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var method = _builder.Resolve().Methods.First(m => m.Name == "Start").MakeReference(_builder);
 
             var v = _method.Body.Variables.First(vr => vr.VariableType.Resolve().Match(_stateMachine));
-            var loadVar = v.VariableType.IsValueType ? (PointCut)(c => c.LoadRef(v)) : c => c.Load(v);
+            var loadVar = v.VariableType.IsValueType ? (PointCut)((in Cut c) => c.LoadRef(v)) : (in Cut c) => c.Load(v);
 
-            _method.Body.OnCall(method, cut => cut.Prev().Prev().Prev().Here(loadVar).Here(code));
+            _method.Body.OnCall(method, (in Cut cut) => cut.Prev().Prev().Prev().Here(loadVar).Here(code));
         }
     }
 }

@@ -25,8 +25,9 @@ namespace Aspects.Cache
             object result = null;
             var resultFound = false;
 
-            var cacheTriggers = (triggers.OfType<CacheAttribute>()).ToList();
+            var cacheTriggers = triggers.OfType<CacheAttribute>().Distinct().OrderBy(c => c.Priority).ToList();
             var key = GetKey(target.Method, args);
+
 
             foreach (var cacheTrigger in cacheTriggers)
             {

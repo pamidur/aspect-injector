@@ -17,6 +17,7 @@ namespace AspectInjector.Tests.Runtime
 
         public TestRunner()
         {
+            var a = typeof(TestRunner);
             TestLog.Reset();
         }
 

@@ -23,4 +23,5 @@
     <ProjectReference Include="..\..\src\Notify\Aspects.Notify.csproj" />
     <ProjectReference Include="..\..\src\Cache\Aspects.Cache.csproj" />
   </ItemGroup>
+
 </Project>
