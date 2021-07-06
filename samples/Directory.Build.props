@@ -1,6 +1,5 @@
 <Project>
-  <PropertyGroup>
-    <Version>1.0.2</Version>
+  <PropertyGroup> 
     <LangVersion>7.3</LangVersion>
     <Product>Aspect Injector</Product>
     <Authors>Aspect Injector Contributors</Authors>
