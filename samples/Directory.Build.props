@@ -1,6 +1,5 @@
 <Project>
-  <PropertyGroup>
-    <Version>1.0.1</Version>
+  <PropertyGroup>    
     <LangVersion>7.3</LangVersion>
     <Product>Aspect Injector</Product>
     <Authors>Aspect Injector Contributors</Authors>
@@ -13,6 +12,6 @@
     <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AspectInjector" Version="2.3.1" PrivateAssets="None" />
+    <PackageReference Include="AspectInjector" Version="2.5.0" PrivateAssets="None" />
   </ItemGroup>
 </Project>

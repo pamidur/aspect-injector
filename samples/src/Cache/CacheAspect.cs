@@ -3,44 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Caching;
 
 namespace Aspects.Cache
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    [Injection(typeof(CacheAspect), Inherited = true)]
-    public abstract class CacheAttribute : Attribute
-    {
-        public abstract ObjectCache Cache { get; }
-
-        public abstract CacheItemPolicy Policy { get; }
-
-        public bool PerInstanceCache { get; set; }
-    }
-
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class MemoryCacheAttribute : CacheAttribute
-    {
-        private static readonly MemoryCache _cache = new MemoryCache("aspect_builtin_memory_cache");
-
-        private readonly uint _seconds;
-
-        public MemoryCacheAttribute(uint seconds, bool perInstanceCache = false)
-        {
-            _seconds = seconds;
-            PerInstanceCache = perInstanceCache;
-        }
-
-        public override ObjectCache Cache => _cache;
-
-        public override CacheItemPolicy Policy => new CacheItemPolicy() { AbsoluteExpiration = DateTimeOffset.UtcNow.AddSeconds(_seconds) };
-    }
-
-
     [Aspect(Scope.Global)]
     public class CacheAspect
     {
-        private static readonly object NullMarker = new object();
+        private static readonly object NullMarker = new { __is_null = "$_is_null" };
 
         [Advice(Kind.Around)]
         public object Handle(
@@ -51,21 +20,20 @@ namespace Aspects.Cache
             [Argument(Source.Triggers)] Attribute[] triggers
             )
         {
+            retType = retType == typeof(void) ? typeof(object) : retType;
+
             object result = null;
             var resultFound = false;
 
             var cacheTriggers = (triggers.OfType<CacheAttribute>()).ToList();
-            var nonInstanceKey = GetKey(target.Method, args);
-            var instanceKey = instance == null ? nonInstanceKey : GetKey(instance, target.Method, args);
+            var key = GetKey(target.Method, args);
 
             foreach (var cacheTrigger in cacheTriggers)
             {
-                var key = cacheTrigger.PerInstanceCache ? instanceKey : nonInstanceKey;
-                var cache = cacheTrigger.Cache;
-                var ci = cache.GetCacheItem(key);
+                var ci = cacheTrigger.Get(key, retType, instance);
                 if (ci != null)
                 {
-                    result = ci.Value;
+                    result = ci;
                     if (result == NullMarker)
                         result = null;
 
@@ -80,19 +48,14 @@ namespace Aspects.Cache
 
                 foreach (var cacheTrigger in cacheTriggers)
                 {
-                    var key = cacheTrigger.PerInstanceCache ? instanceKey : nonInstanceKey;
-                    cacheTrigger.Cache.Set(key, result, cacheTrigger.Policy);
+                    cacheTrigger.Set(key, result, retType, instance);
                 }
-                
             }
 
             return result;
         }
 
-        protected string GetKey(MethodInfo method, IEnumerable<object> args) => 
-            $"{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}"; 
- 
-        protected string GetKey(object instance, MethodInfo method, IEnumerable<object> args) => 
-            $"{instance.GetHashCode()}-{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}"; 
+        protected string GetKey(MethodInfo method, IEnumerable<object> args) =>
+            $"{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
     }
 }
