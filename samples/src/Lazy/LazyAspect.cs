@@ -10,8 +10,7 @@ namespace Aspects.Lazy
         private readonly Dictionary<string, object> _backFields = new Dictionary<string, object>();
 
         [Advice(Kind.Around, Targets = Target.Instance | Target.Public | Target.Getter)]
-        public object OnGet([Argument(Source.Target)] Func<object[], object> method, [Argument(Source.Name)] string name,
-            [Argument(Source.Arguments)] object[] arguments)
+        public object OnGet([Argument(Source.Target)] Func<object[], object> method, [Argument(Source.Name)] string name)
         {
             if (!_backFields.TryGetValue(name, out object value))
             {
@@ -19,7 +18,7 @@ namespace Aspects.Lazy
                 {
                     if (!_backFields.TryGetValue(name, out value))
                     {
-                        value = method(arguments);
+                        value = method(Array.Empty<object>());
                         _backFields.Add(name, value);
                     }
                 }
