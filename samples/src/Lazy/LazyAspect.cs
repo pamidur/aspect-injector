@@ -12,7 +12,7 @@ namespace Aspects.Lazy
         [Advice(Kind.Around, Targets = Target.Public | Target.Getter)]
         public object OnGet([Argument(Source.Target)] Func<object[], object> method, [Argument(Source.Type)] Type type, [Argument(Source.Name)] string name)
         {
-            var key = GetKey(type.Name, name);
+            var key = GetKey(type.FullName, name);
             if (!_backFields.TryGetValue(key, out object value))
             {
                 lock (_backFields)
