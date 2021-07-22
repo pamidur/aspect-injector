@@ -194,22 +194,68 @@ namespace Aspests.Tests
 
         #region Generic class
 
-        class GenericTestClass<T>
+        interface IService
+        {
+
+        }
+
+        class SerA : IService
+        {
+
+        }
+
+        class SerB : IService
+        {
+
+        }
+
+        class ServiceFactory
+        {
+            private static int options = 0;
+
+            public IService CreateService()
+            {
+                options++;
+
+                if (options == 1)
+                {
+                    return new SerA();
+                }
+                else
+                {
+                    return new SerB();
+                }
+            }
+        }
+
+        class GenericTestClass<T> where T : IService
         {
             [Lazy]
             public static ServiceA ServiceA => new ServiceA(DateTime.Now);
 
             [Lazy]
-            public static T ServiceB => default;
+            public static T ServiceFromFactory => (T)new ServiceFactory().CreateService();
         }
 
         [Fact]
-        public void LazyInitialize_GenericClass_PerStaticProperty_Test()
+        public void LazyInitialize_GenericClass_StaticProperty_InitPerClass()
         {
-            var testA = GenericTestClass<int>.ServiceA;
-            var testB = GenericTestClass<string>.ServiceA;
+            var testA = GenericTestClass<SerA>.ServiceA;
+            var testB = GenericTestClass<SerB>.ServiceA;
 
             Assert.NotEqual(testA, testB);
+        }
+
+        [Fact]
+        public void LazyInitialize_GenericProperty_InitEachType()
+        {
+            var serA = GenericTestClass<SerA>.ServiceFromFactory;
+            var serB = GenericTestClass<SerB>.ServiceFromFactory;
+
+            Assert.False(Object.Equals(serA, serB));
+
+            var twice = GenericTestClass<SerA>.ServiceFromFactory;
+            Assert.Equal(serA, twice);
         }
 
         #endregion
