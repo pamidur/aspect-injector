@@ -191,5 +191,27 @@ namespace Aspests.Tests
         }
 
         #endregion
+
+        #region Generic class
+
+        class GenericTestClass<T>
+        {
+            [Lazy]
+            public static ServiceA ServiceA => new ServiceA(DateTime.Now);
+
+            [Lazy]
+            public static T ServiceB => default;
+        }
+
+        [Fact]
+        public void LazyInitialize_GenericClass_PerStaticProperty_Test()
+        {
+            var testA = GenericTestClass<int>.ServiceA;
+            var testB = GenericTestClass<string>.ServiceA;
+
+            Assert.NotEqual(testA, testB);
+        }
+
+        #endregion
     }
 }

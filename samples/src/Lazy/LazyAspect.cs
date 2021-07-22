@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Broker;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Aspects.Lazy
 {
@@ -12,7 +13,8 @@ namespace Aspects.Lazy
         [Advice(Kind.Around, Targets = Target.Public | Target.Getter)]
         public object OnGet([Argument(Source.Target)] Func<object[], object> method, [Argument(Source.Type)] Type type, [Argument(Source.Name)] string name)
         {
-            var key = GetKey(type.FullName, name);
+            var key = GetKey(type.IsGenericType ? method.Method.DeclaringType : type, name);
+
             if (!_backFields.TryGetValue(key, out object value))
             {
                 lock (_backFields)
@@ -27,9 +29,9 @@ namespace Aspects.Lazy
 
             return value;
 
-            string GetKey(string typeName, string targetName)
+            string GetKey(Type declareType, string targetName)
             {
-                return $"{typeName}.{targetName}";
+                return $"{declareType.FullName}.{targetName}";
             }
         }
     }
