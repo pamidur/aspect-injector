@@ -2,7 +2,16 @@
 
 This package provides Lazy-like functionality.
 
-1. Put `LazyAttribute` attribure **on getonly property**, like:
+1. Suppose there is such a property and you want to delay the initialization:
+
+    ```csharp
+    class TestClass
+    {
+        public ServiceA ServiceA { get; } = new ServiceA(DateTime.Now);
+    }
+    ```
+
+2. Use `LazyAttribute`, and define `ServiceA` as a **read-only property**, as follows:
 
     ```csharp
     class TestClass
@@ -25,7 +34,7 @@ This package provides Lazy-like functionality.
     }
     ```
 
-2. The compiled DLL such as:
+3. The compiled DLL such as:
 
     ```csharp
     class TestClass
@@ -40,6 +49,6 @@ This package provides Lazy-like functionality.
     }
     ```
 
-3. But `LazyAttribute` use a Dictionary caches fields.
+4. But `LazyAttribute` use a Dictionary caches fields.
 
 
