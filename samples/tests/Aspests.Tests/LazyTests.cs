@@ -64,22 +64,22 @@ namespace Aspests.Tests
             [Lazy]
             public ServiceA ServiceB9 => new ServiceA(DateTime.Now);
 
-            public ServiceA ServiceC => new ServiceA(DateTime.Now);
+            public ServiceA NoLazyService => new ServiceA(DateTime.Now);
         }
 
         [Fact]
-        public void GetOnlyProperty_Test()
+        public void GetOnlyProperty_NoLazy_ReturnDifferentEachTime()
         {
             var t = new TestClass();
 
-            var first = t.ServiceC.DateTime;
-            var second = t.ServiceC.DateTime;
+            var first = t.NoLazyService.DateTime;
+            var second = t.NoLazyService.DateTime;
 
             Assert.NotEqual(first, second);
         }
 
         [Fact]
-        public void LazyInitializeOnce_OneProperty_Test()
+        public void LazyInitializeOnce_ReturnSameResultEachTime()
         {
             var t = new TestClass();
 
@@ -95,7 +95,6 @@ namespace Aspests.Tests
             var t = new TestClass();
 
             var timeA = t.ServiceA.DateTime;
-            Thread.Sleep(10);
             var timeB = t.ServiceB.DateTime;
 
             Assert.NotEqual(timeA, timeB);
@@ -154,5 +153,43 @@ namespace Aspests.Tests
             var result = tasks.GroupBy(o => o.Result.DateTime);
             Assert.True(result.Count() == 9);
         }
+
+        #region Static Property
+
+        class StaticTestA
+        {
+            [Lazy]
+            public static ServiceA ServiceA => new ServiceA(DateTime.Now);
+
+            public static string S { get; set; } = "";
+
+            public static string SMethod => "";
+        }
+
+        class StaticTestB
+        {
+            [Lazy]
+            public static ServiceA ServiceA => new ServiceA(DateTime.Now);
+        }
+
+        [Fact]
+        public void LazyInitializeOnce_StaticProperty_ReturnSameResultEachTime()
+        {
+            var first = StaticTestA.ServiceA;
+            var second = StaticTestA.ServiceA;
+
+            Assert.Equal(first, second);
+        }
+
+        [Fact]
+        public void LazyInitialize_PerStaticProperty_Test()
+        {
+            var testA = StaticTestA.ServiceA;
+            var testB = StaticTestB.ServiceA;
+
+            Assert.NotEqual(testA, testB);
+        }
+
+        #endregion
     }
 }

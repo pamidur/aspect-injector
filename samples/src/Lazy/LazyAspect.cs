@@ -5,26 +5,32 @@ using System.Collections.Generic;
 namespace Aspects.Lazy
 {
     [Aspect(Scope.PerInstance)]
-    public class LazyAspect
+    public sealed class LazyAspect
     {
         private readonly Dictionary<string, object> _backFields = new Dictionary<string, object>();
 
-        [Advice(Kind.Around, Targets = Target.Instance | Target.Public | Target.Getter)]
-        public object OnGet([Argument(Source.Target)] Func<object[], object> method, [Argument(Source.Name)] string name)
+        [Advice(Kind.Around, Targets = Target.Public | Target.Getter)]
+        public object OnGet([Argument(Source.Target)] Func<object[], object> method, [Argument(Source.Type)] Type type, [Argument(Source.Name)] string name)
         {
-            if (!_backFields.TryGetValue(name, out object value))
+            var key = GetKey(type.Name, name);
+            if (!_backFields.TryGetValue(key, out object value))
             {
                 lock (_backFields)
                 {
-                    if (!_backFields.TryGetValue(name, out value))
+                    if (!_backFields.TryGetValue(key, out value))
                     {
                         value = method(Array.Empty<object>());
-                        _backFields.Add(name, value);
+                        _backFields.Add(key, value);
                     }
                 }
             }
 
             return value;
+
+            string GetKey(string typeName, string targetName)
+            {
+                return $"{typeName}.{targetName}";
+            }
         }
     }
 }
