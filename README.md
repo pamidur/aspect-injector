@@ -31,7 +31,7 @@ Check out [samples](samples) and [docs](docs)
 - (_optional_) For analyzers to work in VSCode, don't forget to enable ```"omnisharp.enableRoslynAnalyzers": true``` 
 
 ### Known Issues / Limitations
-- 'Edit and Continue' feature in VS is not working at the moment with .netcore3+ [#138](https://github.com/pamidur/aspect-injector/issues/138) 
+- <s>'Edit and Continue' feature in VS is not working at the moment with .netcore3+ [#138](https://github.com/pamidur/aspect-injector/issues/138) </s> (check 2.6.0-pre1)
 - Unsafe methods are not supported and are silently ignored.
 - Until Nuget v5 (with transient build feature) you need to refrecence AspectInjector into every project in your solution.
 Thus, 
