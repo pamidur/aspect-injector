@@ -45,7 +45,7 @@ jobs:
       run: dotnet test -c $app_conf --no-build -f net5.0
     - name: Pack
       working-directory: nuget
-      run: dotnet pack -c $app_conf --no-build -o `pwd`/artifacts -p:Version=$app_version
+      run: dotnet pack -c $app_conf --no-build -o `pwd`/artifacts -p:Version=$app_version -p:CommitSHA=$GITHUB_SHA
     - uses: actions/upload-artifact@v1
       with:
         name: artifacts

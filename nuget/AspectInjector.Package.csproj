@@ -3,8 +3,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>AspectInjector</PackageId>
     <Title>Aspect Injector - AOP Framework</Title>
-    <Description>
-      This library provides attributes-based compile-time AOP framework.
+    <PackageDescription>
+      Attributes-based compile-time AOP framework.
       
       Create your aspect by marking class with [Aspect], its methods with [Advice] and create trigger attribute with [Injection].
       That's it! Cross-cutting concerns made easy! Just apply your attribute where you need and everything automagicaly works!
@@ -13,14 +13,16 @@
 
       See release notes for this version here:
       https://github.com/pamidur/aspect-injector/releases/tag/$(Version)
-    </Description>
+    </PackageDescription>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/pamidur/aspect-injector</PackageProjectUrl>
     <RepositoryUrl>https://github.com/pamidur/aspect-injector</RepositoryUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png</PackageIconUrl>
     <PackageIcon>package.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>aop aspect aspects injector injection inpc dotnet core notify notifypropertychanged aot blazor attribute</PackageTags>
+    <RepositoryCommit>$(CommitSHA)</RepositoryCommit>
+    <PackageTags>aop aspect aspects injector inpc core notify aot blazor attribute</PackageTags>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <IncludeBuildOutput>False</IncludeBuildOutput>
     <PackageReleaseNotes>See here => https://github.com/pamidur/aspect-injector/releases/tag/$(Version)</PackageReleaseNotes>
@@ -28,7 +30,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="/" />
+    <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath="/"/>
   </ItemGroup>
 
   <ItemGroup>
