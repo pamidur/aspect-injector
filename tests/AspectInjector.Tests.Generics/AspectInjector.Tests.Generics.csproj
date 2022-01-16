@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.1;netcoreapp3.1;net5.0</TargetFrameworks>
     <LangVersion>7.1</LangVersion>
+    <Configurations>Debug;Release;DebugTests</Configurations>
   </PropertyGroup>
   
   <Import Project="..\..\nuget\build\AspectInjector.targets" />
@@ -14,7 +15,7 @@
 
   <PropertyGroup>
     <_ASI_Location>$(MSBuildThisFileDirectory)..\..\src\AspectInjector\bin\$(Configuration)\netcoreapp2.1\</_ASI_Location>
-    <_ASI_Debug Condition=" '$(Configuration)' == 'Debug' ">true</_ASI_Debug>
+    <_ASI_Debug Condition="'$(Configuration)'=='DebugTests'">true</_ASI_Debug>
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
