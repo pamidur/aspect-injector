@@ -1,13 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <OutputType>Exe</OutputType>
-    <Description>Entrypoint for Aspect Injector.</Description>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
-    <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" />
-    <ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj" />
-    <ProjectReference Include="..\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+		<PublishTrimmed>true</PublishTrimmed>
+		<PublishSingleFile>true</PublishSingleFile>
+		<OutputType>Exe</OutputType>
+		<Description>Entrypoint for Aspect Injector.</Description>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
+		<ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" />
+		<ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj" />
+		<ProjectReference Include="..\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj" />
+	</ItemGroup>
 </Project>

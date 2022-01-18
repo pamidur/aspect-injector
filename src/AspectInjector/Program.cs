@@ -85,6 +85,7 @@ namespace AspectInjector
                 var assembly = Assembly.GetExecutingAssembly();
                 Console.WriteLine($"version: {assembly.GetCustomAttribute<AssemblyProductAttribute>().Product} {assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}");
                 Console.WriteLine($"runtime: {System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}");
+                Console.WriteLine($"os: {System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier}");
                 Console.WriteLine($"visit: https://github.com/pamidur/aspect-injector");
                 _headerPrinted = true;
             }
@@ -93,9 +94,8 @@ namespace AspectInjector
         private static int ShowHelp()
         {
             ShowVerboseHeader();
-            var assembly = Assembly.GetExecutingAssembly();
             Console.WriteLine();
-            Console.WriteLine($"usage: dotnet {assembly.ManifestModule.Name} [-d] [-o] [-v] [-rf <references_file>] <path_to_assembly> (<path_to_reference>)");
+            Console.WriteLine($"usage: AspectInjector [-d] [-o] [-v] [-rf <references_file>] <path_to_assembly> (<path_to_reference>)");
             Console.WriteLine($"options:");
             Console.WriteLine($"   -d\tAttach debugger.");
             Console.WriteLine($"   -o\tOptimize modified code.");

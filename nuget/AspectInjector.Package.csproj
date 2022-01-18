@@ -5,7 +5,7 @@
     <Title>Aspect Injector - AOP Framework</Title>
     <PackageDescription>
       Attributes-based compile-time AOP framework.
-      
+
       Create your aspect by marking class with [Aspect], its methods with [Advice] and create trigger attribute with [Injection].
       That's it! Cross-cutting concerns made easy! Just apply your attribute where you need and everything automagicaly works!
       No xml configs! No wierd reflection hacks! No runtime emit!
@@ -49,22 +49,32 @@
     <PropertyGroup>
       <PublishMain>$(TargetDir)../publish_main/</PublishMain>
       <PublishAnalyzer>$(TargetDir)../publish_analyzer/</PublishAnalyzer>
+      <PublishBroker>$(MSBuildThisFileDirectory)../src/AspectInjector.Broker/bin/$(Configuration)/$(TargetFramework)</PublishBroker>
     </PropertyGroup>
 
-    <Exec Command="dotnet publish ../src/AspectInjector/ -o $(PublishMain) -c $(Configuration) --no-build" />
+    <Exec Command="dotnet publish -r win-x64 --self-contained ../src/AspectInjector/ -o $(PublishMain)win-x64/ -c $(Configuration)" />
+    <Exec Command="dotnet publish -r linux-x64 --self-contained ../src/AspectInjector/ -o $(PublishMain)linux-x64/ -c $(Configuration)" />
+    <Exec Command="dotnet publish -r osx-x64 --self-contained ../src/AspectInjector/ -o $(PublishMain)osx-x64/ -c $(Configuration)" />
+
     <Exec Command="dotnet publish ../src/AspectInjector.Analyzer/ -o $(PublishAnalyzer) -c $(Configuration) --no-build" />
 
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(PublishMain)*.dll">
-        <PackagePath>build/_bin</PackagePath>
+      <TfmSpecificPackageFile Include="$(PublishMain)win-x64/AspectInjector.exe">
+        <PackagePath>build/_bin/win-x64</PackagePath>
       </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(PublishMain)*.runtimeconfig.json ">
-        <PackagePath>build/_bin</PackagePath>
+      <TfmSpecificPackageFile Include="$(PublishMain)linux-x64/AspectInjector">
+        <PackagePath>build/_bin/linux-x64</PackagePath>
+      </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="$(PublishMain)osx-x64/AspectInjector">
+        <PackagePath>build/_bin/osx-x64</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
 
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(PublishMain)AspectInjector.Broker.*" Exclude="$(PublishMain)AspectInjector.Broker.pdb">
+      <TfmSpecificPackageFile Include="$(PublishBroker)/AspectInjector.Broker.dll">
+        <PackagePath>lib/$(TargetFramework)</PackagePath>
+      </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="$(PublishBroker)/AspectInjector.Broker.xml">
         <PackagePath>lib/$(TargetFramework)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>

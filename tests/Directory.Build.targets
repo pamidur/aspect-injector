@@ -1,0 +1,13 @@
+<Project> 
+  
+  <PropertyGroup>
+    <ASI_LOCAL_BUILD>$(MSBuildThisFileDirectory)../src/AspectInjector/bin/$(Configuration)/net6</ASI_LOCAL_BUILD>
+    <ASI_LOCAL_BUILD Condition=" '$(Configuration)' == 'DebugTests' ">$(MSBuildThisFileDirectory)../src/AspectInjector/bin/Debug/net6</ASI_LOCAL_BUILD>
+
+    <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(ASI_LOCAL_BUILD)/AspectInjector</AspectInjector_Location>
+    <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(ASI_LOCAL_BUILD)/AspectInjector</AspectInjector_Location>
+    <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(ASI_LOCAL_BUILD)/AspectInjector.exe</AspectInjector_Location>
+  </PropertyGroup>
+
+  <Import Project="..\nuget\build\AspectInjector.targets" />
+</Project>

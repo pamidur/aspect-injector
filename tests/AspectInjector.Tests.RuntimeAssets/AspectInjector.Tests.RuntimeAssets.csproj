@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netcoreapp2.1;netcoreapp3.1;net5.0;net471;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;net5.0;net6;net471;net461</TargetFrameworks>
     <Configurations>Debug;Release;DebugTests</Configurations>
+    <AspectInjector_Debug Condition=" '$(Configuration)' == 'DebugTests' ">true</AspectInjector_Debug>  
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2">
@@ -12,13 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
-  </ItemGroup>
-
-  <Import Project="..\..\nuget\build\AspectInjector.targets" />
-
-  <PropertyGroup>
-    <_ASI_Location>$(MSBuildThisFileDirectory)..\..\src\AspectInjector\bin\$(Configuration)\netcoreapp2.1\</_ASI_Location>
-    <!--<_ASI_Debug Condition=" '$(Configuration)' == 'DebugTests' ">true</_ASI_Debug>-->
-  </PropertyGroup>
+  </ItemGroup>   
 
 </Project>

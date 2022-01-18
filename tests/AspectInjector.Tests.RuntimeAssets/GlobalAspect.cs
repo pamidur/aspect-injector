@@ -19,9 +19,7 @@ namespace AspectInjector.Tests.Assets
         public static readonly string AfterExecuted = "AfterAspectGlobal";
         public static readonly string BeforeExecuted = "BeforeAspectGlobal";
         public static readonly string AroundEnter = "AroundAspectGlobalEnter";
-        public static readonly string AroundExit = "AroundAspectGlobalExit";
-
-        
+        public static readonly string AroundExit = "AroundAspectGlobalExit";        
 
         [Advice(Kind.After)]
         public void After(

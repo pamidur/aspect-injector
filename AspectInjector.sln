@@ -17,6 +17,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2DAB661A-26B2-440A-BC54-59F2C8404F12}"
 	ProjectSection(SolutionItems) = preProject
 		tests\Directory.Build.props = tests\Directory.Build.props
+		tests\Directory.Build.targets = tests\Directory.Build.targets
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Core.Mixin", "src\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj", "{3FBD73F5-6098-45A8-A236-6CC2F093B804}"

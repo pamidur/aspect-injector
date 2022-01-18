@@ -1,7 +1,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <AspectInjectorEnabled Condition="'$(AspectInjectorEnabled)' == ''">true</AspectInjectorEnabled>
+    <AspectInjector_Enabled Condition="'$(AspectInjector_Enabled)' == ''">true</AspectInjector_Enabled>
+    <AspectInjector_Debug Condition="'$(AspectInjector_Debug)' == ''">false</AspectInjector_Debug>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,26 +18,30 @@
     </_InjectAspectsDependsOn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(AspectInjector_Location)' == ''">
+    <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(MSBuildThisFileDirectory)../../build/_bin/linux-x64/AspectInjector</AspectInjector_Location>
+    <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(MSBuildThisFileDirectory)../../build/_bin/osx-x64/AspectInjector</AspectInjector_Location>
+    <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(MSBuildThisFileDirectory)../../build/_bin/win-x64/AspectInjector.exe</AspectInjector_Location>
+  </PropertyGroup>
+
   <PropertyGroup>
-    <_ASI_Location Condition="'$(_ASI_Location)' == ''">$(MSBuildThisFileDirectory)../../build/_bin/</_ASI_Location>
-    <_ASI_Debug Condition="'$(_ASI_Debug)' == ''">false</_ASI_Debug>
     <_ASI_DelayedInjection Condition="'$(_ASI_DelayedInjection)' == ''">false</_ASI_DelayedInjection>
     <_ASI_RefsFileExt>._asi_refs</_ASI_RefsFileExt>
   </PropertyGroup>
 
-  <Target Name="InjectAspects" AfterTargets="CoreCompile" BeforeTargets="_TimeStampAfterCompile;AfterCompile" Condition="'$(AspectInjectorEnabled)' == 'true'" DependsOnTargets="$(_InjectAspectsDependsOn)"/>
+  <Target Name="InjectAspects" AfterTargets="CoreCompile" BeforeTargets="_TimeStampAfterCompile;AfterCompile" Condition="'$(AspectInjector_Enabled)' == 'true'" DependsOnTargets="$(_InjectAspectsDependsOn)"/>
 
   <Target Name="_ASI_InjectAspectsCore" Condition="'$(_InjectionNeeded)' == 'true'">
     <PropertyGroup>
       <_CmdParams Condition=" '$(Optimize)' == 'true' ">$(_CmdParams) -o</_CmdParams>
-      <_CmdParams Condition=" '$(_ASI_Debug)' == 'true' ">$(_CmdParams) -d</_CmdParams>
+      <_CmdParams Condition=" '$(AspectInjector_Debug)' == 'true' ">$(_CmdParams) -d</_CmdParams>
       <_CmdParams Condition=" '$(_ASI_Verbose)' == 'true' ">$(_CmdParams) -v</_CmdParams>
     </PropertyGroup>
     <PropertyGroup>
-      <_ProcessCmd>dotnet --roll-forward-on-no-candidate-fx 2 &quot;$(_ASI_Location)AspectInjector.dll&quot; $(_CmdParams) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;@(IntermediateAssembly->'%(FullPath)')&quot;</_ProcessCmd>
+      <_ProcessCmd>&quot;$(AspectInjector_Location)&quot; $(_CmdParams) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;@(IntermediateAssembly->'%(FullPath)')&quot;</_ProcessCmd>
     </PropertyGroup>
 
-    <Message Condition=" '$(_ASI_Debug)' == 'true' " Importance="high" Text="$(_ProcessCmd)"/>
+    <Message Condition=" '$(AspectInjector_Debug)' == 'true' " Importance="high" Text="$(_ProcessCmd)"/>
 
     <Exec Command="$(_ProcessCmd)" WorkingDirectory="$(MSBuildThisFileDirectory)" EchoOff="true" IgnoreExitCode="true" Condition="'$(_ASI_DelayedInjection)' == 'false'">
       <Output TaskParameter="ExitCode" PropertyName="_AspectExitCode" />
