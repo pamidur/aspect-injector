@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>_key.snk</AssemblyOriginatorKeyFile>
     <Description>Broker for Aspect Injector operations.</Description>

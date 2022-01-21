@@ -11,6 +11,7 @@
 
   <PropertyGroup>
     <_InjectAspectsDependsOn>
+      _ASI_Custom_Target;
       _ASI_CheckAssemblyChanged;
       _ASI_InjectAspectsCore;
       _ASI_ResignAssembly;
@@ -38,7 +39,7 @@
       <_CmdParams Condition=" '$(_ASI_Verbose)' == 'true' ">$(_CmdParams) -v</_CmdParams>
     </PropertyGroup>
     <PropertyGroup>
-      <_ProcessCmd>&quot;$(AspectInjector_Location)&quot; $(_CmdParams) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;@(IntermediateAssembly->'%(FullPath)')&quot;</_ProcessCmd>
+      <_ProcessCmd>&quot;$(AspectInjector_Location)&quot;$(_CmdParams) -rf &quot;%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)&quot; &quot;@(IntermediateAssembly->'%(FullPath)')&quot;</_ProcessCmd>
     </PropertyGroup>
 
     <Message Condition=" '$(AspectInjector_Debug)' == 'true' " Importance="high" Text="$(_ProcessCmd)"/>
@@ -80,10 +81,10 @@
       <_InjectionNeeded Condition="'$(_TSOld)' != '$(_TSNew)' AND '$(_TSNew)' != '' ">true</_InjectionNeeded>
     </PropertyGroup>
     <WriteLinesToFile Condition="'$(_InjectionNeeded)' == 'true'"
-        File="%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)"
-        Lines="@(ReferencePath->'%(FullPath)')"
-        Overwrite="true"
-        Encoding="Unicode"/>
+			File="%(IntermediateAssembly.FullPath)$(_ASI_RefsFileExt)"
+			Lines="@(ReferencePath->'%(FullPath)')"
+			Overwrite="true"
+			Encoding="Unicode"/>
     <Message Text="Assembly requires injection." Condition="'$(_InjectionNeeded)' == 'true'"/>
   </Target>
 
@@ -108,6 +109,9 @@
       <SnTool>$(SnToolsRaw.Split(';')[0])</SnTool>
     </PropertyGroup>
     <Message Text="SnTool found: $(SnTool)"/>
+  </Target>
+
+  <Target Name="_ASI_Custom_Target">
   </Target>
 
 </Project>

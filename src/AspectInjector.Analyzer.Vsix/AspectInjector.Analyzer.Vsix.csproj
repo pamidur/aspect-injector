@@ -3,12 +3,13 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PackageId>AspectInjector.Analyzer.Vsix</PackageId>
-    <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
+    <MinimumVisualStudioVersion>16.0</MinimumVisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>14.0</OldToolsVersion>
     <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -22,7 +23,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AspectInjector.Analyzer.Vsix</RootNamespace>
     <AssemblyName>AspectInjector.Analyzer</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
     <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
@@ -62,21 +63,18 @@
     <ProjectReference Include="..\..\external\FluentIL\src\FluentIL.Common\FluentIL.Common.csproj">
       <Project>{7bd22418-f4a9-422b-9fde-a20708ba0648}</Project>
       <Name>FluentIL.Common</Name>
-      <AdditionalProperties>TargetFramework=netstandard1.3</AdditionalProperties>
+    </ProjectReference>
+    <ProjectReference Include="..\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj">
+      <Project>{8a2e5556-55a4-4a1c-be82-7603befa1a19}</Project>
+      <Name>AspectInjector.Analyzer</Name>
     </ProjectReference>
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj">
       <Project>{0926fe28-73ba-4f73-9188-b196fbbc9410}</Project>
       <Name>AspectInjector.Broker</Name>
-      <AdditionalProperties>TargetFramework=netstandard1.3</AdditionalProperties>
     </ProjectReference>
     <ProjectReference Include="..\AspectInjector.Rules\AspectInjector.Rules.csproj">
       <Project>{20ed44a4-9d35-41f2-a317-c1eb9923379e}</Project>
       <Name>AspectInjector.Rules</Name>
-      <AdditionalProperties>TargetFramework=netstandard1.3</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="..\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj">
-      <Project>{EB78F1E8-4CEB-45D1-90EB-57A159E606C0}</Project>
-      <Name>AspectInjector.Analyzer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

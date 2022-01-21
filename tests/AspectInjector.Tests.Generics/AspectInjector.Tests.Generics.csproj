@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net5.0;net6</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
     <LangVersion>7.1</LangVersion>
     <Configurations>Debug;Release;DebugTests</Configurations>
-    <AspectInjector_Debug Condition=" '$(Configuration)' == 'DebugTests' ">true</AspectInjector_Debug>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Tests.RuntimeAssets\AspectInjector.Tests.RuntimeAssets.csproj" />

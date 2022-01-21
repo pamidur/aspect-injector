@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-  <Metadata>
-    <Identity Id="AspectInjector1.Analyzer.275fe9ce-23cf-4f50-a564-419c2daae258" Version="1.1" Language="en-US" Publisher="aguly"/>
-    <DisplayName>AspectInjector1.Analyzer</DisplayName>
-    <Description xml:space="preserve">This is a sample diagnostic extension for the .NET Compiler Platform ("Roslyn").</Description>
-  </Metadata>
-  <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[15.0,)" />
-  </Installation>
-  <Dependencies>
-    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.6.1,)" />
-  </Dependencies>
-  <Assets>
-    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="AspectInjector.Analyzer" Path="|AspectInjector.Analyzer|"/>
-    <Asset Type="Microsoft.VisualStudio.Analyzer" d:Source="Project" d:ProjectName="AspectInjector.Analyzer" Path="|AspectInjector.Analyzer|"/>
-    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="AspectInjector.Broker" Path="|AspectInjector.Broker|" AssemblyName="|AspectInjector.Broker;AssemblyName|" />
-    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="AspectInjector.Rules" Path="|AspectInjector.Rules|" AssemblyName="|AspectInjector.Rules;AssemblyName|" />
-    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="FluentIL.Common" Path="|FluentIL.Common|" AssemblyName="|FluentIL.Common;AssemblyName|" />
-  </Assets>
-  <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,16.0)" DisplayName="Visual Studio core editor" />
-    <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.LanguageServices" Version="[15.0,16.0)" DisplayName="Roslyn Language Services" />
-  </Prerequisites>
+    <Metadata>
+        <Identity Id="AspectInjector1.Analyzer.275fe9ce-23cf-4f50-a564-419c2daae258" Version="1.1" Language="en-US" Publisher="aguly"/>
+        <DisplayName>AspectInjector1.Analyzer</DisplayName>
+        <Description xml:space="preserve">This is a sample diagnostic extension for the .NET Compiler Platform ("Roslyn").</Description>
+    </Metadata>
+    <Installation>
+        <InstallationTarget Version="[16.0,)" Id="Microsoft.VisualStudio.Community" />
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.6.1,)" />
+    </Dependencies>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="AspectInjector.Analyzer" Path="|AspectInjector.Analyzer|"/>
+        <Asset Type="Microsoft.VisualStudio.Analyzer" d:Source="Project" d:ProjectName="AspectInjector.Analyzer" Path="|AspectInjector.Analyzer|"/>
+        <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="AspectInjector.Broker" Path="|AspectInjector.Broker|" AssemblyName="|AspectInjector.Broker;AssemblyName|" />
+        <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="AspectInjector.Rules" Path="|AspectInjector.Rules|" AssemblyName="|AspectInjector.Rules;AssemblyName|" />
+        <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="FluentIL.Common" Path="|FluentIL.Common|" AssemblyName="|FluentIL.Common;AssemblyName|" />
+    </Assets>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,)" DisplayName="Visual Studio core editor" />
+        <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.LanguageServices" Version="[16.0,)" DisplayName="Roslyn Language Services" />
+    </Prerequisites>
 </PackageManifest>
