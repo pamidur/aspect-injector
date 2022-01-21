@@ -84,8 +84,8 @@ namespace AspectInjector
             {
                 var assembly = Assembly.GetExecutingAssembly();
                 Console.WriteLine($"version: {assembly.GetCustomAttribute<AssemblyProductAttribute>().Product} {assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}");
-                Console.WriteLine($"runtime: {System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}");
-                Console.WriteLine($"os: {System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier}");
+                Console.WriteLine($"framework: {System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}");
+                Console.WriteLine($"runtime: {System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier}");
                 Console.WriteLine($"visit: https://github.com/pamidur/aspect-injector");
                 _headerPrinted = true;
             }

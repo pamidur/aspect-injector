@@ -77,7 +77,7 @@ namespace AspectInjector.Core.Services
             var injectionAttributes = FindInjections(interfaceDef);
             var parsedList = ParseInjectionAttributes(injectionAttributes, interfaceDef);
 
-            return parsedList.SelectMany(parsed => FindApplicableMembers(target, parsed, null)); //todo: figure if we need fake metadata attribute here
+            return parsedList.SelectMany(parsed => FindApplicableMembers(target, parsed, null));
         }
 
 

@@ -273,9 +273,6 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     to.DebugInformation.CustomDebugInformations.Add(cdi);
                 }
 
-            //from.DebugInformation.SequencePoints.Clear();
-            //from.DebugInformation.Scope = null;
-
             var to_vars = to.Body.Variables;
             foreach (var var in from.Body.Variables)
                 to_vars.Add(new VariableDefinition(to.Module.ImportReference(var.VariableType)));
