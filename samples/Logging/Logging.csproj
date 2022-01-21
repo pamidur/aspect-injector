@@ -1,12 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="AspectInjector" Version="2.5.0" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\Universal\Aspects.Universal.csproj" />
   </ItemGroup>

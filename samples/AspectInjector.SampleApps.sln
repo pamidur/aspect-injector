@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.156
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{90E6BBDF-64DB-4AA0-8686-2D539735915C}"
 EndProject
@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aspects.Freezable", "src\Fr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aspects.Notify", "src\Notify\Aspects.Notify.csproj", "{EA56BF63-C8CD-4BF4-A0D6-56B36F59D787}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aspests.Tests", "tests\Aspests.Tests\Aspests.Tests.csproj", "{8C4F252C-009C-4E9E-9EEC-E835900542FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aspects.Tests", "tests\Aspests.Tests\Aspects.Tests.csproj", "{8C4F252C-009C-4E9E-9EEC-E835900542FF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_solution", "_solution", "{C18D1C04-0FEE-4B56-BD11-DB9454643F1A}"
 	ProjectSection(SolutionItems) = preProject
