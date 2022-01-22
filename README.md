@@ -27,12 +27,11 @@
 Check out [samples](samples) and [docs](docs)
 
 ### Requirements
-- **.NetCore runtime 2.1.6+** installed on your machine _(your projects can be anything that can reference netstandard2.0)_
-- (_semi-optional_) **Nuget 5.0+** for _transient build_ feature. All modern versions of VS and dotnetsdk have it. _(If you still use project.json for some reason - make sure you add AspectInjector to all projects in the solution)_
+- (_semi-optional_) **Nuget 5.0+** for _transient build_ feature. All modern versions of VS and dotnetsdk have it. 
+_(If you still use project.json for some reason - make sure you add AspectInjector to all projects in the solution)_
 - (_optional_) For analyzers to work in VSCode, don't forget to enable ```"omnisharp.enableRoslynAnalyzers": true``` 
 
 ### Known Issues / Limitations
-- 'Edit and Continue' feature in VS is not working at the moment with .netcore3+ [#138](https://github.com/pamidur/aspect-injector/issues/138)
 - Unsafe methods are not supported and are silently ignored.
 
 ### Simple advice
