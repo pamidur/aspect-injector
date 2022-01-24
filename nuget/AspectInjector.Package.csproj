@@ -4,11 +4,13 @@
     <PackageId>AspectInjector</PackageId>
     <Title>Aspect Injector - AOP Framework</Title>
     <PackageDescription>
+
       Attributes-based compile-time AOP framework.
 
-      Create your aspect by marking class with [Aspect], its methods with [Advice] and create trigger attribute with [Injection].
-      That's it! Cross-cutting concerns made easy! Just apply your attribute where you need and everything automagicaly works!
+      Cross-cutting concerns made easy!
+      Just apply your attributes where you need and everything automagicaly works!
       No xml configs! No wierd reflection hacks! No runtime emit!
+
       Works with AOT and Blazor!
 
       See release notes for this version here:
@@ -22,7 +24,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
     <RepositoryCommit>$(CommitSHA)</RepositoryCommit>
-    <PackageTags>aop aspect aspects injector inpc core notify aot blazor attribute</PackageTags>
+    <PackageTags>aop aspect interceptor injector aot blazor attribute il weaving boundary post-compiler</PackageTags>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <IncludeBuildOutput>False</IncludeBuildOutput>
     <PackageReleaseNotes>See here => https://github.com/pamidur/aspect-injector/releases/tag/$(Version)</PackageReleaseNotes>

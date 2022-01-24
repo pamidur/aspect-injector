@@ -6,7 +6,7 @@ namespace AspectInjector.Rules
     public static class GeneralRules
     {
         internal static Rule Make(string id, string title, string message, string description, RuleSeverity severity = RuleSeverity.Error)
-        => new Rule(id, title, message, severity, description: description, helpLinkUri: $"https://pamidur.github.io/aspect-injector/errors/{id}");
+        => new Rule(id, title, message, severity, description: description, helpLinkUri: $"https://github.com/pamidur/aspect-injector/blob/master/docs/errors/{id}.md");
 
         public static class Literals
         {

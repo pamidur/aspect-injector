@@ -4,6 +4,7 @@
 		<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
 		<PublishTrimmed>true</PublishTrimmed>
 		<PublishSingleFile>true</PublishSingleFile>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<OutputType>Exe</OutputType>
 		<Description>Entrypoint for Aspect Injector.</Description>
 	</PropertyGroup>
