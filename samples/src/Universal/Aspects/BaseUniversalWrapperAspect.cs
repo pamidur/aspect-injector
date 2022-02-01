@@ -15,7 +15,7 @@ namespace Aspects.Universal.Aspects
         private delegate object Wrapper(Func<object[], object> target, object[] args);
         private delegate object Handler(Func<object[], object> next, object[] args, AspectEventArgs eventArgs);
 
-        private static readonly Dictionary<MethodBase, Handler> _delegateCache = new Dictionary<MethodBase, Handler>();
+        private static readonly Dictionary<(MethodBase, Type), Handler> _delegateCache = new Dictionary<(MethodBase, Type), Handler>();
 
         private static readonly MethodInfo _asyncGenericHandler =
             typeof(BaseUniversalWrapperAttribute).GetMethod(nameof(BaseUniversalWrapperAttribute.WrapAsync), BindingFlags.NonPublic | BindingFlags.Instance);
@@ -93,13 +93,14 @@ namespace Aspects.Universal.Aspects
 
         private Handler GetMethodHandler(MethodBase method, Type returnType, IReadOnlyList<BaseUniversalWrapperAttribute> wrappers)
         {
-            if (!_delegateCache.TryGetValue(method, out var handler))
+            var key = (method, returnType);
+            if (!_delegateCache.TryGetValue(key, out var handler))
             {
                 lock (method)
                 {
-                    if (!_delegateCache.TryGetValue(method, out handler))
+                    if (!_delegateCache.TryGetValue(key, out handler))
                     {
-                        _delegateCache[method] = handler = CreateMethodHandler(method, returnType, wrappers);
+                        _delegateCache[key] = handler = CreateMethodHandler(method, returnType, wrappers);
                     }
                 }
             }
