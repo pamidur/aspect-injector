@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -15,7 +16,7 @@ namespace Aspects.Universal.Aspects
         private delegate object Wrapper(Func<object[], object> target, object[] args);
         private delegate object Handler(Func<object[], object> next, object[] args, AspectEventArgs eventArgs);
 
-        private static readonly Dictionary<(MethodBase, Type), Handler> _delegateCache = new Dictionary<(MethodBase, Type), Handler>();
+        private static readonly ConcurrentDictionary<(MethodBase, Type), Lazy<Handler>> _delegateCache = new ConcurrentDictionary<(MethodBase, Type), Lazy<Handler>>();
 
         private static readonly MethodInfo _asyncGenericHandler =
             typeof(BaseUniversalWrapperAttribute).GetMethod(nameof(BaseUniversalWrapperAttribute.WrapAsync), BindingFlags.NonPublic | BindingFlags.Instance);
@@ -52,7 +53,7 @@ namespace Aspects.Universal.Aspects
             return handler(target, args, eventArgs);
         }
 
-        private Handler CreateMethodHandler(MethodBase method, Type returnType, IReadOnlyList<BaseUniversalWrapperAttribute> wrappers)
+        private Handler CreateMethodHandler(Type returnType, IReadOnlyList<BaseUniversalWrapperAttribute> wrappers)
         {
             var targetParam = Expression.Parameter(typeof(Func<object[], object>), "orig");
             var eventArgsParam = Expression.Parameter(typeof(AspectEventArgs), "event");
@@ -61,7 +62,7 @@ namespace Aspects.Universal.Aspects
 
             if (typeof(Task).IsAssignableFrom(returnType))
             {
-                var taskType = returnType.IsConstructedGenericType ? returnType.GenericTypeArguments[0] : Type.GetType("System.Threading.Tasks.VoidTaskResult");
+                var taskType = returnType.IsConstructedGenericType ? returnType.GenericTypeArguments[0] : _voidTaskResult;
                 returnType = typeof(Task<>).MakeGenericType(new[] { taskType });
 
                 wrapperMethod = _asyncGenericHandler.MakeGenericMethod(new[] { taskType });
@@ -93,19 +94,8 @@ namespace Aspects.Universal.Aspects
 
         private Handler GetMethodHandler(MethodBase method, Type returnType, IReadOnlyList<BaseUniversalWrapperAttribute> wrappers)
         {
-            var key = (method, returnType);
-            if (!_delegateCache.TryGetValue(key, out var handler))
-            {
-                lock (method)
-                {
-                    if (!_delegateCache.TryGetValue(key, out handler))
-                    {
-                        _delegateCache[key] = handler = CreateMethodHandler(method, returnType, wrappers);
-                    }
-                }
-            }
-
-            return handler;
+            var lazyHandler = _delegateCache.GetOrAdd((method, returnType), _ => new Lazy<Handler>(() => CreateMethodHandler(returnType, wrappers)));
+            return lazyHandler.Value;
         }
     }
 }
