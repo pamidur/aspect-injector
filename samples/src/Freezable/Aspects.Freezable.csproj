@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Version>1.0.1</Version>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageTags>aspect freezable pattern attribute</PackageTags>    
     <Description>This package provides simple freezable pattern implementation. Put [Freezable] attribure on your properties or a whole class. Then cast your objects to IFreezable when needed.
