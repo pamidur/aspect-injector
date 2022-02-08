@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageTags>aspect notify notifypropertychanged INPC pattern attribute</PackageTags>
     <Description>This package provides simple INotifyPropertyChanged aspect. Put [Notify] attribure on your properties or a whole class. You can use [NotifyAlso] attributes to notify other dependant properties.
