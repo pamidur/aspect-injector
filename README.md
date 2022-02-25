@@ -1,3 +1,21 @@
+![image](https://user-images.githubusercontent.com/4095184/155636545-94ba7c67-277f-46d7-84e3-b750ff341769.png)
+
+<h3><span style="color: #ff0000;"><strong>I have never asked for any donations, but today, I ask you, please, consider donating Ukrainian Army.<br /></strong></span></h3>
+<h3><span style="color: #ff0000;"><strong>You can find official ways to do it <a href="https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi">here</a></strong></span></h3>
+<h3><span style="color: #ff0000;"><strong>People need to be alive to create open source projects!</strong></span></h3>
+
+
+
+ 
+ 
+_______________________________
+_______________________________
+_______________________________
+
+-------------------------------
+ 
+ 
+
 <img src="https://raw.githubusercontent.com/pamidur/aspect-injector/master/package.png" width="48" align="right"/>Aspect Injector
 ========================
 **Aspect Injector** is an attribute-based framework for creating and injecting aspects into your .net assemblies.
