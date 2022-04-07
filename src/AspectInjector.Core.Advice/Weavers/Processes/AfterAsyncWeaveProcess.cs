@@ -11,16 +11,17 @@ using System.Linq;
 namespace AspectInjector.Core.Advice.Weavers.Processes
 {
     internal class AfterAsyncWeaveProcess : AfterStateMachineWeaveProcessBase
-    {       
+    {
         private readonly TypeReference _builder;
         private readonly TypeReference _asyncResult;
 
-        public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection) 
+        public AfterAsyncWeaveProcess(ILogger log, MethodDefinition target, InjectionDefinition injection)
             : base(log, target, injection)
         {
             SetStateMachine(GetStateMachine());
 
-            var builderField = _stateMachine.Fields.First(f => f.Name == "<>t__builder");
+            var builderField = _stateMachine.Fields.First(f => f.Name == "<>t__builder" || f.Name == "$Builder");
+
             _builder = builderField.FieldType;
             _asyncResult = (_builder as IGenericInstance)?.GenericArguments.FirstOrDefault();
         }
@@ -30,8 +31,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var smRef = _method.CustomAttributes.First(ca => ca.AttributeType.Match(StandardType.AsyncStateMachineAttribute))
                 .GetConstructorValue<TypeReference>(0);
 
-            if (smRef.HasGenericParameters)            
-                smRef = _method.Body.Variables.First(v => v.VariableType.Resolve() == smRef).VariableType;            
+            if (smRef.HasGenericParameters)
+                smRef = _method.Body.Variables.First(v => v.VariableType.Resolve() == smRef).VariableType;
 
             return smRef;
         }
@@ -100,12 +101,23 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         protected override void InsertStateMachineCall(PointCut code)
         {
-            var method = _builder.Resolve().Methods.First(m => m.Name == "Start").MakeReference(_builder);
+            var smctor = _method.Body.Instructions.Where(i => i.OpCode == OpCodes.Newobj && i.Operand is MethodReference mr && mr.DeclaringType.Resolve() == _stateMachine).ToArray();
 
-            var v = _method.Body.Variables.First(vr => vr.VariableType.Resolve().Match(_stateMachine));
-            var loadVar = v.VariableType.IsValueType ? (PointCut)((in Cut c) => c.LoadRef(v)) : (in Cut c) => c.Load(v);
+            if (smctor.Length > 0) // DEBUG build
+            {
+                _method.Body.AfterInstruction(smctor[0], (in Cut cut) => cut.Dup().Here(code));
+            }
+            else // RELEASE build
+            {
+                var v = _method.Body.Variables.First(vr => vr.VariableType.Resolve().Match(_stateMachine));
+                var sminit = _method.Body.Instructions.Where(i => i.OpCode == OpCodes.Initobj && i.Operand is TypeReference tr && tr.Resolve() == _stateMachine).ToArray();
 
-            _method.Body.OnCall(method, (in Cut cut) => cut.Prev().Prev().Prev().Here(loadVar).Here(code));
+                if (sminit.Length > 0) // VB                                   
+                    _method.Body.AfterInstruction(sminit[0], (in Cut cut) => cut.LoadRef(v).Here(code));
+                else // C#         
+                    _method.Body.AfterEntry((in Cut cut) => cut.LoadRef(v).Here(code));
+
+            }
         }
     }
 }
