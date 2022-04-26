@@ -41,6 +41,7 @@ _______________________________
 - Supports any project that can reference **netstandard2.0** libraries, see [here](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
 - Debugging support
 - Roslyn analyzers for your convenience (only c# currently)
+- Can work DI/IoC frameworks [#166](https://github.com/pamidur/aspect-injector/discussions/166)
 
 Check out [samples](samples) and [docs](docs)
 
