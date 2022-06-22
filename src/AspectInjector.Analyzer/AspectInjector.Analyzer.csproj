@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\external\FluentIL\src\FluentIL.Common\FluentIL.Common.csproj" />
+    <ProjectReference Include="..\FluentIL.Common\FluentIL.Common.csproj" />
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Rules\AspectInjector.Rules.csproj" />
   </ItemGroup>

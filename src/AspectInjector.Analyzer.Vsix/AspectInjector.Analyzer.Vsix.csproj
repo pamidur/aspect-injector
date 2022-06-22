@@ -60,10 +60,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\external\FluentIL\src\FluentIL.Common\FluentIL.Common.csproj">
-      <Project>{7bd22418-f4a9-422b-9fde-a20708ba0648}</Project>
-      <Name>FluentIL.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj">
       <Project>{8a2e5556-55a4-4a1c-be82-7603befa1a19}</Project>
       <Name>AspectInjector.Analyzer</Name>
