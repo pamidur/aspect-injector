@@ -52,7 +52,7 @@ namespace Aspects.Cache
                     cacheTrigger.Set(key, result, retType, instance);
                 }
             }
-
+            if (result == NullMarker) return null;
             return result;
         }
 

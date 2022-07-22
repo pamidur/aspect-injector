@@ -12,6 +12,20 @@ namespace Aspests.Tests
         class TestClass
         {
             [MemoryCache(3, PerInstanceCache = false)]
+            public int? Nullable(bool ok)
+            {
+                if (ok) return 1;
+                return null;
+            }
+
+            [MemoryCache(3, PerInstanceCache = true)]
+            public int? NullablePerInstance(bool ok)
+            {
+                if (ok) return 1;
+                return null;
+            }
+
+            [MemoryCache(3, PerInstanceCache = false)]
             public void Do(ref int a)
             {
                 a++;
@@ -162,6 +176,24 @@ namespace Aspests.Tests
             Assert.Equal(expected, result3);
             Assert.NotEqual(result2, result);
             Assert.NotEqual(result4, result);
+        }
+
+        [Fact]
+        public void Cache_Nullable_Method()
+        {
+            var target = new TestClass();
+            
+            var i = target.Nullable(true);
+            Assert.Equal(1, i);
+
+            i = target.Nullable(false);
+            Assert.Null(i);
+
+            i = target.NullablePerInstance(true);
+            Assert.Equal(1, i);
+            
+            i = target.NullablePerInstance(false);
+            Assert.Null(i);
         }
 
         [Fact]
