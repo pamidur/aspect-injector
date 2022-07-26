@@ -63,6 +63,7 @@
     <Exec Command="dotnet publish -r osx-x64 -o $(PublishMain)osx-x64/ $(BuildCommandArgs)" />
     <Exec Command="dotnet publish -r linux-musl-x64 -o $(PublishMain)linux-musl-x64/ $(BuildCommandArgs)" />
     <Exec Command="dotnet publish -r linux-arm64 -o $(PublishMain)linux-arm64/ $(BuildCommandArgs)" />
+    <Exec Command="dotnet publish -r linux-musl-arm64 -o $(PublishMain)linux-musl-arm64/ $(BuildCommandArgs)" />
 
     <Exec Command="dotnet publish ../src/AspectInjector.Analyzer/ -o $(PublishAnalyzer) -c $(Configuration) --no-build" />
 
@@ -73,8 +74,11 @@
       <TfmSpecificPackageFile Include="$(PublishMain)linux-x64/AspectInjector">
         <PackagePath>build/_bin/linux-x64</PackagePath>
       </TfmSpecificPackageFile>
-       <TfmSpecificPackageFile Include="$(PublishMain)linux-musl-x64/AspectInjector">
+      <TfmSpecificPackageFile Include="$(PublishMain)linux-musl-x64/AspectInjector">
         <PackagePath>build/_bin/linux-musl-x64</PackagePath>
+      </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="$(PublishMain)linux-musl-arm64/AspectInjector">
+        <PackagePath>build/_bin/linux-musl-arm64</PackagePath>
       </TfmSpecificPackageFile>
       <TfmSpecificPackageFile Include="$(PublishMain)linux-arm64/AspectInjector">
         <PackagePath>build/_bin/linux-arm64</PackagePath>
