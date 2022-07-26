@@ -22,9 +22,9 @@
   <PropertyGroup Condition="'$(AspectInjector_Location)' == ''">
     <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(MSBuildThisFileDirectory)../../build/_bin/osx-x64/AspectInjector</AspectInjector_Location>
     <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(MSBuildThisFileDirectory)../../build/_bin/win-x64/AspectInjector.exe</AspectInjector_Location>
-    <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">$(MSBuildThisFileDirectory)../../build/_bin/linux-x64/AspectInjector</AspectInjector_Location>
+    <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64' AND !Exists('/lib/libc.musl-x86_64.so.1')">$(MSBuildThisFileDirectory)../../build/_bin/linux-x64/AspectInjector</AspectInjector_Location>
     <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64' AND Exists('/lib/libc.musl-x86_64.so.1')">$(MSBuildThisFileDirectory)../../build/_bin/linux-musl-x64/AspectInjector</AspectInjector_Location>
-    <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">$(MSBuildThisFileDirectory)../../build/_bin/linux-arm64/AspectInjector</AspectInjector_Location>
+    <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64' AND !Exists('/lib/libc.musl-aarch64.so.1')">$(MSBuildThisFileDirectory)../../build/_bin/linux-arm64/AspectInjector</AspectInjector_Location>
     <AspectInjector_Location Condition="$([MSBuild]::IsOSPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64' AND Exists('/lib/libc.musl-aarch64.so.1')">$(MSBuildThisFileDirectory)../../build/_bin/linux-musl-arm64/AspectInjector</AspectInjector_Location>
   </PropertyGroup>
 
