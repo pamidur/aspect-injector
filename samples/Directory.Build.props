@@ -11,6 +11,6 @@
     <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AspectInjector" Version="2.7.3" PrivateAssets="None" />
+    <PackageReference Include="AspectInjector" Version="2.7.3" PrivateAssets="All" />
   </ItemGroup>
 </Project>
