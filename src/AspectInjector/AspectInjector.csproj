@@ -1,17 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<RuntimeIdentifiers>win-x64;linux-x64;linux-musl-x64;linux-musl-arm64;linux-arm64;osx-x64</RuntimeIdentifiers>
-		<PublishTrimmed>true</PublishTrimmed>
-		<PublishSingleFile>true</PublishSingleFile>
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishSingleFile>true</PublishSingleFile>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-		<OutputType>Exe</OutputType>
-		<Description>Entrypoint for Aspect Injector.</Description>
-	</PropertyGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
-		<ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" />
-		<ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj" />
-		<ProjectReference Include="..\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj" />
-	</ItemGroup>
+    <OutputType>Exe</OutputType>
+    <Description>Entrypoint for Aspect Injector.</Description>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TrimMode>link</TrimMode>
+    <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
+    <DebuggerSupport>false</DebuggerSupport>
+    <EventSourceSupport>false</EventSourceSupport>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <UseNativeHttpHandler>true</UseNativeHttpHandler>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
+    <TrimmerDefaultAction>link</TrimmerDefaultAction>
+    <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
+    <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" />
+    <ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj" />
+    <ProjectReference Include="..\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj" />
+  </ItemGroup>
 </Project>

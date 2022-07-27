@@ -58,7 +58,7 @@ namespace AspectInjector
             Console.WriteLine($"Process id is '{Process.GetCurrentProcess().Id}'");
             Debugger.Launch();
             var c = 0;
-            while (!Debugger.IsAttached && c < 10)
+            while (!Debugger.IsAttached && c < 20)
             {
                 Thread.Sleep(1000);
                 Console.Write(".");

@@ -31,9 +31,13 @@
     <Version>0.0.0</Version>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PublishForRuntimes>win-x64;win-arm64;linux-x64;linux-musl-x64;linux-arm64;linux-musl-arm64;osx-x64;osx-arm64</PublishForRuntimes>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="/" />
-    <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath="/"/>
+    <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
   <ItemGroup>
@@ -58,33 +62,16 @@
       <BuildCommandArgs> --self-contained -c $(Configuration) -p:Version=&quot;$(Version)&quot; -p:InformationalVersion=&quot;$(Version):$(CommitSHA)&quot; ../src/AspectInjector/</BuildCommandArgs>
     </PropertyGroup>
 
-    <Exec Command="dotnet publish -r win-x64 -o $(PublishMain)win-x64/ $(BuildCommandArgs)" />
-    <Exec Command="dotnet publish -r linux-x64 -o $(PublishMain)linux-x64/ $(BuildCommandArgs)" />
-    <Exec Command="dotnet publish -r osx-x64 -o $(PublishMain)osx-x64/ $(BuildCommandArgs)" />
-    <Exec Command="dotnet publish -r linux-musl-x64 -o $(PublishMain)linux-musl-x64/ $(BuildCommandArgs)" />
-    <Exec Command="dotnet publish -r linux-arm64 -o $(PublishMain)linux-arm64/ $(BuildCommandArgs)" />
-    <Exec Command="dotnet publish -r linux-musl-arm64 -o $(PublishMain)linux-musl-arm64/ $(BuildCommandArgs)" />
+    <ItemGroup>
+      <PublishRids Include="$(PublishForRuntimes)" />
+    </ItemGroup>
 
+    <Exec Command="dotnet publish -r %(PublishRids.Identity) -o $(PublishMain)%(PublishRids.Identity)/ $(BuildCommandArgs)" />
     <Exec Command="dotnet publish ../src/AspectInjector.Analyzer/ -o $(PublishAnalyzer) -c $(Configuration) --no-build" />
 
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(PublishMain)win-x64/AspectInjector.exe">
-        <PackagePath>build/_bin/win-x64</PackagePath>
-      </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(PublishMain)linux-x64/AspectInjector">
-        <PackagePath>build/_bin/linux-x64</PackagePath>
-      </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(PublishMain)linux-musl-x64/AspectInjector">
-        <PackagePath>build/_bin/linux-musl-x64</PackagePath>
-      </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(PublishMain)linux-musl-arm64/AspectInjector">
-        <PackagePath>build/_bin/linux-musl-arm64</PackagePath>
-      </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(PublishMain)linux-arm64/AspectInjector">
-        <PackagePath>build/_bin/linux-arm64</PackagePath>
-      </TfmSpecificPackageFile>
-      <TfmSpecificPackageFile Include="$(PublishMain)osx-x64/AspectInjector">
-        <PackagePath>build/_bin/osx-x64</PackagePath>
+      <TfmSpecificPackageFile Include="$(PublishMain)/**/*.*">
+        <PackagePath>build/_bin</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
 

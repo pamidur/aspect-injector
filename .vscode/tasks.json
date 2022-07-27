@@ -1,46 +1,49 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "build_injector",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/src/AspectInjector/AspectInjector.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build_analyzer",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",                
-                "${workspaceFolder}/analyzers/AspectInjector.Analyzer/AspectInjector.Analyzer.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build_runtime",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "--no-incremental",
-                "-c", "Debug",
-                "${workspaceFolder}/tests/AspectInjector.Tests.Runtime/AspectInjector.Tests.Runtime.csproj",
-                "/property:GenerateFullPaths=true",
-                //"/p:_ASI_Debug=true",  
-                "/p:_ASI_Verbose=true", 
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile",
-            "dependsOn":["build_injector"]
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build_injector",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/AspectInjector/AspectInjector.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build_analyzer",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/analyzers/AspectInjector.Analyzer/AspectInjector.Analyzer.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build_runtime",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "--no-incremental",
+        "-c",
+        "DebugTests",
+        "-f",
+        "net6.0",
+        "${workspaceFolder}/tests/AspectInjector.Tests.Runtime/AspectInjector.Tests.Runtime.csproj",
+        "/property:GenerateFullPaths=true",
+        "/p:AspectInjector_Debug=true",
+        "/p:_ASI_Verbose=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "dependsOn": ["build_injector"]
+    }
+  ]
 }
