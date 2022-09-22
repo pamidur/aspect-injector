@@ -23,6 +23,8 @@ _______________________________
 ### Project Status
 [![Nuget](https://img.shields.io/nuget/v/AspectInjector?label=stable&logo=nuget&style=flat-square)](https://www.nuget.org/packages/AspectInjector)
 [![Nuget Pre](https://img.shields.io/nuget/vpre/AspectInjector?label=latest&logo=nuget&style=flat-square)](https://www.nuget.org/packages/AspectInjector)
+[![Nuget](https://img.shields.io/nuget/dt/AspectInjector?style=flat-square)](https://www.nuget.org/packages/AspectInjector)
+
 ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/pamidur/aspect-injector?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/pamidur/aspect-injector?style=flat-square)
 
