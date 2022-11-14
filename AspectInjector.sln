@@ -53,9 +53,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectInjector.Analyzer.Vsi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Rules", "src\AspectInjector.Rules\AspectInjector.Rules.csproj", "{20ED44A4-9D35-41F2-A317-C1EB9923379E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentIL", "external\FluentIL\src\FluentIL\FluentIL.csproj", "{E8F7FB9B-4FF0-4195-B064-D41A96E41918}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentIL", "src\FluentIL\FluentIL.csproj", "{E8F7FB9B-4FF0-4195-B064-D41A96E41918}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentIL.Common", "external\FluentIL\src\FluentIL.Common\FluentIL.Common.csproj", "{7BD22418-F4A9-422B-9FDE-A20708BA0648}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentIL.Common", "src\FluentIL.Common\FluentIL.Common.csproj", "{7BD22418-F4A9-422B-9FDE-A20708BA0648}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectInjector.Tests.Integrity", "tests\AspectInjector.Tests.Integrity\AspectInjector.Tests.Integrity.csproj", "{230C6FAF-11A1-4318-A482-69C7252652B1}"
 EndProject

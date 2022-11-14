@@ -60,7 +60,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\external\FluentIL\src\FluentIL.Common\FluentIL.Common.csproj">
+    <ProjectReference Include="..\FluentIL.Common\FluentIL.Common.csproj">
       <Project>{7bd22418-f4a9-422b-9fde-a20708ba0648}</Project>
       <Name>FluentIL.Common</Name>
     </ProjectReference>

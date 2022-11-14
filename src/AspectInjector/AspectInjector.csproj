@@ -20,7 +20,6 @@
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
     <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
-    <TrimmerDefaultAction>link</TrimmerDefaultAction>
     <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
   <ItemGroup>
