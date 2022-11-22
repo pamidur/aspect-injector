@@ -1,4 +1,4 @@
-﻿using Aspects.Cache;
+using Aspects.Cache;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -12,24 +12,22 @@ namespace Aspests.Tests
         class TestClass
         {
             [MemoryCache(3, PerInstanceCache = false)]
-            public int? Nullable(bool ok)
-            {
-                if (ok) return 1;
-                return null;
-            }
-
-            [MemoryCache(3, PerInstanceCache = true)]
-            public int? NullablePerInstance(bool ok)
-            {
-                if (ok) return 1;
-                return null;
-            }
+            public int? NullableArg(int? ok) => ok;
 
             [MemoryCache(3, PerInstanceCache = false)]
-            public void Do(ref int a)
-            {
-                a++;
-            }
+            public int? NullableArg(bool? ok) => (ok ?? false) ? 1 : null;
+
+            [MemoryCache(3, PerInstanceCache = true)]
+            public int? NullableArgPerInstance(bool? ok) => (ok ?? false) ? 1 : null;
+
+            [MemoryCache(3, PerInstanceCache = false)]
+            public int? Nullable(bool ok) => ok ? 1 : null;
+
+            [MemoryCache(3, PerInstanceCache = true)]
+            public int? NullablePerInstance(bool ok) => ok ? 1 : null;
+
+            [MemoryCache(3, PerInstanceCache = false)]
+            public void Do(ref int a) => a++;
 
             [MemoryCache(3, PerInstanceCache = false)]
             public Task DoTask(ref int a)
@@ -39,40 +37,28 @@ namespace Aspests.Tests
             }
 
             [MemoryCache(3, PerInstanceCache = false)]
-            public long Calculate(int a, string b)
-            {
-                return a + b.GetHashCode() + DateTime.Now.Ticks;
-            }
+            public long Calculate(int a, string b) =>
+                a + b.GetHashCode() + DateTime.Now.Ticks;
 
             [MemoryCache(3, PerInstanceCache = true)]
-            public long CalculatePerInstance(int a, string b)
-            {
-                return a + b.GetHashCode() + DateTime.Now.Ticks;
-            }
+            public long CalculatePerInstance(int a, string b) =>
+                a + b.GetHashCode() + DateTime.Now.Ticks;
 
             [MemoryCache(3, PerInstanceCache = false)]
-            public long Calculate(int a, int b)
-            {
-                return a + b + DateTime.Now.Ticks;
-            }
+            public long Calculate(int a, int b) =>
+                a + b + DateTime.Now.Ticks;
 
             [MemoryCache(3, PerInstanceCache = false)]
-            public Task<long> CalculateTask(int a, string b)
-            {
-                return Task.FromResult(a + b.GetHashCode() + DateTime.Now.Ticks);
-            }
+            public Task<long> CalculateTask(int a, string b) =>
+                Task.FromResult(a + b.GetHashCode() + DateTime.Now.Ticks);
 
             [MemoryCache(3, PerInstanceCache = false)]
-            public async Task<long> CalculateTaskAsync(int a, string b)
-            {
-                return await Task.FromResult(a + b.GetHashCode() + DateTime.Now.Ticks);
-            }
+            public async Task<long> CalculateTaskAsync(int a, string b) =>
+                await Task.FromResult(a + b.GetHashCode() + DateTime.Now.Ticks);
 
             [MemoryCache(3, PerInstanceCache = false)]
-            public static long CalculateStatic(int a, string b)
-            {
-                return a + b.GetHashCode() + DateTime.Now.Ticks;
-            }
+            public static long CalculateStatic(int a, string b) =>
+                a + b.GetHashCode() + DateTime.Now.Ticks;
         }
 
         [Fact]
@@ -179,10 +165,40 @@ namespace Aspests.Tests
         }
 
         [Fact]
+        public void Cache_NullableArg_Method()
+        {
+            var target = new TestClass();
+
+            var i = target.NullableArg(true);
+            Assert.Equal(1, i);
+            i = target.NullableArg(false);
+            Assert.Null(i);
+            i = target.NullableArg((bool?)null);
+            Assert.Null(i);
+
+            i = target.NullableArg((int?)null);
+            Assert.Null(i);
+            i = target.NullableArg((int?)1);
+            Assert.Equal(1, i);
+
+            i = target.NullableArg((int?)-1);
+            Assert.Equal(-1, i);
+            i = target.NullableArg((int?)null);
+            Assert.Null(i);
+
+            i = target.NullableArgPerInstance(true);
+            Assert.Equal(1, i);
+            i = target.NullableArg(false);
+            Assert.Null(i);
+            i = target.NullableArgPerInstance(null);
+            Assert.Null(i);
+        }
+
+        [Fact]
         public void Cache_Nullable_Method()
         {
             var target = new TestClass();
-            
+
             var i = target.Nullable(true);
             Assert.Equal(1, i);
 
@@ -191,7 +207,7 @@ namespace Aspests.Tests
 
             i = target.NullablePerInstance(true);
             Assert.Equal(1, i);
-            
+
             i = target.NullablePerInstance(false);
             Assert.Null(i);
         }

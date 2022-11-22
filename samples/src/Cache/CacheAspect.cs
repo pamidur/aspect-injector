@@ -1,4 +1,4 @@
-﻿using AspectInjector.Broker;
+using AspectInjector.Broker;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,6 +57,6 @@ namespace Aspects.Cache
         }
 
         protected string GetKey(MethodInfo method, IEnumerable<object> args) =>
-            $"{method.GetHashCode()}-{string.Join("-", args.Select(a => a.GetHashCode()))}";
+            $"{method.GetHashCode()}_{string.Join("_", args.Select(a => a == null ? "null" : a.GetHashCode().ToString()))}";
     }
 }
