@@ -28,8 +28,8 @@ _______________________________
 ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/pamidur/aspect-injector?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/pamidur/aspect-injector?style=flat-square)
 
-[![Application Status](https://img.shields.io/github/workflow/status/pamidur/aspect-injector/Application?label=app%20build&style=flat-square)](https://github.com/pamidur/aspect-injector/commits/master)
-[![Samples Status](https://img.shields.io/github/workflow/status/pamidur/aspect-injector/Samples?label=samples%20build&style=flat-square)](https://github.com/pamidur/aspect-injector/commits/master)
+[![Application Status](https://img.shields.io/github/actions/workflow/status/pamidur/aspect-injector/application.yml?label=app%20build&style=flat-square)](https://github.com/pamidur/aspect-injector/commits/master)
+[![Samples Status](https://img.shields.io/github/actions/workflow/status/pamidur/aspect-injector/samples.yml?label=samples%20build&style=flat-square)](https://github.com/pamidur/aspect-injector/commits/master)
 
 ### Download
 ```bash
