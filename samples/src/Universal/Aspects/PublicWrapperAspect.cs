@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using AspectInjector.Broker;
 
@@ -9,7 +9,7 @@ namespace Aspects.Universal.Aspects
     {
         [Advice(Kind.Around, Targets = Target.Public | Target.Any)]
         public object Handle(
-            [Argument(Source.Instance)] object instance,
+            [Argument(Source.Instance)] object? instance,
             [Argument(Source.Type)] Type type,
             [Argument(Source.Metadata)] MethodBase method,
             [Argument(Source.Target)] Func<object[], object> target,

@@ -1,13 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
 		<TargetFramework>netstandard2.0</TargetFramework>
     <PackageTags>aspect proxy wrapper universal</PackageTags>
     <Description>
-      This package provides simple universal method wrrapper aspect.
+      This package provides simple universal method wrapper aspect.
     </Description>
     <PackageProjectUrl>https://github.com/pamidur/aspect-injector/tree/master/samples/src/Universal</PackageProjectUrl>
+    <LangVersion>10</LangVersion>
+    <Nullable>enable</Nullable>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="AspectInjector" Version="2.8.1" />
+	</ItemGroup>
 
 </Project>

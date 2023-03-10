@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,15 +19,15 @@ namespace Aspects.Universal.Aspects
         private static readonly ConcurrentDictionary<(MethodBase, Type), Lazy<Handler>> _delegateCache = new ConcurrentDictionary<(MethodBase, Type), Lazy<Handler>>();
 
         private static readonly MethodInfo _asyncGenericHandler =
-            typeof(BaseUniversalWrapperAttribute).GetMethod(nameof(BaseUniversalWrapperAttribute.WrapAsync), BindingFlags.NonPublic | BindingFlags.Instance);
+            typeof(BaseUniversalWrapperAttribute).GetMethod(nameof(BaseUniversalWrapperAttribute.WrapAsync), BindingFlags.NonPublic | BindingFlags.Instance)!;
 
         private static readonly MethodInfo _syncGenericHandler =
-            typeof(BaseUniversalWrapperAttribute).GetMethod(nameof(BaseUniversalWrapperAttribute.WrapSync), BindingFlags.NonPublic | BindingFlags.Instance);
+            typeof(BaseUniversalWrapperAttribute).GetMethod(nameof(BaseUniversalWrapperAttribute.WrapSync), BindingFlags.NonPublic | BindingFlags.Instance)!;
 
-        private static readonly Type _voidTaskResult = Type.GetType("System.Threading.Tasks.VoidTaskResult");
+        private static readonly Type _voidTaskResult = Type.GetType("System.Threading.Tasks.VoidTaskResult")!;
 
         protected object BaseHandle(
-            object instance,
+            object? instance,
             Type type,
             MethodBase method,
             Func<object[], object> target,
@@ -53,7 +53,7 @@ namespace Aspects.Universal.Aspects
             return handler(target, args, eventArgs);
         }
 
-        private Handler CreateMethodHandler(Type returnType, IReadOnlyList<BaseUniversalWrapperAttribute> wrappers)
+        private static Handler CreateMethodHandler(Type returnType, IReadOnlyList<BaseUniversalWrapperAttribute> wrappers)
         {
             var targetParam = Expression.Parameter(typeof(Func<object[], object>), "orig");
             var eventArgsParam = Expression.Parameter(typeof(AspectEventArgs), "event");
@@ -75,8 +75,8 @@ namespace Aspects.Universal.Aspects
                 wrapperMethod = _syncGenericHandler.MakeGenericMethod(new[] { returnType });
             }
 
-            var converArgs = Expression.Parameter(typeof(object[]), "args");
-            var next = Expression.Lambda(Expression.Convert(Expression.Invoke(targetParam, converArgs), returnType), converArgs);
+            var convertArgs = Expression.Parameter(typeof(object[]), "args");
+            var next = Expression.Lambda(Expression.Convert(Expression.Invoke(targetParam, convertArgs), returnType), convertArgs);
 
             foreach (var wrapper in wrappers)
             {
@@ -84,15 +84,15 @@ namespace Aspects.Universal.Aspects
                 next = Expression.Lambda(Expression.Call(Expression.Constant(wrapper), wrapperMethod, next, argsParam, eventArgsParam), argsParam);
             }
 
-            var orig_args = Expression.Parameter(typeof(object[]), "orig_args");
-            var handler = Expression.Lambda<Handler>(Expression.Convert(Expression.Invoke(next, orig_args), typeof(object)), targetParam, orig_args, eventArgsParam);
+            var originalArgs = Expression.Parameter(typeof(object[]), "orig_args");
+            var handler = Expression.Lambda<Handler>(Expression.Convert(Expression.Invoke(next, originalArgs), typeof(object)), targetParam, originalArgs, eventArgsParam);
 
             var handlerCompiled = handler.Compile();
 
             return handlerCompiled;
         }
 
-        private Handler GetMethodHandler(MethodBase method, Type returnType, IReadOnlyList<BaseUniversalWrapperAttribute> wrappers)
+        private static Handler GetMethodHandler(MethodBase method, Type returnType, IReadOnlyList<BaseUniversalWrapperAttribute> wrappers)
         {
             var lazyHandler = _delegateCache.GetOrAdd((method, returnType), _ => new Lazy<Handler>(() => CreateMethodHandler(returnType, wrappers)));
             return lazyHandler.Value;
