@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Reflection;
 
@@ -16,7 +16,7 @@ namespace AspectInjector.Broker
         Instance = 1,
 
         /// <summary>
-        /// Target's owner. Usualy class or struct type.
+        /// Target's owner. Usually class or struct type.
         /// Should be of type <see cref="System.Type" />.
         /// </summary>
         Type = 2,
@@ -68,7 +68,7 @@ namespace AspectInjector.Broker
         ReturnType = 8,
 
         /// <summary>
-        /// Set of injections that trigger this advice./>.
+        /// Set of injections that trigger this advice.
         /// Should be of type <see cref="Attribute" />[].
         /// </summary>
         [Obsolete("Use Source.Triggers instead")]   
@@ -76,7 +76,7 @@ namespace AspectInjector.Broker
         Injections = 9,
 
         /// <summary>
-        /// Set of injections that trigger this advice./>.
+        /// Set of injections that trigger this advice.
         /// Should be of type <see cref="Attribute" />[].
         /// </summary>
         Triggers = 9
