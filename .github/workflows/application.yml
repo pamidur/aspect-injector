@@ -42,7 +42,7 @@ jobs:
         CODESIGN_CERT: ${{ secrets.CODESIGN_PEM }}
       working-directory: nuget
       run: |
-        echo $CODESIGN_CERT > cert.pem
+        echo "$CODESIGN_CERT" > cert.pem
         chmod +x ./rcodesign
         dotnet pack -c $app_conf --no-build -o `pwd`/artifacts -p:Version=$app_version -p:CommitSHA=$GITHUB_SHA -p:OSXCertPath=cert.pem
         rm cert.pem
