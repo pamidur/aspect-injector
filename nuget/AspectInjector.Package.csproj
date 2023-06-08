@@ -47,24 +47,27 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddMainFilesToPackage</TargetsForTfmSpecificContentInPackage>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PublishBinaries;SignOSXBinaries</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
-  <Target Name="AddMainFilesToPackage">
+
+  <Target Name="ConfigurePublish">
+    <ItemGroup>
+      <PublishRids Include="$(PublishForRuntimes)" />
+    </ItemGroup> 
 
     <PropertyGroup>
       <PublishMain>$(TargetDir)../publish_main/</PublishMain>
       <PublishAnalyzer>$(TargetDir)../publish_analyzer/</PublishAnalyzer>
       <PublishBroker>$(MSBuildThisFileDirectory)../src/AspectInjector.Broker/bin/$(Configuration)/$(TargetFramework)</PublishBroker>
     </PropertyGroup>
+  </Target>
+
+  <Target Name="PublishBinaries" DependsOnTargets="ConfigurePublish">    
 
     <PropertyGroup>
       <BuildCommandArgs> --self-contained -c $(Configuration) -p:Version=&quot;$(Version)&quot; -p:InformationalVersion=&quot;$(Version):$(CommitSHA)&quot; ../src/AspectInjector/</BuildCommandArgs>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <PublishRids Include="$(PublishForRuntimes)" />
-    </ItemGroup>
+    </PropertyGroup> 
 
     <Exec Command="dotnet publish -r %(PublishRids.Identity) -o $(PublishMain)%(PublishRids.Identity)/ $(BuildCommandArgs)" />
     <Exec Command="dotnet publish ../src/AspectInjector.Analyzer/ -o $(PublishAnalyzer) -c $(Configuration) --no-build" />
@@ -92,5 +95,14 @@
         <PackagePath>analyzers/dotnet/cs</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
+  </Target>
+
+  <Target Name="SignOSXBinaries" DependsOnTargets="ConfigurePublish" Condition=" '$(Configuration)' == 'Release' AND '$(OSXCertPath)' != '' ">    
+
+    <ItemGroup>
+      <PublishOSXRids Include="@(PublishRids)" Condition="$([System.String]::Copy(%(Identity)).StartsWith('osx-'))"/>
+    </ItemGroup>
+
+    <Exec Command="rcodesign sign --pem-source $(OSXCertPath) $(PublishMain)%(PublishOSXRids.Identity)/AspectInjector" />
   </Target>
 </Project>
