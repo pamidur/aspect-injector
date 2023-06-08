@@ -103,6 +103,6 @@
       <PublishOSXRids Include="@(PublishRids)" Condition="$([System.String]::Copy(%(Identity)).StartsWith('osx-'))"/>
     </ItemGroup>
 
-    <Exec Command="rcodesign sign --pem-source $(OSXCertPath) $(PublishMain)%(PublishOSXRids.Identity)/AspectInjector" />
+    <Exec Command="$(MSBuildThisFileDirectory)/rcodesign sign --pem-source $(OSXCertPath) $(PublishMain)%(PublishOSXRids.Identity)/AspectInjector" />
   </Target>
 </Project>
