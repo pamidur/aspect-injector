@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -18,7 +18,7 @@ namespace AspectInjector
 
             var optimize = false;
             var verbose = false;
-            List<string> references = new List<string>();
+            List<string> references = new();
 
             for (int i = 0; i < args.Length; i++)
             {

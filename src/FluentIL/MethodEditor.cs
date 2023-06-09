@@ -1,4 +1,4 @@
-﻿using FluentIL.Extensions;
+using FluentIL.Extensions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
@@ -64,7 +64,7 @@ namespace FluentIL
                 .Here(action);
         }
 
-        public static void Mark(this MethodDefinition method, TypeReference attribute)
+        public static void Mark(this MethodDefinition method, TypeReference attribute, params CustomAttributeArgument[] args)
         {
             if (method.CustomAttributes.Any(ca => ca.AttributeType.FullName == attribute.FullName))
                 return;
@@ -72,7 +72,12 @@ namespace FluentIL
             var constructor = method.Module.ImportReference(attribute).Resolve()
                 .Methods.First(m => m.IsConstructor && !m.IsStatic);
 
-            method.CustomAttributes.Add(new CustomAttribute(method.Module.ImportReference(constructor)));
+            var attr = new CustomAttribute(method.Module.ImportReference(constructor));
+
+            foreach (var arg in args)
+                attr.ConstructorArguments.Add(arg);
+
+            method.CustomAttributes.Add(attr);
         }
 
         public static Instruction GetCodeStart(this MethodBody body)

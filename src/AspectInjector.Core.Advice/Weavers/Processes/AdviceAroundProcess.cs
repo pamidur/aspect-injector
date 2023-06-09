@@ -1,4 +1,4 @@
-﻿using AspectInjector.Core.Advice.Effects;
+using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using FluentIL;
@@ -82,7 +82,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
         {
             var unwrapper = GetOrCreateUnwrapper();
 
-            var instructions = prev.Body.Instructions.Where(i => i.Operand is MethodReference && ((MethodReference)i.Operand).Resolve() == unwrapper).ToList();
+            var instructions = prev.Body.Instructions.Where(i => i.Operand is MethodReference reference && reference.Resolve() == unwrapper).ToList();
 
             var nextRef = CreateRef(next, prev);
 
@@ -240,6 +240,8 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
             var fsp = from.DebugInformation.SequencePoints;
             var tsp = to.DebugInformation.SequencePoints;
 
+            to.HasThis = from.HasThis;
+
             var codeStart = from.Body.GetUserCodeStart();
             var init = codeStart == null ? 0 : frb.IndexOf(codeStart);
 
@@ -261,10 +263,22 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                 }
             }
 
-            to.DebugInformation.Scope = new ScopeDebugInformation(to.Body.Instructions.First(), to.Body.Instructions.Last());
-
             if (from.DebugInformation.Scope != null)
-                to.DebugInformation.Scope.Import = from.DebugInformation.Scope.Import;
+            {
+                to.DebugInformation.Scope = from.DebugInformation.Scope;
+                to.DebugInformation.Scope.Start = new InstructionOffset(to.Body.Instructions[0].Offset);
+                to.DebugInformation.Scope.End = new InstructionOffset(to.Body.Instructions[to.Body.Instructions.Count - 1].Offset);
+                from.DebugInformation.Scope = null;
+            }
+
+
+            //to.DebugInformation.StateMachineKickOffMethod = from;
+
+            if (from.DebugInformation.StateMachineKickOffMethod != null)
+            {
+                to.DebugInformation.StateMachineKickOffMethod = from.DebugInformation.StateMachineKickOffMethod;
+                from.DebugInformation.StateMachineKickOffMethod = null;
+            }
 
             if (from.DebugInformation.HasCustomDebugInformations)
                 foreach (var cdi in from.DebugInformation.CustomDebugInformations.ToArray())
@@ -272,6 +286,10 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
                     from.DebugInformation.CustomDebugInformations.Remove(cdi);
                     to.DebugInformation.CustomDebugInformations.Add(cdi);
                 }
+
+            //var cstm = new StateMachineScopeDebugInformation();
+            //cstm.Scopes.Add(new StateMachineScope(to.Body.Instructions[0], to.Body.Instructions[to.Body.Instructions.Count - 1]));
+            //to.CustomDebugInformations.Add(cstm);
 
             var to_vars = to.Body.Variables;
             foreach (var var in from.Body.Variables)
