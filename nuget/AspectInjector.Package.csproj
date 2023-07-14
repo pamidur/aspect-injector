@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>AspectInjector</PackageId>
@@ -100,7 +100,7 @@
   <Target Name="SignOSXBinaries" DependsOnTargets="ConfigurePublish" Condition=" '$(Configuration)' == 'Release' AND '$(OSXCertPath)' != '' ">    
 
     <ItemGroup>
-      <PublishOSXRids Include="@(PublishRids)" Condition="$([System.String]::Copy(%(Identity)).StartsWith('osx-'))"/>
+      <PublishOSXRids Include="@(PublishRids)" Condition="$([System.String]::Copy(%(Identity)).StartsWith('osx-arm'))"/>
     </ItemGroup>
 
     <Exec Command="$(MSBuildThisFileDirectory)/rcodesign sign --pem-source $(OSXCertPath) $(PublishMain)%(PublishOSXRids.Identity)/AspectInjector" />

@@ -1,4 +1,4 @@
-﻿using AspectInjector.Core.Advice.Effects;
+using AspectInjector.Core.Advice.Effects;
 using AspectInjector.Core.Extensions;
 using AspectInjector.Core.Models;
 using FluentIL;
@@ -16,6 +16,7 @@ namespace AspectInjector.Core.Advice.Weavers.Processes
 
         public override void Execute()
         {
+            _method.EnsureAspectInitialized(_aspect);
             _method.Body.OnAspectsInitialized(
                 (in Cut e) => e
                 .LoadAspect(_aspect)

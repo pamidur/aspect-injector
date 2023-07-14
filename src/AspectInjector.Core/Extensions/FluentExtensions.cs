@@ -1,4 +1,4 @@
-﻿using AspectInjector.Broker;
+using AspectInjector.Broker;
 using AspectInjector.Core.Models;
 using FluentIL;
 using FluentIL.Extensions;
@@ -77,6 +77,14 @@ namespace AspectInjector.Core.Extensions
                 call = call.Cast(call.TypeSystem.Object, aspect.Host);
 
             return call;
+        }
+
+        public static void EnsureAspectInitialized(this MethodDefinition target, AspectDefinition aspect)
+        {
+            if (target.IsStatic || aspect.Scope == Scope.Global)
+                _ = GetGlobalAspectField(aspect);
+            else
+                _ = GetInstanceAspectField(aspect, target.DeclaringType, new Cut(target.Body, target.Body.Instructions[0]));
         }
 
         private static FieldReference GetInstanceAspectField(AspectDefinition aspect, TypeDefinition source, in Cut cut)
