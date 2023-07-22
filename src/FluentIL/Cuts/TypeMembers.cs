@@ -1,6 +1,6 @@
-﻿using FluentIL.Extensions;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+﻿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using FluentIL.Extensions;
 using System;
 
 namespace FluentIL
@@ -17,59 +17,58 @@ namespace FluentIL
         {
             if (cut.Method.HasThis) return cut.Write(OpCodes.Ldarg_0);
             else throw new InvalidOperationException("Attempt to load 'this' on static method.");
-        }       
-
-        public static Cut Load(this in Cut cut, VariableDefinition variable) => cut
-            .Write(OpCodes.Ldloc, variable);
-
-        public static Cut Load(this in Cut cut, ParameterReference par) => cut
-            .Write(OpCodes.Ldarg, par.Resolve());
-
-        public static Cut Load(this in Cut cut, FieldReference field)
-        {
-            if(!field.IsCallCompatible())
-                throw new ArgumentException($"Uninitialized generic call reference: {field}");
-            
-            var fieldDef = field.Resolve();
-
-            return cut.Write(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, field);
         }
 
-        public static Cut LoadRef(this in Cut cut, VariableDefinition variable) => cut
-            .Write(OpCodes.Ldloca, variable);
+        public static Cut Load(this in Cut cut, Local variable) => cut
+            .Write(OpCodes.Ldloc, variable);
 
-        public static Cut LoadRef(this in Cut cut, ParameterReference par) => cut
-            .Write(OpCodes.Ldarga, par.Resolve());
+        public static Cut Load(this in Cut cut, Parameter par) => cut
+            .Write(OpCodes.Ldarg, par);
 
-        public static Cut LoadRef(this in Cut cut, FieldReference field)
+        public static Cut Load(this in Cut cut, IField field)
         {
             if (!field.IsCallCompatible())
                 throw new ArgumentException($"Uninitialized generic call reference: {field}");
 
-            var fieldDef = field.Resolve();
+            var fieldDef = field.ResolveFieldDef();
+            return cut.Write(fieldDef.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, field);
+        }
+
+        public static Cut LoadRef(this in Cut cut, Local variable) => cut
+            .Write(Instruction.Create(OpCodes.Ldloca, variable));
+
+        public static Cut LoadRef(this in Cut cut, Parameter par) => cut
+            .Write(Instruction.Create(OpCodes.Ldarga, par));
+
+        public static Cut LoadRef(this in Cut cut, IField field)
+        {
+            if (!field.IsCallCompatible())
+                throw new ArgumentException($"Uninitialized generic call reference: {field}");
+
+            var fieldDef = field.ResolveFieldDef();
 
             return cut.Write(fieldDef.IsStatic ? OpCodes.Ldsflda : OpCodes.Ldflda, field);
         }
 
-        public static Cut Store(this in Cut cut, FieldReference field, PointCut value = null)
+        public static Cut Store(this in Cut cut, IField field, PointCut value = null)
         {
             if (!field.IsCallCompatible())
                 throw new ArgumentException($"Uninitialized generic call reference: {field}");
 
-            var fieldDef = field.Resolve();
+            var fieldDef = field.ResolveFieldDef();
 
             return cut
                 .Here(value)
                 .Write(fieldDef.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, field);
         }
 
-        public static Cut Store(this in Cut cut, VariableDefinition variable, PointCut value = null) => cut
+        public static Cut Store(this in Cut cut, Local variable, PointCut value = null) => cut
            .Here(value)
            .Write(OpCodes.Stloc, variable);
 
-        public static Cut Store(this in Cut cut, ParameterReference par, PointCut value = null)
+        public static Cut Store(this in Cut cut, Parameter par, PointCut value = null)
         {
-            if (par.ParameterType.IsByReference)
+            if (par.ParamDef.IsIn | par.ParamDef.IsOut)
             {
                 return cut
                     .Load(par)
@@ -79,8 +78,8 @@ namespace FluentIL
             {
                 return cut
                     .Here(value)
-                    .Write(OpCodes.Starg, par.Resolve());
+                    .Write(OpCodes.Starg, par);
             }
-        }        
+        }
     }
 }

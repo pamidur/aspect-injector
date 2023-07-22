@@ -1,8 +1,9 @@
-﻿using FluentIL.Extensions;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+﻿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using FluentIL.Extensions;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace FluentIL
 {
@@ -17,14 +18,14 @@ namespace FluentIL
         public static Cut Dup(this in Cut pc) => pc
             .Write(OpCodes.Dup);
 
-        public static Cut Delegate(this in Cut cut, MethodReference method) => cut
+        public static Cut Delegate(this in Cut cut, IMethod method) => cut
             .Write(OpCodes.Ldftn, method);
 
-        public static Cut TypeOf(this in Cut cut, TypeReference type) => cut
+        public static Cut TypeOf(this in Cut cut, ITypeDefOrRef type) => cut
             .Write(OpCodes.Ldtoken, type)
             .Write(OpCodes.Call, GetTypeFromHandleMethod_Ref(cut));
 
-        public static Cut MethodOf(this in Cut cut, MethodReference method) => cut
+        public static Cut MethodOf(this in Cut cut, IMethod method) => cut
             .Write(OpCodes.Ldtoken, method)
             .Write(OpCodes.Ldtoken, method.DeclaringType)
             .Write(OpCodes.Call, GetMethodFromHandleMethod_Ref(cut));
@@ -36,60 +37,60 @@ namespace FluentIL
 
             var valueType = value.GetType();
 
-            if (value is CustomAttributeArgument argument)
+            if (value is CAArgument argument)
                 return AttributeArgument(pc, argument);
-            else if (value is TypeReference tr)
+            else if (value is TypeRef tr)
                 return TypeOf(pc, tr);
             else if (valueType.IsValueType)
-                return Primitive(pc, value);
+                return Primitive(pc, value, value.GetType());
             else if (value is string str)
                 return pc.Write(OpCodes.Ldstr, str);
             else
                 throw new NotSupportedException(valueType.ToString());
         }
 
-        public static Cut Primitive(this in Cut pc, object value)
+        public static Cut Primitive<T>(this in Cut pc, T value) where T : struct
         {
-            var valueType = value.GetType();
-
-            switch (value)
-            {
-#pragma warning disable S2583 // Conditionally executed code should be reachable
-                case bool bo: return pc.Write(bo ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
-#pragma warning restore S2583 // Conditionally executed code should be reachable
-                case long l: return pc.Write(OpCodes.Ldc_I8, l);
-                case ulong ul: return pc.Write(OpCodes.Ldc_I8, unchecked((long)ul));
-                case double d: return pc.Write(OpCodes.Ldc_R8, d);
-                case int i: return pc.Write(OpCodes.Ldc_I4, i);
-                case uint ui: return pc.Write(OpCodes.Ldc_I4, unchecked((int)ui));
-                case float fl: return pc.Write(OpCodes.Ldc_R4, fl);
-                case sbyte sb: return pc.Write(OpCodes.Ldc_I4, (int)sb);
-                case byte b: return pc.Write(OpCodes.Ldc_I4, (int)b);
-                case ushort us: return pc.Write(OpCodes.Ldc_I4, us);
-                case short s: return pc.Write(OpCodes.Ldc_I4, s);
-                case char c: return pc.Write(OpCodes.Ldc_I4, c);
-
-                default: throw new NotSupportedException(valueType.ToString());
-            }
+            return pc.Primitive(value, typeof(T));
         }
 
-        public static Cut Cast(this in Cut cut, TypeReference typeOnStack, TypeReference expectedType)
+        private static Cut Primitive(this in Cut pc, object value, Type valueType)
+        {
+            return value switch
+            {
+                bool bo => pc.Write(bo ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0),
+                long l => pc.Write(Instruction.Create(OpCodes.Ldc_I8, l)),
+                ulong ul => pc.Write(Instruction.Create(OpCodes.Ldc_I8, unchecked((long)ul))),
+                double d => pc.Write(Instruction.Create(OpCodes.Ldc_R8, d)),
+                int i => pc.Write(Instruction.CreateLdcI4(i)),
+                uint ui => pc.Write(Instruction.CreateLdcI4(unchecked((int)ui))),
+                float fl => pc.Write(Instruction.Create(OpCodes.Ldc_R4, fl)),
+                sbyte sb => pc.Write(Instruction.CreateLdcI4(sb)),
+                byte b => pc.Write(Instruction.CreateLdcI4(b)),
+                ushort us => pc.Write(Instruction.CreateLdcI4(us)),
+                short s => pc.Write(Instruction.CreateLdcI4(s)),
+                char c => pc.Write(Instruction.CreateLdcI4(c)),
+                _ => throw new NotSupportedException(valueType.ToString()),
+            };
+        }
+
+        public static Cut Cast(this in Cut cut, TypeSig typeOnStack, TypeSig expectedType)
         {
             var result = cut;
 
             if (typeOnStack.Match(expectedType))
                 return result;
 
-            if (expectedType.IsByReference)
+            if (expectedType.IsByRef)
             {
-                var elementType = ((ByReferenceType)expectedType).ElementType;
+                var elementType = expectedType.Next;
                 result = result.Cast(typeOnStack, elementType);
                 return StoreByReference(result, elementType);
             }
 
-            if (typeOnStack.IsByReference)
+            if (typeOnStack.IsByRef)
             {
-                typeOnStack = ((ByReferenceType)typeOnStack).ElementType;
+                typeOnStack = typeOnStack.Next;
                 result = LoadByReference(result, typeOnStack);
             }
 
@@ -114,69 +115,65 @@ namespace FluentIL
             throw new InvalidCastException($"Cannot cast '{typeOnStack}' to '{expectedType}'");
         }
 
-        private static Cut StoreByReference(in Cut pc, TypeReference elemType)
+        private static Cut StoreByReference(in Cut pc, TypeSig sig)
         {
-            switch (elemType.MetadataType)
+            return sig.ElementType switch
             {
-                case MetadataType.Class: return pc.Write(OpCodes.Stind_Ref);
-                case MetadataType.Object: return pc.Write(OpCodes.Stind_Ref);
-                case MetadataType.String: return pc.Write(OpCodes.Stind_Ref);
-                case MetadataType.Array: return pc.Write(OpCodes.Stind_Ref);
-                case MetadataType.MVar: return pc.Write(OpCodes.Stobj, elemType);
-                case MetadataType.Var: return pc.Write(OpCodes.Stobj, elemType);
-                case MetadataType.ValueType: return pc.Write(OpCodes.Stobj, elemType);
-                case MetadataType.GenericInstance: return pc.Write(OpCodes.Stobj, elemType);
-                case MetadataType.Double: return pc.Write(OpCodes.Stind_R8);
-                case MetadataType.Single: return pc.Write(OpCodes.Stind_R4);
-                case MetadataType.Int64: return pc.Write(OpCodes.Stind_I8);
-                case MetadataType.UInt64: return pc.Write(OpCodes.Stind_I8);
-                case MetadataType.Int32: return pc.Write(OpCodes.Stind_I4);
-                case MetadataType.UInt32: return pc.Write(OpCodes.Stind_I4);
-                case MetadataType.Int16: return pc.Write(OpCodes.Stind_I2);
-                case MetadataType.UInt16: return pc.Write(OpCodes.Stind_I2);
-                case MetadataType.Byte: return pc.Write(OpCodes.Stind_I1);
-                case MetadataType.SByte: return pc.Write(OpCodes.Stind_I1);
-                case MetadataType.Boolean: return pc.Write(OpCodes.Stind_I1);
-                case MetadataType.Char: return pc.Write(OpCodes.Stind_I2);
-                case MetadataType.UIntPtr: return pc.Write(OpCodes.Stind_I);
-                case MetadataType.IntPtr: return pc.Write(OpCodes.Stind_I);
-            }
-
-            throw new NotSupportedException($"No instruction for {elemType.MetadataType}");
+                ElementType.Class => pc.Write(OpCodes.Stind_Ref),
+                ElementType.Object => pc.Write(OpCodes.Stind_Ref),
+                ElementType.String => pc.Write(OpCodes.Stind_Ref),
+                ElementType.Array => pc.Write(OpCodes.Stind_Ref),
+                ElementType.MVar => pc.Write(OpCodes.Stobj, sig),
+                ElementType.Var => pc.Write(OpCodes.Stobj, sig),
+                ElementType.ValueType => pc.Write(OpCodes.Stobj, sig),
+                ElementType.GenericInst => pc.Write(OpCodes.Stobj, sig),
+                ElementType.R8 => pc.Write(OpCodes.Stind_R8),
+                ElementType.R4 => pc.Write(OpCodes.Stind_R4),
+                ElementType.I8 => pc.Write(OpCodes.Stind_I8),
+                ElementType.U8 => pc.Write(OpCodes.Stind_I8),
+                ElementType.I4 => pc.Write(OpCodes.Stind_I4),
+                ElementType.U4 => pc.Write(OpCodes.Stind_I4),
+                ElementType.I2 => pc.Write(OpCodes.Stind_I2),
+                ElementType.U2 => pc.Write(OpCodes.Stind_I2),
+                ElementType.U1 => pc.Write(OpCodes.Stind_I1),
+                ElementType.I1 => pc.Write(OpCodes.Stind_I1),
+                ElementType.Boolean => pc.Write(OpCodes.Stind_I1),
+                ElementType.Char => pc.Write(OpCodes.Stind_I2),
+                ElementType.Ptr => pc.Write(OpCodes.Stind_I),
+                _ => throw new NotSupportedException($"No instruction for {sig.ElementType}"),
+            };
         }
 
-        private static Cut LoadByReference(in Cut pc, TypeReference elemType)
+        private static Cut LoadByReference(in Cut pc, TypeSig sig)
         {
-            switch (elemType.MetadataType)
+            return sig.ElementType switch
             {
-                case MetadataType.Class: return pc.Write(OpCodes.Ldind_Ref);
-                case MetadataType.Object: return pc.Write(OpCodes.Ldind_Ref);
-                case MetadataType.String: return pc.Write(OpCodes.Ldind_Ref);
-                case MetadataType.Array: return pc.Write(OpCodes.Ldind_Ref);
-                case MetadataType.MVar: return pc.Write(OpCodes.Ldobj, elemType);
-                case MetadataType.Var: return pc.Write(OpCodes.Ldobj, elemType);
-                case MetadataType.ValueType: return pc.Write(OpCodes.Ldobj, elemType);
-                case MetadataType.GenericInstance: return pc.Write(OpCodes.Ldobj, elemType);
-                case MetadataType.Double: return pc.Write(OpCodes.Ldind_R8);
-                case MetadataType.Single: return pc.Write(OpCodes.Ldind_R4);
-                case MetadataType.Int64: return pc.Write(OpCodes.Ldind_I8);
-                case MetadataType.UInt64: return pc.Write(OpCodes.Ldind_I8);
-                case MetadataType.Int32: return pc.Write(OpCodes.Ldind_I4);
-                case MetadataType.UInt32: return pc.Write(OpCodes.Ldind_U4);
-                case MetadataType.Int16: return pc.Write(OpCodes.Ldind_I2);
-                case MetadataType.UInt16: return pc.Write(OpCodes.Ldind_U2);
-                case MetadataType.Byte: return pc.Write(OpCodes.Ldind_U1);
-                case MetadataType.SByte: return pc.Write(OpCodes.Ldind_I1);
-                case MetadataType.Boolean: return pc.Write(OpCodes.Ldind_U1);
-                case MetadataType.Char: return pc.Write(OpCodes.Ldind_U2);
-                case MetadataType.UIntPtr: return pc.Write(OpCodes.Ldind_I);
-                case MetadataType.IntPtr: return pc.Write(OpCodes.Ldind_I);
-            }
-
-            throw new NotSupportedException($"No instruction for {elemType.MetadataType}");
+                ElementType.Class => pc.Write(OpCodes.Ldind_Ref),
+                ElementType.Object => pc.Write(OpCodes.Ldind_Ref),
+                ElementType.String => pc.Write(OpCodes.Ldind_Ref),
+                ElementType.Array => pc.Write(OpCodes.Ldind_Ref),
+                ElementType.MVar => pc.Write(OpCodes.Ldobj, sig),
+                ElementType.Var => pc.Write(OpCodes.Ldobj, sig),
+                ElementType.ValueType => pc.Write(OpCodes.Ldobj, sig),
+                ElementType.GenericInst => pc.Write(OpCodes.Ldobj, sig),
+                ElementType.R8 => pc.Write(OpCodes.Ldind_R8),
+                ElementType.R4 => pc.Write(OpCodes.Ldind_R4),
+                ElementType.I8 => pc.Write(OpCodes.Ldind_I8),
+                ElementType.U8 => pc.Write(OpCodes.Ldind_I8),
+                ElementType.I4 => pc.Write(OpCodes.Ldind_I4),
+                ElementType.U4 => pc.Write(OpCodes.Ldind_U4),
+                ElementType.I2 => pc.Write(OpCodes.Ldind_I2),
+                ElementType.U2 => pc.Write(OpCodes.Ldind_U2),
+                ElementType.U1 => pc.Write(OpCodes.Ldind_U1),
+                ElementType.I1 => pc.Write(OpCodes.Ldind_I1),
+                ElementType.Boolean => pc.Write(OpCodes.Ldind_U1),
+                ElementType.Char => pc.Write(OpCodes.Ldind_U2),
+                ElementType.Ptr => pc.Write(OpCodes.Ldind_I),
+                _ => throw new NotSupportedException($"No instruction for {sig.ElementType}"),
+            };
         }
 
-        private static Cut AttributeArgument(in Cut cut, CustomAttributeArgument argument)
+        private static Cut AttributeArgument(in Cut cut, CAArgument argument)
         {
             var val = argument.Value;
 
@@ -184,35 +181,40 @@ namespace FluentIL
 
             if (val != null && val.GetType().IsArray)
                 pc = pc.CreateArray(
-                    argument.Type.GetElementType(),
+                    argument.Type.Next.ToTypeDefOrRef(),
                     ((Array)val).Cast<object>().Select<object, PointCut>(v => (in Cut il) => il.Value(v)).ToArray()
                     );
             else
             {
                 pc = pc.Value(val);
 
-                if (val is CustomAttributeArgument next)
+                if (val is CAArgument next)
                     pc = pc.Cast(next.Type, argument.Type);
             }
 
             return pc;
         }
 
-        private static MethodReference GetTypeFromHandleMethod_Ref(in Cut cut)
+        private static MemberRef GetTypeFromHandleMethod_Ref(in Cut cut)
         {
             var tref = cut.Import(StandardType.Type);
-            var mr = new MethodReference("GetTypeFromHandle", tref, tref);
-            mr.Parameters.Add(new ParameterDefinition(cut.Import(StandardType.RuntimeTypeHandle)));
+            var mr = new MemberRefUser(cut.Method.Module, "GetTypeFromHandle", new MethodSig(CallingConvention.StdCall, 0,
+                tref.ToTypeSig(),
+                cut.Import(StandardType.RuntimeTypeHandle).ToTypeSig()
+                ));
 
             return mr;
         }
 
-        private static MethodReference GetMethodFromHandleMethod_Ref(in Cut cut)
+        private static MemberRef GetMethodFromHandleMethod_Ref(in Cut cut)
         {
             var mbref = cut.Import(StandardType.MethodBase);
-            var mr = new MethodReference("GetMethodFromHandle", mbref, mbref);
-            mr.Parameters.Add(new ParameterDefinition(cut.Import(StandardType.RuntimeMethodHandle)));
-            mr.Parameters.Add(new ParameterDefinition(cut.Import(StandardType.RuntimeTypeHandle)));
+            var mr = new MemberRefUser(cut.Method.Module, "GetMethodFromHandle", new MethodSig(CallingConvention.StdCall, 0,
+                mbref.ToTypeSig(),
+                cut.Import(StandardType.RuntimeMethodHandle).ToTypeSig(),
+                cut.Import(StandardType.RuntimeTypeHandle).ToTypeSig()
+                ));
+
             return mr;
         }
     }

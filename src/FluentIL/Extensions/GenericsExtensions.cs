@@ -1,7 +1,4 @@
-﻿using Mono.Cecil;
-using Mono.Collections.Generic;
-
-namespace FluentIL.Extensions
+﻿namespace FluentIL.Extensions
 {
     public static class GenericsExtensions
     {

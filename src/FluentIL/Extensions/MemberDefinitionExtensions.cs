@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using dnlib.DotNet;
+using Mono.Cecil;
 using Mono.Cecil.Rocks;
 using System;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace FluentIL.Extensions
             return result;
         }
 
-        public static bool IsCallCompatible(this MemberReference member)
+        public static bool IsCallCompatible(this IMemberRef member)
         {
             if (member is TypeReference typeRef)
                 return !typeRef.HasGenericParameters;

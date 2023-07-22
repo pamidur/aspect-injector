@@ -1,15 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Description>This is core library of Aspect Injector.</Description>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Mono.Cecil" Version="0.11.4" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FluentIL\FluentIL.csproj" />
+    <ProjectReference Include="..\FluentIL\Fragments.FluentIL.csproj" />
     <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Rules\AspectInjector.Rules.csproj" />
   </ItemGroup>

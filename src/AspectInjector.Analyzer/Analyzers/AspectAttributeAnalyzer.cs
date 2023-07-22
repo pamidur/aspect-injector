@@ -23,6 +23,8 @@ namespace AspectInjector.Analyzer.Analyzers
 
         public override void Initialize(AnalysisContext context)
         {
+            context.EnableConcurrentExecution();
+            context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
             context.RegisterSyntaxNodeAction(AnalyzeAttribute, SyntaxKind.Attribute);
         }
 
@@ -33,8 +35,7 @@ namespace AspectInjector.Analyzer.Analyzers
             if (attr == null || attr.AttributeClass.ToDisplayString() != WellKnown.AspectType)
                 return;
 
-            var symbol = context.ContainingSymbol as INamedTypeSymbol;
-            if (symbol == null)
+            if (!(context.ContainingSymbol is INamedTypeSymbol symbol))
                 return;
 
             var factory = attr.NamedArguments.FirstOrDefault(n => n.Key == nameof(Aspect.Factory)).Value.Value;

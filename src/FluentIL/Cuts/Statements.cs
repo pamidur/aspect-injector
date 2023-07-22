@@ -1,6 +1,6 @@
 ﻿using FluentIL.Extensions;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
 using System;
 
 namespace FluentIL
@@ -12,7 +12,7 @@ namespace FluentIL
             return cut.Write(OpCodes.Ret);
         }
 
-        public static Cut Call(this in Cut cut, MethodReference method, PointCut args = null)
+        public static Cut Call(this in Cut cut, IMethod method, PointCut args = null)
         {
             var cur_cut = cut;
 
@@ -21,7 +21,7 @@ namespace FluentIL
 
             if (args != null) cur_cut = cur_cut.Here(args);
 
-            var methodDef = method.Resolve();
+            var methodDef = method.ResolveMethodDef();
 
             var code = OpCodes.Call;
             if (methodDef.IsConstructor) code = OpCodes.Newobj;

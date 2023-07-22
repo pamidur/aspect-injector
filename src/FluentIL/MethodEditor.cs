@@ -1,149 +1,150 @@
-﻿using FluentIL.Extensions;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+﻿using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using FluentIL.Extensions;
 using System;
 using System.Linq;
 
-namespace FluentIL
+namespace FluentIL;
+
+public static class MethodEditor
 {
-    public static class MethodEditor
+    public static void BeforeInstruction(this MethodDef body, Instruction instruction, PointCut action)
     {
-        public static void BeforeInstruction(this MethodBody body, Instruction instruction, PointCut action)
+        new Cut(body, instruction)
+            .Prev()
+            .Here(action);
+    }
+
+    public static void AfterInstruction(this MethodDef body, Instruction instruction, PointCut action)
+    {
+        new Cut(body, instruction)
+            .Here(action);
+    }
+    public static void AfterEntry(this MethodDef body, PointCut action)
+    {
+        new Cut(body, GetCodeStart(body))
+            .Prev()
+            .Here(action);
+    }
+
+    public static void BeforeExit(this MethodDef method, PointCut action)
+    {
+        foreach (var ret in method.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList())
         {
-            new Cut(body, instruction)
-                .Prev()
-                .Here(action);
+            var cut = new Cut(method, ret);
+            cut.Here(action).Write(OpCodes.Ret);
+            cut.Remove();
         }
+    }
 
-        public static void AfterInstruction(this MethodBody body, Instruction instruction, PointCut action)
-        {
-            new Cut(body, instruction)
-                .Here(action);
-        }
-        public static void AfterEntry(this MethodBody body, PointCut action)
-        {
-            new Cut(body, GetCodeStart(body))
-                .Prev()
-                .Here(action);
-        }
+    public static void Append(this MethodDef method, PointCut action)
+    {
+        var cut = new Cut(method, entry: false, exit: true);
+        cut.Here(action);
+    }
 
-        public static void BeforeExit(this MethodBody body, PointCut action)
-        {
-            foreach (var ret in body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList())
-            {
-                var cut = new Cut(body, ret);
-                cut.Here(action).Write(OpCodes.Ret);
-                cut.Remove();
-            }
-        }
+    public static void Before(this MethodDef method, Instruction instruction, PointCut action)
+    {
+        if (!method.Body.Instructions.Contains(instruction))
+            throw new ArgumentException("Wrong instruction.");
 
-        public static void Append(this MethodBody body, PointCut action)
-        {
-            var cut = new Cut(body, entry: false, exit: true);
-            cut.Here(action);
-        }
+        new Cut(method, instruction)
+            .SkipNops()
+            .Prev()
+            .Here(action);
+    }
 
-        public static void Before(this MethodBody body, Instruction instruction, PointCut action)
-        {
-            if (!body.Instructions.Contains(instruction))
-                throw new ArgumentException("Wrong instruction.");
+    public static void Instead(this MethodDef method, PointCut action)
+    {
+        method.Body.Instructions.Clear();
+        method.Body.Variables.Clear();
+        method.Body.ExceptionHandlers.Clear();
 
-            new Cut(body, instruction)
-                .SkipNops()
-                .Prev()
-                .Here(action);
-        }
+        new Cut(method, true, true)
+            .Here(action);
+    }
 
-        public static void Instead(this MethodBody body, PointCut action)
-        {
-            body.Instructions.Clear();
-            body.Variables.Clear();
-            body.ExceptionHandlers.Clear();
+    public static void Mark(this MethodDef method, ITypeDefOrRef attribute)
+    {
+        if (method.CustomAttributes.Any(ca => ca.AttributeType.Match(attribute)))
+            return;
 
-            new Cut(body, true, true)
-                .Here(action);
-        }
+        var constructor = ((ITypeDefOrRef)method.Module.Import(attribute)).ResolveTypeDef()
+            .Methods.First(m => m.IsConstructor && !m.IsStatic);
 
-        public static void Mark(this MethodDefinition method, TypeReference attribute)
-        {
-            if (method.CustomAttributes.Any(ca => ca.AttributeType.FullName == attribute.FullName))
-                return;
+        method.CustomAttributes.Add(new CustomAttribute(method.Module.Import(constructor)));
+    }
 
-            var constructor = method.Module.ImportReference(attribute).Resolve()
-                .Methods.First(m => m.IsConstructor && !m.IsStatic);
+    public static Instruction GetCodeStart(this MethodDef method)
+    {
+        if (method.DeclaringType.IsValueType || !method.IsConstructor || method.IsStatic)
+            return method.Body.Instructions.First();
 
-            method.CustomAttributes.Add(new CustomAttribute(method.Module.ImportReference(constructor)));
-        }
+        var point = method.Body.Instructions.FirstOrDefault(
+            i => i != null &&
+            i.OpCode == OpCodes.Call &&
+            i.Operand is IMethod methodReference &&
+            IsOwnConstructor(methodReference, method.DeclaringType));
 
-        public static Instruction GetCodeStart(this MethodBody body)
-        {
-            if (body.Method.DeclaringType.IsValueType || !body.Method.IsConstructor || body.Method.IsStatic)
-                return body.Method.Body.Instructions.First();
+        if (point == null)
+            throw new InvalidOperationException("Cannot find base class ctor call");
 
-            var point = body.Instructions.FirstOrDefault(
-                i => i != null &&
-                i.OpCode == OpCodes.Call &&
-                i.Operand is MethodReference methodReference &&
-                IsOwnConstructor(methodReference, body.Method.DeclaringType));
+        return method.Body.Instructions[method.Body.Instructions.IndexOf(point) + 1];
+    }
 
-            if (point == null)
-                throw new InvalidOperationException("Cannot find base class ctor call");
+    private static bool IsOwnConstructor(IMethod methodReference, TypeDef owner)
+    {
+        var methodDef = methodReference.ResolveMethodDef();
+        return methodDef.IsConstructor &&
+            (methodDef.DeclaringType.Match(owner) || methodDef.DeclaringType.Match(owner.BaseType?.ResolveTypeDef()));
+    }
 
-            return point.Next;
-        }
+    public static void OnLoadField(this MethodDef method, IField field, PointCut pc, Instruction startingFrom = null)
+    {
+        var fieldDef = field.ResolveFieldDef();
 
-        private static bool IsOwnConstructor(MethodReference methodReference, TypeDefinition owner)
-        {
-            var methodDef = methodReference.Resolve();
-            return methodDef.IsConstructor &&
-                (methodDef.DeclaringType.Match(owner) || methodDef.DeclaringType.Match(owner.BaseType?.Resolve()));
-        }
-
-        public static void OnLoadField(this MethodBody body, FieldReference field, PointCut pc, Instruction startingFrom = null)
-        {
-            var fieldDef = field.Resolve();
-
-            if (fieldDef.IsStatic)
-                body.OnEveryOccasionOf(i =>
-                (i.OpCode == OpCodes.Ldsfld || i.OpCode == OpCodes.Ldsflda) && i.Operand is FieldReference f && f.DeclaringType.Match(field.DeclaringType) && f.Resolve() == fieldDef
-                , pc, startingFrom);
-            else
-                body.OnEveryOccasionOf(i =>
-                (i.OpCode == OpCodes.Ldfld || i.OpCode == OpCodes.Ldflda) && i.Operand is FieldReference f && f.DeclaringType.Match(field.DeclaringType) && f.Resolve() == fieldDef
-                , pc, startingFrom);
-        }
-
-        public static void OnStoreVar(this MethodBody body, VariableReference variable, PointCut pc, Instruction startingFrom = null)
-        {
-            body.OnEveryOccasionOf(i =>
-                ((i.OpCode == OpCodes.Stloc || i.OpCode == OpCodes.Stloc_S) && ((i.Operand is int n && n == variable.Index) || (i.Operand is VariableDefinition v && v.Index == variable.Index))) ||
-                (variable.Index == 0 && i.OpCode == OpCodes.Stloc_0) ||
-                (variable.Index == 1 && i.OpCode == OpCodes.Stloc_1) ||
-                (variable.Index == 2 && i.OpCode == OpCodes.Stloc_2) ||
-                (variable.Index == 3 && i.OpCode == OpCodes.Stloc_3)
+        if (fieldDef.IsStatic)
+            method.OnEveryOccasionOf(i =>
+            (i.OpCode == OpCodes.Ldsfld || i.OpCode == OpCodes.Ldsflda) && i.Operand is IField f && f.DeclaringType.Match(field.DeclaringType) && f.ResolveFieldDef() == fieldDef
             , pc, startingFrom);
-        }
-
-        public static void OnCall(this MethodBody body, MethodReference method, PointCut pc, Instruction startingFrom = null)
-        {
-            body.OnEveryOccasionOf(i =>
-                (i.OpCode == OpCodes.Call || i.OpCode == OpCodes.Calli || i.OpCode == OpCodes.Callvirt || i.OpCode == OpCodes.Newobj)
-                && i.Operand is MethodReference mref && mref.DeclaringType.Match(method.DeclaringType) && mref.Resolve() == method.Resolve()
+        else
+            method.OnEveryOccasionOf(i =>
+            (i.OpCode == OpCodes.Ldfld || i.OpCode == OpCodes.Ldflda) && i.Operand is IField f && f.DeclaringType.Match(field.DeclaringType) && f.ResolveFieldDef() == fieldDef
             , pc, startingFrom);
-        }
+    }
 
-        public static void OnEveryOccasionOf(this MethodBody body, Func<Instruction, bool> predicate, PointCut pc, Instruction startingFrom = null)
-        {
-            var insts = body.Instructions;
-            var start = startingFrom == null ? 0 : insts.IndexOf(startingFrom);
+    public static void OnStoreVar(this MethodDef method, Local variable, PointCut pc, Instruction startingFrom = null)
+    {
+        method.OnEveryOccasionOf(i =>
+            ((i.OpCode == OpCodes.Stloc || i.OpCode == OpCodes.Stloc_S) && ((i.Operand is int n && n == variable.Index) || (i.Operand is Local v && v.Index == variable.Index))) ||
+            (variable.Index == 0 && i.OpCode == OpCodes.Stloc_0) ||
+            (variable.Index == 1 && i.OpCode == OpCodes.Stloc_1) ||
+            (variable.Index == 2 && i.OpCode == OpCodes.Stloc_2) ||
+            (variable.Index == 3 && i.OpCode == OpCodes.Stloc_3)
+        , pc, startingFrom);
+    }
 
-            var icol = insts.Skip(start).Where(predicate).ToArray();
+    public static void OnCall(this MethodDef method, IMethod calee, PointCut pc, Instruction startingFrom = null)
+    {
+        var def = calee.ResolveMethodDef();
 
-            if (icol.Length == 0)
-                throw new InvalidOperationException("Expected sequence is not found even once. Unsupported language/version ?");
+        method.OnEveryOccasionOf(i =>
+            (i.OpCode == OpCodes.Call || i.OpCode == OpCodes.Calli || i.OpCode == OpCodes.Callvirt || i.OpCode == OpCodes.Newobj)
+            && i.Operand is IMethod mref && mref.DeclaringType.Match(calee.DeclaringType) && mref.ResolveMethodDef() == def
+        , pc, startingFrom);
+    }
 
-            foreach (var curi in icol)
-                new Cut(body, curi).Here(pc);
-        }
+    public static void OnEveryOccasionOf(this MethodDef method, Func<Instruction, bool> predicate, PointCut pc, Instruction startingFrom = null)
+    {
+        var insts = method.Body.Instructions;
+        var start = startingFrom == null ? 0 : insts.IndexOf(startingFrom);
+
+        var icol = insts.Skip(start).Where(predicate).ToArray();
+
+        if (icol.Length == 0)
+            throw new InvalidOperationException("Expected sequence is not found even once. Unsupported language/version ?");
+
+        foreach (var curi in icol)
+            new Cut(method, curi).Here(pc);
     }
 }

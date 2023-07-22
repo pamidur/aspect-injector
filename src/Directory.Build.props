@@ -4,7 +4,7 @@
     <Authors>Aspect Injector Contributors</Authors>
     <Company>Aspect Injector Contributors</Company>
   </PropertyGroup>
-  <ItemGroup>    
+  <!--<ItemGroup>    
     <PackageReference Include="SonarAnalyzer.CSharp" Version="8.17.0.26580">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -13,5 +13,5 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
+  </ItemGroup>-->
 </Project>
