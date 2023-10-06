@@ -6,6 +6,8 @@
     <Company>Aspect Injector Contributors</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>package.png</PackageIcon>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)../src/AspectInjector.Broker/_key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)../package.png" Pack="true" PackagePath="\" />
