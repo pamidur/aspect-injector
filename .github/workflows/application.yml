@@ -40,7 +40,7 @@ jobs:
     - name: Pack
       working-directory: nuget
       run: dotnet pack -c $app_conf --no-build -o `pwd`/artifacts -p:Version=$app_version -p:CommitSHA=$GITHUB_SHA
-    - uses: actions/upload-artifact
+    - uses: actions/upload-artifact@v3.2.1
       with:
         name: artifacts
         path: ./nuget/artifacts
