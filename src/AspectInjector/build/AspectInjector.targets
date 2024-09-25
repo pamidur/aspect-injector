@@ -1,0 +1,90 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask Condition="'$(AspectInjector_Location)' != ''" TaskName="AspectInjectorTask" AssemblyFile="$(AspectInjector_Location)" />
+  <UsingTask Condition="'$(AspectInjector_Location)' == ''" TaskName="AspectInjectorTask" AssemblyFile="(MSBuildThisFileDirectory)../../binaries/AspectInjector.dll" />
+
+  <ItemGroup>
+    <PackageReference Update="AspectInjector" PrivateAssets="None" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <AspectInjector_Enabled Condition="'$(AspectInjector_Enabled)' == ''">true</AspectInjector_Enabled>
+    <AspectInjector_Debug Condition="'$(AspectInjector_Debug)' == ''">false</AspectInjector_Debug>
+    <AspectInjector_Verbose Condition="'$(AspectInjector_Verbose)' == ''">false</AspectInjector_Verbose>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <_InjectAspectsDependsOn>
+      AspectInjector_Custom_Target;
+      AspectInjector_InjectAspectsCore;
+      AspectInjector_ResignAssembly;
+    </_InjectAspectsDependsOn>
+  </PropertyGroup>
+
+  <Target Name="AspectInjector_InjectAspects" 
+          AfterTargets="CoreCompile" 
+          BeforeTargets="_TimeStampAfterCompile;AfterCompile" 
+          Condition="'$(AspectInjector_Enabled)' == 'true'" 
+          DependsOnTargets="$(_InjectAspectsDependsOn)"
+  />
+
+  <Target Name="AspectInjector_InjectAspectsCore"
+          Inputs="@(IntermediateAssembly->'%(FullPath)')" 
+          Outputs="%(IntermediateAssembly.FullPath).aspectsinjected"
+    >
+    <AspectInjectorTask 
+      AssemblyPath="@(IntermediateAssembly->'%(FullPath)')" 
+      References="@(ReferencePath)"
+      Optimize="$(Optimize)"
+      AttachDebugger="$(AspectInjector_Debug)"
+      Verbose="$(AspectInjector_Verbose)"
+    />
+    <Touch Files="%(IntermediateAssembly.FullPath).aspectsinjected" AlwaysCreate="true" Time="%(IntermediateAssembly.ModifiedTime)"/>
+  </Target>
+
+  <Target Name="AspectInjector_ResignAssembly" 
+          Condition="'$(SignAssembly)' == 'true' AND '$(DelaySign)' != 'true'" 
+          DependsOnTargets="GetSnToolForUnix;GetSnToolForWindows"
+          Inputs="@(IntermediateAssembly->'%(FullPath)')" 
+          Outputs="%(IntermediateAssembly.FullPath).aspectssigned"
+    >
+    <PropertyGroup>
+      <_SignCommand Condition="'$(KeyContainerName)' != ''">&quot;$(SnTool)&quot; -Rc &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(KeyContainerName)</_SignCommand>
+      <_SignCommand Condition="'$(KeyContainerName)' == '' AND '$(KeyOriginatorFile)' != ''">&quot;$(SnTool)&quot; -R &quot;$(ProjectDir)$(IntermediateOutputPath)$(TargetFileName)&quot; $(KeyOriginatorFile)</_SignCommand>
+    </PropertyGroup>
+    <Exec Command="$(_SignCommand)" Condition="'$(_SignCommand)' != ''" EchoOff="true" IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="_SignExitCode" />
+    </Exec>
+    <Error Text="Aspect Injector cannot re-sing assembly. Try rebuid solution." Condition="'$(_SignExitCode)' != '0'" Code="AI_ERR0" File="AspectInjector"/>
+    <Touch Files="%(IntermediateAssembly.FullPath).aspectsinjected" AlwaysCreate="true" Time="%(IntermediateAssembly.ModifiedTime)"/>
+    <Touch Files="%(IntermediateAssembly.FullPath).aspectssigned" AlwaysCreate="true" Time="%(IntermediateAssembly.ModifiedTime)"/>
+  </Target>
+
+  <Target Name="GetSnToolForUnix" Condition=" '$(OS)' == 'Unix' ">
+    <PropertyGroup>
+      <SnTool>sn</SnTool>
+    </PropertyGroup>
+    <Message Text="SnTool found: $(SnTool)"/>
+  </Target>
+
+  <Target Name="GetSnToolForWindows" Condition=" '$(OS)' != 'Unix' ">
+    <GetFrameworkSdkPath>
+      <Output TaskParameter="Path" PropertyName="WindowsSdkPath" />
+    </GetFrameworkSdkPath>
+    <ItemGroup>
+      <SnTools Include="$(WindowsSdkPath)**\sn.exe" />
+    </ItemGroup>
+    <PropertyGroup>
+      <SnToolsRaw>@(SnTools)</SnToolsRaw>
+    </PropertyGroup>
+    <PropertyGroup>
+      <SnTool>$(SnToolsRaw.Split(';')[0])</SnTool>
+    </PropertyGroup>
+    <Message Text="SnTool found: $(SnTool)"/>
+  </Target>
+
+  <Target Name="AspectInjector_Custom_Target">
+  </Target>
+
+</Project>
+

@@ -1,22 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <AspectInjector_Enabled>false</AspectInjector_Enabled>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Unofficial.CoreRT.ILVerify" Version="0.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.2" />
-    <PackageReference Include="xunit" Version="2.4.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Tests.Generics\AspectInjector.Tests.Generics.csproj" />
     <ProjectReference Include="..\AspectInjector.Tests.Runtime\AspectInjector.Tests.Runtime.csproj" />
     <ProjectReference Include="..\AspectInjector.Tests.RuntimeAssets\AspectInjector.Tests.RuntimeAssets.csproj" />

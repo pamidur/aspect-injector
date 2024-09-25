@@ -23,7 +23,7 @@ namespace AspectInjector.Tests.Runtime
 
         static TestRunner()
         {
-            TestLog.Reset();
+            TestLog.Reset(); 
 
             var type = typeof(TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>);
             System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);

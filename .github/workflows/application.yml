@@ -21,10 +21,10 @@ jobs:
         fetch-depth: 0
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.x
+        dotnet-version: 6.0.x
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.0.x
     - name: Get version
       run:  echo "app_version=`git describe --tags`" >> $GITHUB_ENV
     - name: Get release status
@@ -35,17 +35,11 @@ jobs:
       run: dotnet build -c $app_conf -p:Version=$app_version -p:InformationalVersion="$app_version:$GITHUB_SHA"
     - name: Test net6
       run: dotnet test -c $app_conf --no-build -f net6.0
-    - name: Test netcore3
-      run: dotnet test -c $app_conf --no-build -f netcoreapp3.1
+    - name: Test net8
+      run: dotnet test -c $app_conf --no-build -f net8.0
     - name: Pack
-      env:
-        CODESIGN_CERT: ${{ secrets.CODESIGN_PEM }}
       working-directory: nuget
-      run: |
-        echo "$CODESIGN_CERT" > cert.pem
-        chmod +x ./rcodesign
-        dotnet pack -c $app_conf --no-build -o `pwd`/artifacts -p:Version=$app_version -p:CommitSHA=$GITHUB_SHA -p:OSXCertPath=cert.pem
-        rm cert.pem
+      run: dotnet pack -c $app_conf --no-build -o `pwd`/artifacts -p:Version=$app_version -p:CommitSHA=$GITHUB_SHA
     - uses: actions/upload-artifact@v1
       with:
         name: artifacts
@@ -55,4 +49,4 @@ jobs:
       env:
         NUGETKEY: ${{ secrets.NUGET_KEY }}
       working-directory: nuget/artifacts
-      run: dotnet nuget push ./AspectInjector.$app_version.nupkg -s $nuget_url -k $NUGETKEY     
+      run: dotnet nuget push ./*.nupkg -s $nuget_url -k $NUGETKEY     

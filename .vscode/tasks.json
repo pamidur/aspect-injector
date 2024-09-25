@@ -39,7 +39,7 @@
         "${workspaceFolder}/tests/AspectInjector.Tests.Runtime/AspectInjector.Tests.Runtime.csproj",
         "/property:GenerateFullPaths=true",
         "/p:AspectInjector_Debug=true",
-        "/p:_ASI_Verbose=true",
+        "/p:AspectInjector_Verbose=true",
         "/consoleloggerparameters:NoSummary"
       ],
       "problemMatcher": "$msCompile",

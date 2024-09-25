@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageTags>aspect cache memorycache method methodcache</PackageTags>
+    <Description>
+      This package provides cache aspect for your methods. Put [MemoryCache(seconds)] attribure on your methods. And enjoy hassle-free memory cache for your methods.
+      Or implement your own cache mechanics by inheriting CacheAttribute class.
+      Powered by AspectInjector.
+    </Description>
+    <PackageProjectUrl>https://github.com/pamidur/aspect-injector/tree/master/samples/src/Cache</PackageProjectUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.32" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.32" />
+    <PackageReference Include="System.Text.Json" Version="6.0.9" />
+  </ItemGroup>
+
+</Project>

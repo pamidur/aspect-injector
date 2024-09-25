@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+    <PackageTags>aspect proxy wrapper universal</PackageTags>
+    <Description>
+      This package provides simple universal method wrrapper aspect.
+    </Description>
+    <PackageProjectUrl>https://github.com/pamidur/aspect-injector/tree/master/samples/src/Universal</PackageProjectUrl>
+	</PropertyGroup>
+
+</Project>

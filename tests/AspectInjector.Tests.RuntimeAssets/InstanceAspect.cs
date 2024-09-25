@@ -98,7 +98,7 @@ namespace AspectInjector.Tests.Assets
             TestLog.Write(AroundEnter);
             var result = target(args);
             TestLog.Write(AroundExit);
-            return result;
+            return result; 
         }
 
         public Tuple<int, Asset1, Asset1, Asset2, T3> TestMethod<T3>(int a1, Asset1 a2, Asset1 a3, Asset2 a4, T3 a5, ref int ar1, ref Asset1 ar2, ref Asset1 ar3, ref Asset2 ar4, ref T3 ar5, out int ao1, out Asset1 ao2, out Asset1 ao3, out Asset2 ao4, out T3 ao5)

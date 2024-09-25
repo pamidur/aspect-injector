@@ -1,13 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <LangVersion>7.1</LangVersion>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Configurations>Debug;Release;DebugTests</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" />
     <ProjectReference Include="..\AspectInjector.Tests.RuntimeAssets\AspectInjector.Tests.RuntimeAssets.csproj" />
   </ItemGroup>
 

@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup> 
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AspectInjector_Location>$(MSBuildThisFileDirectory)../src/AspectInjector/bin/$(Configuration)/netstandard2.0/AspectInjector.dll</AspectInjector_Location>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)../src/AspectInjector/build/AspectInjector.targets" />
+
+  <ItemGroup>
+	  <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\AspectInjector\AspectInjector.csproj" PrivateAssets="None"/>
+	  <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" PrivateAssets="All"/>
+	</ItemGroup>
+
+</Project>

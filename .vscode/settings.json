@@ -5,6 +5,5 @@
     },
     "search.exclude": {
         "**/obj": true
-    },
-    "dotnet-test-explorer.testProjectPath":"tests/**/*.Tests.*.csproj",
+    }
 }

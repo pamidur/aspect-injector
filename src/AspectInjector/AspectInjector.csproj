@@ -1,31 +1,63 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <PublishTrimmed>true</PublishTrimmed>
-    <PublishSingleFile>true</PublishSingleFile>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <OutputType>Exe</OutputType>
-    <Description>Entrypoint for Aspect Injector.</Description>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <WarningsAsErrors>$(WarningsAsErrors);Nullable</WarningsAsErrors>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
+
   <PropertyGroup>
-    <TrimMode>link</TrimMode>
-    <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
-    <DebuggerSupport>false</DebuggerSupport>
-    <EventSourceSupport>false</EventSourceSupport>
-    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <UseNativeHttpHandler>true</UseNativeHttpHandler>
-    <UseSystemResourceKeys>true</UseSystemResourceKeys>
-    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
-    <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
-    <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
+    <PackageId>AspectInjector</PackageId>
+    <Title>Aspect Injector - AOP Framework</Title>
+    <PackageDescription>Attributes-based compile-time AOP framework.
+Cross-cutting concerns made easy!
+
+Just apply your attributes where you need them and everything automagicaly works!
+No xml configs! No wierd reflection hacks! No runtime emit!
+
+Works with AOT and Blazor!
+
+See release notes for this version here:
+https://github.com/pamidur/aspect-injector/releases/tag/$(Version)
+    </PackageDescription>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>aop aspect interceptor injector aot blazor attribute il weaving boundary post-compiler</PackageTags>
+    <PackageReleaseNotes>See here: https://github.com/pamidur/aspect-injector/releases/tag/$(Version)</PackageReleaseNotes>
+
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <IncludeBuildOutput>False</IncludeBuildOutput>
+    <NoWarn>$(NoWarn);NU5100</NoWarn>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificBuildOutput);PublishAspectInjector</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" />
-    <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" />
-    <ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj" />
-    <ProjectReference Include="..\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj" />
+
+   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)../../README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="build/*.*" Pack="true" PackagePath="build/$(TargetFramework)" />
+    <None Include="build/*.*" Pack="true" PackagePath="buildTransitive/$(TargetFramework)" />
+    <None Include="tools/*.*" Pack="true" PackagePath="tools" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AspectInjector.Broker\AspectInjector.Broker.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\AspectInjector.Core\AspectInjector.Core.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\AspectInjector.Core.Advice\AspectInjector.Core.Advice.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\AspectInjector.Core.Mixin\AspectInjector.Core.Mixin.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj" PrivateAssets="All" IncludeAssets="None" Private="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.11.4" PrivateAssets="All" />
+  </ItemGroup> 
+
+  <Target Name="PublishAspectInjector" DependsOnTargets="BuildOnlySettings;ResolveReferences">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)AspectInjector.Broker.*" Exclude="**/*.pdb" PackagePath="lib/$(TargetFramework)" />
+      <TfmSpecificPackageFile Include="$(OutputPath)/**/*.dll" PackagePath="binaries" />
+      <TfmSpecificPackageFile Include="$(MSBuildThisFileDirectory)../AspectInjector.Analyzer/bin/$(Configuration)/$(TargetFramework)/**/*.dll" PackagePath="analyzers/dotnet/cs" />
+    </ItemGroup>
+  </Target>
+
 </Project>
