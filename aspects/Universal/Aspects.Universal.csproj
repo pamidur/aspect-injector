@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
     <PackageTags>aspect proxy wrapper universal</PackageTags>
@@ -8,10 +7,4 @@
     </Description>
     <PackageProjectUrl>https://github.com/pamidur/aspect-injector/tree/master/samples/src/Universal</PackageProjectUrl>
 	</PropertyGroup>
-  <ItemGroup Condition="'$(AddPackDeps)' == 'true'">
-    <PackageReference Include="AspectInjector" Version="$(Version)">
-      <IncludeAssets>All</IncludeAssets>
-      <ExcludeAssets>build</ExcludeAssets>
-    </PackageReference>
-  </ItemGroup>
 </Project>
