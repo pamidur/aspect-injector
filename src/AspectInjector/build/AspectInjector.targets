@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <UsingTask Condition="'$(AspectInjector_Location)' != ''" TaskName="AspectInjectorTask" AssemblyFile="$(AspectInjector_Location)" />
-  <UsingTask Condition="'$(AspectInjector_Location)' == ''" TaskName="AspectInjectorTask" AssemblyFile="(MSBuildThisFileDirectory)../../binaries/AspectInjector.dll" />
+  <UsingTask Condition="'$(AspectInjector_Location)' == ''" TaskName="AspectInjectorTask" AssemblyFile="$(MSBuildThisFileDirectory)../../binaries/AspectInjector.dll" />
 
   <ItemGroup>
     <PackageReference Update="AspectInjector" PrivateAssets="None" />

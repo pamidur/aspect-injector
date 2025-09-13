@@ -38,7 +38,7 @@ jobs:
     - name: Test net8
       run: dotnet test -c $app_conf --no-build -f net8.0
     - name: Pack
-      run: dotnet pack -c $app_conf -o `pwd`/artifacts -p:Version=$app_version -p:InformationalVersion="$app_version:$GITHUB_SHA" -p:CommitSHA=$GITHUB_SHA
+      run: dotnet pack -c $app_conf -o `pwd`/artifacts -p:AddPackDeps=true -p:Version=$app_version -p:InformationalVersion="$app_version:$GITHUB_SHA" -p:CommitSHA=$GITHUB_SHA
     - uses: actions/upload-artifact@v4
       with:
         name: artifacts

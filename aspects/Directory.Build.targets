@@ -17,8 +17,7 @@
      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
      <OutputItemType>Analyzer</OutputItemType>
    </ProjectReference>  -->
-	</ItemGroup>  
-
+	</ItemGroup>
 
   <!-- <ItemGroup>
     <Analyzer Include="$(MSBuildThisFileDirectory)..\..\src\AspectInjector.Analyzer\bin\Debug\netstandard2.0\AspectInjector.Analyzer.dll" />
