@@ -1,0 +1,15 @@
+<Project>
+
+  <Import Project="$(MSBuildThisFileDirectory)../Directory.Build.props" />
+
+  <PropertyGroup> 
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\AspectInjector\AspectInjector.csproj" PrivateAssets="None" IncludeAssets="All" ExcludeAssets="Compile,Runtime,Native"/>
+	  <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" PrivateAssets="All"/>
+	</ItemGroup>
+
+</Project>

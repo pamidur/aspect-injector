@@ -10,15 +10,6 @@
 
   <Import Project="$(MSBuildThisFileDirectory)../src/AspectInjector/build/AspectInjector.targets" />
 
-  <ItemGroup>
-	  <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\AspectInjector\AspectInjector.csproj" PrivateAssets="None" ReferenceOutputAssembly="false"/>
-	  <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\AspectInjector.Broker\AspectInjector.Broker.csproj" PrivateAssets="All"/>
-    <!-- <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\src\AspectInjector.Analyzer\AspectInjector.Analyzer.csproj">
-     <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-     <OutputItemType>Analyzer</OutputItemType>
-   </ProjectReference>  -->
-	</ItemGroup>
-
   <!-- <ItemGroup>
     <Analyzer Include="$(MSBuildThisFileDirectory)..\..\src\AspectInjector.Analyzer\bin\Debug\netstandard2.0\AspectInjector.Analyzer.dll" />
   </ItemGroup>     -->
