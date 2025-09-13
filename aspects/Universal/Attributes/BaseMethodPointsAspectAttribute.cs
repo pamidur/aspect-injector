@@ -6,7 +6,7 @@ namespace Aspects.Universal.Attributes
 {
     public abstract class BaseMethodPointsAspectAttribute : BaseUniversalWrapperAttribute
     {
-        protected internal sealed override T WrapSync<T>(Func<object[], T> target, object[] args, AspectEventArgs eventArgs)
+        protected internal override T WrapSync<T>(Func<object[], T> target, object[] args, AspectEventArgs eventArgs)
         {
             OnBefore(eventArgs);
 
@@ -23,7 +23,7 @@ namespace Aspects.Universal.Attributes
             }
         }
 
-        protected internal sealed override async Task<T> WrapAsync<T>(Func<object[], Task<T>> target, object[] args, AspectEventArgs eventArgs)
+        protected internal override async Task<T> WrapAsync<T>(Func<object[], Task<T>> target, object[] args, AspectEventArgs eventArgs)
         {
             await OnBeforeAsync(eventArgs);
 

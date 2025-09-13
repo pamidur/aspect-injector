@@ -1,0 +1,24 @@
+{
+	"name": "C# (.NET)",
+	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,Z",
+	"workspaceFolder": "/workspace",
+	"runArgs": [
+		"--userns=keep-id:uid=1000,gid=1000"
+	],
+	"updateRemoteUserUID": false,
+	"securityOpt": [
+		"label=type:container_t"
+	],
+	"containerEnv": {
+		"HOME": "/home/vscode"
+	},
+	"containerUser": "vscode",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-dotnettools.csdevkit"
+			]
+		}
+	}
+}
