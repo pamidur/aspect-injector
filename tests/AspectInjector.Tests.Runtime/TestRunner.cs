@@ -238,16 +238,20 @@ namespace AspectInjector.Tests.Runtime
             TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticAsyncMethod2<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5).Wait();
         }
 
+        /// <summary>
+        /// Waits for instance async-void advice before subsequent event-order checks.
+        /// </summary>
         public void ExecAsyncVoidMethod()
         {
-            new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestAsyncMethod3<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5);
-            Task.Delay(300).Wait();
+            AsyncVoid.Run(() => new TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>().TestAsyncMethod3<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5));
         }
 
+        /// <summary>
+        /// Waits for static async-void advice before subsequent event-order checks.
+        /// </summary>
         public void ExecStaticAsyncVoidMethod()
         {
-            TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticAsyncMethod3<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5);
-            Task.Delay(300).Wait();
+            AsyncVoid.Run(() => TestClassWrapper<short>.TestClass<IAssetIface1<Asset1>>.TestStaticAsyncMethod3<Asset2>(TestAssets.asset1, TestAssets.asset2, TestAssets.asset3, TestAssets.asset4, TestAssets.asset5));
         }
 
         public void CheckSequence(IReadOnlyList<string> orderedEvents)

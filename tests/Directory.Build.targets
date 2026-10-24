@@ -4,7 +4,7 @@
     <AspectInjector_Location>$(MSBuildThisFileDirectory)../src/AspectInjector/bin/$(Configuration)/netstandard2.0/AspectInjector.dll</AspectInjector_Location>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'DebugTests' AND '$(TargetFramework)' == 'net6.0'">
+  <PropertyGroup Condition=" '$(Configuration)' == 'DebugTests' AND '$(TargetFramework)' == 'net10.0'">
     <AspectInjector_Debug>true</AspectInjector_Debug>
     <AspectInjector_Verbose>true</AspectInjector_Verbose>
   </PropertyGroup>

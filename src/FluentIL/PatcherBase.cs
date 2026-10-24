@@ -17,14 +17,22 @@ namespace FluentIL
             _log = logger;
         }
 
+        /// <summary>
+        /// Processes an assembly and disposes the resolver created for its references.
+        /// </summary>
         public void Process(string assemblyFile, IReadOnlyList<string> references, bool optimize, bool verbose)
         {
-            var resolver = GetResolver(assemblyFile, references);
-            if (_log.IsErrorThrown) return;
-
-            Process(assemblyFile, resolver, optimize, verbose);
+            // Dispose loaded dependencies even when reference validation reports an error.
+            using (var resolver = GetResolver(assemblyFile, references))
+            {
+                if (_log.IsErrorThrown) return;
+                Process(assemblyFile, resolver, optimize, verbose);
+            }
         }
 
+        /// <summary>
+        /// Processes an assembly without disposing the caller's dependency resolver.
+        /// </summary>
         public void Process(string assemblyFile, IAssemblyResolver resolver, bool optimize, bool verbose)
         {
             if (!File.Exists(assemblyFile))
@@ -36,18 +44,24 @@ namespace FluentIL
             if (verbose) _log.Log(GenericInfoRule, $"Started for {Path.GetFileName(assemblyFile)}");
 
             var pdbPresent = AreSymbolsFound(assemblyFile);
-            var assembly = ReadAssembly(assemblyFile, resolver, pdbPresent, verbose);
-
-            var modified = PatchAssembly(assembly, optimize, verbose);
-
-            if (!_log.IsErrorThrown)
+            // Close the target and symbols even when weaving is skipped or fails.
+            using (var targetResolver = new TargetAssemblyResolver(resolver))
+            using (var assembly = ReadAssembly(assemblyFile, targetResolver, pdbPresent))
             {
-                if (modified)
+                // Register before weaving can follow dependency back-references.
+                targetResolver.Target = assembly;
+                if (verbose) _log.Log(GenericInfoRule, "Assembly has been read.");
+                var modified = PatchAssembly(assembly, optimize, verbose);
+
+                if (!_log.IsErrorThrown)
                 {
-                    if (verbose) _log.Log(GenericInfoRule, "Assembly has been patched.");
-                    WriteAssembly(assembly, pdbPresent, verbose);
+                    if (modified)
+                    {
+                        if (verbose) _log.Log(GenericInfoRule, "Assembly has been patched.");
+                        WriteAssembly(assembly, pdbPresent, verbose);
+                    }
+                    else if (verbose) _log.Log(GenericInfoRule, "No patching required.");
                 }
-                else if (verbose) _log.Log(GenericInfoRule, "No patching required.");
             }
         }
 
@@ -67,29 +81,25 @@ namespace FluentIL
             return resolver;
         }
 
-        private AssemblyDefinition ReadAssembly(string assemblyFile, IAssemblyResolver resolver, bool readSymbols,bool verbose)
+        /// <summary>
+        /// Opens the target directly, keeping it out of the dependency cache.
+        /// </summary>
+        private AssemblyDefinition ReadAssembly(string assemblyFile, IAssemblyResolver resolver, bool readSymbols)
         {
-            var assembly = AssemblyDefinition.ReadAssembly(assemblyFile,
-                new ReaderParameters
-                {
-                    ReadingMode = ReadingMode.Deferred
-                });
-
-            assembly.Dispose();
-
-            assembly = resolver.Resolve(assembly.Name, new ReaderParameters
+            return AssemblyDefinition.ReadAssembly(assemblyFile, new ReaderParameters
             {
-                ReadingMode = ReadingMode.Immediate,
+                // Defer metadata reads until the target is registered for cyclic lookups.
+                // Cecil materializes deferred metadata before rewriting the original stream.
+                ReadingMode = ReadingMode.Deferred,
                 ReadWrite = true,
                 AssemblyResolver = resolver,
                 ReadSymbols = readSymbols
             });
-
-            if (verbose) _log.Log(GenericInfoRule, "Assembly has been read.");
-
-            return assembly;
         }
 
+        /// <summary>
+        /// Writes the assembly and symbols while the processing scope retains ownership.
+        /// </summary>
         private void WriteAssembly(AssemblyDefinition assembly, bool writeSymbols, bool verbose)
         {
             var param = new WriterParameters();
@@ -100,11 +110,6 @@ namespace FluentIL
             }
 
             assembly.Write(param);
-
-            if (assembly.MainModule.SymbolReader != null)
-                assembly.MainModule.SymbolReader.Dispose();
-
-            assembly.Dispose();
 
             if (verbose) _log.Log(GenericInfoRule, "Assembly has been written.");
         }

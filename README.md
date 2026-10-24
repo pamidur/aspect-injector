@@ -54,6 +54,23 @@ _(If you still use project.json for some reason - make sure you add AspectInject
 ### Known Issues / Limitations
 - Unsafe methods are not supported and are silently ignored.
 
+### Building and testing
+
+Use the .NET 10 SDK to build this repository. Install the .NET 8 SDK as well to run
+the compatibility tests; the development container includes both SDKs. The published
+libraries continue to target .NET Standard 2.0.
+
+```bash
+dotnet build -c Release
+dotnet test -c Release --no-build -f net8.0
+dotnet test -c Release --no-build -f net10.0
+```
+
+The build tests check DLL/PDB handle release after successful, unchanged, and
+failed processing, resolver ownership, and dependency reference cycles. They also build,
+rebuild, and run console applications with and without aspects using the .NET 8
+and .NET 10 SDKs. The application workflow runs the tests on Linux.
+
 ### Simple advice
 #### Create an aspect with simple advice:
 ```C#

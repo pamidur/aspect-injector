@@ -1,30 +1,30 @@
 name: Application
 on:
   push:
-    branches: 
+    branches:
         - master
-    tags: 
+    tags:
         - '**'
-  pull_request:  
+  pull_request:
 
 env:
   app_release: false
   app_conf: Release
   nuget_url: https://api.nuget.org/v3/index.json
 
-jobs:  
+jobs:
   build:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
-    - uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-    - uses: actions/setup-dotnet@v1
+    - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       with:
         dotnet-version: 8.0.x
+    - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      with:
+        dotnet-version: 10.0.x
     - name: Get version
       run:  echo "app_version=`git describe --tags`" >> $GITHUB_ENV
     - name: Get release status
@@ -33,10 +33,10 @@ jobs:
       run: echo "Release=$app_release, version=$app_version"
     - name: Compile
       run: dotnet build -c $app_conf -p:Version=$app_version -p:InformationalVersion="$app_version:$GITHUB_SHA"
-    - name: Test net6
-      run: dotnet test -c $app_conf --no-build -f net6.0
     - name: Test net8
       run: dotnet test -c $app_conf --no-build -f net8.0
+    - name: Test net10
+      run: dotnet test -c $app_conf --no-build -f net10.0
     - name: Pack
       run: dotnet pack -c $app_conf -o `pwd`/artifacts -p:Version=$app_version -p:InformationalVersion="$app_version:$GITHUB_SHA" -p:CommitSHA=$GITHUB_SHA
     - uses: actions/upload-artifact@v4
@@ -48,4 +48,4 @@ jobs:
       env:
         NUGETKEY: ${{ secrets.NUGET_KEY }}
       working-directory: artifacts
-      run: dotnet nuget push ./*.nupkg -s $nuget_url -k $NUGETKEY     
+      run: dotnet nuget push ./*.nupkg -s $nuget_url -k $NUGETKEY

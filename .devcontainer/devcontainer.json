@@ -1,6 +1,12 @@
 {
 	"name": "C# (.NET)",
-	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0",
+	"image": "mcr.microsoft.com/devcontainers/dotnet:1-10.0",
+	"features": {
+		"ghcr.io/devcontainers/features/dotnet:2": {
+			"version": "none",
+			"additionalVersions": "8.0"
+		}
+	},
 	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,Z",
 	"workspaceFolder": "/workspace",
 	"runArgs": [
